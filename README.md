@@ -1,3 +1,49 @@
 # dash-widgeter-plugins
 
-First-party plugin repository for dash-widgeter.
+First-party plugin repository for [dash-widgeter](https://github.com/Trigus42/widgiter).
+
+These are the built-in widgets — clock, weather, calendar, and Immich photo
+frame — maintained here as an independent, versioned plugin source. The host app
+consumes this repo as a **git submodule** at build time (it compiles each plugin
+against its own sandbox SDK), and also registers this repo as the **default,
+trusted plugin repository** so its plugins are installed out of the box. Like any
+other repo, the default repo can be browsed, updated, and uninstalled by the user.
+
+## Layout
+
+```
+plugins.json          Canonical list of plugin ids → source dirs.
+<plugin>/manifest.ts  Static, host-side manifest (id, capabilities, network, widgets).
+<plugin>/sandbox.ts   Sandbox entry — the code that runs in the null-origin iframe.
+<plugin>/*            Widget components, pure logic, styles, unit tests.
+dist/                 Built repo: index.json + <id>.js bundles (generated; git-ignored).
+```
+
+## Plugin contract
+
+Every plugin is a self-contained package that:
+
+- exports a static `PluginManifest` from `manifest.ts` (declares `id`,
+  `capabilities`, `network` allowlist, `widgets`), and
+- provides a `sandbox.ts` default-exporting a `PluginModule` (`definePlugin({...})`)
+  whose widgets run inside the host's null-origin sandbox iframe.
+
+Plugins author against the host SDK — `@/sandbox/sdk`, `@/sandbox/react`, and the
+shared `@/types` — which the host resolves when it builds them. The host runs no
+plugin code in its own realm; the manifest is the plugin's entire security surface.
+
+## Building the distributable repo
+
+The host app owns the build (it has the SDK). From the app repo:
+
+```
+bun run build:plugins   # emits dist/index.json + dist/<id>.js here, with pinned SHA-256s
+```
+
+`index.json` lists each plugin's full manifest, its bundle URL, and the SHA-256 of
+the bundle bytes. The host verifies that hash before ever executing a bundle, so a
+tampered or MITM'd bundle is refused rather than run.
+
+## License
+
+AGPL-3.0-only, same as the host application.

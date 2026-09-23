@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    { "id": "clock", "dir": "clock" },
+    { "id": "weather", "dir": "weather" },
+    { "id": "calendar", "dir": "calendar" },
+    { "id": "immich", "dir": "immich" }
+  ]
+}
