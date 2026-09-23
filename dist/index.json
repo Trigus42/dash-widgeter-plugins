@@ -1,0 +1,679 @@
+{
+  "name": "dash-widgeter (first-party)",
+  "plugins": [
+    {
+      "manifest": {
+        "id": "clock",
+        "name": "Clock",
+        "version": "1.0.0",
+        "description": "Date and time display",
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "network": [],
+        "widgets": [
+          {
+            "id": "clock.time",
+            "name": "Clock",
+            "description": "Current time and date",
+            "minW": 8,
+            "minH": 5,
+            "defaultW": 18,
+            "defaultH": 8,
+            "defaultZIndex": 10,
+            "defaultConfig": {
+              "use24Hour": true,
+              "showSeconds": false,
+              "showDate": true,
+              "dateStyle": "full",
+              "fontWeight": 700
+            },
+            "defaultAppearance": {
+              "background": "none",
+              "backgroundOpacity": 0.55
+            },
+            "settings": [
+              {
+                "key": "use24Hour",
+                "label": "24-hour time",
+                "type": "boolean",
+                "section": "Time"
+              },
+              {
+                "key": "showSeconds",
+                "label": "Show seconds",
+                "type": "boolean",
+                "section": "Time"
+              },
+              {
+                "key": "showDate",
+                "label": "Show date",
+                "type": "boolean",
+                "section": "Date"
+              },
+              {
+                "key": "dateStyle",
+                "label": "Date format",
+                "type": "select",
+                "section": "Date",
+                "help": "Weekday only shows e.g. \"Monday\"; full adds the month and day.",
+                "options": [
+                  {
+                    "label": "Full (weekday, month, day)",
+                    "value": "full"
+                  },
+                  {
+                    "label": "Weekday only",
+                    "value": "weekday"
+                  }
+                ]
+              },
+              {
+                "key": "fontWeight",
+                "label": "Text weight",
+                "type": "select",
+                "section": "Style",
+                "options": [
+                  {
+                    "label": "Thin",
+                    "value": "200"
+                  },
+                  {
+                    "label": "Light",
+                    "value": "300"
+                  },
+                  {
+                    "label": "Regular",
+                    "value": "400"
+                  },
+                  {
+                    "label": "Medium",
+                    "value": "500"
+                  },
+                  {
+                    "label": "Semibold",
+                    "value": "600"
+                  },
+                  {
+                    "label": "Bold",
+                    "value": "700"
+                  },
+                  {
+                    "label": "Black",
+                    "value": "900"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock.js",
+      "sha256": "ad934aec9357893a1da7a82d0ec4200ae564df9161de6a6f54faad9fd9c55c69"
+    },
+    {
+      "manifest": {
+        "id": "weather",
+        "name": "Weather",
+        "version": "1.0.0",
+        "description": "Current conditions and forecast via Open-Meteo",
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "network": [
+          "api.open-meteo.com"
+        ],
+        "widgets": [
+          {
+            "id": "weather.current",
+            "name": "Weather Now",
+            "description": "Current conditions badge",
+            "minW": 8,
+            "minH": 5,
+            "defaultW": 13,
+            "defaultH": 8,
+            "defaultZIndex": 10,
+            "defaultConfig": {
+              "latitude": 59.91,
+              "longitude": 10.75,
+              "locationName": "Oslo",
+              "unit": "celsius",
+              "forecastDays": 4,
+              "showNextEvent": true,
+              "showTitle": true
+            },
+            "settings": [
+              {
+                "key": "locationName",
+                "label": "Location name",
+                "type": "text",
+                "placeholder": "Oslo",
+                "section": "Location"
+              },
+              {
+                "key": "latitude",
+                "label": "Latitude",
+                "type": "number",
+                "section": "Location"
+              },
+              {
+                "key": "longitude",
+                "label": "Longitude",
+                "type": "number",
+                "section": "Location"
+              },
+              {
+                "key": "unit",
+                "label": "Temperature unit",
+                "type": "select",
+                "section": "Location",
+                "options": [
+                  {
+                    "label": "Celsius",
+                    "value": "celsius"
+                  },
+                  {
+                    "label": "Fahrenheit",
+                    "value": "fahrenheit"
+                  }
+                ]
+              },
+              {
+                "key": "showNextEvent",
+                "label": "Show next precipitation",
+                "type": "boolean",
+                "section": "Display",
+                "help": "A small note like \"Rain in 25 min\" from the 15-minute nowcast."
+              },
+              {
+                "key": "showTitle",
+                "label": "Show location name",
+                "type": "boolean",
+                "section": "Appearance",
+                "help": "Turn off to save space — the widget content already makes it obvious."
+              }
+            ]
+          },
+          {
+            "id": "weather.forecast",
+            "name": "Weather Forecast",
+            "description": "Multi-day forecast card",
+            "minW": 13,
+            "minH": 8,
+            "defaultW": 20,
+            "defaultH": 10,
+            "defaultZIndex": 10,
+            "defaultConfig": {
+              "latitude": 59.91,
+              "longitude": 10.75,
+              "locationName": "Oslo",
+              "unit": "celsius",
+              "forecastDays": 4,
+              "showNextEvent": true,
+              "showTitle": true
+            },
+            "settings": [
+              {
+                "key": "locationName",
+                "label": "Location name",
+                "type": "text",
+                "placeholder": "Oslo",
+                "section": "Location"
+              },
+              {
+                "key": "latitude",
+                "label": "Latitude",
+                "type": "number",
+                "section": "Location"
+              },
+              {
+                "key": "longitude",
+                "label": "Longitude",
+                "type": "number",
+                "section": "Location"
+              },
+              {
+                "key": "unit",
+                "label": "Temperature unit",
+                "type": "select",
+                "section": "Location",
+                "options": [
+                  {
+                    "label": "Celsius",
+                    "value": "celsius"
+                  },
+                  {
+                    "label": "Fahrenheit",
+                    "value": "fahrenheit"
+                  }
+                ]
+              },
+              {
+                "key": "forecastDays",
+                "label": "Forecast days",
+                "type": "number",
+                "section": "Display",
+                "help": "Number of days to show (1–16)."
+              },
+              {
+                "key": "showTitle",
+                "label": "Show location name",
+                "type": "boolean",
+                "section": "Appearance",
+                "help": "Turn off to save space — the widget content already makes it obvious."
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather.js",
+      "sha256": "cefc5b1dde9bf031e5babfa9b2d7a9fa3a5a96a066253c05c02dbd9b3e970222"
+    },
+    {
+      "manifest": {
+        "id": "calendar",
+        "name": "Calendar",
+        "version": "1.0.0",
+        "description": "Upcoming events from an iCal feed",
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "network": [
+          "*"
+        ],
+        "ipExceptions": [
+          "127.0.0.1/32",
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "widgets": [
+          {
+            "id": "calendar.agenda",
+            "name": "Calendar Agenda",
+            "description": "Upcoming events from any iCal (.ics) feed",
+            "minW": 5,
+            "minH": 8,
+            "defaultW": 8,
+            "defaultH": 13,
+            "defaultZIndex": 10,
+            "defaultConfig": {
+              "sources": [],
+              "title": "",
+              "showTitle": false,
+              "daysAhead": 7
+            },
+            "settings": [
+              {
+                "key": "sources",
+                "label": "Calendars",
+                "type": "list",
+                "section": "Feeds",
+                "addLabel": "Add calendar",
+                "help": "Each feed is merged into one agenda. Basic auth in the URL and webcal:// are supported.",
+                "itemFields": [
+                  {
+                    "key": "icalUrl",
+                    "label": "iCal URL",
+                    "type": "text",
+                    "placeholder": "https://example.com/calendar.ics"
+                  },
+                  {
+                    "key": "color",
+                    "label": "Color",
+                    "type": "color"
+                  }
+                ]
+              },
+              {
+                "key": "daysAhead",
+                "label": "Days ahead",
+                "type": "number",
+                "section": "Feeds"
+              },
+              {
+                "key": "showTitle",
+                "label": "Show title",
+                "type": "boolean",
+                "section": "Appearance",
+                "help": "A heading above the agenda. Usually unnecessary once feeds are merged."
+              },
+              {
+                "key": "title",
+                "label": "Title text",
+                "type": "text",
+                "placeholder": "My week",
+                "section": "Appearance"
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar.js",
+      "sha256": "bdec49eb9183d8e85e2ce0fd56bf5116ca6549c18d72da234131440e3f11cd95"
+    },
+    {
+      "manifest": {
+        "id": "immich",
+        "name": "Immich Photo Frame",
+        "version": "1.0.0",
+        "description": "Digital photo frame backed by an Immich server, with offline caching",
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "network": [
+          "*"
+        ],
+        "ipExceptions": [
+          "127.0.0.1/32",
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "widgets": [
+          {
+            "id": "immich.photoframe",
+            "name": "Photo Frame",
+            "description": "ImmichFrame-style slideshow: pools, transitions, metadata, controls",
+            "minW": 5,
+            "minH": 5,
+            "defaultW": 30,
+            "defaultH": 25,
+            "defaultZIndex": 0,
+            "defaultConfig": {
+              "serverUrl": "",
+              "apiKey": "",
+              "poolMode": "random",
+              "albumIds": [],
+              "personIds": [],
+              "tagIds": [],
+              "rating": 0,
+              "showVideos": false,
+              "intervalSeconds": 15,
+              "layout": "single",
+              "transition": "kenburns",
+              "transitionSeconds": 1.2,
+              "imageFit": "cover",
+              "showControls": true,
+              "progressBar": "bottom",
+              "metadataPosition": "bottom-right",
+              "metadataShowDate": true,
+              "metadataShowLocation": true,
+              "metadataShowDescription": false,
+              "metadataShowPeople": true,
+              "cacheEnabled": true,
+              "cacheMaxMB": 500,
+              "cacheExpirationDays": 0,
+              "listTtlMinutes": 720
+            },
+            "defaultAppearance": {
+              "background": "none",
+              "backgroundOpacity": 1
+            },
+            "settings": [
+              {
+                "key": "serverUrl",
+                "label": "Immich Server URL",
+                "type": "text",
+                "placeholder": "http://localhost:2283",
+                "help": "Base URL of your Immich instance (without /api).",
+                "section": "Connection"
+              },
+              {
+                "key": "apiKey",
+                "label": "API Key",
+                "type": "password",
+                "secret": true,
+                "help": "Immich → Account Settings → API Keys.",
+                "section": "Connection"
+              },
+              {
+                "key": "poolMode",
+                "label": "Photo source",
+                "type": "select",
+                "section": "Source",
+                "options": [
+                  {
+                    "label": "Random (all)",
+                    "value": "random"
+                  },
+                  {
+                    "label": "Favorites",
+                    "value": "favorites"
+                  },
+                  {
+                    "label": "Memories (on this day)",
+                    "value": "memories"
+                  },
+                  {
+                    "label": "Albums",
+                    "value": "albums"
+                  },
+                  {
+                    "label": "People",
+                    "value": "people"
+                  },
+                  {
+                    "label": "Tags",
+                    "value": "tags"
+                  }
+                ]
+              },
+              {
+                "key": "albumIds",
+                "label": "Albums",
+                "type": "multiselect",
+                "help": "Used when source is Albums.",
+                "section": "Source",
+                "dynamicOptions": true
+              },
+              {
+                "key": "personIds",
+                "label": "People",
+                "type": "multiselect",
+                "help": "Used when source is People.",
+                "section": "Source",
+                "dynamicOptions": true
+              },
+              {
+                "key": "tagIds",
+                "label": "Tags",
+                "type": "multiselect",
+                "help": "Used when source is Tags.",
+                "section": "Source",
+                "dynamicOptions": true
+              },
+              {
+                "key": "rating",
+                "label": "Minimum rating (0 = any)",
+                "type": "number",
+                "section": "Source"
+              },
+              {
+                "key": "showVideos",
+                "label": "Include videos",
+                "type": "boolean",
+                "section": "Source"
+              },
+              {
+                "key": "intervalSeconds",
+                "label": "Seconds per photo",
+                "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "layout",
+                "label": "Layout",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Single",
+                    "value": "single"
+                  },
+                  {
+                    "label": "Split (two photos)",
+                    "value": "split"
+                  }
+                ]
+              },
+              {
+                "key": "transition",
+                "label": "Transition",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Ken Burns",
+                    "value": "kenburns"
+                  },
+                  {
+                    "label": "Zoom",
+                    "value": "zoom"
+                  },
+                  {
+                    "label": "Pan",
+                    "value": "pan"
+                  },
+                  {
+                    "label": "Fade",
+                    "value": "fade"
+                  },
+                  {
+                    "label": "None",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "transitionSeconds",
+                "label": "Transition seconds",
+                "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "imageFit",
+                "label": "Image fit",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Cover (fill)",
+                    "value": "cover"
+                  },
+                  {
+                    "label": "Contain (letterbox)",
+                    "value": "contain"
+                  }
+                ]
+              },
+              {
+                "key": "showControls",
+                "label": "Show play/next controls",
+                "type": "boolean",
+                "section": "Slideshow"
+              },
+              {
+                "key": "progressBar",
+                "label": "Progress bar",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Bottom",
+                    "value": "bottom"
+                  },
+                  {
+                    "label": "Top",
+                    "value": "top"
+                  },
+                  {
+                    "label": "Hidden",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "metadataPosition",
+                "label": "Info overlay",
+                "type": "select",
+                "section": "Info overlay",
+                "help": "Show a caption (location, date, people) in a corner of the photo.",
+                "options": [
+                  {
+                    "label": "Bottom right",
+                    "value": "bottom-right"
+                  },
+                  {
+                    "label": "Bottom left",
+                    "value": "bottom-left"
+                  },
+                  {
+                    "label": "Top right",
+                    "value": "top-right"
+                  },
+                  {
+                    "label": "Top left",
+                    "value": "top-left"
+                  },
+                  {
+                    "label": "Hidden",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "metadataShowLocation",
+                "label": "Show location",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowDate",
+                "label": "Show date",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowPeople",
+                "label": "Show people",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowDescription",
+                "label": "Show description",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "cacheEnabled",
+                "label": "Cache photos locally",
+                "type": "boolean",
+                "section": "Caching"
+              },
+              {
+                "key": "cacheMaxMB",
+                "label": "Cache size limit (MB)",
+                "type": "number",
+                "help": "Oldest images are evicted first when the limit is reached.",
+                "section": "Caching"
+              },
+              {
+                "key": "cacheExpirationDays",
+                "label": "Cache image expiration (days)",
+                "type": "number",
+                "help": "Cached images older than this are removed (0 = never expire).",
+                "section": "Caching"
+              },
+              {
+                "key": "listTtlMinutes",
+                "label": "Offline list validity (minutes)",
+                "type": "number",
+                "section": "Caching"
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich.js",
+      "sha256": "ac26019d5d6f1064fa2aa80d6decc8f66259c4d0ae65066d518fefeaa0e824be"
+    }
+  ]
+}
