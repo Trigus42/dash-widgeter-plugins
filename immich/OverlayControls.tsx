@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Props {
   playing: boolean;
@@ -9,9 +9,14 @@ interface Props {
   active: boolean;
 }
 
+/** How long the controls stay visible after the last interaction. */
+const HIDE_DELAY_MS = 2500;
+
 /**
  * Interactive overlay: left/right tap zones step back/forward and the center
- * toggles play/pause. Icons reveal on hover so they stay out of the way. Arrow
+ * toggles play/pause. Controls reveal on any pointer/keyboard interaction and
+ * auto-hide after a short delay — using a JS timer rather than CSS :hover, which
+ * latches "on" after a tap on touch devices (Android) and never clears. Arrow
  * keys / space mirror the actions. Fully inert while the widget is edited.
  */
 export function OverlayControls({
@@ -21,23 +26,54 @@ export function OverlayControls({
   onTogglePlay,
   active,
 }: Props): React.JSX.Element {
+  const [visible, setVisible] = useState(false);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const reveal = useCallback(() => {
+    setVisible(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (!active) return;
     const handler = (e: KeyboardEvent): void => {
-      if (e.key === 'ArrowRight') onNext();
-      else if (e.key === 'ArrowLeft') onBack();
-      else if (e.key === ' ') {
+      if (e.key === 'ArrowRight') {
+        onNext();
+        reveal();
+      } else if (e.key === 'ArrowLeft') {
+        onBack();
+        reveal();
+      } else if (e.key === ' ') {
         e.preventDefault();
         onTogglePlay();
+        reveal();
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [active, onNext, onBack, onTogglePlay]);
+  }, [active, onNext, onBack, onTogglePlay, reveal]);
+
+  const act = (fn: () => void) => (): void => {
+    fn();
+    reveal();
+  };
 
   return (
-    <div className="immich-controls" data-active={active}>
-      <button type="button" className="immich-zone immich-zone-side" onClick={onBack} aria-label="Previous">
+    <div
+      className="immich-controls"
+      data-active={active}
+      data-visible={visible}
+      onPointerMove={reveal}
+      onPointerDown={reveal}
+    >
+      <button type="button" className="immich-zone immich-zone-side" onClick={act(onBack)} aria-label="Previous">
         <span className="immich-zone-btn">
           <ChevronLeft />
         </span>
@@ -45,14 +81,14 @@ export function OverlayControls({
       <button
         type="button"
         className="immich-zone immich-zone-center"
-        onClick={onTogglePlay}
+        onClick={act(onTogglePlay)}
         aria-label={playing ? 'Pause' : 'Play'}
       >
         <span className="immich-zone-btn immich-zone-btn-lg">
           {playing ? <PauseIcon /> : <PlayIcon />}
         </span>
       </button>
-      <button type="button" className="immich-zone immich-zone-side" onClick={onNext} aria-label="Next">
+      <button type="button" className="immich-zone immich-zone-side" onClick={act(onNext)} aria-label="Next">
         <span className="immich-zone-btn">
           <ChevronRight />
         </span>

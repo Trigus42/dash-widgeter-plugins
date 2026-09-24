@@ -35,6 +35,7 @@ vi.mock('./service', () => ({
   ImmichService: class {
     fetchImageBlob = fetchImageBlob;
     fetchFaceBox = () => Promise.resolve(null);
+    poolCacheKey = () => 'test-pool-key';
   },
 }));
 

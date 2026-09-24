@@ -39,13 +39,16 @@ export interface FaceBox {
   cy: number;
 }
 
-export type ImmichPoolMode =
-  | 'random'
-  | 'favorites'
-  | 'memories'
-  | 'albums'
-  | 'people'
-  | 'tags';
+export type ImmichPoolMode = 'random' | 'favorites' | 'memories';
+
+/**
+ * A tri-state entity filter: ids to include (any-of) and ids to exclude
+ * (none-of). Empty include means "no include constraint" for that category.
+ */
+export interface EntityFilter {
+  include: string[];
+  exclude: string[];
+}
 
 export type FrameLayout = 'single' | 'split';
 export type TransitionMode = 'fade' | 'zoom' | 'pan' | 'kenburns' | 'none';
@@ -66,9 +69,10 @@ export interface ImmichConfig {
 
   // Pool / source
   poolMode: ImmichPoolMode;
-  albumIds: string[];
-  personIds: string[];
-  tagIds: string[];
+  /** Tri-state album/person/tag filters, combined (AND across categories). */
+  albums: EntityFilter;
+  people: EntityFilter;
+  tags: EntityFilter;
   rating: number; // 0 = any
   showVideos: boolean;
 
@@ -101,9 +105,9 @@ export const IMMICH_DEFAULT_CONFIG: ImmichConfig = {
   serverUrl: '',
   apiKey: '',
   poolMode: 'random',
-  albumIds: [],
-  personIds: [],
-  tagIds: [],
+  albums: { include: [], exclude: [] },
+  people: { include: [], exclude: [] },
+  tags: { include: [], exclude: [] },
   rating: 0,
   showVideos: false,
   intervalSeconds: 15,

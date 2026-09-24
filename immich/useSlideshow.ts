@@ -53,12 +53,7 @@ export function useSlideshow(
 
   const service = useMemo(() => makeService(context, config), [context, config]);
 
-  const poolKey = useMemo(() => {
-    const c = config;
-    return `${c.serverUrl}|${c.poolMode}|${c.albumIds.join(',')}|${c.personIds.join(
-      ',',
-    )}|${c.tagIds.join(',')}|r${c.rating}|v${c.showVideos ? 1 : 0}`;
-  }, [config]);
+  const poolKey = useMemo(() => service.poolCacheKey(), [service]);
 
   const listTtlMs = config.listTtlMinutes * 60 * 1000;
   const {

@@ -1,5 +1,6 @@
 import type { CachePolicy, HttpRequest, HttpResponse } from '@/types';
 import type {
+  EntityFilter,
   FaceBox,
   ImmichAsset,
   ImmichConfig,
@@ -82,9 +83,10 @@ export class ImmichService {
   /** Stable identity for the asset pool; used as the shared query key. */
   poolCacheKey(): string {
     const c = this.config;
-    return `${c.serverUrl}|${c.poolMode}|${c.albumIds.join(',')}|${c.personIds.join(
-      ',',
-    )}|${c.tagIds.join(',')}|r${c.rating}|v${c.showVideos ? 1 : 0}`;
+    const f = (e: EntityFilter): string => `${e.include.join(',')}!${e.exclude.join(',')}`;
+    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${
+      c.showVideos ? 1 : 0
+    }`;
   }
 
   private async fetchPool(count: number): Promise<ImmichAsset[]> {
@@ -93,12 +95,6 @@ export class ImmichService {
         return this.fetchMemories();
       case 'favorites':
         return this.metadataSearch({ isFavorite: true }, count);
-      case 'albums':
-        return this.metadataSearch({ albumIds: this.config.albumIds }, count);
-      case 'people':
-        return this.metadataSearch({ personIds: this.config.personIds }, count);
-      case 'tags':
-        return this.metadataSearch({ tagIds: this.config.tagIds }, count);
       case 'random':
       default:
         return this.fetchRandom(count);
@@ -107,6 +103,32 @@ export class ImmichService {
 
   private assetType(): Record<string, unknown> {
     return this.config.showVideos ? {} : { type: 'IMAGE' };
+  }
+
+  /**
+   * Album/person/tag selection layered on every pool. Includes go in the flat
+   * top-level id arrays (AND across categories, OR within — the well-worn path),
+   * excludes go through `filter.<x>.none`. Both are omitted when empty: an
+   * unselected category adds no constraint, and Immich's IdsFilter requires a
+   * non-empty array. Ids that were removed on the server are still valid UUIDs,
+   * so sending them just matches nothing — never an error.
+   */
+  private selectionFilter(): Record<string, unknown> {
+    const c = this.config;
+    const includes: Record<string, string[]> = {};
+    if (c.albums.include.length) includes.albumIds = c.albums.include;
+    if (c.people.include.length) includes.personIds = c.people.include;
+    if (c.tags.include.length) includes.tagIds = c.tags.include;
+
+    const none: Record<string, { none: string[] }> = {};
+    if (c.albums.exclude.length) none.albumIds = { none: c.albums.exclude };
+    if (c.people.exclude.length) none.personIds = { none: c.people.exclude };
+    if (c.tags.exclude.length) none.tagIds = { none: c.tags.exclude };
+
+    return {
+      ...includes,
+      ...(Object.keys(none).length > 0 ? { filter: none } : {}),
+    };
   }
 
   private async fetchRandom(count: number): Promise<ImmichAsset[]> {
@@ -118,6 +140,7 @@ export class ImmichService {
         size: count,
         withExif: true,
         withPeople: true,
+        ...this.selectionFilter(),
         ...this.assetType(),
         ...(this.config.rating > 0 ? { rating: this.config.rating } : {}),
       },
@@ -137,6 +160,7 @@ export class ImmichService {
       headers: this.jsonHeaders,
       body: {
         ...filter,
+        ...this.selectionFilter(),
         withExif: true,
         withPeople: true,
         size: count,

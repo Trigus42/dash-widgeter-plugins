@@ -17,8 +17,7 @@ export default definePlugin({
     'immich.photoframe': defineReactWidget(PhotoFrameWidget),
   },
   loadOptions(context, _widgetId, fieldKey, config) {
-    const kind =
-      fieldKey === 'albumIds' ? 'albums' : fieldKey === 'personIds' ? 'people' : 'tags';
+    const kind = fieldKey === 'albums' ? 'albums' : fieldKey === 'people' ? 'people' : 'tags';
     return loadImmichOptions(context, kind, config);
   },
 });

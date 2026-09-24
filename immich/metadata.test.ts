@@ -71,7 +71,18 @@ describe('readImmichConfig — metadata overlay', () => {
     expect(cfg.layout).toBe('split');
   });
 
-  it('parses comma-joined multiselect strings into arrays', () => {
-    expect(readImmichConfig({ albumIds: 'a1,a2' }).albumIds).toEqual(['a1', 'a2']);
+  it('migrates legacy flat album/person/tag ids into the include filter', () => {
+    const cfg = readImmichConfig({ albumIds: 'a1,a2', personIds: ['p1'] });
+    expect(cfg.albums).toEqual({ include: ['a1', 'a2'], exclude: [] });
+    expect(cfg.people).toEqual({ include: ['p1'], exclude: [] });
+  });
+
+  it('reads the tri-state include/exclude shape', () => {
+    const cfg = readImmichConfig({ tags: { include: ['t1'], exclude: ['t2'] } });
+    expect(cfg.tags).toEqual({ include: ['t1'], exclude: ['t2'] });
+  });
+
+  it('drops legacy albums/people/tags pool modes back to random', () => {
+    expect(readImmichConfig({ poolMode: 'albums' }).poolMode).toBe('random');
   });
 });

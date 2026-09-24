@@ -45,17 +45,53 @@ describe('ImmichService pool routing', () => {
     expect(calls[0]?.proxy).toBe('always');
   });
 
-  it('albums → POST /search/metadata with albumIds', async () => {
-    const albumConfig = { ...config, poolMode: 'albums' as const, albumIds: ['al1'] };
+  it('favorites → POST /search/metadata with isFavorite', async () => {
+    const favConfig = { ...config, poolMode: 'favorites' as const };
     const { transport, calls } = stubHttp(() => ({
       ok: true,
       status: 200,
       data: { assets: { items: [{ id: 'b1', type: 'IMAGE', originalFileName: 'b.jpg' }] } },
     }));
-    const assets = await service(transport, albumConfig).fetchAssets(5);
+    const assets = await service(transport, favConfig).fetchAssets(5);
     expect(assets[0]?.id).toBe('b1');
     expect(calls[0]?.url).toBe('http://immich.local/api/search/metadata');
-    expect((calls[0]?.body as { albumIds: string[] }).albumIds).toEqual(['al1']);
+    expect((calls[0]?.body as { isFavorite: boolean }).isFavorite).toBe(true);
+  });
+
+  it('layers include ids (flat) and exclude ids (filter.none) onto the pool', async () => {
+    const filtered = {
+      ...config,
+      albums: { include: ['al1'], exclude: ['al2'] },
+      people: { include: ['p1'], exclude: [] },
+      tags: { include: [], exclude: ['t9'] },
+    };
+    const { transport, calls } = stubHttp(() => ({
+      ok: true,
+      status: 200,
+      data: [{ id: 'r1', type: 'IMAGE', originalFileName: 'r.jpg' }],
+    }));
+    await service(transport, filtered).fetchAssets(5);
+    const body = calls[0]?.body as {
+      albumIds?: string[];
+      personIds?: string[];
+      tagIds?: string[];
+      filter?: { albumIds?: { none: string[] }; tagIds?: { none: string[] } };
+    };
+    expect(body.albumIds).toEqual(['al1']);
+    expect(body.personIds).toEqual(['p1']);
+    expect(body.tagIds).toBeUndefined();
+    expect(body.filter?.albumIds).toEqual({ none: ['al2'] });
+    expect(body.filter?.tagIds).toEqual({ none: ['t9'] });
+  });
+
+  it('omits selection filters entirely when nothing is selected', async () => {
+    const { transport, calls } = stubHttp(() => ({ ok: true, status: 200, data: [] }));
+    await service(transport).fetchAssets(5);
+    const body = calls[0]?.body as Record<string, unknown>;
+    expect(body.albumIds).toBeUndefined();
+    expect(body.personIds).toBeUndefined();
+    expect(body.tagIds).toBeUndefined();
+    expect(body.filter).toBeUndefined();
   });
 
   it('memories → GET /memories and injects a memory title', async () => {
@@ -75,11 +111,11 @@ describe('ImmichService pool routing', () => {
     await expect(service(transport).fetchAssets(5)).rejects.toThrow(/random search failed/);
   });
 
-  it('derives a stable pool key that changes with the pool', () => {
+  it('derives a stable pool key that changes with the selection', () => {
     const key = service(stubHttp(() => ({ ok: true, status: 200, data: [] })).transport).poolCacheKey();
     const albumKey = service(
       stubHttp(() => ({ ok: true, status: 200, data: [] })).transport,
-      { ...config, poolMode: 'albums', albumIds: ['x'] },
+      { ...config, albums: { include: ['x'], exclude: [] } },
     ).poolCacheKey();
     expect(key).not.toBe(albumKey);
   });

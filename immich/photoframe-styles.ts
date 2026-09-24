@@ -45,7 +45,8 @@ export const IMMICH_SANDBOX_CSS = `
   .immich-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
   .immich-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
   .immich-zone-btn-lg { width: 64px; height: 64px; }
-  .immich-zone:hover .immich-zone-btn { opacity: 1; transform: scale(1); }
+  .immich-controls[data-visible='true'] .immich-zone-btn { opacity: 1; transform: scale(1); }
+  @media (hover: hover) { .immich-zone:hover .immich-zone-btn { opacity: 1; transform: scale(1); } }
   .immich-zone-btn svg { width: 55%; height: 55%; }
   .immich-empty, .immich-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
   .immich-status { background: rgba(0,0,0,0.35); }

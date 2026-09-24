@@ -1,5 +1,6 @@
 import {
   IMMICH_DEFAULT_CONFIG,
+  type EntityFilter,
   type FrameLayout,
   type ImageFit,
   type ImmichConfig,
@@ -25,7 +26,20 @@ function strArray(raw: unknown): string[] {
   return [];
 }
 
-const POOL_MODES: ImmichPoolMode[] = ['random', 'favorites', 'memories', 'albums', 'people', 'tags'];
+const POOL_MODES: ImmichPoolMode[] = ['random', 'favorites', 'memories'];
+
+/**
+ * Coerce a tri-state entity filter. Accepts the current `{ include, exclude }`
+ * shape and migrates the legacy flat id array (from when albums/people/tags
+ * were single-select pool modes) into `include`.
+ */
+function entityFilter(raw: unknown, legacyIds: unknown): EntityFilter {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    const v = raw as { include?: unknown; exclude?: unknown };
+    return { include: strArray(v.include), exclude: strArray(v.exclude) };
+  }
+  return { include: strArray(legacyIds), exclude: [] };
+}
 const TRANSITIONS: TransitionMode[] = ['fade', 'zoom', 'pan', 'kenburns', 'none'];
 const METADATA_POSITIONS: MetadataPosition[] = [
   'none',
@@ -38,6 +52,9 @@ const METADATA_POSITIONS: MetadataPosition[] = [
 /** Coerce persisted config (unknown JSON) into a validated ImmichConfig. */
 export function readImmichConfig(raw: Record<string, unknown>): ImmichConfig {
   const d = IMMICH_DEFAULT_CONFIG;
+  // Legacy 'albums'/'people'/'tags' pool modes are gone: those are now
+  // independent tri-state filters layered on the base pool, so anything not in
+  // the current set falls back to 'random'.
   const poolMode = POOL_MODES.includes(raw.poolMode as ImmichPoolMode)
     ? (raw.poolMode as ImmichPoolMode)
     : d.poolMode;
@@ -58,9 +75,9 @@ export function readImmichConfig(raw: Record<string, unknown>): ImmichConfig {
     serverUrl: str(raw.serverUrl, d.serverUrl),
     apiKey: str(raw.apiKey, d.apiKey),
     poolMode,
-    albumIds: strArray(raw.albumIds),
-    personIds: strArray(raw.personIds),
-    tagIds: strArray(raw.tagIds),
+    albums: entityFilter(raw.albums, raw.albumIds),
+    people: entityFilter(raw.people, raw.personIds),
+    tags: entityFilter(raw.tags, raw.tagIds),
     rating: num(raw.rating, d.rating),
     showVideos: bool(raw.showVideos, d.showVideos),
     intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
