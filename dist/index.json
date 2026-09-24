@@ -108,7 +108,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock.js",
-      "sha256": "ad934aec9357893a1da7a82d0ec4200ae564df9161de6a6f54faad9fd9c55c69"
+      "sha256": "824db9fbf1cb878b3da44a162fbdb4d46bd8a005442fe5924a9909c5b9ac1212"
     },
     {
       "manifest": {
@@ -265,7 +265,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather.js",
-      "sha256": "cefc5b1dde9bf031e5babfa9b2d7a9fa3a5a96a066253c05c02dbd9b3e970222"
+      "sha256": "f60a8acfc1e12574e5d6827ebc87c946c6244972946aa15563fcbcb2fb28f6fe"
     },
     {
       "manifest": {
@@ -347,13 +347,13 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar.js",
-      "sha256": "bdec49eb9183d8e85e2ce0fd56bf5116ca6549c18d72da234131440e3f11cd95"
+      "sha256": "f4cef9be3aaac847c276d2fcf4a8b7112e759b2d2fa32c92adaac9a72843149a"
     },
     {
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
         "executionType": "sandboxed",
         "capabilities": [],
@@ -380,9 +380,18 @@
               "serverUrl": "",
               "apiKey": "",
               "poolMode": "random",
-              "albumIds": [],
-              "personIds": [],
-              "tagIds": [],
+              "albums": {
+                "include": [],
+                "exclude": []
+              },
+              "people": {
+                "include": [],
+                "exclude": []
+              },
+              "tags": {
+                "include": [],
+                "exclude": []
+              },
               "rating": 0,
               "showVideos": false,
               "intervalSeconds": 15,
@@ -430,7 +439,7 @@
                 "section": "Source",
                 "options": [
                   {
-                    "label": "Random (all)",
+                    "label": "All photos",
                     "value": "random"
                   },
                   {
@@ -440,42 +449,30 @@
                   {
                     "label": "Memories (on this day)",
                     "value": "memories"
-                  },
-                  {
-                    "label": "Albums",
-                    "value": "albums"
-                  },
-                  {
-                    "label": "People",
-                    "value": "people"
-                  },
-                  {
-                    "label": "Tags",
-                    "value": "tags"
                   }
                 ]
               },
               {
-                "key": "albumIds",
+                "key": "albums",
                 "label": "Albums",
-                "type": "multiselect",
-                "help": "Used when source is Albums.",
+                "type": "multiselect3",
+                "help": "Tap to include (+), tap again to exclude (−). Combined with people & tags.",
                 "section": "Source",
                 "dynamicOptions": true
               },
               {
-                "key": "personIds",
+                "key": "people",
                 "label": "People",
-                "type": "multiselect",
-                "help": "Used when source is People.",
+                "type": "multiselect3",
+                "help": "Tap to include (+), tap again to exclude (−).",
                 "section": "Source",
                 "dynamicOptions": true
               },
               {
-                "key": "tagIds",
+                "key": "tags",
                 "label": "Tags",
-                "type": "multiselect",
-                "help": "Used when source is Tags.",
+                "type": "multiselect3",
+                "help": "Tap to include (+), tap again to exclude (−).",
                 "section": "Source",
                 "dynamicOptions": true
               },
@@ -673,7 +670,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich.js",
-      "sha256": "ac26019d5d6f1064fa2aa80d6decc8f66259c4d0ae65066d518fefeaa0e824be"
+      "sha256": "1f64a8b2afd7e9b67733617df45fd42cb19f74eb2bf110c83984d6ca49c8cf55"
     }
   ]
 }

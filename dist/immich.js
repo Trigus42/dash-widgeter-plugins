@@ -23865,7 +23865,7 @@ function defineReactWidget(Component) {
       draw();
     },
     unmount() {
-      root?.unmount();
+      root == null ? void 0 : root.unmount();
       root = null;
       context = null;
     }
@@ -23900,9 +23900,9 @@ var IMMICH_DEFAULT_CONFIG = {
   serverUrl: "",
   apiKey: "",
   poolMode: "random",
-  albumIds: [],
-  personIds: [],
-  tagIds: [],
+  albums: { include: [], exclude: [] },
+  people: { include: [], exclude: [] },
+  tags: { include: [], exclude: [] },
   rating: 0,
   showVideos: false,
   intervalSeconds: 15,
@@ -23941,7 +23941,14 @@ function strArray(raw) {
   if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
   return [];
 }
-var POOL_MODES = ["random", "favorites", "memories", "albums", "people", "tags"];
+var POOL_MODES = ["random", "favorites", "memories"];
+function entityFilter(raw, legacyIds) {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const v = raw;
+    return { include: strArray(v.include), exclude: strArray(v.exclude) };
+  }
+  return { include: strArray(legacyIds), exclude: [] };
+}
 var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
 var METADATA_POSITIONS = [
   "none",
@@ -23962,9 +23969,9 @@ function readImmichConfig(raw) {
     serverUrl: str(raw.serverUrl, d.serverUrl),
     apiKey: str(raw.apiKey, d.apiKey),
     poolMode,
-    albumIds: strArray(raw.albumIds),
-    personIds: strArray(raw.personIds),
-    tagIds: strArray(raw.tagIds),
+    albums: entityFilter(raw.albums, raw.albumIds),
+    people: entityFilter(raw.people, raw.personIds),
+    tags: entityFilter(raw.tags, raw.tagIds),
     rating: num(raw.rating, d.rating),
     showVideos: bool(raw.showVideos, d.showVideos),
     intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
@@ -24035,9 +24042,8 @@ var ImmichService = class {
   /** Stable identity for the asset pool; used as the shared query key. */
   poolCacheKey() {
     const c = this.config;
-    return `${c.serverUrl}|${c.poolMode}|${c.albumIds.join(",")}|${c.personIds.join(
-      ","
-    )}|${c.tagIds.join(",")}|r${c.rating}|v${c.showVideos ? 1 : 0}`;
+    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
+    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}`;
   }
   async fetchPool(count) {
     switch (this.config.poolMode) {
@@ -24045,12 +24051,6 @@ var ImmichService = class {
         return this.fetchMemories();
       case "favorites":
         return this.metadataSearch({ isFavorite: true }, count);
-      case "albums":
-        return this.metadataSearch({ albumIds: this.config.albumIds }, count);
-      case "people":
-        return this.metadataSearch({ personIds: this.config.personIds }, count);
-      case "tags":
-        return this.metadataSearch({ tagIds: this.config.tagIds }, count);
       case "random":
       default:
         return this.fetchRandom(count);
@@ -24058,6 +24058,29 @@ var ImmichService = class {
   }
   assetType() {
     return this.config.showVideos ? {} : { type: "IMAGE" };
+  }
+  /**
+   * Album/person/tag selection layered on every pool. Includes go in the flat
+   * top-level id arrays (AND across categories, OR within — the well-worn path),
+   * excludes go through `filter.<x>.none`. Both are omitted when empty: an
+   * unselected category adds no constraint, and Immich's IdsFilter requires a
+   * non-empty array. Ids that were removed on the server are still valid UUIDs,
+   * so sending them just matches nothing — never an error.
+   */
+  selectionFilter() {
+    const c = this.config;
+    const includes = {};
+    if (c.albums.include.length) includes.albumIds = c.albums.include;
+    if (c.people.include.length) includes.personIds = c.people.include;
+    if (c.tags.include.length) includes.tagIds = c.tags.include;
+    const none = {};
+    if (c.albums.exclude.length) none.albumIds = { none: c.albums.exclude };
+    if (c.people.exclude.length) none.personIds = { none: c.people.exclude };
+    if (c.tags.exclude.length) none.tagIds = { none: c.tags.exclude };
+    return {
+      ...includes,
+      ...Object.keys(none).length > 0 ? { filter: none } : {}
+    };
   }
   async fetchRandom(count) {
     const res = await this.req({
@@ -24068,6 +24091,7 @@ var ImmichService = class {
         size: count,
         withExif: true,
         withPeople: true,
+        ...this.selectionFilter(),
         ...this.assetType(),
         ...this.config.rating > 0 ? { rating: this.config.rating } : {}
       },
@@ -24077,12 +24101,14 @@ var ImmichService = class {
     return Array.isArray(res.data) ? res.data : [];
   }
   async metadataSearch(filter, count) {
+    var _a;
     const res = await this.req({
       url: `${this.base}/search/metadata`,
       method: "POST",
       headers: this.jsonHeaders,
       body: {
         ...filter,
+        ...this.selectionFilter(),
         withExif: true,
         withPeople: true,
         size: count,
@@ -24092,7 +24118,7 @@ var ImmichService = class {
       proxy: PROXY
     });
     if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    return res.data.assets?.items ?? [];
+    return ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
   }
   async fetchMemories() {
     const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
@@ -24105,7 +24131,8 @@ var ImmichService = class {
     if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
     const now = (/* @__PURE__ */ new Date()).getFullYear();
     return (res.data ?? []).flatMap((memory) => {
-      const years = memory.data?.year ? now - memory.data.year : 0;
+      var _a;
+      const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
       const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
       return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
     });
@@ -24402,12 +24429,7 @@ function useSlideshow(context, config, tick) {
   const configured = config.serverUrl !== "" && config.apiKey !== "";
   const panes = panesForLayout(config.layout);
   const service = (0, import_react2.useMemo)(() => makeService(context, config), [context, config]);
-  const poolKey = (0, import_react2.useMemo)(() => {
-    const c = config;
-    return `${c.serverUrl}|${c.poolMode}|${c.albumIds.join(",")}|${c.personIds.join(
-      ","
-    )}|${c.tagIds.join(",")}|r${c.rating}|v${c.showVideos ? 1 : 0}`;
-  }, [config]);
+  const poolKey = (0, import_react2.useMemo)(() => service.poolCacheKey(), [service]);
   const listTtlMs = config.listTtlMinutes * 60 * 1e3;
   const {
     data: assets,
@@ -24526,8 +24548,9 @@ function AssetView({
   const imgRef = (0, import_react4.useRef)(null);
   const [loaded, setLoaded] = (0, import_react4.useState)(false);
   (0, import_react4.useEffect)(() => {
+    var _a;
     setLoaded(false);
-    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) setLoaded(true);
+    if (((_a = imgRef.current) == null ? void 0 : _a.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
   }, [imageUrl]);
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "immich-asset", style, children: [
     slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "immich-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
@@ -24550,6 +24573,7 @@ function AssetView({
 // src/plugins/immich/OverlayControls.tsx
 var import_react5 = __toESM(require_react(), 1);
 var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+var HIDE_DELAY_MS = 2500;
 function OverlayControls({
   playing,
   onNext,
@@ -24557,33 +24581,64 @@ function OverlayControls({
   onTogglePlay,
   active
 }) {
+  const [visible, setVisible] = (0, import_react5.useState)(false);
+  const hideTimer = (0, import_react5.useRef)(null);
+  const reveal = (0, import_react5.useCallback)(() => {
+    setVisible(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
+  }, []);
+  (0, import_react5.useEffect)(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
   (0, import_react5.useEffect)(() => {
     if (!active) return;
     const handler = (e) => {
-      if (e.key === "ArrowRight") onNext();
-      else if (e.key === "ArrowLeft") onBack();
-      else if (e.key === " ") {
+      if (e.key === "ArrowRight") {
+        onNext();
+        reveal();
+      } else if (e.key === "ArrowLeft") {
+        onBack();
+        reveal();
+      } else if (e.key === " ") {
         e.preventDefault();
         onTogglePlay();
+        reveal();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [active, onNext, onBack, onTogglePlay]);
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "immich-controls", "data-active": active, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: onBack, "aria-label": "Previous", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronLeft, {}) }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-      "button",
-      {
-        type: "button",
-        className: "immich-zone immich-zone-center",
-        onClick: onTogglePlay,
-        "aria-label": playing ? "Pause" : "Play",
-        children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn immich-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PlayIcon, {}) })
-      }
-    ),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: onNext, "aria-label": "Next", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronRight, {}) }) })
-  ] });
+  }, [active, onNext, onBack, onTogglePlay, reveal]);
+  const act = (fn) => () => {
+    fn();
+    reveal();
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+    "div",
+    {
+      className: "immich-controls",
+      "data-active": active,
+      "data-visible": visible,
+      onPointerMove: reveal,
+      onPointerDown: reveal,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: act(onBack), "aria-label": "Previous", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronLeft, {}) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "immich-zone immich-zone-center",
+            onClick: act(onTogglePlay),
+            "aria-label": playing ? "Pause" : "Play",
+            children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn immich-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PlayIcon, {}) })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: act(onNext), "aria-label": "Next", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronRight, {}) }) })
+      ]
+    }
+  );
 }
 function ChevronLeft() {
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
@@ -24617,13 +24672,13 @@ function ProgressBar({
 // src/plugins/immich/metadata.ts
 function deriveMetadata(asset, options) {
   const exif = asset.exifInfo;
-  const rawDate = exif?.dateTimeOriginal ?? asset.localDateTime;
-  const location = options.showLocation ? [exif?.city, exif?.state, exif?.country].filter(Boolean).join(", ") || null : null;
+  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
+  const location = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
   const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
   return {
     date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString() : null,
     location,
-    description: options.showDescription && exif?.description ? exif.description : null,
+    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
     people
   };
 }
@@ -24792,7 +24847,8 @@ var IMMICH_SANDBOX_CSS = `
   .immich-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
   .immich-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
   .immich-zone-btn-lg { width: 64px; height: 64px; }
-  .immich-zone:hover .immich-zone-btn { opacity: 1; transform: scale(1); }
+  .immich-controls[data-visible='true'] .immich-zone-btn { opacity: 1; transform: scale(1); }
+  @media (hover: hover) { .immich-zone:hover .immich-zone-btn { opacity: 1; transform: scale(1); } }
   .immich-zone-btn svg { width: 55%; height: 55%; }
   .immich-empty, .immich-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
   .immich-status { background: rgba(0,0,0,0.35); }
@@ -24807,7 +24863,7 @@ var sandbox_default = definePlugin({
     "immich.photoframe": defineReactWidget(PhotoFrameWidget)
   },
   loadOptions(context, _widgetId, fieldKey, config) {
-    const kind = fieldKey === "albumIds" ? "albums" : fieldKey === "personIds" ? "people" : "tags";
+    const kind = fieldKey === "albums" ? "albums" : fieldKey === "people" ? "people" : "tags";
     return loadImmichOptions(context, kind, config);
   }
 });

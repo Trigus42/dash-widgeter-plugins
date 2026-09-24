@@ -23865,7 +23865,7 @@ function defineReactWidget(Component) {
       draw();
     },
     unmount() {
-      root?.unmount();
+      root == null ? void 0 : root.unmount();
       root = null;
       context = null;
     }

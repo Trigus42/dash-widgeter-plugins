@@ -23865,7 +23865,7 @@ function defineReactWidget(Component2) {
       draw();
     },
     unmount() {
-      root?.unmount();
+      root == null ? void 0 : root.unmount();
       root = null;
       context = null;
     }
@@ -29937,9 +29937,10 @@ var Component = class _Component {
    * @private
    */
   get _designSet() {
+    var _a;
     let parentDesign = this.parent && this.parent._designSet;
     if (!parentDesign && this.name == "vcard") {
-      let versionProp = this.jCal[PROPERTY_INDEX]?.[0];
+      let versionProp = (_a = this.jCal[PROPERTY_INDEX]) == null ? void 0 : _a[0];
       if (versionProp && versionProp[PROPERTY_NAME_INDEX] == "version" && versionProp[PROPERTY_VALUE_INDEX] == "3.0") {
         return design.getDesignSet("vcard3");
       }
@@ -31403,7 +31404,7 @@ function CalendarWidget({ context }) {
     showTitle && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-header", children: config.title }),
     error && !events && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-error", role: "alert", children: error }),
     events && events.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-none", children: "No upcoming events" }),
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ul", { className: "calendar-list", children: events?.map((event) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ul", { className: "calendar-list", children: events == null ? void 0 : events.map((event) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
       "li",
       {
         className: "calendar-event",
