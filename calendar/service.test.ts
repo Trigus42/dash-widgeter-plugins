@@ -3,7 +3,7 @@ import { mergeEvents, normalizeIcalUrl, parseCalendar } from './service';
 import { readCalendarConfig } from './types';
 
 function ics(startIso: string): string {
-  const dt = startIso.replace(/[-:]/g, '').replace('.000', '');
+  const dt = startIso.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
