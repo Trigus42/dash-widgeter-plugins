@@ -8,6 +8,8 @@ const ALL_ON: MetadataOptions = {
   showLocation: true,
   showDescription: true,
   showPeople: true,
+  showAlbum: true,
+  showTags: true,
 };
 
 const asset: ImmichAsset = {
@@ -21,6 +23,8 @@ const asset: ImmichAsset = {
     dateTimeOriginal: '2023-06-01T10:00:00Z',
   },
   people: [{ id: 'p1', name: 'Alice' }],
+  albumName: 'Vacations',
+  tags: [{ id: 't1', name: 'nature', value: 'nature' }],
 };
 
 describe('deriveMetadata', () => {
@@ -29,14 +33,18 @@ describe('deriveMetadata', () => {
     expect(meta.location).toContain('Oslo');
     expect(meta.description).toBe('Fjord trip');
     expect(meta.people).toBe('Alice');
+    expect(meta.album).toBe('Vacations');
+    expect(meta.tags).toBe('nature');
     expect(hasMetadata(meta)).toBe(true);
   });
 
   it('respects toggles', () => {
-    const meta = deriveMetadata(asset, { ...ALL_ON, showLocation: false, showDescription: false });
+    const meta = deriveMetadata(asset, { ...ALL_ON, showLocation: false, showDescription: false, showAlbum: false });
     expect(meta.location).toBeNull();
     expect(meta.description).toBeNull();
+    expect(meta.album).toBeNull();
     expect(meta.people).toBe('Alice');
+    expect(meta.tags).toBe('nature');
   });
 
   it('reports no metadata when everything is off', () => {
@@ -45,6 +53,8 @@ describe('deriveMetadata', () => {
       showLocation: false,
       showDescription: false,
       showPeople: false,
+      showAlbum: false,
+      showTags: false,
     });
     expect(hasMetadata(meta)).toBe(false);
   });

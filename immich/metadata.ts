@@ -5,6 +5,8 @@ export interface AssetMetadata {
   location: string | null;
   description: string | null;
   people: string | null;
+  album: string | null;
+  tags: string | null;
 }
 
 /** Which metadata lines the frame's corner overlay should show. */
@@ -13,6 +15,8 @@ export interface MetadataOptions {
   showLocation: boolean;
   showDescription: boolean;
   showPeople: boolean;
+  showAlbum: boolean;
+  showTags: boolean;
 }
 
 /** Derive the display metadata for an asset, honoring the enabled fields. */
@@ -29,15 +33,24 @@ export function deriveMetadata(asset: ImmichAsset, options: MetadataOptions): As
       ? asset.people.map((p) => p.name).filter(Boolean).join(', ') || null
       : null;
 
+  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
+
+  const tags =
+    options.showTags && asset.tags && asset.tags.length > 0
+      ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(', ') || null
+      : null;
+
   return {
     date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString() : null,
     location,
     description: options.showDescription && exif?.description ? exif.description : null,
     people,
+    album,
+    tags,
   };
 }
 
 /** True when at least one metadata line will render. */
 export function hasMetadata(meta: AssetMetadata): boolean {
-  return Boolean(meta.date || meta.location || meta.description || meta.people);
+  return Boolean(meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags);
 }

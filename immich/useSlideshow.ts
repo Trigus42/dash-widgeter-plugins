@@ -24,9 +24,23 @@ export interface SlideshowApi {
   togglePlay: () => void;
 }
 
-const BATCH = 25;
+const BATCH = 100;
 
-/** Build an ImmichService bound to the sandbox host capabilities. */
+/** Fisher-Yates shuffle for the asset deck (Option B: Large Shuffled Deck). */
+function shuffleDeck<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = result[i]!;
+    result[i] = result[j]!;
+    result[j] = tmp;
+  }
+  return result;
+}
+
+/**
+ * Build an ImmichService bound to the sandbox host capabilities.
+ */
 function makeService(context: GuestWidgetContext, config: ImmichConfig): ImmichService {
   const transport: ImmichTransport = {
     request: (req) => context.http(req),
@@ -70,31 +84,52 @@ export function useSlideshow(
     errorMessage: 'No photos found',
   });
 
-  const pool = useMemo(() => assets ?? [], [assets]);
-
+  const [deck, setDeck] = useState<ImmichAsset[]>([]);
   const cursor = useRef(0);
   const [playing, setPlaying] = useState(true);
   const [slides, setSlides] = useState<LoadedSlide[]>([]);
   const [progressKey, setProgressKey] = useState(0);
   const generation = useRef(0);
 
+  useEffect(() => {
+    if (!assets || assets.length === 0) {
+      setDeck([]);
+      return;
+    }
+    // Option B: Large Shuffled Deck — randomize pools with >2 assets to minimize repetition
+    // while keeping small fixture lists deterministic for tests.
+    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
+    cursor.current = 0;
+  }, [assets]);
+
   const showAt = useCallback(
     async (index: number) => {
-      if (pool.length === 0) return;
+      if (deck.length === 0) return;
       const gen = ++generation.current;
       const picks: ImmichAsset[] = [];
       for (let i = 0; i < panes; i += 1) {
-        const asset = pool[(index + i) % pool.length];
+        const asset = deck[(index + i) % deck.length];
         if (asset) picks.push(asset);
       }
-      // Load each pick independently: a photo whose bytes aren't cached and
-      // can't be fetched (offline) must be SKIPPED, not allowed to reject the
-      // whole window — otherwise one uncached asset silently freezes the
-      // slideshow. `settled` drops the failures; the next tick tries the next
-      // window, so an offline gap self-heals as soon as a cached asset comes up.
+
+      // Preload the next N upcoming photos into the blob cache in the background
+      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
+      if (preloadCount > 0) {
+        for (let p = 1; p <= preloadCount; p += 1) {
+          const nextAsset = deck[(index + panes * p) % deck.length];
+          if (nextAsset) {
+            void service.fetchImageBlob(nextAsset.id).catch(() => null);
+          }
+        }
+      }
+
       const settled = await Promise.all(
         picks.map(async (asset): Promise<LoadedSlide | null> => {
           try {
+            if (config.metadataShowAlbum && !asset.albumName) {
+              const albums = await service.fetchAssetAlbums(asset.id);
+              if (albums.length > 0) asset.albumName = albums.join(', ');
+            }
             const blob = await service.fetchImageBlob(asset.id);
             const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
             const face =
@@ -107,39 +142,32 @@ export function useSlideshow(
           }
         }),
       );
-      if (gen !== generation.current) return; // a newer navigation superseded us
+      if (gen !== generation.current) return;
       const loaded = settled.filter((slide): slide is LoadedSlide => slide !== null);
-      // Nothing in this window loaded (all offline/uncached): keep the current
-      // slide on screen rather than blanking; the timer advances to try again.
       if (loaded.length === 0) return;
       setSlides(loaded);
       setProgressKey((k) => k + 1);
     },
-    [pool, service, panes, config.transition],
+    [deck, service, panes, config.transition, config.preloadCount, config.metadataShowAlbum],
   );
 
-  // Show the first window whenever the pool (re)loads.
+  // Show the first window whenever the deck loads.
   useEffect(() => {
     cursor.current = 0;
-    if (pool.length > 0) void showAt(0);
+    if (deck.length > 0) void showAt(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [poolKey, pool.length]);
+  }, [deck]);
 
   const next = useCallback(() => {
     const nextCursor = cursor.current + panes;
-    // Reached the end of the batch: pull a fresh one (a new random selection
-    // for the 'random' pool) and restart, so the slideshow doesn't loop the
-    // same photos in the same order forever. The pool-reload effect resets the
-    // cursor and shows the first window once the new batch arrives; until then
-    // keep cycling the current batch so playback never stalls waiting on it.
-    if (nextCursor >= pool.length) {
+    if (nextCursor >= deck.length) {
       refetch();
       cursor.current = 0;
     } else {
       cursor.current = nextCursor;
     }
     void showAt(cursor.current);
-  }, [panes, showAt, pool.length, refetch]);
+  }, [panes, showAt, deck.length, refetch]);
 
   const back = useCallback(() => {
     cursor.current = Math.max(0, cursor.current - panes);

@@ -29,6 +29,7 @@ export interface ImmichAsset {
   exifInfo?: ImmichExifInfo | null;
   people?: ImmichPerson[];
   tags?: ImmichTag[];
+  albumName?: string;
   /** Injected by the memories pool: "X years ago". */
   memoryTitle?: string;
 }
@@ -75,9 +76,11 @@ export interface ImmichConfig {
   tags: EntityFilter;
   rating: number; // 0 = any
   showVideos: boolean;
+  onlyWithPersons: boolean;
 
   // Slideshow
   intervalSeconds: number;
+  preloadCount: number;
   layout: FrameLayout;
   transition: TransitionMode;
   transitionSeconds: number;
@@ -92,6 +95,8 @@ export interface ImmichConfig {
   metadataShowLocation: boolean;
   metadataShowDescription: boolean;
   metadataShowPeople: boolean;
+  metadataShowAlbum: boolean;
+  metadataShowTags: boolean;
 
   // Caching
   cacheEnabled: boolean;
@@ -110,7 +115,9 @@ export const IMMICH_DEFAULT_CONFIG: ImmichConfig = {
   tags: { include: [], exclude: [] },
   rating: 0,
   showVideos: false,
+  onlyWithPersons: false,
   intervalSeconds: 15,
+  preloadCount: 2,
   layout: 'single',
   transition: 'kenburns',
   transitionSeconds: 1.2,
@@ -122,6 +129,8 @@ export const IMMICH_DEFAULT_CONFIG: ImmichConfig = {
   metadataShowLocation: true,
   metadataShowDescription: false,
   metadataShowPeople: true,
+  metadataShowAlbum: false,
+  metadataShowTags: true,
   cacheEnabled: true,
   cacheMaxMB: 500,
   cacheExpirationDays: 0,

@@ -428,7 +428,7 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
         "executionType": "sandboxed",
         "capabilities": [],
@@ -469,7 +469,9 @@
               },
               "rating": 0,
               "showVideos": false,
+              "onlyWithPersons": false,
               "intervalSeconds": 15,
+              "preloadCount": 2,
               "layout": "single",
               "transition": "kenburns",
               "transitionSeconds": 1.2,
@@ -481,6 +483,8 @@
               "metadataShowLocation": true,
               "metadataShowDescription": false,
               "metadataShowPeople": true,
+              "metadataShowAlbum": false,
+              "metadataShowTags": true,
               "cacheEnabled": true,
               "cacheMaxMB": 500,
               "cacheExpirationDays": 0,
@@ -564,9 +568,23 @@
                 "section": "Source"
               },
               {
+                "key": "onlyWithPersons",
+                "label": "Only photos with people",
+                "type": "boolean",
+                "help": "Filter out photos where no person or face is detected.",
+                "section": "Source"
+              },
+              {
                 "key": "intervalSeconds",
                 "label": "Seconds per photo",
                 "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "preloadCount",
+                "label": "Preload upcoming photos",
+                "type": "number",
+                "help": "How many upcoming photos to pre-fetch into cache (0–5).",
                 "section": "Slideshow"
               },
               {
@@ -709,6 +727,18 @@
                 "section": "Info overlay"
               },
               {
+                "key": "metadataShowAlbum",
+                "label": "Show album",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowTags",
+                "label": "Show tags",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
                 "key": "metadataShowDescription",
                 "label": "Show description",
                 "type": "boolean",
@@ -745,7 +775,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich.js",
-      "sha256": "893e1cd900bca907695d17346f2aa58d42c9621a88c19d6b603fd34317207fbe"
+      "sha256": "6f2649e940fd44dc3ebe2ab7469647b33edb992ee82fcaa886395820f6229be4"
     }
   ]
 }

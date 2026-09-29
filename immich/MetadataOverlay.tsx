@@ -21,8 +21,10 @@ export function MetadataOverlay({ asset, position, options }: Props): React.JSX.
   return (
     <div className={`immich-caption immich-caption-${position}`}>
       {meta.location && <span className="immich-caption-primary">{meta.location}</span>}
+      {meta.album && <span className="immich-caption-primary">{meta.album}</span>}
       {meta.date && <span className="immich-caption-secondary">{meta.date}</span>}
       {meta.people && <span className="immich-caption-secondary">{meta.people}</span>}
+      {meta.tags && <span className="immich-caption-secondary">{meta.tags}</span>}
       {meta.description && <span className="immich-caption-desc">{meta.description}</span>}
     </div>
   );

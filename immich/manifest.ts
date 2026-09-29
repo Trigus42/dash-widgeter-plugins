@@ -39,8 +39,10 @@ const settings: WidgetSettingField[] = [
   { key: 'tags', label: 'Tags', type: 'multiselect3', help: 'Tap to include (+), tap again to exclude (−).', section: 'Source', dynamicOptions: true },
   { key: 'rating', label: 'Minimum rating (0 = any)', type: 'number', section: 'Source' },
   { key: 'showVideos', label: 'Include videos', type: 'boolean', section: 'Source' },
+  { key: 'onlyWithPersons', label: 'Only photos with people', type: 'boolean', help: 'Filter out photos where no person or face is detected.', section: 'Source' },
   // Slideshow
   { key: 'intervalSeconds', label: 'Seconds per photo', type: 'number', section: 'Slideshow' },
+  { key: 'preloadCount', label: 'Preload upcoming photos', type: 'number', help: 'How many upcoming photos to pre-fetch into cache (0–5).', section: 'Slideshow' },
   {
     key: 'layout',
     label: 'Layout',
@@ -105,6 +107,8 @@ const settings: WidgetSettingField[] = [
   { key: 'metadataShowLocation', label: 'Show location', type: 'boolean', section: 'Info overlay' },
   { key: 'metadataShowDate', label: 'Show date', type: 'boolean', section: 'Info overlay' },
   { key: 'metadataShowPeople', label: 'Show people', type: 'boolean', section: 'Info overlay' },
+  { key: 'metadataShowAlbum', label: 'Show album', type: 'boolean', section: 'Info overlay' },
+  { key: 'metadataShowTags', label: 'Show tags', type: 'boolean', section: 'Info overlay' },
   { key: 'metadataShowDescription', label: 'Show description', type: 'boolean', section: 'Info overlay' },
   // Caching
   { key: 'cacheEnabled', label: 'Cache photos locally', type: 'boolean', section: 'Caching' },
@@ -116,7 +120,7 @@ const settings: WidgetSettingField[] = [
 export const immichManifest: PluginManifest = {
   id: 'immich',
   name: 'Immich Photo Frame',
-  version: '1.1.0',
+  version: '1.2.0',
   description: 'Digital photo frame backed by an Immich server, with offline caching',
   executionType: 'sandboxed',
   capabilities: [],

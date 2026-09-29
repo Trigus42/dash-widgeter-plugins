@@ -86,7 +86,7 @@ export class ImmichService {
     const f = (e: EntityFilter): string => `${e.include.join(',')}!${e.exclude.join(',')}`;
     return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${
       c.showVideos ? 1 : 0
-    }`;
+    }|p${c.onlyWithPersons ? 1 : 0}`;
   }
 
   private async fetchPool(count: number): Promise<ImmichAsset[]> {
@@ -94,83 +94,111 @@ export class ImmichService {
       case 'memories':
         return this.fetchMemories();
       case 'favorites':
-        return this.metadataSearch({ isFavorite: true }, count);
+        return this.metadataSearch({ isFavorite: { eq: true } }, count);
       case 'random':
       default:
         return this.fetchRandom(count);
     }
   }
 
-  private assetType(): Record<string, unknown> {
-    return this.config.showVideos ? {} : { type: 'IMAGE' };
+  /**
+   * Builds the modern Immich v3+ structured SearchFilter.
+   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
+   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
+   * All criteria are packaged inside `filter`.
+   */
+  private buildSearchFilter(extraFilter: Record<string, unknown> = {}): Record<string, unknown> {
+    const c = this.config;
+    const filter: Record<string, unknown> = { ...extraFilter };
+
+    if (!c.showVideos) {
+      filter.type = { in: ['IMAGE'] };
+    }
+    if (c.rating > 0) {
+      filter.rating = { ge: c.rating };
+    }
+    if (c.onlyWithPersons) {
+      filter.hasPeople = { eq: true };
+    }
+
+    const buildIds = (e: EntityFilter): { any?: string[]; none?: string[] } | null => {
+      const res: { any?: string[]; none?: string[] } = {};
+      if (e.include.length) res.any = e.include;
+      if (e.exclude.length) res.none = e.exclude;
+      return Object.keys(res).length > 0 ? res : null;
+    };
+
+    const albumIds = buildIds(c.albums);
+    if (albumIds) filter.albumIds = albumIds;
+
+    const personIds = buildIds(c.people);
+    if (personIds) filter.personIds = personIds;
+
+    const tagIds = buildIds(c.tags);
+    if (tagIds) filter.tagIds = tagIds;
+
+    return filter;
   }
 
-  /**
-   * Album/person/tag selection layered on every pool. Includes go in the flat
-   * top-level id arrays (AND across categories, OR within — the well-worn path),
-   * excludes go through `filter.<x>.none`. Both are omitted when empty: an
-   * unselected category adds no constraint, and Immich's IdsFilter requires a
-   * non-empty array. Ids that were removed on the server are still valid UUIDs,
-   * so sending them just matches nothing — never an error.
-   */
-  private selectionFilter(): Record<string, unknown> {
-    const c = this.config;
-    const includes: Record<string, string[]> = {};
-    if (c.albums.include.length) includes.albumIds = c.albums.include;
-    if (c.people.include.length) includes.personIds = c.people.include;
-    if (c.tags.include.length) includes.tagIds = c.tags.include;
-
-    const none: Record<string, { none: string[] }> = {};
-    if (c.albums.exclude.length) none.albumIds = { none: c.albums.exclude };
-    if (c.people.exclude.length) none.personIds = { none: c.people.exclude };
-    if (c.tags.exclude.length) none.tagIds = { none: c.tags.exclude };
-
-    return {
-      ...includes,
-      ...(Object.keys(none).length > 0 ? { filter: none } : {}),
-    };
+  private postProcessAssets(items: ImmichAsset[]): ImmichAsset[] {
+    let result = items;
+    if (this.config.onlyWithPersons) {
+      result = result.filter((a) => a.people && a.people.length > 0);
+    }
+    if (this.config.people.exclude.length > 0) {
+      const excluded = new Set(this.config.people.exclude);
+      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
+    }
+    if (this.config.tags.exclude.length > 0) {
+      const excluded = new Set(this.config.tags.exclude);
+      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
+    }
+    return result;
   }
 
   private async fetchRandom(count: number): Promise<ImmichAsset[]> {
+    const filter = this.buildSearchFilter();
+    const hasFilter = Object.keys(filter).length > 0;
+    const body: Record<string, unknown> = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...(hasFilter ? { filter } : {}),
+    };
     const res = await this.req<ImmichAsset[]>({
       url: `${this.base}/search/random`,
       method: 'POST',
       headers: this.jsonHeaders,
-      body: {
-        size: count,
-        withExif: true,
-        withPeople: true,
-        ...this.selectionFilter(),
-        ...this.assetType(),
-        ...(this.config.rating > 0 ? { rating: this.config.rating } : {}),
-      },
+      body,
       proxy: PROXY,
     });
     if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    return Array.isArray(res.data) ? res.data : [];
+    const items = Array.isArray(res.data) ? res.data : [];
+    return this.postProcessAssets(items);
   }
 
   private async metadataSearch(
-    filter: Record<string, unknown>,
+    extraFilter: Record<string, unknown>,
     count: number,
   ): Promise<ImmichAsset[]> {
+    const filter = this.buildSearchFilter(extraFilter);
+    const hasFilter = Object.keys(filter).length > 0;
+    const body: Record<string, unknown> = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...(hasFilter ? { filter } : {}),
+    };
     const res = await this.req<MetadataEnvelope>({
       url: `${this.base}/search/metadata`,
       method: 'POST',
       headers: this.jsonHeaders,
-      body: {
-        ...filter,
-        ...this.selectionFilter(),
-        withExif: true,
-        withPeople: true,
-        size: count,
-        ...this.assetType(),
-        ...(this.config.rating > 0 ? { rating: this.config.rating } : {}),
-      },
+      body,
       proxy: PROXY,
     });
     if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    return res.data.assets?.items ?? [];
+    const items = res.data.assets?.items ?? [];
+    return this.postProcessAssets(items);
   }
 
   private async fetchMemories(): Promise<ImmichAsset[]> {
@@ -183,11 +211,27 @@ export class ImmichService {
     });
     if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
     const now = new Date().getFullYear();
-    return (res.data ?? []).flatMap((memory) => {
+    const items = (res.data ?? []).flatMap((memory) => {
       const years = memory.data?.year ? now - memory.data.year : 0;
       const title = years > 0 ? `${years} year${years > 1 ? 's' : ''} ago` : 'Memory';
       return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
     });
+    return this.postProcessAssets(items);
+  }
+
+  async fetchAssetAlbums(assetId: string): Promise<string[]> {
+    try {
+      const res = await this.req<Array<{ id: string; albumName: string }>>({
+        url: `${this.base}/albums?assetId=${assetId}`,
+        method: 'GET',
+        headers: this.jsonHeaders,
+        proxy: PROXY,
+      });
+      if (!res.ok || !Array.isArray(res.data)) return [];
+      return res.data.map((a) => a.albumName).filter(Boolean);
+    } catch {
+      return [];
+    }
   }
 
   /**

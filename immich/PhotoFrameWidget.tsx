@@ -49,6 +49,8 @@ export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Eleme
     showLocation: config.metadataShowLocation,
     showDescription: config.metadataShowDescription,
     showPeople: config.metadataShowPeople,
+    showAlbum: config.metadataShowAlbum,
+    showTags: config.metadataShowTags,
   };
 
   if (!configured) {

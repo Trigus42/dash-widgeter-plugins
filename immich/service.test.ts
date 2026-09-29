@@ -45,7 +45,7 @@ describe('ImmichService pool routing', () => {
     expect(calls[0]?.proxy).toBe('always');
   });
 
-  it('favorites → POST /search/metadata with isFavorite', async () => {
+  it('favorites → POST /search/metadata with isFavorite in filter', async () => {
     const favConfig = { ...config, poolMode: 'favorites' as const };
     const { transport, calls } = stubHttp(() => ({
       ok: true,
@@ -55,10 +55,11 @@ describe('ImmichService pool routing', () => {
     const assets = await service(transport, favConfig).fetchAssets(5);
     expect(assets[0]?.id).toBe('b1');
     expect(calls[0]?.url).toBe('http://immich.local/api/search/metadata');
-    expect((calls[0]?.body as { isFavorite: boolean }).isFavorite).toBe(true);
+    const body = calls[0]?.body as { filter?: { isFavorite?: { eq: boolean } } };
+    expect(body.filter?.isFavorite).toEqual({ eq: true });
   });
 
-  it('layers include ids (flat) and exclude ids (filter.none) onto the pool', async () => {
+  it('layers include and exclude ids inside modern filter without top-level deprecated fields', async () => {
     const filtered = {
       ...config,
       albums: { include: ['al1'], exclude: ['al2'] },
@@ -75,18 +76,39 @@ describe('ImmichService pool routing', () => {
       albumIds?: string[];
       personIds?: string[];
       tagIds?: string[];
-      filter?: { albumIds?: { none: string[] }; tagIds?: { none: string[] } };
+      filter?: {
+        albumIds?: { any?: string[]; none?: string[] };
+        personIds?: { any?: string[] };
+        tagIds?: { none?: string[] };
+        type?: { in?: string[] };
+      };
     };
-    expect(body.albumIds).toEqual(['al1']);
-    expect(body.personIds).toEqual(['p1']);
+    // No top-level deprecated fields to avoid HTTP 400 withShapeExclusivity error
+    expect(body.albumIds).toBeUndefined();
+    expect(body.personIds).toBeUndefined();
     expect(body.tagIds).toBeUndefined();
-    expect(body.filter?.albumIds).toEqual({ none: ['al2'] });
+    expect(body.filter?.albumIds).toEqual({ any: ['al1'], none: ['al2'] });
+    expect(body.filter?.personIds).toEqual({ any: ['p1'] });
     expect(body.filter?.tagIds).toEqual({ none: ['t9'] });
   });
 
-  it('omits selection filters entirely when nothing is selected', async () => {
+  it('onlyWithPersons sets hasPeople: { eq: true } in filter', async () => {
+    const withPeopleCfg = { ...config, onlyWithPersons: true };
+    const { transport, calls } = stubHttp(() => ({
+      ok: true,
+      status: 200,
+      data: [{ id: 'p1', type: 'IMAGE', originalFileName: 'p.jpg', people: [{ id: '1', name: 'Alice' }] }],
+    }));
+    const assets = await service(transport, withPeopleCfg).fetchAssets(5);
+    expect(assets).toHaveLength(1);
+    const body = calls[0]?.body as { filter?: { hasPeople?: { eq: boolean } } };
+    expect(body.filter?.hasPeople).toEqual({ eq: true });
+  });
+
+  it('omits selection filters when nothing is selected and videos allowed', async () => {
+    const noFilterCfg = { ...config, showVideos: true };
     const { transport, calls } = stubHttp(() => ({ ok: true, status: 200, data: [] }));
-    await service(transport).fetchAssets(5);
+    await service(transport, noFilterCfg).fetchAssets(5);
     const body = calls[0]?.body as Record<string, unknown>;
     expect(body.albumIds).toBeUndefined();
     expect(body.personIds).toBeUndefined();

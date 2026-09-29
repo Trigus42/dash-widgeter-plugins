@@ -24240,7 +24240,9 @@ var IMMICH_DEFAULT_CONFIG = {
   tags: { include: [], exclude: [] },
   rating: 0,
   showVideos: false,
+  onlyWithPersons: false,
   intervalSeconds: 15,
+  preloadCount: 2,
   layout: "single",
   transition: "kenburns",
   transitionSeconds: 1.2,
@@ -24252,6 +24254,8 @@ var IMMICH_DEFAULT_CONFIG = {
   metadataShowLocation: true,
   metadataShowDescription: false,
   metadataShowPeople: true,
+  metadataShowAlbum: false,
+  metadataShowTags: true,
   cacheEnabled: true,
   cacheMaxMB: 500,
   cacheExpirationDays: 0,
@@ -24309,7 +24313,9 @@ function readImmichConfig(raw) {
     tags: entityFilter(raw.tags, raw.tagIds),
     rating: num(raw.rating, d.rating),
     showVideos: bool(raw.showVideos, d.showVideos),
+    onlyWithPersons: bool(raw.onlyWithPersons, d.onlyWithPersons),
     intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
+    preloadCount: num(raw.preloadCount, d.preloadCount),
     layout,
     transition,
     transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
@@ -24321,6 +24327,8 @@ function readImmichConfig(raw) {
     metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
     metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
     metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
+    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
+    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
     cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
     cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
     cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
@@ -24378,82 +24386,106 @@ var ImmichService = class {
   poolCacheKey() {
     const c = this.config;
     const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
-    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}`;
+    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
   }
   async fetchPool(count) {
     switch (this.config.poolMode) {
       case "memories":
         return this.fetchMemories();
       case "favorites":
-        return this.metadataSearch({ isFavorite: true }, count);
+        return this.metadataSearch({ isFavorite: { eq: true } }, count);
       case "random":
       default:
         return this.fetchRandom(count);
     }
   }
-  assetType() {
-    return this.config.showVideos ? {} : { type: "IMAGE" };
-  }
   /**
-   * Album/person/tag selection layered on every pool. Includes go in the flat
-   * top-level id arrays (AND across categories, OR within — the well-worn path),
-   * excludes go through `filter.<x>.none`. Both are omitted when empty: an
-   * unselected category adds no constraint, and Immich's IdsFilter requires a
-   * non-empty array. Ids that were removed on the server are still valid UUIDs,
-   * so sending them just matches nothing — never an error.
+   * Builds the modern Immich v3+ structured SearchFilter.
+   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
+   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
+   * All criteria are packaged inside `filter`.
    */
-  selectionFilter() {
+  buildSearchFilter(extraFilter = {}) {
     const c = this.config;
-    const includes = {};
-    if (c.albums.include.length) includes.albumIds = c.albums.include;
-    if (c.people.include.length) includes.personIds = c.people.include;
-    if (c.tags.include.length) includes.tagIds = c.tags.include;
-    const none = {};
-    if (c.albums.exclude.length) none.albumIds = { none: c.albums.exclude };
-    if (c.people.exclude.length) none.personIds = { none: c.people.exclude };
-    if (c.tags.exclude.length) none.tagIds = { none: c.tags.exclude };
-    return {
-      ...includes,
-      ...Object.keys(none).length > 0 ? { filter: none } : {}
+    const filter = { ...extraFilter };
+    if (!c.showVideos) {
+      filter.type = { in: ["IMAGE"] };
+    }
+    if (c.rating > 0) {
+      filter.rating = { ge: c.rating };
+    }
+    if (c.onlyWithPersons) {
+      filter.hasPeople = { eq: true };
+    }
+    const buildIds = (e) => {
+      const res = {};
+      if (e.include.length) res.any = e.include;
+      if (e.exclude.length) res.none = e.exclude;
+      return Object.keys(res).length > 0 ? res : null;
     };
+    const albumIds = buildIds(c.albums);
+    if (albumIds) filter.albumIds = albumIds;
+    const personIds = buildIds(c.people);
+    if (personIds) filter.personIds = personIds;
+    const tagIds = buildIds(c.tags);
+    if (tagIds) filter.tagIds = tagIds;
+    return filter;
+  }
+  postProcessAssets(items) {
+    let result = items;
+    if (this.config.onlyWithPersons) {
+      result = result.filter((a) => a.people && a.people.length > 0);
+    }
+    if (this.config.people.exclude.length > 0) {
+      const excluded = new Set(this.config.people.exclude);
+      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
+    }
+    if (this.config.tags.exclude.length > 0) {
+      const excluded = new Set(this.config.tags.exclude);
+      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
+    }
+    return result;
   }
   async fetchRandom(count) {
+    const filter = this.buildSearchFilter();
+    const hasFilter = Object.keys(filter).length > 0;
+    const body = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...hasFilter ? { filter } : {}
+    };
     const res = await this.req({
       url: `${this.base}/search/random`,
       method: "POST",
       headers: this.jsonHeaders,
-      body: {
-        size: count,
-        withExif: true,
-        withPeople: true,
-        ...this.selectionFilter(),
-        ...this.assetType(),
-        ...this.config.rating > 0 ? { rating: this.config.rating } : {}
-      },
+      body,
       proxy: PROXY
     });
     if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    return Array.isArray(res.data) ? res.data : [];
+    const items = Array.isArray(res.data) ? res.data : [];
+    return this.postProcessAssets(items);
   }
-  async metadataSearch(filter, count) {
+  async metadataSearch(extraFilter, count) {
     var _a;
+    const filter = this.buildSearchFilter(extraFilter);
+    const hasFilter = Object.keys(filter).length > 0;
+    const body = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...hasFilter ? { filter } : {}
+    };
     const res = await this.req({
       url: `${this.base}/search/metadata`,
       method: "POST",
       headers: this.jsonHeaders,
-      body: {
-        ...filter,
-        ...this.selectionFilter(),
-        withExif: true,
-        withPeople: true,
-        size: count,
-        ...this.assetType(),
-        ...this.config.rating > 0 ? { rating: this.config.rating } : {}
-      },
+      body,
       proxy: PROXY
     });
     if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    return ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
+    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
+    return this.postProcessAssets(items);
   }
   async fetchMemories() {
     const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
@@ -24465,12 +24497,27 @@ var ImmichService = class {
     });
     if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
     const now = (/* @__PURE__ */ new Date()).getFullYear();
-    return (res.data ?? []).flatMap((memory) => {
+    const items = (res.data ?? []).flatMap((memory) => {
       var _a;
       const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
       const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
       return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
     });
+    return this.postProcessAssets(items);
+  }
+  async fetchAssetAlbums(assetId) {
+    try {
+      const res = await this.req({
+        url: `${this.base}/albums?assetId=${assetId}`,
+        method: "GET",
+        headers: this.jsonHeaders,
+        proxy: PROXY
+      });
+      if (!res.ok || !Array.isArray(res.data)) return [];
+      return res.data.map((a) => a.albumName).filter(Boolean);
+    } catch {
+      return [];
+    }
   }
   /**
    * Fetch a preview image as a Blob, serving from the local size-capped blob
@@ -24751,7 +24798,17 @@ function thumbhashToDataUrl(base64) {
 }
 
 // src/plugins/immich/useSlideshow.ts
-var BATCH = 25;
+var BATCH = 100;
+function shuffleDeck(items) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = result[i];
+    result[i] = result[j];
+    result[j] = tmp;
+  }
+  return result;
+}
 function makeService(context, config) {
   const transport = {
     request: (req) => context.http(req),
@@ -24779,24 +24836,45 @@ function useSlideshow(context, config, tick) {
     staleMessage: "Offline \u2014 showing cached photos",
     errorMessage: "No photos found"
   });
-  const pool = (0, import_react2.useMemo)(() => assets ?? [], [assets]);
+  const [deck, setDeck] = (0, import_react2.useState)([]);
   const cursor = (0, import_react2.useRef)(0);
   const [playing, setPlaying] = (0, import_react2.useState)(true);
   const [slides, setSlides] = (0, import_react2.useState)([]);
   const [progressKey, setProgressKey] = (0, import_react2.useState)(0);
   const generation = (0, import_react2.useRef)(0);
+  (0, import_react2.useEffect)(() => {
+    if (!assets || assets.length === 0) {
+      setDeck([]);
+      return;
+    }
+    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
+    cursor.current = 0;
+  }, [assets]);
   const showAt = (0, import_react2.useCallback)(
     async (index) => {
-      if (pool.length === 0) return;
+      if (deck.length === 0) return;
       const gen = ++generation.current;
       const picks = [];
       for (let i = 0; i < panes; i += 1) {
-        const asset = pool[(index + i) % pool.length];
+        const asset = deck[(index + i) % deck.length];
         if (asset) picks.push(asset);
+      }
+      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
+      if (preloadCount > 0) {
+        for (let p = 1; p <= preloadCount; p += 1) {
+          const nextAsset = deck[(index + panes * p) % deck.length];
+          if (nextAsset) {
+            void service.fetchImageBlob(nextAsset.id).catch(() => null);
+          }
+        }
       }
       const settled = await Promise.all(
         picks.map(async (asset) => {
           try {
+            if (config.metadataShowAlbum && !asset.albumName) {
+              const albums = await service.fetchAssetAlbums(asset.id);
+              if (albums.length > 0) asset.albumName = albums.join(", ");
+            }
             const blob = await service.fetchImageBlob(asset.id);
             const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
             const face = config.transition === "kenburns" ? await service.fetchFaceBox(asset.id).catch(() => null) : null;
@@ -24812,22 +24890,22 @@ function useSlideshow(context, config, tick) {
       setSlides(loaded);
       setProgressKey((k) => k + 1);
     },
-    [pool, service, panes, config.transition]
+    [deck, service, panes, config.transition, config.preloadCount, config.metadataShowAlbum]
   );
   (0, import_react2.useEffect)(() => {
     cursor.current = 0;
-    if (pool.length > 0) void showAt(0);
-  }, [poolKey, pool.length]);
+    if (deck.length > 0) void showAt(0);
+  }, [deck]);
   const next = (0, import_react2.useCallback)(() => {
     const nextCursor = cursor.current + panes;
-    if (nextCursor >= pool.length) {
+    if (nextCursor >= deck.length) {
       refetch();
       cursor.current = 0;
     } else {
       cursor.current = nextCursor;
     }
     void showAt(cursor.current);
-  }, [panes, showAt, pool.length, refetch]);
+  }, [panes, showAt, deck.length, refetch]);
   const back = (0, import_react2.useCallback)(() => {
     cursor.current = Math.max(0, cursor.current - panes);
     void showAt(cursor.current);
@@ -25010,15 +25088,19 @@ function deriveMetadata(asset, options) {
   const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
   const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
   const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
+  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
+  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
   return {
     date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString() : null,
     location: location2,
     description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
-    people
+    people,
+    album,
+    tags
   };
 }
 function hasMetadata(meta) {
-  return Boolean(meta.date || meta.location || meta.description || meta.people);
+  return Boolean(meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags);
 }
 
 // src/plugins/immich/MetadataOverlay.tsx
@@ -25029,8 +25111,10 @@ function MetadataOverlay({ asset, position, options }) {
   if (!hasMetadata(meta)) return null;
   return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `immich-caption immich-caption-${position}`, children: [
     meta.location && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-primary", children: meta.location }),
+    meta.album && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-primary", children: meta.album }),
     meta.date && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.date }),
     meta.people && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.people }),
+    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.tags }),
     meta.description && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-desc", children: meta.description })
   ] });
 }
@@ -25069,7 +25153,9 @@ function PhotoFrameWidget({ context }) {
     showDate: config.metadataShowDate,
     showLocation: config.metadataShowLocation,
     showDescription: config.metadataShowDescription,
-    showPeople: config.metadataShowPeople
+    showPeople: config.metadataShowPeople,
+    showAlbum: config.metadataShowAlbum,
+    showTags: config.metadataShowTags
   };
   if (!configured) {
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-frame immich-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
