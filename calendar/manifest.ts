@@ -12,7 +12,7 @@ import { CALENDAR_DEFAULT_CONFIG } from './types';
 export const calendarManifest: PluginManifest = {
   id: 'calendar',
   name: 'Calendar',
-  version: '1.0.0',
+  version: '1.1.0',
   description: 'Upcoming events from an iCal feed',
   executionType: 'sandboxed',
   capabilities: [],
@@ -48,6 +48,18 @@ export const calendarManifest: PluginManifest = {
           ],
         },
         { key: 'daysAhead', label: 'Days ahead', type: 'number', section: 'Feeds' },
+        {
+          key: 'refreshIntervalMinutes',
+          label: 'Refresh interval',
+          type: 'select',
+          section: 'Feeds',
+          options: [
+            { label: '5 minutes', value: '5' },
+            { label: '15 minutes', value: '15' },
+            { label: '30 minutes', value: '30' },
+            { label: '60 minutes', value: '60' },
+          ],
+        },
         {
           key: 'showTitle',
           label: 'Show title',

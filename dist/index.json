@@ -108,13 +108,13 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock.js",
-      "sha256": "824db9fbf1cb878b3da44a162fbdb4d46bd8a005442fe5924a9909c5b9ac1212"
+      "sha256": "3feba235c8e2b9d7bb06b59c7868ad8062065141bc0260dae58ee490d299bafb"
     },
     {
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "executionType": "sandboxed",
         "capabilities": [],
@@ -138,7 +138,8 @@
               "unit": "celsius",
               "forecastDays": 4,
               "showNextEvent": true,
-              "showTitle": true
+              "showTitle": true,
+              "refreshIntervalMinutes": 15
             },
             "settings": [
               {
@@ -173,6 +174,30 @@
                   {
                     "label": "Fahrenheit",
                     "value": "fahrenheit"
+                  }
+                ]
+              },
+              {
+                "key": "refreshIntervalMinutes",
+                "label": "Refresh interval",
+                "type": "select",
+                "section": "Location",
+                "options": [
+                  {
+                    "label": "5 minutes",
+                    "value": "5"
+                  },
+                  {
+                    "label": "15 minutes",
+                    "value": "15"
+                  },
+                  {
+                    "label": "30 minutes",
+                    "value": "30"
+                  },
+                  {
+                    "label": "60 minutes",
+                    "value": "60"
                   }
                 ]
               },
@@ -208,7 +233,8 @@
               "unit": "celsius",
               "forecastDays": 4,
               "showNextEvent": true,
-              "showTitle": true
+              "showTitle": true,
+              "refreshIntervalMinutes": 15
             },
             "settings": [
               {
@@ -247,6 +273,30 @@
                 ]
               },
               {
+                "key": "refreshIntervalMinutes",
+                "label": "Refresh interval",
+                "type": "select",
+                "section": "Location",
+                "options": [
+                  {
+                    "label": "5 minutes",
+                    "value": "5"
+                  },
+                  {
+                    "label": "15 minutes",
+                    "value": "15"
+                  },
+                  {
+                    "label": "30 minutes",
+                    "value": "30"
+                  },
+                  {
+                    "label": "60 minutes",
+                    "value": "60"
+                  }
+                ]
+              },
+              {
                 "key": "forecastDays",
                 "label": "Forecast days",
                 "type": "number",
@@ -265,13 +315,13 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather.js",
-      "sha256": "f60a8acfc1e12574e5d6827ebc87c946c6244972946aa15563fcbcb2fb28f6fe"
+      "sha256": "134166ff34c947125ea9815a519cf27c6a963fb739a2b792399169a103dbd35b"
     },
     {
       "manifest": {
         "id": "calendar",
         "name": "Calendar",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Upcoming events from an iCal feed",
         "executionType": "sandboxed",
         "capabilities": [],
@@ -298,7 +348,8 @@
               "sources": [],
               "title": "",
               "showTitle": false,
-              "daysAhead": 7
+              "daysAhead": 7,
+              "refreshIntervalMinutes": 15
             },
             "settings": [
               {
@@ -329,6 +380,30 @@
                 "section": "Feeds"
               },
               {
+                "key": "refreshIntervalMinutes",
+                "label": "Refresh interval",
+                "type": "select",
+                "section": "Feeds",
+                "options": [
+                  {
+                    "label": "5 minutes",
+                    "value": "5"
+                  },
+                  {
+                    "label": "15 minutes",
+                    "value": "15"
+                  },
+                  {
+                    "label": "30 minutes",
+                    "value": "30"
+                  },
+                  {
+                    "label": "60 minutes",
+                    "value": "60"
+                  }
+                ]
+              },
+              {
                 "key": "showTitle",
                 "label": "Show title",
                 "type": "boolean",
@@ -347,7 +422,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar.js",
-      "sha256": "f4cef9be3aaac847c276d2fcf4a8b7112e759b2d2fa32c92adaac9a72843149a"
+      "sha256": "a734e14e3f1126fb7f969290db4612c2b25d5711821a57b771c7a858438b5875"
     },
     {
       "manifest": {
@@ -670,7 +745,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich.js",
-      "sha256": "1f64a8b2afd7e9b67733617df45fd42cb19f74eb2bf110c83984d6ca49c8cf55"
+      "sha256": "893e1cd900bca907695d17346f2aa58d42c9621a88c19d6b603fd34317207fbe"
     }
   ]
 }

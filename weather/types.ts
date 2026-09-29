@@ -11,6 +11,8 @@ export interface WeatherConfig {
   showNextEvent: boolean;
   /** Whether the widget renders its location/title line. */
   showTitle: boolean;
+  /** Background refetch interval in minutes. */
+  refreshIntervalMinutes: number;
 }
 
 export const WEATHER_DEFAULT_CONFIG: WeatherConfig = {
@@ -21,6 +23,7 @@ export const WEATHER_DEFAULT_CONFIG: WeatherConfig = {
   forecastDays: 4,
   showNextEvent: true,
   showTitle: true,
+  refreshIntervalMinutes: 15,
 };
 
 export interface DailyForecast {
@@ -71,5 +74,11 @@ export function readWeatherConfig(raw: Record<string, unknown>): WeatherConfig {
         ? raw.showNextEvent
         : WEATHER_DEFAULT_CONFIG.showNextEvent,
     showTitle: typeof raw.showTitle === 'boolean' ? raw.showTitle : WEATHER_DEFAULT_CONFIG.showTitle,
+    refreshIntervalMinutes:
+      typeof raw.refreshIntervalMinutes === 'number' && raw.refreshIntervalMinutes > 0
+        ? raw.refreshIntervalMinutes
+        : typeof raw.refreshIntervalMinutes === 'string' && Number(raw.refreshIntervalMinutes) > 0
+          ? Number(raw.refreshIntervalMinutes)
+          : WEATHER_DEFAULT_CONFIG.refreshIntervalMinutes,
   };
 }

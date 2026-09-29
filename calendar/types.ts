@@ -16,6 +16,8 @@ export interface CalendarConfig {
   /** Whether to render the title heading at all. */
   showTitle: boolean;
   daysAhead: number;
+  /** Background refetch interval in minutes. */
+  refreshIntervalMinutes: number;
 }
 
 export const DEFAULT_EVENT_COLOR = '#6ba7e8';
@@ -25,6 +27,7 @@ export const CALENDAR_DEFAULT_CONFIG: CalendarConfig = {
   title: '',
   showTitle: false,
   daysAhead: 7,
+  refreshIntervalMinutes: 15,
 };
 
 export interface CalendarEvent {
@@ -52,6 +55,12 @@ export function readCalendarConfig(raw: Record<string, unknown>): CalendarConfig
       typeof raw.showTitle === 'boolean' ? raw.showTitle : CALENDAR_DEFAULT_CONFIG.showTitle,
     daysAhead:
       typeof raw.daysAhead === 'number' ? raw.daysAhead : CALENDAR_DEFAULT_CONFIG.daysAhead,
+    refreshIntervalMinutes:
+      typeof raw.refreshIntervalMinutes === 'number' && raw.refreshIntervalMinutes > 0
+        ? raw.refreshIntervalMinutes
+        : typeof raw.refreshIntervalMinutes === 'string' && Number(raw.refreshIntervalMinutes) > 0
+          ? Number(raw.refreshIntervalMinutes)
+          : CALENDAR_DEFAULT_CONFIG.refreshIntervalMinutes,
   };
 }
 

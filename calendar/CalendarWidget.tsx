@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
+import { usePullToRefresh, useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
 import { mergeEvents, normalizeIcalUrl, parseCalendar } from './service';
 import { readCalendarConfig, type CalendarEvent } from './types';
 
@@ -10,8 +10,6 @@ function formatWhen(event: CalendarEvent): string {
   const time = start.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   return `${day} · ${time}`;
 }
-
-const REFRESH_MS = 15 * 60 * 1000;
 
 /**
  * Agenda widget, running in the plugin sandbox. Fetches every configured iCal
@@ -27,7 +25,7 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
   // Key on every source URL + color so re-configuring a feed re-fetches/re-tags.
   const sourceKey = config.sources.map((s) => `${s.icalUrl}|${s.color}`).join(',');
 
-  const { data: events, error } = useWidgetData<CalendarEvent[]>(context, {
+  const { data: events, error, refetch } = useWidgetData<CalendarEvent[]>(context, {
     key: ['calendar', sourceKey, config.daysAhead],
     enabled: configured,
     fetcher: async () => {
@@ -41,10 +39,12 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
       );
       return mergeEvents(perFeed);
     },
-    refetchIntervalMs: REFRESH_MS,
+    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1000,
     staleMessage: 'Offline — showing cached schedule',
     errorMessage: 'Calendar unavailable',
   });
+
+  const containerRef = usePullToRefresh<HTMLUListElement>(refetch);
 
   if (!configured) {
     return (
@@ -68,7 +68,7 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
         </div>
       )}
       {events && events.length === 0 && <div className="calendar-none">No upcoming events</div>}
-      <ul className="calendar-list">
+      <ul ref={containerRef} className="calendar-list">
         {events?.map((event) => (
           <li
             key={`${event.uid}-${event.start}`}

@@ -23,6 +23,18 @@ const sharedSettings: WidgetSettingField[] = [
       { label: 'Fahrenheit', value: 'fahrenheit' },
     ],
   },
+  {
+    key: 'refreshIntervalMinutes',
+    label: 'Refresh interval',
+    type: 'select',
+    section: 'Location',
+    options: [
+      { label: '5 minutes', value: '5' },
+      { label: '15 minutes', value: '15' },
+      { label: '30 minutes', value: '30' },
+      { label: '60 minutes', value: '60' },
+    ],
+  },
 ];
 
 const showTitleField: WidgetSettingField = {
@@ -60,7 +72,7 @@ const forecastSettings: WidgetSettingField[] = [
 export const weatherManifest: PluginManifest = {
   id: 'weather',
   name: 'Weather',
-  version: '1.0.0',
+  version: '1.1.0',
   description: 'Current conditions and forecast via Open-Meteo',
   executionType: 'sandboxed',
   capabilities: [],

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
+import { usePullToRefresh, useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
 import { describeWeather } from './wmo';
 import { WeatherIcon } from './WeatherIcon';
 import { buildWeatherUrl, mapOpenMeteo, nextPrecipEvent, weatherCacheKey } from './service';
@@ -13,8 +13,6 @@ function formatLeadTime(minutes: number): string {
   return `in ${hours} h`;
 }
 
-const REFRESH_MS = 15 * 60 * 1000;
-
 /**
  * Compact current-conditions widget, running in the plugin sandbox. Data flows
  * through the shared host layer via useWidgetData (dedup/cache/offline); the
@@ -23,17 +21,19 @@ const REFRESH_MS = 15 * 60 * 1000;
  */
 export function WeatherWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const config = useMemo(() => readWeatherConfig(context.config), [context.config]);
-  const { data, error } = useWidgetData<WeatherData>(context, {
+  const { data, error, refetch } = useWidgetData<WeatherData>(context, {
     key: [weatherCacheKey(config)],
     fetcher: async () => {
       const res = await context.http({ url: buildWeatherUrl(config), proxy: 'auto' });
       if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
       return mapOpenMeteo(res.data);
     },
-    refetchIntervalMs: REFRESH_MS,
+    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1000,
     staleMessage: 'Offline — showing last weather',
     errorMessage: 'Weather unavailable',
   });
+
+  const containerRef = usePullToRefresh(refetch);
 
   if (error && !data) {
     return (
@@ -51,7 +51,7 @@ export function WeatherWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const nextDescription = nextEvent ? describeWeather(nextEvent.weatherCode) : null;
 
   return (
-    <div className="weather-widget">
+    <div ref={containerRef} className="weather-widget">
       <div className="weather-current">
         <WeatherIcon icon={current.icon} size={64} />
         <div className="weather-temp">
