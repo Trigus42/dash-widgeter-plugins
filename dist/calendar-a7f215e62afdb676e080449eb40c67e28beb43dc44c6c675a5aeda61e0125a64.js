@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text) {
-        if (text) {
+      function setTextContent(node, text2) {
+        if (text2) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text;
+            firstChild.nodeValue = text2;
             return;
           }
         }
-        node.textContent = text;
+        node.textContent = text2;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text) {
-        textInstance.nodeValue = text;
+      function unhideTextInstance(textInstance, text2) {
+        textInstance.nodeValue = text2;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
-        if ("" === text) return null;
+      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
+        if ("" === text2) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -31757,159 +31757,11 @@ var de_default = {
   }
 };
 
-// src/plugins/immich/locales/de.json
-var de_default2 = {
-  manifest: {
-    "Immich Photo Frame": "Immich-Bilderrahmen",
-    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
-    "Photo Frame": "Bilderrahmen",
-    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
-    Connection: "Verbindung",
-    Source: "Quelle",
-    Slideshow: "Diashow",
-    "Info overlay": "Info-Einblendung",
-    Caching: "Zwischenspeicher",
-    "Immich Server URL": "Immich-Server-URL",
-    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
-    "API Key": "API-Schl\xFCssel",
-    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
-    "Photo source": "Fotoquelle",
-    "All photos": "Alle Fotos",
-    Favorites: "Favoriten",
-    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
-    Albums: "Alben",
-    People: "Personen",
-    Tags: "Schlagw\xF6rter",
-    "Tap to include (+), tap again to exclude (\u2212). Combined with people & tags.": "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212). Wird mit Personen und Schlagw\xF6rtern kombiniert.",
-    "Tap to include (+), tap again to exclude (\u2212).": "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
-    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
-    "Include videos": "Videos einschlie\xDFen",
-    "Only photos with people": "Nur Fotos mit Personen",
-    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
-    "Seconds per photo": "Sekunden pro Foto",
-    "Preload upcoming photos": "Kommende Fotos vorladen",
-    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
-    Layout: "Layout",
-    Single: "Einzeln",
-    "Split (two photos)": "Geteilt (zwei Fotos)",
-    Transition: "\xDCbergang",
-    Pan: "Schwenken",
-    Fade: "\xDCberblenden",
-    None: "Keiner",
-    "Transition seconds": "\xDCbergangsdauer",
-    "Image fit": "Bildanpassung",
-    "Cover (fill)": "Ausf\xFCllen",
-    "Contain (letterbox)": "Einpassen",
-    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
-    "Progress bar": "Fortschrittsbalken",
-    Bottom: "Unten",
-    Top: "Oben",
-    Hidden: "Ausgeblendet",
-    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
-    "Bottom right": "Unten rechts",
-    "Bottom left": "Unten links",
-    "Top right": "Oben rechts",
-    "Top left": "Oben links",
-    "Show location": "Ort anzeigen",
-    "Show date": "Datum anzeigen",
-    "Show people": "Personen anzeigen",
-    "Show album": "Album anzeigen",
-    "Show tags": "Schlagw\xF6rter anzeigen",
-    "Show description": "Beschreibung anzeigen",
-    "Cache photos locally": "Fotos lokal zwischenspeichern",
-    "Cache size limit (MB)": "Speicherlimit (MB)",
-    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
-    "Cache image expiration (days)": "Bildablauf (Tage)",
-    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
-    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
-  },
-  runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
-    loading: "Fotos werden geladen\u2026",
-    next: "Weiter",
-    pause: "Pause",
-    play: "Wiedergabe",
-    previous: "Zur\xFCck",
-    title: "Immich-Bilderrahmen"
-  }
-};
-
-// src/plugins/weather/locales/de.json
-var de_default3 = {
-  manifest: {
-    Weather: "Wetter",
-    "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage \xFCber Open-Meteo",
-    "Weather Now": "Aktuelles Wetter",
-    "Current conditions badge": "Aktuelle Wetterbedingungen",
-    "Weather Forecast": "Wettervorhersage",
-    "Multi-day forecast card": "Mehrt\xE4gige Wettervorhersage",
-    Location: "Standort",
-    Display: "Anzeige",
-    "Location name": "Ortsname",
-    Latitude: "Breitengrad",
-    Longitude: "L\xE4ngengrad",
-    "Temperature unit": "Temperatureinheit",
-    "Refresh interval": "Aktualisierungsintervall",
-    "5 minutes": "5 Minuten",
-    "15 minutes": "15 Minuten",
-    "30 minutes": "30 Minuten",
-    "60 minutes": "60 Minuten",
-    "Show next precipitation": "N\xE4chsten Niederschlag anzeigen",
-    'A small note like "Rain in 25 min" from the 15-minute nowcast.': "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
-    "Show location name": "Ortsnamen anzeigen",
-    "Turn off to save space \u2014 the widget content already makes it obvious.": "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
-    "Forecast days": "Vorhersagetage",
-    "Number of days to show (1\u201316).": "Anzahl der anzuzeigenden Tage (1\u201316)."
-  },
-  runtime: {
-    "codes.0": "Klar",
-    "codes.1": "\xDCberwiegend klar",
-    "codes.2": "Teilweise bew\xF6lkt",
-    "codes.3": "Bedeckt",
-    "codes.45": "Nebel",
-    "codes.48": "Reifnebel",
-    "codes.51": "Leichter Nieselregen",
-    "codes.53": "Nieselregen",
-    "codes.55": "Starker Nieselregen",
-    "codes.61": "Leichter Regen",
-    "codes.63": "Regen",
-    "codes.65": "Starker Regen",
-    "codes.66": "Gefrierender Regen",
-    "codes.67": "Gefrierender Regen",
-    "codes.71": "Leichter Schneefall",
-    "codes.73": "Schnee",
-    "codes.75": "Starker Schneefall",
-    "codes.77": "Schneegriesel",
-    "codes.80": "Regenschauer",
-    "codes.81": "Regenschauer",
-    "codes.82": "Heftige Schauer",
-    "codes.85": "Schneeschauer",
-    "codes.86": "Schneeschauer",
-    "codes.95": "Gewitter",
-    "codes.96": "Gewitter",
-    "codes.99": "Gewitter",
-    inHours: "in {{count}} Std.",
-    inMinutes: "in {{count}} Min.",
-    loading: "Wetter wird geladen\u2026",
-    loadingForecast: "Vorhersage wird geladen\u2026",
-    nextPrecipitation: "N\xE4chster Niederschlag",
-    now: "jetzt",
-    today: "Heute"
-  }
-};
-
-// src/plugins/translate.ts
-var translations = {
-  calendar: { de: de_default.runtime },
-  immich: { de: de_default2.runtime },
-  weather: { de: de_default3.runtime }
-};
-function pluginText(locale, key, params = {}, fallback = key) {
-  var _a, _b;
-  const [pluginId, ...parts] = key.split(".");
-  const value = pluginId ? (_b = (_a = translations[pluginId]) == null ? void 0 : _a[locale.split("-")[0] ?? locale]) == null ? void 0 : _b[parts.join(".")] : void 0;
-  if (typeof value !== "string") return fallback;
-  return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
+// src/plugins/calendar/translate.ts
+var translations = { de: de_default.runtime };
+function text(locale, key, fallback = key) {
+  var _a;
+  return ((_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key]) ?? fallback;
 }
 
 // src/plugins/calendar/CalendarWidget.tsx
@@ -31917,7 +31769,7 @@ var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
 function formatWhen(locale, event) {
   const start = new Date(event.start);
   const day = start.toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
-  if (event.allDay) return `${day} \xB7 ${pluginText(locale, "calendar.allDay")}`;
+  if (event.allDay) return `${day} \xB7 ${text(locale, "allDay")}`;
   const time = start.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   return `${day} \xB7 ${time}`;
 }
@@ -31946,15 +31798,15 @@ function CalendarWidget({ context }) {
   const containerRef = usePullToRefresh(refetch);
   if (!configured) {
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-widget calendar-empty", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("strong", { children: pluginText(context.locale, "calendar.title") }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { children: pluginText(context.locale, "calendar.configure") })
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("strong", { children: text(context.locale, "title") }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { children: text(context.locale, "configure") })
     ] }) });
   }
   const showTitle = config.showTitle && config.title !== "";
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "calendar-widget", children: [
     showTitle && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-header", children: config.title }),
     error && !events && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-error", role: "alert", children: error }),
-    events && events.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-none", children: pluginText(context.locale, "calendar.none") }),
+    events && events.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-none", children: text(context.locale, "none") }),
     /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ul", { ref: containerRef, className: "calendar-list", children: events == null ? void 0 : events.map((event) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
       "li",
       {

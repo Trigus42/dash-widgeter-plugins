@@ -5,7 +5,7 @@
       "manifest": {
         "id": "clock",
         "name": "Clock",
-        "version": "1.1.0",
+        "version": "1.2.0",
         "description": "Date and time display",
         "translations": {
           "de": {
@@ -132,14 +132,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock.js",
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock-63821d061a54d85f7920ef61797ed0da59010788b4284590d6754f3302d0e2be.js",
       "sha256": "63821d061a54d85f7920ef61797ed0da59010788b4284590d6754f3302d0e2be"
     },
     {
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.2.0",
+        "version": "1.3.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "translations": {
           "de": {
@@ -366,14 +366,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather.js",
-      "sha256": "b74772c62c7726a9156e4a5f2567c2c0f5a8a02799fd0530c67328255b98fbcc"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-cc130203bfe3505c9ac483ffbc021cf132e27718dfacfef5c0d2c77be6a181fb.js",
+      "sha256": "cc130203bfe3505c9ac483ffbc021cf132e27718dfacfef5c0d2c77be6a181fb"
     },
     {
       "manifest": {
         "id": "calendar",
         "name": "Calendar",
-        "version": "1.2.0",
+        "version": "1.3.0",
         "description": "Upcoming events from an iCal feed",
         "translations": {
           "de": {
@@ -495,14 +495,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar.js",
-      "sha256": "0985dd81a002c5e3498eb2f71b978fe6af302d2a7b653e9ba5729821d1794f85"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar-a7f215e62afdb676e080449eb40c67e28beb43dc44c6c675a5aeda61e0125a64.js",
+      "sha256": "a7f215e62afdb676e080449eb40c67e28beb43dc44c6c675a5aeda61e0125a64"
     },
     {
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.3.0",
+        "version": "1.4.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
         "translations": {
           "de": {
@@ -914,8 +914,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich.js",
-      "sha256": "08c6aceac7e54d177d5885a25e680af33a6c9dfe533d8705eef902303c7fed6e"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-fc90d366e74eb63c0fca9548aa97025bb3a19f21c7693cc01db0653dbb79b3dd.js",
+      "sha256": "fc90d366e74eb63c0fca9548aa97025bb3a19f21c7693cc01db0653dbb79b3dd"
     }
   ]
 }

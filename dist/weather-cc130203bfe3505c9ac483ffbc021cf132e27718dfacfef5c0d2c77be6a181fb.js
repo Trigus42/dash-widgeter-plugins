@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text) {
-        if (text) {
+      function setTextContent(node, text2) {
+        if (text2) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text;
+            firstChild.nodeValue = text2;
             return;
           }
         }
-        node.textContent = text;
+        node.textContent = text2;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text) {
-        textInstance.nodeValue = text;
+      function unhideTextInstance(textInstance, text2) {
+        textInstance.nodeValue = text2;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
-        if ("" === text) return null;
+      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
+        if ("" === text2) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -24226,875 +24226,237 @@ function useWidgetData(context, options) {
   }, [keyId]);
   return { ...snapshot, refetch: () => refetchRef.current() };
 }
-
-// src/plugins/immich/PhotoFrameWidget.tsx
-var import_react6 = __toESM(require_react(), 1);
-
-// src/plugins/immich/types.ts
-var IMMICH_DEFAULT_CONFIG = {
-  serverUrl: "",
-  apiKey: "",
-  poolMode: "random",
-  albums: { include: [], exclude: [] },
-  people: { include: [], exclude: [] },
-  tags: { include: [], exclude: [] },
-  rating: 0,
-  showVideos: false,
-  onlyWithPersons: false,
-  intervalSeconds: 15,
-  preloadCount: 2,
-  layout: "single",
-  transition: "kenburns",
-  transitionSeconds: 1.2,
-  imageFit: "cover",
-  showControls: true,
-  progressBar: "bottom",
-  metadataPosition: "bottom-right",
-  metadataShowDate: true,
-  metadataShowLocation: true,
-  metadataShowDescription: false,
-  metadataShowPeople: true,
-  metadataShowAlbum: false,
-  metadataShowTags: true,
-  cacheEnabled: true,
-  cacheMaxMB: 500,
-  cacheExpirationDays: 0,
-  listTtlMinutes: 720
-};
-function panesForLayout(layout) {
-  return layout === "split" ? 2 : 1;
+function usePullToRefresh(onRefresh) {
+  const containerRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const el = containerRef.current;
+    if (!el || typeof window === "undefined") return;
+    let style = document.getElementById("wg-pull-to-refresh-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "wg-pull-to-refresh-style";
+      style.textContent = ".ptr--text,.ptr--icon{color:rgba(255,255,255,.72)!important}";
+      document.head.appendChild(style);
+    }
+    const ptr = import_pulltorefreshjs.default.init({
+      mainElement: el,
+      triggerElement: el,
+      shouldPullToRefresh: () => el.scrollTop <= 0,
+      onRefresh() {
+        return Promise.resolve(onRefresh());
+      },
+      distThreshold: 45,
+      distMax: 65,
+      distReload: 35
+    });
+    return () => {
+      ptr.destroy();
+    };
+  }, [onRefresh]);
+  return containerRef;
 }
 
-// src/plugins/immich/config.ts
-function str(raw, fallback) {
-  return typeof raw === "string" ? raw : fallback;
-}
-function num(raw, fallback) {
-  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
-}
-function bool(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
-}
-function strArray(raw) {
-  if (Array.isArray(raw)) return raw.filter((v) => typeof v === "string");
-  if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
-  return [];
-}
-var POOL_MODES = ["random", "favorites", "memories"];
-function entityFilter(raw, legacyIds) {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const v = raw;
-    return { include: strArray(v.include), exclude: strArray(v.exclude) };
-  }
-  return { include: strArray(legacyIds), exclude: [] };
-}
-var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
-var METADATA_POSITIONS = [
-  "none",
-  "bottom-left",
-  "bottom-right",
-  "top-left",
-  "top-right"
-];
-function readImmichConfig(raw) {
-  const d = IMMICH_DEFAULT_CONFIG;
-  const poolMode = POOL_MODES.includes(raw.poolMode) ? raw.poolMode : d.poolMode;
-  const transition = TRANSITIONS.includes(raw.transition) ? raw.transition : d.transition;
-  const layout = raw.layout === "split" ? "split" : "single";
-  const imageFit = raw.imageFit === "contain" ? "contain" : "cover";
-  const progressBar = raw.progressBar === "top" || raw.progressBar === "none" ? raw.progressBar : d.progressBar;
-  const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition) ? raw.metadataPosition : d.metadataPosition;
-  return {
-    serverUrl: str(raw.serverUrl, d.serverUrl),
-    apiKey: str(raw.apiKey, d.apiKey),
-    poolMode,
-    albums: entityFilter(raw.albums, raw.albumIds),
-    people: entityFilter(raw.people, raw.personIds),
-    tags: entityFilter(raw.tags, raw.tagIds),
-    rating: num(raw.rating, d.rating),
-    showVideos: bool(raw.showVideos, d.showVideos),
-    onlyWithPersons: bool(raw.onlyWithPersons, d.onlyWithPersons),
-    intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
-    preloadCount: num(raw.preloadCount, d.preloadCount),
-    layout,
-    transition,
-    transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
-    imageFit,
-    showControls: bool(raw.showControls, d.showControls),
-    progressBar,
-    metadataPosition,
-    metadataShowDate: bool(raw.metadataShowDate, d.metadataShowDate),
-    metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
-    metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
-    metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
-    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
-    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
-    cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
-    cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
-    cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
-    listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes)
-  };
-}
-
-// src/plugins/immich/useSlideshow.ts
+// src/plugins/weather/WeatherWidget.tsx
 var import_react2 = __toESM(require_react(), 1);
 
-// src/plugins/immich/service.ts
-var PROXY = "always";
-var ImmichService = class {
-  constructor(transport, config) {
-    this.transport = transport;
-    this.config = config;
-  }
-  get base() {
-    return `${this.config.serverUrl.replace(/\/$/, "")}/api`;
-  }
-  /** Host-enforced eviction bounds for cached image blobs, from user config.
-   *  cacheExpirationDays of 0 means never expire (maxAgeMs = Infinity). */
-  get cachePolicy() {
-    const days = this.config.cacheExpirationDays;
-    return {
-      maxBytes: this.config.cacheMaxMB * 1024 * 1024,
-      maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
-    };
-  }
-  get jsonHeaders() {
-    return {
-      // `apiKey` is the `{{secret:apiKey}}` sentinel (a secret field); the host
-      // HTTP layer substitutes the real key at egress, so it never enters this
-      // frame. Sending the sentinel verbatim here is correct.
-      "x-api-key": this.config.apiKey,
-      accept: "application/json",
-      "content-type": "application/json"
-    };
-  }
-  /** Typed request helper: the transport returns `unknown` data (RPC-crossed). */
-  async req(request) {
-    return await this.transport.request(request);
-  }
-  /**
-   * Pool-aware asset-list fetch. Pure network fetch: caching, staleness, and
-   * offline fallback are handled by the shared data layer (useWidgetData /
-   * TanStack Query), not here. Image bytes still use the dedicated size-capped
-   * blob cache (see fetchImageBlob) because that needs LRU eviction the query
-   * cache does not provide.
-   */
-  async fetchAssets(count) {
-    return this.fetchPool(count);
-  }
-  /** Stable identity for the asset pool; used as the shared query key. */
-  poolCacheKey() {
-    const c = this.config;
-    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
-    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
-  }
-  async fetchPool(count) {
-    switch (this.config.poolMode) {
-      case "memories":
-        return this.fetchMemories();
-      case "favorites":
-        return this.metadataSearch({ isFavorite: { eq: true } }, count);
-      case "random":
-      default:
-        return this.fetchRandom(count);
-    }
-  }
-  /**
-   * Builds the modern Immich v3+ structured SearchFilter.
-   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
-   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
-   * All criteria are packaged inside `filter`.
-   */
-  buildSearchFilter(extraFilter = {}) {
-    const c = this.config;
-    const filter = { ...extraFilter };
-    if (!c.showVideos) {
-      filter.type = { in: ["IMAGE"] };
-    }
-    if (c.rating > 0) {
-      filter.rating = { ge: c.rating };
-    }
-    if (c.onlyWithPersons) {
-      filter.hasPeople = { eq: true };
-    }
-    const buildIds = (e) => {
-      const res = {};
-      if (e.include.length) res.any = e.include;
-      if (e.exclude.length) res.none = e.exclude;
-      return Object.keys(res).length > 0 ? res : null;
-    };
-    const albumIds = buildIds(c.albums);
-    if (albumIds) filter.albumIds = albumIds;
-    const personIds = buildIds(c.people);
-    if (personIds) filter.personIds = personIds;
-    const tagIds = buildIds(c.tags);
-    if (tagIds) filter.tagIds = tagIds;
-    return filter;
-  }
-  postProcessAssets(items) {
-    let result = items;
-    if (this.config.onlyWithPersons) {
-      result = result.filter((a) => a.people && a.people.length > 0);
-    }
-    if (this.config.people.exclude.length > 0) {
-      const excluded = new Set(this.config.people.exclude);
-      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
-    }
-    if (this.config.tags.exclude.length > 0) {
-      const excluded = new Set(this.config.tags.exclude);
-      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
-    }
-    return result;
-  }
-  async fetchRandom(count) {
-    const filter = this.buildSearchFilter();
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/random`,
-      method: "POST",
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    const items = Array.isArray(res.data) ? res.data : [];
-    return this.postProcessAssets(items);
-  }
-  async metadataSearch(extraFilter, count) {
-    var _a;
-    const filter = this.buildSearchFilter(extraFilter);
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/metadata`,
-      method: "POST",
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
-    return this.postProcessAssets(items);
-  }
-  async fetchMemories() {
-    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
-    const res = await this.req({
-      url: `${this.base}/memories?for=${today}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
-    const now = (/* @__PURE__ */ new Date()).getFullYear();
-    const items = (res.data ?? []).flatMap((memory) => {
-      var _a;
-      const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
-      const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
-      return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
-    });
-    return this.postProcessAssets(items);
-  }
-  async fetchAssetAlbums(assetId) {
-    try {
-      const res = await this.req({
-        url: `${this.base}/albums?assetId=${assetId}`,
-        method: "GET",
-        headers: this.jsonHeaders,
-        proxy: PROXY
-      });
-      if (!res.ok || !Array.isArray(res.data)) return [];
-      return res.data.map((a) => a.albumName).filter(Boolean);
-    } catch {
-      return [];
-    }
-  }
-  /**
-   * Fetch a preview image as a Blob, serving from the local size-capped blob
-   * cache first (offline + instant). Network responses are cached and the store
-   * is pruned to the configured budget. Returns the Blob itself — the caller
-   * owns object-URL creation and revocation so the URL lifecycle is tied to the
-   * element that renders it.
-   */
-  async fetchImageBlob(assetId, size = "preview") {
-    const cacheKey = `${assetId}:${size}`;
-    if (this.config.cacheEnabled) {
-      const cached = await this.transport.cacheGet(cacheKey);
-      if (cached) return cached;
-    }
-    const res = await this.req({
-      url: `${this.base}/assets/${assetId}/thumbnail?size=${size}`,
-      method: "GET",
-      headers: { "x-api-key": this.config.apiKey },
-      responseType: "binary",
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich image failed (${res.status})`);
-    if (this.config.cacheEnabled) {
-      await this.transport.cachePut(cacheKey, res.data, this.cachePolicy);
-    }
-    return res.data;
-  }
-  /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
-  async fetchFaceBox(assetId) {
-    const res = await this.req({
-      url: `${this.base}/faces?id=${assetId}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
-    const f = res.data[0];
-    if (!f || !f.imageWidth || !f.imageHeight) return null;
-    return {
-      cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
-      cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight
-    };
-  }
-  async listAlbums() {
-    const res = await this.req({
-      url: `${this.base}/albums`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
-    return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
-  }
-  async listPeople() {
-    const res = await this.req({
-      url: `${this.base}/people?withHidden=false`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
-    return (res.data.people ?? []).filter((p) => p.name).map((p) => ({ label: p.name, value: p.id }));
-  }
-  async listTags() {
-    const res = await this.req({
-      url: `${this.base}/tags`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
-    return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
-  }
+// src/plugins/weather/wmo.ts
+var WMO = {
+  0: { label: "Clear sky", icon: "clear" },
+  1: { label: "Mainly clear", icon: "partly" },
+  2: { label: "Partly cloudy", icon: "partly" },
+  3: { label: "Overcast", icon: "cloudy" },
+  45: { label: "Fog", icon: "fog" },
+  48: { label: "Rime fog", icon: "fog" },
+  51: { label: "Light drizzle", icon: "drizzle" },
+  53: { label: "Drizzle", icon: "drizzle" },
+  55: { label: "Dense drizzle", icon: "drizzle" },
+  61: { label: "Slight rain", icon: "rain" },
+  63: { label: "Rain", icon: "rain" },
+  65: { label: "Heavy rain", icon: "rain" },
+  66: { label: "Freezing rain", icon: "rain" },
+  67: { label: "Freezing rain", icon: "rain" },
+  71: { label: "Slight snow", icon: "snow" },
+  73: { label: "Snow", icon: "snow" },
+  75: { label: "Heavy snow", icon: "snow" },
+  77: { label: "Snow grains", icon: "snow" },
+  80: { label: "Rain showers", icon: "rain" },
+  81: { label: "Rain showers", icon: "rain" },
+  82: { label: "Violent showers", icon: "rain" },
+  85: { label: "Snow showers", icon: "snow" },
+  86: { label: "Snow showers", icon: "snow" },
+  95: { label: "Thunderstorm", icon: "thunder" },
+  96: { label: "Thunderstorm", icon: "thunder" },
+  99: { label: "Thunderstorm", icon: "thunder" }
 };
-
-// node_modules/thumbhash/thumbhash.js
-function thumbHashToRGBA(hash) {
-  let { PI, min, max, cos, round } = Math;
-  let header24 = hash[0] | hash[1] << 8 | hash[2] << 16;
-  let header16 = hash[3] | hash[4] << 8;
-  let l_dc = (header24 & 63) / 63;
-  let p_dc = (header24 >> 6 & 63) / 31.5 - 1;
-  let q_dc = (header24 >> 12 & 63) / 31.5 - 1;
-  let l_scale = (header24 >> 18 & 31) / 31;
-  let hasAlpha = header24 >> 23;
-  let p_scale = (header16 >> 3 & 63) / 63;
-  let q_scale = (header16 >> 9 & 63) / 63;
-  let isLandscape = header16 >> 15;
-  let lx = max(3, isLandscape ? hasAlpha ? 5 : 7 : header16 & 7);
-  let ly = max(3, isLandscape ? header16 & 7 : hasAlpha ? 5 : 7);
-  let a_dc = hasAlpha ? (hash[5] & 15) / 15 : 1;
-  let a_scale = (hash[5] >> 4) / 15;
-  let ac_start = hasAlpha ? 6 : 5;
-  let ac_index = 0;
-  let decodeChannel = (nx, ny, scale) => {
-    let ac = [];
-    for (let cy = 0; cy < ny; cy++)
-      for (let cx = cy ? 0 : 1; cx * ny < nx * (ny - cy); cx++)
-        ac.push(((hash[ac_start + (ac_index >> 1)] >> ((ac_index++ & 1) << 2) & 15) / 7.5 - 1) * scale);
-    return ac;
-  };
-  let l_ac = decodeChannel(lx, ly, l_scale);
-  let p_ac = decodeChannel(3, 3, p_scale * 1.25);
-  let q_ac = decodeChannel(3, 3, q_scale * 1.25);
-  let a_ac = hasAlpha && decodeChannel(5, 5, a_scale);
-  let ratio = thumbHashToApproximateAspectRatio(hash);
-  let w = round(ratio > 1 ? 32 : 32 * ratio);
-  let h = round(ratio > 1 ? 32 / ratio : 32);
-  let rgba = new Uint8Array(w * h * 4), fx = [], fy = [];
-  for (let y = 0, i = 0; y < h; y++) {
-    for (let x = 0; x < w; x++, i += 4) {
-      let l = l_dc, p = p_dc, q = q_dc, a = a_dc;
-      for (let cx = 0, n = max(lx, hasAlpha ? 5 : 3); cx < n; cx++)
-        fx[cx] = cos(PI / w * (x + 0.5) * cx);
-      for (let cy = 0, n = max(ly, hasAlpha ? 5 : 3); cy < n; cy++)
-        fy[cy] = cos(PI / h * (y + 0.5) * cy);
-      for (let cy = 0, j = 0; cy < ly; cy++)
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx * ly < lx * (ly - cy); cx++, j++)
-          l += l_ac[j] * fx[cx] * fy2;
-      for (let cy = 0, j = 0; cy < 3; cy++) {
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 3 - cy; cx++, j++) {
-          let f = fx[cx] * fy2;
-          p += p_ac[j] * f;
-          q += q_ac[j] * f;
-        }
-      }
-      if (hasAlpha)
-        for (let cy = 0, j = 0; cy < 5; cy++)
-          for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 5 - cy; cx++, j++)
-            a += a_ac[j] * fx[cx] * fy2;
-      let b = l - 2 / 3 * p;
-      let r = (3 * l - b + q) / 2;
-      let g = r - q;
-      rgba[i] = max(0, 255 * min(1, r));
-      rgba[i + 1] = max(0, 255 * min(1, g));
-      rgba[i + 2] = max(0, 255 * min(1, b));
-      rgba[i + 3] = max(0, 255 * min(1, a));
-    }
-  }
-  return { w, h, rgba };
-}
-function thumbHashToApproximateAspectRatio(hash) {
-  let header = hash[3];
-  let hasAlpha = hash[2] & 128;
-  let isLandscape = hash[4] & 128;
-  let lx = isLandscape ? hasAlpha ? 5 : 7 : header & 7;
-  let ly = isLandscape ? header & 7 : hasAlpha ? 5 : 7;
-  return lx / ly;
-}
-function rgbaToDataURL(w, h, rgba) {
-  let row = w * 4 + 1;
-  let idat = 6 + h * (5 + row);
-  let bytes = [
-    137,
-    80,
-    78,
-    71,
-    13,
-    10,
-    26,
-    10,
-    0,
-    0,
-    0,
-    13,
-    73,
-    72,
-    68,
-    82,
-    0,
-    0,
-    w >> 8,
-    w & 255,
-    0,
-    0,
-    h >> 8,
-    h & 255,
-    8,
-    6,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    idat >>> 24,
-    idat >> 16 & 255,
-    idat >> 8 & 255,
-    idat & 255,
-    73,
-    68,
-    65,
-    84,
-    120,
-    1
-  ];
-  let table = [
-    0,
-    498536548,
-    997073096,
-    651767980,
-    1994146192,
-    1802195444,
-    1303535960,
-    1342533948,
-    -306674912,
-    -267414716,
-    -690576408,
-    -882789492,
-    -1687895376,
-    -2032938284,
-    -1609899400,
-    -1111625188
-  ];
-  let a = 1, b = 0;
-  for (let y = 0, i = 0, end = row - 1; y < h; y++, end += row - 1) {
-    bytes.push(y + 1 < h ? 0 : 1, row & 255, row >> 8, ~row & 255, row >> 8 ^ 255, 0);
-    for (b = (b + a) % 65521; i < end; i++) {
-      let u = rgba[i] & 255;
-      bytes.push(u);
-      a = (a + u) % 65521;
-      b = (b + a) % 65521;
-    }
-  }
-  bytes.push(
-    b >> 8,
-    b & 255,
-    a >> 8,
-    a & 255,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    73,
-    69,
-    78,
-    68,
-    174,
-    66,
-    96,
-    130
-  );
-  for (let [start, end] of [[12, 29], [37, 41 + idat]]) {
-    let c = ~0;
-    for (let i = start; i < end; i++) {
-      c ^= bytes[i];
-      c = c >>> 4 ^ table[c & 15];
-      c = c >>> 4 ^ table[c & 15];
-    }
-    c = ~c;
-    bytes[end++] = c >>> 24;
-    bytes[end++] = c >> 16 & 255;
-    bytes[end++] = c >> 8 & 255;
-    bytes[end++] = c & 255;
-  }
-  return "data:image/png;base64," + btoa(String.fromCharCode(...bytes));
-}
-function thumbHashToDataURL(hash) {
-  let image = thumbHashToRGBA(hash);
-  return rgbaToDataURL(image.w, image.h, image.rgba);
+var FALLBACK = { label: "Unknown", icon: "cloudy" };
+function describeWeather(code) {
+  return WMO[code] ?? FALLBACK;
 }
 
-// src/plugins/immich/thumbhash.ts
-function thumbhashToDataUrl(base64) {
-  try {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-    return thumbHashToDataURL(bytes);
-  } catch {
-    return null;
-  }
-}
-
-// src/plugins/immich/useSlideshow.ts
-var BATCH = 100;
-function shuffleDeck(items) {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = result[i];
-    result[i] = result[j];
-    result[j] = tmp;
-  }
-  return result;
-}
-function makeService(context, config) {
-  const transport = {
-    request: (req) => context.http(req),
-    cacheGet: (key) => context.cacheGet(key),
-    cachePut: (key, blob, policy) => context.cachePut(key, blob, policy)
-  };
-  return new ImmichService(transport, config);
-}
-function useSlideshow(context, config, tick) {
-  const configured = config.serverUrl !== "" && config.apiKey !== "";
-  const panes = panesForLayout(config.layout);
-  const service = (0, import_react2.useMemo)(() => makeService(context, config), [context, config]);
-  const poolKey = (0, import_react2.useMemo)(() => service.poolCacheKey(), [service]);
-  const listTtlMs = config.listTtlMinutes * 60 * 1e3;
-  const {
-    data: assets,
-    error,
-    isLoading,
-    refetch
-  } = useWidgetData(context, {
-    key: ["immich", poolKey],
-    fetcher: () => service.fetchAssets(BATCH),
-    enabled: configured,
-    staleTimeMs: listTtlMs,
-    staleMessage: "Offline \u2014 showing cached photos",
-    errorMessage: "No photos found"
-  });
-  const [deck, setDeck] = (0, import_react2.useState)([]);
-  const cursor = (0, import_react2.useRef)(0);
-  const [playing, setPlaying] = (0, import_react2.useState)(true);
-  const [slides, setSlides] = (0, import_react2.useState)([]);
-  const [progressKey, setProgressKey] = (0, import_react2.useState)(0);
-  const generation = (0, import_react2.useRef)(0);
-  (0, import_react2.useEffect)(() => {
-    if (!assets || assets.length === 0) {
-      setDeck([]);
-      return;
-    }
-    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
-    cursor.current = 0;
-  }, [assets]);
-  const showAt = (0, import_react2.useCallback)(
-    async (index) => {
-      if (deck.length === 0) return;
-      const gen = ++generation.current;
-      const picks = [];
-      for (let i = 0; i < panes; i += 1) {
-        const asset = deck[(index + i) % deck.length];
-        if (asset) picks.push(asset);
-      }
-      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
-      if (preloadCount > 0) {
-        for (let p = 1; p <= preloadCount; p += 1) {
-          const nextAsset = deck[(index + panes * p) % deck.length];
-          if (nextAsset) {
-            void service.fetchImageBlob(nextAsset.id).catch(() => null);
-          }
-        }
-      }
-      const settled = await Promise.all(
-        picks.map(async (asset) => {
-          try {
-            if (config.metadataShowAlbum && !asset.albumName) {
-              const albums = await service.fetchAssetAlbums(asset.id);
-              if (albums.length > 0) asset.albumName = albums.join(", ");
-            }
-            const blob = await service.fetchImageBlob(asset.id);
-            const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
-            const face = config.transition === "kenburns" ? await service.fetchFaceBox(asset.id).catch(() => null) : null;
-            return { asset, blob, placeholder, face };
-          } catch {
-            return null;
-          }
-        })
-      );
-      if (gen !== generation.current) return;
-      const loaded = settled.filter((slide) => slide !== null);
-      if (loaded.length === 0) return;
-      setSlides(loaded);
-      setProgressKey((k) => k + 1);
-    },
-    [deck, service, panes, config.transition, config.preloadCount, config.metadataShowAlbum]
-  );
-  (0, import_react2.useEffect)(() => {
-    cursor.current = 0;
-    if (deck.length > 0) void showAt(0);
-  }, [deck]);
-  const next = (0, import_react2.useCallback)(() => {
-    const nextCursor = cursor.current + panes;
-    if (nextCursor >= deck.length) {
-      refetch();
-      cursor.current = 0;
-    } else {
-      cursor.current = nextCursor;
-    }
-    void showAt(cursor.current);
-  }, [panes, showAt, deck.length, refetch]);
-  const back = (0, import_react2.useCallback)(() => {
-    cursor.current = Math.max(0, cursor.current - panes);
-    void showAt(cursor.current);
-  }, [panes, showAt]);
-  const togglePlay = (0, import_react2.useCallback)(() => setPlaying((p) => !p), []);
-  const lastTick = (0, import_react2.useRef)(tick);
-  (0, import_react2.useEffect)(() => {
-    if (tick !== lastTick.current) {
-      lastTick.current = tick;
-      if (playing && configured) next();
-    }
-  }, [tick, playing, configured, next]);
-  return { slides, playing, error, isLoading, progressKey, next, back, togglePlay };
-}
-
-// src/plugins/immich/AssetView.tsx
-var import_react4 = __toESM(require_react(), 1);
+// src/plugins/weather/WeatherIcon.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function transitionClass(transition) {
-  switch (transition) {
-    case "kenburns":
-      return "immich-kenburns";
-    case "zoom":
-      return "immich-zoom";
-    case "pan":
-      return "immich-pan";
-    case "none":
-      return "immich-none";
+var SUN = "#ffd166";
+var CLOUD = "#c7d0da";
+var RAIN = "#6ba7e8";
+var SNOW = "#e8f0fa";
+var BOLT = "#ffd166";
+function WeatherIcon({ icon, size = 48 }) {
+  const common = { width: size, height: size, viewBox: "0 0 64 64" };
+  switch (icon) {
+    case "clear":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "32", cy: "32", r: "14", fill: SUN }),
+        Array.from({ length: 8 }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "rect",
+          {
+            x: "31",
+            y: "2",
+            width: "2",
+            height: "9",
+            rx: "1",
+            fill: SUN,
+            transform: `rotate(${i * 45} 32 32)`
+          },
+          i
+        ))
+      ] });
+    case "partly":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "24", cy: "24", r: "11", fill: SUN }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "38", cy: "40", rx: "18", ry: "12", fill: CLOUD })
+      ] });
+    case "cloudy":
+    case "fog":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "34", rx: "20", ry: "13", fill: CLOUD }),
+        icon === "fog" && [46, 52].map((y) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("rect", { x: "14", y, width: "36", height: "3", rx: "1.5", fill: CLOUD }, y))
+      ] });
+    case "drizzle":
+    case "rain":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
+        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "line",
+          {
+            x1: x,
+            y1: "44",
+            x2: x - 4,
+            y2: icon === "rain" ? 56 : 51,
+            stroke: RAIN,
+            strokeWidth: "3",
+            strokeLinecap: "round"
+          },
+          x
+        ))
+      ] });
+    case "snow":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
+        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: x, cy: "50", r: "2.5", fill: SNOW }, x))
+      ] });
+    case "thunder":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "26", rx: "19", ry: "12", fill: CLOUD }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("polygon", { points: "30,40 40,40 32,50 38,50 26,62 30,50 24,50", fill: BOLT })
+      ] });
     default:
-      return "immich-fadeonly";
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("svg", { ...common, "aria-hidden": true });
   }
 }
-function AssetView({
-  slide,
-  fit,
-  transition,
-  durationSeconds,
-  intervalSeconds
-}) {
-  const origin = slide.face ? `${(slide.face.cx * 100).toFixed(1)}% ${(slide.face.cy * 100).toFixed(1)}%` : "center";
-  const motionClass = transitionClass(transition);
-  const style = {
-    "--immich-origin": origin,
-    "--immich-motion-duration": `${intervalSeconds + durationSeconds}s`,
-    "--immich-fade-duration": `${durationSeconds}s`
+
+// src/plugins/weather/service.ts
+var MAX_FORECAST_DAYS = 16;
+function buildWeatherUrl(config) {
+  const params = new URLSearchParams({
+    latitude: String(config.latitude),
+    longitude: String(config.longitude),
+    current: "temperature_2m,weather_code,wind_speed_10m,is_day",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min",
+    minutely_15: "precipitation,weather_code",
+    forecast_minutely_15: "48",
+    timezone: "auto",
+    timeformat: "unixtime",
+    forecast_days: String(MAX_FORECAST_DAYS),
+    temperature_unit: config.unit
+  });
+  return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+}
+function mapOpenMeteo(raw) {
+  const res = raw;
+  return mapResponse(res);
+}
+function mapResponse(res) {
+  const daily = res.daily.time.map((sec, i) => ({
+    dateMs: sec * 1e3,
+    weatherCode: res.daily.weather_code[i] ?? 0,
+    tempMax: res.daily.temperature_2m_max[i] ?? 0,
+    tempMin: res.daily.temperature_2m_min[i] ?? 0
+  }));
+  const m = res.minutely_15;
+  const minutely = m ? m.time.map((sec, i) => ({
+    timeMs: sec * 1e3,
+    precipitation: m.precipitation[i] ?? 0,
+    weatherCode: m.weather_code[i] ?? 0
+  })) : [];
+  return {
+    temperature: res.current.temperature_2m,
+    weatherCode: res.current.weather_code,
+    windSpeed: res.current.wind_speed_10m,
+    isDay: res.current.is_day === 1,
+    unitLabel: res.current_units.temperature_2m,
+    utcOffsetSeconds: res.utc_offset_seconds ?? 0,
+    daily,
+    minutely
   };
-  const [imageUrl, setImageUrl] = (0, import_react4.useState)(null);
-  (0, import_react4.useEffect)(() => {
-    const url = URL.createObjectURL(slide.blob);
-    setImageUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [slide.blob]);
-  const imgRef = (0, import_react4.useRef)(null);
-  const [loaded, setLoaded] = (0, import_react4.useState)(false);
-  (0, import_react4.useEffect)(() => {
-    var _a;
-    setLoaded(false);
-    if (((_a = imgRef.current) == null ? void 0 : _a.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
-  }, [imageUrl]);
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "immich-asset", style, children: [
-    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "immich-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
-    imageUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "img",
-      {
-        ref: imgRef,
-        className: `immich-photo immich-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: imageUrl,
-        alt: "",
-        "aria-hidden": true,
-        onLoad: () => setLoaded(true)
-      },
-      slide.asset.id
-    )
-  ] });
+}
+function weatherCacheKey(config) {
+  return `weather:${config.latitude},${config.longitude},${config.unit}`;
+}
+function nextPrecipEvent(data, nowMs) {
+  const THRESHOLD_MM = 0.1;
+  const upcoming = data.minutely.filter((s) => s.timeMs + 15 * 60 * 1e3 > nowMs);
+  if (upcoming.length === 0) return null;
+  const current = upcoming[0];
+  if (current && current.timeMs <= nowMs && current.precipitation >= THRESHOLD_MM) return null;
+  const event = upcoming.find((s) => s.timeMs > nowMs && s.precipitation >= THRESHOLD_MM);
+  if (!event) return null;
+  return {
+    minutesUntil: Math.max(0, Math.round((event.timeMs - nowMs) / 6e4)),
+    weatherCode: event.weatherCode
+  };
 }
 
-// src/plugins/immich/OverlayControls.tsx
-var import_react5 = __toESM(require_react(), 1);
-
-// src/plugins/calendar/locales/de.json
-var de_default = {
-  manifest: {
-    Calendar: "Kalender",
-    "Upcoming events from an iCal feed": "Anstehende Termine aus einem iCal-Kalender",
-    "Calendar Agenda": "Kalender\xFCbersicht",
-    "Upcoming events from any iCal (.ics) feed": "Anstehende Termine aus iCal-Kalendern",
-    Feeds: "Kalender",
-    Calendars: "Kalender",
-    "Add calendar": "Kalender hinzuf\xFCgen",
-    "Each feed is merged into one agenda. Basic auth in the URL and webcal:// are supported.": "Alle Kalender werden in einer \xDCbersicht zusammengef\xFChrt. Basis-Authentifizierung in der URL und webcal:// werden unterst\xFCtzt.",
-    Color: "Farbe",
-    "Days ahead": "Tage im Voraus",
-    "Refresh interval": "Aktualisierungsintervall",
-    "5 minutes": "5 Minuten",
-    "15 minutes": "15 Minuten",
-    "30 minutes": "30 Minuten",
-    "60 minutes": "60 Minuten",
-    "Show title": "Titel anzeigen",
-    "A heading above the agenda. Usually unnecessary once feeds are merged.": "Eine \xDCberschrift \xFCber der Termin\xFCbersicht. Bei zusammengef\xFChrten Kalendern meist nicht n\xF6tig.",
-    "Title text": "Titeltext"
-  },
-  runtime: {
-    allDay: "Ganzt\xE4gig",
-    configure: "F\xFCgen Sie in den Einstellungen mindestens einen iCal-Kalender (.ics) hinzu.",
-    none: "Keine anstehenden Termine",
-    title: "Kalender"
-  }
+// src/plugins/weather/types.ts
+var WEATHER_DEFAULT_CONFIG = {
+  latitude: 59.91,
+  longitude: 10.75,
+  locationName: "Oslo",
+  unit: "celsius",
+  forecastDays: 4,
+  showNextEvent: true,
+  showTitle: true,
+  refreshIntervalMinutes: 15
 };
-
-// src/plugins/immich/locales/de.json
-var de_default2 = {
-  manifest: {
-    "Immich Photo Frame": "Immich-Bilderrahmen",
-    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
-    "Photo Frame": "Bilderrahmen",
-    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
-    Connection: "Verbindung",
-    Source: "Quelle",
-    Slideshow: "Diashow",
-    "Info overlay": "Info-Einblendung",
-    Caching: "Zwischenspeicher",
-    "Immich Server URL": "Immich-Server-URL",
-    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
-    "API Key": "API-Schl\xFCssel",
-    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
-    "Photo source": "Fotoquelle",
-    "All photos": "Alle Fotos",
-    Favorites: "Favoriten",
-    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
-    Albums: "Alben",
-    People: "Personen",
-    Tags: "Schlagw\xF6rter",
-    "Tap to include (+), tap again to exclude (\u2212). Combined with people & tags.": "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212). Wird mit Personen und Schlagw\xF6rtern kombiniert.",
-    "Tap to include (+), tap again to exclude (\u2212).": "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
-    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
-    "Include videos": "Videos einschlie\xDFen",
-    "Only photos with people": "Nur Fotos mit Personen",
-    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
-    "Seconds per photo": "Sekunden pro Foto",
-    "Preload upcoming photos": "Kommende Fotos vorladen",
-    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
-    Layout: "Layout",
-    Single: "Einzeln",
-    "Split (two photos)": "Geteilt (zwei Fotos)",
-    Transition: "\xDCbergang",
-    Pan: "Schwenken",
-    Fade: "\xDCberblenden",
-    None: "Keiner",
-    "Transition seconds": "\xDCbergangsdauer",
-    "Image fit": "Bildanpassung",
-    "Cover (fill)": "Ausf\xFCllen",
-    "Contain (letterbox)": "Einpassen",
-    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
-    "Progress bar": "Fortschrittsbalken",
-    Bottom: "Unten",
-    Top: "Oben",
-    Hidden: "Ausgeblendet",
-    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
-    "Bottom right": "Unten rechts",
-    "Bottom left": "Unten links",
-    "Top right": "Oben rechts",
-    "Top left": "Oben links",
-    "Show location": "Ort anzeigen",
-    "Show date": "Datum anzeigen",
-    "Show people": "Personen anzeigen",
-    "Show album": "Album anzeigen",
-    "Show tags": "Schlagw\xF6rter anzeigen",
-    "Show description": "Beschreibung anzeigen",
-    "Cache photos locally": "Fotos lokal zwischenspeichern",
-    "Cache size limit (MB)": "Speicherlimit (MB)",
-    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
-    "Cache image expiration (days)": "Bildablauf (Tage)",
-    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
-    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
-  },
-  runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
-    loading: "Fotos werden geladen\u2026",
-    next: "Weiter",
-    pause: "Pause",
-    play: "Wiedergabe",
-    previous: "Zur\xFCck",
-    title: "Immich-Bilderrahmen"
-  }
-};
+function toForecastDays(raw) {
+  const n = typeof raw === "string" ? Number(raw) : raw;
+  if (typeof n !== "number" || Number.isNaN(n)) return WEATHER_DEFAULT_CONFIG.forecastDays;
+  return Math.max(1, Math.min(16, Math.round(n)));
+}
+function readWeatherConfig(raw) {
+  return {
+    latitude: typeof raw.latitude === "number" ? raw.latitude : WEATHER_DEFAULT_CONFIG.latitude,
+    longitude: typeof raw.longitude === "number" ? raw.longitude : WEATHER_DEFAULT_CONFIG.longitude,
+    locationName: typeof raw.locationName === "string" ? raw.locationName : WEATHER_DEFAULT_CONFIG.locationName,
+    unit: raw.unit === "fahrenheit" ? "fahrenheit" : "celsius",
+    forecastDays: toForecastDays(raw.forecastDays),
+    showNextEvent: typeof raw.showNextEvent === "boolean" ? raw.showNextEvent : WEATHER_DEFAULT_CONFIG.showNextEvent,
+    showTitle: typeof raw.showTitle === "boolean" ? raw.showTitle : WEATHER_DEFAULT_CONFIG.showTitle,
+    refreshIntervalMinutes: typeof raw.refreshIntervalMinutes === "number" && raw.refreshIntervalMinutes > 0 ? raw.refreshIntervalMinutes : typeof raw.refreshIntervalMinutes === "string" && Number(raw.refreshIntervalMinutes) > 0 ? Number(raw.refreshIntervalMinutes) : WEATHER_DEFAULT_CONFIG.refreshIntervalMinutes
+  };
+}
 
 // src/plugins/weather/locales/de.json
-var de_default3 = {
+var de_default = {
   manifest: {
     Weather: "Wetter",
     "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage \xFCber Open-Meteo",
@@ -25157,325 +24519,151 @@ var de_default3 = {
   }
 };
 
-// src/plugins/translate.ts
-var translations = {
-  calendar: { de: de_default.runtime },
-  immich: { de: de_default2.runtime },
-  weather: { de: de_default3.runtime }
-};
-function pluginText(locale, key, params = {}, fallback = key) {
-  var _a, _b;
-  const [pluginId, ...parts] = key.split(".");
-  const value = pluginId ? (_b = (_a = translations[pluginId]) == null ? void 0 : _a[locale.split("-")[0] ?? locale]) == null ? void 0 : _b[parts.join(".")] : void 0;
-  if (typeof value !== "string") return fallback;
+// src/plugins/weather/translate.ts
+var translations = { de: de_default.runtime };
+function text(locale, key, params = {}, fallback = key) {
+  var _a;
+  const value = (_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key];
+  if (!value) return fallback;
   return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
 }
 
-// src/plugins/immich/OverlayControls.tsx
+// src/plugins/weather/WeatherWidget.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-var HIDE_DELAY_MS = 2500;
-function OverlayControls({
-  playing,
-  onNext,
-  onBack,
-  onTogglePlay,
-  active,
-  locale
-}) {
-  const [visible, setVisible] = (0, import_react5.useState)(false);
-  const hideTimer = (0, import_react5.useRef)(null);
-  const reveal = (0, import_react5.useCallback)(() => {
-    setVisible(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-    };
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    if (!active) return;
-    const handler = (e) => {
-      if (e.key === "ArrowRight") {
-        onNext();
-        reveal();
-      } else if (e.key === "ArrowLeft") {
-        onBack();
-        reveal();
-      } else if (e.key === " ") {
-        e.preventDefault();
-        onTogglePlay();
-        reveal();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [active, onNext, onBack, onTogglePlay, reveal]);
-  const act = (fn) => () => {
-    fn();
-    reveal();
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-    "div",
-    {
-      className: "immich-controls",
-      "data-active": active,
-      "data-visible": visible,
-      onPointerMove: reveal,
-      onPointerDown: reveal,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: act(onBack), "aria-label": pluginText(locale, "immich.previous"), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronLeft, {}) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-          "button",
-          {
-            type: "button",
-            className: "immich-zone immich-zone-center",
-            onClick: act(onTogglePlay),
-            "aria-label": playing ? pluginText(locale, "immich.pause") : pluginText(locale, "immich.play"),
-            children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn immich-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PlayIcon, {}) })
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: act(onNext), "aria-label": pluginText(locale, "immich.next"), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronRight, {}) }) })
-      ]
-    }
-  );
+function formatLeadTime(locale, minutes) {
+  if (minutes < 1) return text(locale, "now");
+  if (minutes < 60) return text(locale, "inMinutes", { count: minutes });
+  const hours = Math.round(minutes / 60);
+  return text(locale, "inHours", { count: hours });
 }
-function ChevronLeft() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function ChevronRight() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function PlayIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 5v14l11-7z" }) });
-}
-function PauseIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
+function WeatherWidget({ context }) {
+  const config = (0, import_react2.useMemo)(() => readWeatherConfig(context.config), [context.config]);
+  const { data, error, refetch } = useWidgetData(context, {
+    key: [weatherCacheKey(config)],
+    fetcher: async () => {
+      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
+      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
+      return mapOpenMeteo(res.data);
+    },
+    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
+    staleMessage: "Offline \u2014 showing last weather",
+    errorMessage: "Weather unavailable"
+  });
+  const containerRef = usePullToRefresh(refetch);
+  if (error && !data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
+  }
+  if (!data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loading") });
+  }
+  const current = describeWeather(data.weatherCode);
+  const nextEvent = config.showNextEvent ? nextPrecipEvent(data, Date.now()) : null;
+  const nextDescription = nextEvent ? describeWeather(nextEvent.weatherCode) : null;
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-current", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: current.icon, size: 64 }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-temp", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-value", children: [
+          Math.round(data.temperature),
+          data.unitLabel
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-desc", children: text(context.locale, `codes.${data.weatherCode}`, {}, current.label) }),
+        config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-loc", children: config.locationName })
+      ] })
+    ] }),
+    nextEvent && nextDescription && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-next", title: text(context.locale, "nextPrecipitation"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: nextDescription.icon, size: 18 }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-next-text", children: [
+        text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label),
+        " ",
+        formatLeadTime(context.locale, nextEvent.minutesUntil)
+      ] })
+    ] })
+  ] });
 }
 
-// src/plugins/immich/ProgressBar.tsx
+// src/plugins/weather/ForecastWidget.tsx
+var import_react4 = __toESM(require_react(), 1);
 var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ProgressBar({
-  position,
-  durationSeconds,
-  playing,
-  cycleKey
-}) {
-  if (position === "none") return null;
-  const style = {
-    "--immich-progress-duration": `${durationSeconds}s`,
-    animationPlayState: playing ? "running" : "paused"
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `immich-progress immich-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "immich-progress-fill", style }, cycleKey) });
-}
-
-// src/plugins/immich/metadata.ts
-function deriveMetadata(asset, options, locale) {
-  const exif = asset.exifInfo;
-  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
-  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
-  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
-  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
-  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
-  return {
-    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
-    location: location2,
-    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
-    people,
-    album,
-    tags
-  };
-}
-function hasMetadata(meta) {
-  return Boolean(meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags);
-}
-
-// src/plugins/immich/MetadataOverlay.tsx
-var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-function MetadataOverlay({ asset, position, options, locale }) {
-  if (position === "none") return null;
-  const meta = deriveMetadata(asset, options, locale);
-  if (!hasMetadata(meta)) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `immich-caption immich-caption-${position}`, children: [
-    meta.location && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-primary", children: meta.location }),
-    meta.album && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-primary", children: meta.album }),
-    meta.date && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.date }),
-    meta.people && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.people }),
-    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.tags }),
-    meta.description && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-desc", children: meta.description })
+function ForecastWidget({ context }) {
+  const config = (0, import_react4.useMemo)(() => readWeatherConfig(context.config), [context.config]);
+  const { data, error, refetch } = useWidgetData(context, {
+    key: [weatherCacheKey(config)],
+    fetcher: async () => {
+      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
+      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
+      return mapOpenMeteo(res.data);
+    },
+    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
+    staleMessage: "Offline \u2014 showing last forecast",
+    errorMessage: "Forecast unavailable"
+  });
+  const containerRef = usePullToRefresh(refetch);
+  if (error && !data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
+  }
+  if (!data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loadingForecast") });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
+    config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast-header", children: config.locationName }),
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast weather-forecast-full", children: data.daily.slice(0, config.forecastDays).map((day, i) => {
+      const d = describeWeather(day.weatherCode);
+      return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "weather-day", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "weather-dow", children: i === 0 ? text(context.locale, "today") : new Date(day.dateMs).toLocaleDateString(context.locale, { weekday: "short" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(WeatherIcon, { icon: d.icon, size: 32 }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "weather-range", children: [
+          Math.round(day.tempMax),
+          "\xB0 / ",
+          Math.round(day.tempMin),
+          "\xB0"
+        ] })
+      ] }, day.dateMs);
+    }) })
   ] });
 }
 
-// src/plugins/immich/PhotoFrameWidget.tsx
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
-function PhotoFrameWidget({ context }) {
-  const config = (0, import_react6.useMemo)(() => readImmichConfig(context.config), [context.config]);
-  const configured = config.serverUrl !== "" && config.apiKey !== "";
-  const [tick, setTick] = (0, import_react6.useState)(0);
-  const show = useSlideshow(context, config, tick);
-  const timerRef = (0, import_react6.useRef)(null);
-  const resetTimer = (0, import_react6.useCallback)(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (!show.playing || !configured) return;
-    timerRef.current = setInterval(
-      () => setTick((t) => t + 1),
-      Math.max(3, config.intervalSeconds) * 1e3
-    );
-  }, [show.playing, configured, config.intervalSeconds]);
-  (0, import_react6.useEffect)(() => {
-    resetTimer();
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [resetTimer, show.progressKey]);
-  const handleNext = (0, import_react6.useCallback)(() => {
-    show.next();
-    resetTimer();
-  }, [show, resetTimer]);
-  const handleBack = (0, import_react6.useCallback)(() => {
-    show.back();
-    resetTimer();
-  }, [show, resetTimer]);
-  const metadataOptions = {
-    showDate: config.metadataShowDate,
-    showLocation: config.metadataShowLocation,
-    showDescription: config.metadataShowDescription,
-    showPeople: config.metadataShowPeople,
-    showAlbum: config.metadataShowAlbum,
-    showTags: config.metadataShowTags
-  };
-  if (!configured) {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-frame immich-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: pluginText(context.locale, "immich.title") }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: pluginText(context.locale, "immich.configure") })
-    ] }) });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `immich-frame immich-layout-${config.layout}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "immich-pane", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        AssetView,
-        {
-          slide,
-          fit: config.imageFit,
-          transition: config.transition,
-          durationSeconds: config.transitionSeconds,
-          intervalSeconds: config.intervalSeconds
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        MetadataOverlay,
-        {
-          asset: slide.asset,
-          position: config.metadataPosition,
-          options: metadataOptions,
-          locale: context.locale
-        }
-      )
-    ] }, slide.asset.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      ProgressBar,
-      {
-        position: config.progressBar,
-        durationSeconds: Math.max(3, config.intervalSeconds),
-        playing: show.playing,
-        cycleKey: show.progressKey
-      }
-    ),
-    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      OverlayControls,
-      {
-        playing: show.playing,
-        onNext: handleNext,
-        onBack: handleBack,
-        onTogglePlay: show.togglePlay,
-        active: context.isEditing === false,
-        locale: context.locale
-      }
-    ),
-    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-status", children: pluginText(context.locale, "immich.loading") }),
-    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-status immich-error", role: "alert", children: show.error })
-  ] });
-}
-
-// src/plugins/immich/settings-options.ts
-async function loadImmichOptions(context, kind, rawConfig) {
-  const config = readImmichConfig(rawConfig);
-  if (!config.serverUrl || !config.apiKey) {
-    throw new Error("Enter the server URL and API key first.");
-  }
-  const transport = {
-    request: (req) => context.http(req),
-    cacheGet: () => Promise.resolve(null),
-    cachePut: () => Promise.resolve()
-  };
-  const service = new ImmichService(transport, config);
-  if (kind === "albums") return service.listAlbums();
-  if (kind === "people") return service.listPeople();
-  return service.listTags();
-}
-
-// src/plugins/immich/photoframe-styles.ts
-var IMMICH_SANDBOX_CSS = `
+// src/plugins/weather/weather-styles.ts
+var WEATHER_SANDBOX_CSS = `
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
   body { width: 100%; height: 100%; }
   .wg-plugin-root { width: 100%; height: 100%; }
-  .immich-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .immich-panes { display: flex; width: 100%; height: 100%; }
-  .immich-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
-  .immich-layout-split .immich-pane + .immich-pane { border-left: 2px solid rgba(255,255,255,0.12); }
-  .immich-asset { position: absolute; inset: 0; overflow: hidden; }
-  .immich-backdrop, .immich-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .immich-backdrop { filter: blur(14px); transform: scale(1.1); }
-  .immich-fit-cover { object-fit: cover; }
-  .immich-fit-contain { object-fit: contain; }
-  .immich-photo { opacity: 0; transform-origin: var(--immich-origin, center); }
-  .immich-fadeonly, .immich-none { animation: immich-fade var(--immich-fade-duration, 1s) ease both; }
-  .immich-none { animation-duration: 0.01s; }
-  .immich-zoom { animation: immich-fade var(--immich-fade-duration,1s) ease both, immich-zoom var(--immich-motion-duration,16s) ease-out both; }
-  .immich-pan { animation: immich-fade var(--immich-fade-duration,1s) ease both, immich-pan var(--immich-motion-duration,16s) ease-in-out both; }
-  .immich-kenburns { animation: immich-fade var(--immich-fade-duration,1s) ease both, immich-kenburns var(--immich-motion-duration,16s) ease-in-out both; }
-  @keyframes immich-fade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes immich-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
-  @keyframes immich-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
-  @keyframes immich-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
-  .immich-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
-  .immich-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
-  .immich-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
-  .immich-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .immich-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
-  .immich-progress-top { top: 0; }
-  .immich-progress-bottom { bottom: 0; }
-  .immich-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: immich-progress var(--immich-progress-duration, 15s) linear forwards; }
-  @keyframes immich-progress { from { width: 0; } to { width: 100%; } }
-  .immich-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
-  .immich-controls[data-active='false'] { pointer-events: none; }
-  .immich-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
-  .immich-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
-  .immich-zone-btn-lg { width: 64px; height: 64px; }
-  .immich-controls[data-visible='true'] .immich-zone-btn { opacity: 1; transform: scale(1); }
-  @media (hover: hover) { .immich-zone:hover .immich-zone-btn { opacity: 1; transform: scale(1); } }
-  .immich-zone-btn svg { width: 55%; height: 55%; }
-  .immich-empty, .immich-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
-  .immich-status { background: rgba(0,0,0,0.35); }
-  .immich-empty p { margin-top: 8px; font-size: 13px; }
-  .immich-error { color: #ff8080; }
+  .weather-widget {
+    position: relative; width: 100%; height: 100%; padding: 3% 5%;
+    display: flex; flex-direction: column; justify-content: center;
+    color: #fff; overflow: hidden; container-type: size; box-sizing: border-box;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .weather-loading, .weather-error { display: grid; place-items: center; text-align: center; }
+  .weather-error { color: #ff8080; }
+  .weather-current { display: flex; align-items: center; justify-content: center; gap: min(10cqh,5cqw); height: 100%; }
+  .weather-current svg { width: min(90cqh,30cqw); height: min(90cqh,30cqw); flex-shrink: 0; }
+  .weather-temp { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .weather-value { font-size: min(52cqh,22cqw); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .weather-desc { font-size: min(20cqh,8cqw); color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-loc { font-size: min(17cqh,7cqw); color: rgba(255,255,255,0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-forecast { display: flex; justify-content: space-between; gap: 3%; margin-top: 8px; }
+  .weather-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6%; flex: 1; min-width: 0; }
+  .weather-day svg { width: min(34cqh,60%); height: min(34cqh,60%); }
+  .weather-dow { font-size: min(11cqh,4.5cqw); color: rgba(255,255,255,0.82); }
+  .weather-range { font-size: min(11cqh,4.5cqw); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .weather-forecast-header { font-size: min(12cqh,6cqw); color: rgba(255,255,255,0.82); margin-bottom: 2%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-forecast-full { margin-top: 0; flex: 1; align-items: stretch; }
+  .weather-next {
+    position: absolute; left: 5%; right: 5%; bottom: 4%;
+    display: flex; align-items: center; justify-content: center; gap: 0.4em;
+    color: rgba(255,255,255,0.9);
+  }
+  .weather-next svg { width: min(14cqh,7cqw); height: min(14cqh,7cqw); flex-shrink: 0; }
+  .weather-next-text { font-size: min(13cqh,5.5cqw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `;
 
-// src/plugins/immich/sandbox.ts
-injectStyle("immich-style", IMMICH_SANDBOX_CSS);
+// src/plugins/weather/sandbox.ts
+injectStyle("weather-style", WEATHER_SANDBOX_CSS);
 var sandbox_default = definePlugin({
   widgets: {
-    "immich.photoframe": defineReactWidget(PhotoFrameWidget)
-  },
-  loadOptions(context, _widgetId, fieldKey, config) {
-    const kind = fieldKey === "albums" ? "albums" : fieldKey === "people" ? "people" : "tags";
-    return loadImmichOptions(context, kind, config);
+    "weather.current": defineReactWidget(WeatherWidget),
+    "weather.forecast": defineReactWidget(ForecastWidget)
   }
 });
 export {

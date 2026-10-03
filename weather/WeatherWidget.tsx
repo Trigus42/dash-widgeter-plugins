@@ -4,14 +4,14 @@ import { describeWeather } from './wmo';
 import { WeatherIcon } from './WeatherIcon';
 import { buildWeatherUrl, mapOpenMeteo, nextPrecipEvent, weatherCacheKey } from './service';
 import { readWeatherConfig, type WeatherData } from './types';
-import { pluginText } from '@/plugins/translate';
+import { text } from './translate';
 
 /** "in 25 min" / "in 2 h" — compact, locale-neutral relative label. */
 function formatLeadTime(locale: string, minutes: number): string {
-  if (minutes < 1) return pluginText(locale, 'weather.now');
-  if (minutes < 60) return pluginText(locale, 'weather.inMinutes', { count: minutes });
+  if (minutes < 1) return text(locale, 'now');
+  if (minutes < 60) return text(locale, 'inMinutes', { count: minutes });
   const hours = Math.round(minutes / 60);
-  return pluginText(locale, 'weather.inHours', { count: hours });
+  return text(locale, 'inHours', { count: hours });
 }
 
 /**
@@ -44,7 +44,7 @@ export function WeatherWidget({ context }: ReactWidgetProps): React.JSX.Element 
     );
   }
   if (!data) {
-    return <div className="weather-widget weather-loading">{pluginText(context.locale, 'weather.loading')}</div>;
+    return <div className="weather-widget weather-loading">{text(context.locale, 'loading')}</div>;
   }
 
   const current = describeWeather(data.weatherCode);
@@ -60,15 +60,15 @@ export function WeatherWidget({ context }: ReactWidgetProps): React.JSX.Element 
             {Math.round(data.temperature)}
             {data.unitLabel}
           </span>
-          <span className="weather-desc">{pluginText(context.locale, `weather.codes.${data.weatherCode}`, {}, current.label)}</span>
+          <span className="weather-desc">{text(context.locale, `codes.${data.weatherCode}`, {}, current.label)}</span>
           {config.showTitle && <span className="weather-loc">{config.locationName}</span>}
         </div>
       </div>
       {nextEvent && nextDescription && (
-        <div className="weather-next" title={pluginText(context.locale, 'weather.nextPrecipitation')}>
+        <div className="weather-next" title={text(context.locale, 'nextPrecipitation')}>
           <WeatherIcon icon={nextDescription.icon} size={18} />
           <span className="weather-next-text">
-            {pluginText(context.locale, `weather.codes.${nextEvent.weatherCode}`, {}, nextDescription.label)} {formatLeadTime(context.locale, nextEvent.minutesUntil)}
+            {text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label)} {formatLeadTime(context.locale, nextEvent.minutesUntil)}
           </span>
         </div>
       )}

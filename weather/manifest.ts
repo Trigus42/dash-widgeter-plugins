@@ -73,7 +73,7 @@ const forecastSettings: WidgetSettingField[] = [
 export const weatherManifest: PluginManifest = {
   id: 'weather',
   name: 'Weather',
-  version: '1.2.0',
+  version: '1.3.0',
   description: 'Current conditions and forecast via Open-Meteo',
   translations: { de: de.manifest },
   executionType: 'sandboxed',

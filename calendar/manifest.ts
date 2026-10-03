@@ -13,7 +13,7 @@ import de from './locales/de.json';
 export const calendarManifest: PluginManifest = {
   id: 'calendar',
   name: 'Calendar',
-  version: '1.2.0',
+  version: '1.3.0',
   description: 'Upcoming events from an iCal feed',
   translations: { de: de.manifest },
   executionType: 'sandboxed',

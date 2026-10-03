@@ -4,7 +4,7 @@ import { describeWeather } from './wmo';
 import { WeatherIcon } from './WeatherIcon';
 import { buildWeatherUrl, mapOpenMeteo, weatherCacheKey } from './service';
 import { readWeatherConfig, type WeatherData } from './types';
-import { pluginText } from '@/plugins/translate';
+import { text } from './translate';
 
 /**
  * Multi-day forecast widget — the second widget the weather plugin registers.
@@ -35,7 +35,7 @@ export function ForecastWidget({ context }: ReactWidgetProps): React.JSX.Element
     );
   }
   if (!data) {
-    return <div className="weather-widget weather-loading">{pluginText(context.locale, 'weather.loadingForecast')}</div>;
+    return <div className="weather-widget weather-loading">{text(context.locale, 'loadingForecast')}</div>;
   }
 
   return (
@@ -48,7 +48,7 @@ export function ForecastWidget({ context }: ReactWidgetProps): React.JSX.Element
             <div key={day.dateMs} className="weather-day">
               <span className="weather-dow">
                 {i === 0
-                  ? pluginText(context.locale, 'weather.today')
+                  ? text(context.locale, 'today')
                   : new Date(day.dateMs).toLocaleDateString(context.locale, { weekday: 'short' })}
               </span>
               <WeatherIcon icon={d.icon} size={32} />

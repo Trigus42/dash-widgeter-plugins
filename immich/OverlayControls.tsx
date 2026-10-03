@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { pluginText } from '@/plugins/translate';
+import { text } from './translate';
 
 interface Props {
   playing: boolean;
@@ -76,7 +76,7 @@ export function OverlayControls({
       onPointerMove={reveal}
       onPointerDown={reveal}
     >
-      <button type="button" className="immich-zone immich-zone-side" onClick={act(onBack)} aria-label={pluginText(locale, 'immich.previous')}>
+      <button type="button" className="immich-zone immich-zone-side" onClick={act(onBack)} aria-label={text(locale, 'previous')}>
         <span className="immich-zone-btn">
           <ChevronLeft />
         </span>
@@ -85,13 +85,13 @@ export function OverlayControls({
         type="button"
         className="immich-zone immich-zone-center"
         onClick={act(onTogglePlay)}
-        aria-label={playing ? pluginText(locale, 'immich.pause') : pluginText(locale, 'immich.play')}
+        aria-label={playing ? text(locale, 'pause') : text(locale, 'play')}
       >
         <span className="immich-zone-btn immich-zone-btn-lg">
           {playing ? <PauseIcon /> : <PlayIcon />}
         </span>
       </button>
-      <button type="button" className="immich-zone immich-zone-side" onClick={act(onNext)} aria-label={pluginText(locale, 'immich.next')}>
+      <button type="button" className="immich-zone immich-zone-side" onClick={act(onNext)} aria-label={text(locale, 'next')}>
         <span className="immich-zone-btn">
           <ChevronRight />
         </span>

@@ -2,12 +2,12 @@ import { useMemo } from 'react';
 import { usePullToRefresh, useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
 import { mergeEvents, normalizeIcalUrl, parseCalendar } from './service';
 import { readCalendarConfig, type CalendarEvent } from './types';
-import { pluginText } from '@/plugins/translate';
+import { text } from './translate';
 
 function formatWhen(locale: string, event: CalendarEvent): string {
   const start = new Date(event.start);
   const day = start.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
-  if (event.allDay) return `${day} · ${pluginText(locale, 'calendar.allDay')}`;
+  if (event.allDay) return `${day} · ${text(locale, 'allDay')}`;
   const time = start.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   return `${day} · ${time}`;
 }
@@ -51,8 +51,8 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
     return (
       <div className="calendar-widget calendar-empty">
         <div>
-          <strong>{pluginText(context.locale, 'calendar.title')}</strong>
-          <p>{pluginText(context.locale, 'calendar.configure')}</p>
+          <strong>{text(context.locale, 'title')}</strong>
+          <p>{text(context.locale, 'configure')}</p>
         </div>
       </div>
     );
@@ -68,7 +68,7 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
           {error}
         </div>
       )}
-      {events && events.length === 0 && <div className="calendar-none">{pluginText(context.locale, 'calendar.none')}</div>}
+      {events && events.length === 0 && <div className="calendar-none">{text(context.locale, 'none')}</div>}
       <ul ref={containerRef} className="calendar-list">
         {events?.map((event) => (
           <li

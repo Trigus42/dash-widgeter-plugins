@@ -6,7 +6,7 @@ import { AssetView } from './AssetView';
 import { OverlayControls } from './OverlayControls';
 import { ProgressBar } from './ProgressBar';
 import { MetadataOverlay } from './MetadataOverlay';
-import { pluginText } from '@/plugins/translate';
+import { text } from './translate';
 
 /** Full ImmichFrame-equivalent slideshow widget with strong local caching. */
 export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Element {
@@ -58,8 +58,8 @@ export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Eleme
     return (
       <div className="immich-frame immich-empty">
         <div>
-          <strong>{pluginText(context.locale, 'immich.title')}</strong>
-          <p>{pluginText(context.locale, 'immich.configure')}</p>
+          <strong>{text(context.locale, 'title')}</strong>
+          <p>{text(context.locale, 'configure')}</p>
         </div>
       </div>
     );
@@ -106,7 +106,7 @@ export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Eleme
       )}
 
       {show.isLoading && show.slides.length === 0 && (
-        <div className="immich-status">{pluginText(context.locale, 'immich.loading')}</div>
+        <div className="immich-status">{text(context.locale, 'loading')}</div>
       )}
       {show.error && show.slides.length === 0 && (
         <div className="immich-status immich-error" role="alert">
