@@ -5,6 +5,7 @@ interface Props {
   asset: ImmichAsset;
   position: MetadataPosition;
   options: MetadataOptions;
+  locale: string;
 }
 
 /**
@@ -13,9 +14,9 @@ interface Props {
  * description). Rendered inside the pane so it sits on the image it describes,
  * never as a separate tile. Returns null when hidden or empty.
  */
-export function MetadataOverlay({ asset, position, options }: Props): React.JSX.Element | null {
+export function MetadataOverlay({ asset, position, options, locale }: Props): React.JSX.Element | null {
   if (position === 'none') return null;
-  const meta = deriveMetadata(asset, options);
+  const meta = deriveMetadata(asset, options, locale);
   if (!hasMetadata(meta)) return null;
 
   return (

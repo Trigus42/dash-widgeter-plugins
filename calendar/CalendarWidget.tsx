@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 import { usePullToRefresh, useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
 import { mergeEvents, normalizeIcalUrl, parseCalendar } from './service';
 import { readCalendarConfig, type CalendarEvent } from './types';
+import { pluginText } from '@/plugins/translate';
 
-function formatWhen(event: CalendarEvent): string {
+function formatWhen(locale: string, event: CalendarEvent): string {
   const start = new Date(event.start);
-  const day = start.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
-  if (event.allDay) return `${day} · All day`;
-  const time = start.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const day = start.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
+  if (event.allDay) return `${day} · ${pluginText(locale, 'calendar.allDay')}`;
+  const time = start.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   return `${day} · ${time}`;
 }
 
@@ -50,8 +51,8 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
     return (
       <div className="calendar-widget calendar-empty">
         <div>
-          <strong>Calendar</strong>
-          <p>Add one or more iCal (.ics) feeds in settings.</p>
+          <strong>{pluginText(context.locale, 'calendar.title')}</strong>
+          <p>{pluginText(context.locale, 'calendar.configure')}</p>
         </div>
       </div>
     );
@@ -67,7 +68,7 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
           {error}
         </div>
       )}
-      {events && events.length === 0 && <div className="calendar-none">No upcoming events</div>}
+      {events && events.length === 0 && <div className="calendar-none">{pluginText(context.locale, 'calendar.none')}</div>}
       <ul ref={containerRef} className="calendar-list">
         {events?.map((event) => (
           <li
@@ -75,7 +76,7 @@ export function CalendarWidget({ context }: ReactWidgetProps): React.JSX.Element
             className="calendar-event"
             style={{ borderLeftColor: event.color }}
           >
-            <span className="calendar-when">{formatWhen(event)}</span>
+            <span className="calendar-when">{formatWhen(context.locale, event)}</span>
             <span className="calendar-summary">{event.summary}</span>
             {event.location && <span className="calendar-loc">{event.location}</span>}
           </li>

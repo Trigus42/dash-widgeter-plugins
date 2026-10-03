@@ -12,7 +12,7 @@ import { CALENDAR_DEFAULT_CONFIG } from './types';
 export const calendarManifest: PluginManifest = {
   id: 'calendar',
   name: 'Calendar',
-  version: '1.1.0',
+  version: '1.1.1',
   description: 'Upcoming events from an iCal feed',
   executionType: 'sandboxed',
   capabilities: [],

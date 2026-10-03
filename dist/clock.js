@@ -24233,16 +24233,16 @@ function readClockConfig(raw) {
 }
 
 // src/plugins/clock/format.ts
-function formatClock(now, config) {
+function formatClock(now, config, locale) {
   const timeOptions = {
     hour: "2-digit",
     minute: "2-digit",
     hour12: !config.use24Hour
   };
   if (config.showSeconds) timeOptions.second = "2-digit";
-  const time = new Intl.DateTimeFormat(void 0, timeOptions).format(now);
+  const time = new Intl.DateTimeFormat(locale, timeOptions).format(now);
   const dateOptions = config.dateStyle === "weekday" ? { weekday: "long" } : { weekday: "long", month: "short", day: "numeric" };
-  const date = config.showDate ? new Intl.DateTimeFormat(void 0, dateOptions).format(now) : "";
+  const date = config.showDate ? new Intl.DateTimeFormat(locale, dateOptions).format(now) : "";
   return { time, date };
 }
 
@@ -24280,7 +24280,7 @@ function ClockWidget({ context }) {
     const timer = setInterval(() => setNow(/* @__PURE__ */ new Date()), period);
     return () => clearInterval(timer);
   }, [config.showSeconds]);
-  const { time, date } = formatClock(now, config);
+  const { time, date } = formatClock(now, config, context.locale);
   const showDate = config.showDate && Boolean(date);
   const widgetRef = (0, import_react2.useRef)(null);
   const timeRef = (0, import_react2.useRef)(null);

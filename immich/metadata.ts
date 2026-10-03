@@ -20,7 +20,7 @@ export interface MetadataOptions {
 }
 
 /** Derive the display metadata for an asset, honoring the enabled fields. */
-export function deriveMetadata(asset: ImmichAsset, options: MetadataOptions): AssetMetadata {
+export function deriveMetadata(asset: ImmichAsset, options: MetadataOptions, locale?: string): AssetMetadata {
   const exif = asset.exifInfo;
   const rawDate = exif?.dateTimeOriginal ?? asset.localDateTime;
 
@@ -41,7 +41,7 @@ export function deriveMetadata(asset: ImmichAsset, options: MetadataOptions): As
       : null;
 
   return {
-    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString() : null,
+    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
     location,
     description: options.showDescription && exif?.description ? exif.description : null,
     people,

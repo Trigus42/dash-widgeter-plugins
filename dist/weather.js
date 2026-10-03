@@ -24231,6 +24231,13 @@ function usePullToRefresh(onRefresh) {
   (0, import_react.useEffect)(() => {
     const el = containerRef.current;
     if (!el || typeof window === "undefined") return;
+    let style = document.getElementById("wg-pull-to-refresh-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "wg-pull-to-refresh-style";
+      style.textContent = ".ptr--text,.ptr--icon{color:rgba(255,255,255,.72)!important}";
+      document.head.appendChild(style);
+    }
     const ptr = import_pulltorefreshjs.default.init({
       mainElement: el,
       triggerElement: el,
@@ -24448,13 +24455,711 @@ function readWeatherConfig(raw) {
   };
 }
 
+// src/locales/en.json
+var en_default = {
+  appearance: {
+    background: "Background",
+    backgroundLayer: "Background",
+    backgroundOpacity: "Background opacity \xB7 {{percent}}%",
+    backward: "Send backward",
+    blur: "Background blur \xB7 {{pixels}}px",
+    forward: "Bring forward",
+    general: "General",
+    glass: "Glass (blur)",
+    layer: "Layer (height) \xB7 {{level}}",
+    none: "None",
+    opacity: "Widget opacity \xB7 {{percent}}%",
+    overlayLayer: "Overlay",
+    section: "Appearance",
+    solid: "Solid",
+    widgetLayer: "Widget"
+  },
+  calendar: {
+    allDay: "All day",
+    configure: "Add one or more iCal (.ics) feeds in settings.",
+    none: "No upcoming events",
+    title: "Calendar"
+  },
+  common: {
+    add: "Add",
+    cancel: "Cancel",
+    clear: "Clear",
+    close: "Close",
+    loading: "Loading\u2026",
+    remove: "Remove",
+    save: "Save",
+    settings: "Settings"
+  },
+  device: {
+    autostart: "Start on boot",
+    autostartHelp: "Launch the frame automatically after the device boots. No device owner required. To also make it the home screen, set it as the default launcher in Android settings.",
+    checkEvery: "Check every {{hours}} hours",
+    deviceOwner: "Device owner",
+    hideStatus: "Hide status bar",
+    hideStatusHelp: "Immersive full screen; swipe from the edge to reveal briefly.",
+    operationFailed: "Device operation failed",
+    pinning: "Full-screen pinning",
+    pinningHelp: "Lock Task Mode. With device owner this is a true, non-exitable kiosk.",
+    pinOnBoot: "Start pinned on boot",
+    pinOnBootHelp: "Re-enter pinning automatically when the app launches.",
+    privilege: "Privilege \xB7 {{authority}}",
+    privilegeHelp: "Full kiosk (non-exitable pinning, Wi-Fi control) needs device-owner privilege via OwnDroid/Dhizuku. Without it, pinning falls back to normal screen pinning.",
+    repository: "GitHub repository",
+    requestDhizuku: "Request Dhizuku access",
+    silent: "Request silent installation",
+    silentHelp: "Android only permits this for eligible device-owner installers.",
+    unavailable: "Device controls (kiosk pinning, status bar, volume) are only available in the native Android app.",
+    updates: "Automatic updates",
+    updatesHelp: "Check GitHub Releases periodically and install newer signed APKs.",
+    volume: "Media volume \xB7 {{percent}}%",
+    volumeLabel: "Media volume"
+  },
+  errors: {
+    retry: "Retry",
+    unknownWidget: "Unknown widget: {{id}}",
+    widgetFailed: "{{name}} failed"
+  },
+  fields: {
+    failedOptions: "Failed to load options",
+    loadOptions: "Load options",
+    noOptions: "No options loaded.",
+    reloadOptions: "Reload options",
+    removeItem: "Remove item",
+    secretSet: "set",
+    secretStored: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (stored)"
+  },
+  global: {
+    ambient: "Room brightness (light sensor)",
+    brightness: "Brightness \xB7 {{percent}}%",
+    brightnessLabel: "Display brightness",
+    density: "Grid density \xB7 {{columns}} columns",
+    densityHelp: "More columns = denser grid with smaller cells; widgets keep their cell span.",
+    densityLabel: "Grid density (columns)",
+    detect: "Auto-detect location (GPS / IP)",
+    detected: "Detected: {{location}}",
+    detecting: "Detecting\u2026",
+    detectionFailed: "Detection failed",
+    device: "Device",
+    dimBrightness: "Dimmed brightness \xB7 {{percent}}%",
+    dimBrightnessLabel: "Dimmed brightness",
+    dimFrom: "Dim from",
+    dimHelp: "0% turns the screen off during the dim window.",
+    dimMode: "Dim / off schedule",
+    dimUntil: "Dim until",
+    display: "Display",
+    english: "English",
+    german: "German",
+    grid: "Grid",
+    language: "Language",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    off: "Off",
+    plugins: "Plugins",
+    schedule: "Schedule (time of day)",
+    sunset: "Sunset to sunrise",
+    title: "Settings"
+  },
+  immich: {
+    configure: "Open settings to add your Immich server URL and API key.",
+    loading: "Loading photos\u2026",
+    next: "Next",
+    pause: "Pause",
+    play: "Play",
+    previous: "Previous",
+    title: "Immich Photo Frame"
+  },
+  loading: "Loading Dash Widgeter\u2026",
+  palette: {
+    empty: "No widgets registered.",
+    title: "Add widget"
+  },
+  plugins: {
+    acceptInstall: "Accept & install",
+    acceptUpdate: "Accept & update",
+    adding: "Adding\u2026",
+    addRepository: "Add repository",
+    anyNetwork: "Contact any server on the internet",
+    browse: "Browse",
+    browseName: "Browse {{name}}",
+    contact: "Contact: {{hosts}}",
+    decline: "Decline",
+    disabled: "Disabled",
+    enabled: "Enabled",
+    enabledLabel: "{{name}} enabled",
+    failedAdd: "Failed to add repository",
+    failedLoad: "Failed to load repository",
+    install: "Install",
+    installed: "Installed",
+    installedState: "Installed",
+    installFailed: "Install failed",
+    installing: "Installing\u2026",
+    localNetwork: "Reach devices on your local network",
+    new: "NEW",
+    none: "No plugins registered.",
+    noNetwork: "No network access",
+    permissions: "Plugin permissions",
+    provideServices: "Provide services: {{services}}",
+    refresh: "Refresh",
+    refreshName: "Refresh {{name}}",
+    removeName: "Remove {{name}}",
+    removeRepository: "Remove repository",
+    repoEmpty: "This repository lists no plugins.",
+    repositories: "Repositories",
+    repositoryUrl: "Repository URL",
+    reviewInstall: "This plugin will be able to:",
+    reviewUpdate: "Review permissions for update:",
+    uninstall: "Uninstall {{name}}",
+    updateTo: "Update to v{{version}}",
+    updating: "Updating\u2026",
+    useServices: "Use services: {{services}}",
+    widgets_one: "{{count}} widget",
+    widgets_other: "{{count}} widgets"
+  },
+  status: {
+    cached: "Showing cached data",
+    system: "System notice",
+    unavailable: "Widget unavailable"
+  },
+  toolbar: {
+    add: "Add widget",
+    done: "Done editing",
+    edit: "Edit layout",
+    editAgain: "Click again to edit layout"
+  },
+  wake: "Display awake (8s) \xB7 Open Settings to adjust brightness",
+  weather: {
+    inHours: "in {{count}} h",
+    inMinutes: "in {{count}} min",
+    loading: "Loading weather\u2026",
+    loadingForecast: "Loading forecast\u2026",
+    nextPrecipitation: "Next precipitation",
+    now: "now",
+    today: "Today"
+  },
+  webviewOld: "This device's system WebView (Chrome {{major}}) is too old and may render incorrectly. Update Android System WebView to version {{minimum}} or newer.",
+  widget: {
+    remove: "Remove {{name}}",
+    settings: "{{name}} settings"
+  }
+};
+
+// src/locales/de.json
+var de_default = {
+  appearance: {
+    background: "Hintergrund",
+    backgroundLayer: "Hintergrund",
+    backgroundOpacity: "Hintergrund-Deckkraft \xB7 {{percent}}%",
+    backward: "Nach hinten",
+    blur: "Hintergrund-Unsch\xE4rfe \xB7 {{pixels}}px",
+    forward: "Nach vorne",
+    general: "Allgemein",
+    glass: "Glas (Unsch\xE4rfe)",
+    layer: "Ebene (H\xF6he) \xB7 {{level}}",
+    none: "Keiner",
+    opacity: "Widget-Deckkraft \xB7 {{percent}}%",
+    overlayLayer: "\xDCberlagerung",
+    section: "Darstellung",
+    solid: "Einfarbig",
+    widgetLayer: "Widget"
+  },
+  calendar: {
+    allDay: "Ganzt\xE4gig",
+    configure: "F\xFCgen Sie in den Einstellungen mindestens einen iCal-Kalender (.ics) hinzu.",
+    none: "Keine anstehenden Termine",
+    title: "Kalender"
+  },
+  common: {
+    add: "Hinzuf\xFCgen",
+    cancel: "Abbrechen",
+    clear: "L\xF6schen",
+    close: "Schlie\xDFen",
+    loading: "Wird geladen\u2026",
+    remove: "Entfernen",
+    save: "Speichern",
+    settings: "Einstellungen"
+  },
+  device: {
+    autostart: "Beim Systemstart starten",
+    autostartHelp: "Startet den Rahmen automatisch nach dem Ger\xE4testart. Ger\xE4teeigent\xFCmerrechte sind nicht erforderlich. Um ihn zus\xE4tzlich als Startbildschirm zu verwenden, in Android als Standard-Launcher festlegen.",
+    checkEvery: "Alle {{hours}} Stunden pr\xFCfen",
+    deviceOwner: "Ger\xE4teeigent\xFCmer",
+    hideStatus: "Statusleiste ausblenden",
+    hideStatusHelp: "Immersiver Vollbildmodus; zum kurzzeitigen Einblenden vom Rand wischen.",
+    operationFailed: "Ger\xE4teaktion fehlgeschlagen",
+    pinning: "Vollbildfixierung",
+    pinningHelp: "Lock-Task-Modus. Mit Ger\xE4teeigent\xFCmerrechten ist dies ein nicht beendbarer Kioskmodus.",
+    pinOnBoot: "Nach dem Start fixieren",
+    pinOnBootHelp: "Beim App-Start automatisch wieder fixieren.",
+    privilege: "Berechtigung \xB7 {{authority}}",
+    privilegeHelp: "Der vollst\xE4ndige Kioskmodus (nicht beendbares Anheften, WLAN-Steuerung) ben\xF6tigt Ger\xE4teeigent\xFCmerrechte \xFCber OwnDroid/Dhizuku. Ohne diese Rechte wird die normale Bildschirmfixierung verwendet.",
+    repository: "GitHub-Repository",
+    requestDhizuku: "Dhizuku-Zugriff anfordern",
+    silent: "Stille Installation anfordern",
+    silentHelp: "Android erlaubt dies nur f\xFCr berechtigte Ger\xE4teeigent\xFCmer-Installationsprogramme.",
+    unavailable: "Ger\xE4testeuerung (Kioskmodus, Statusleiste, Lautst\xE4rke) ist nur in der nativen Android-App verf\xFCgbar.",
+    updates: "Automatische Aktualisierungen",
+    updatesHelp: "GitHub Releases regelm\xE4\xDFig pr\xFCfen und neuere signierte APKs installieren.",
+    volume: "Medienlautst\xE4rke \xB7 {{percent}}%",
+    volumeLabel: "Medienlautst\xE4rke"
+  },
+  errors: {
+    retry: "Erneut versuchen",
+    unknownWidget: "Unbekanntes Widget: {{id}}",
+    widgetFailed: "{{name}} ist fehlgeschlagen"
+  },
+  fields: {
+    failedOptions: "Optionen konnten nicht geladen werden",
+    loadOptions: "Optionen laden",
+    noOptions: "Keine Optionen geladen.",
+    reloadOptions: "Optionen neu laden",
+    removeItem: "Eintrag entfernen",
+    secretSet: "gesetzt",
+    secretStored: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (gespeichert)"
+  },
+  global: {
+    ambient: "Raumhelligkeit (Lichtsensor)",
+    brightness: "Helligkeit \xB7 {{percent}}%",
+    brightnessLabel: "Anzeigehelligkeit",
+    density: "Rasterdichte \xB7 {{columns}} Spalten",
+    densityHelp: "Mehr Spalten ergeben ein dichteres Raster mit kleineren Zellen; Widgets behalten ihre Zellengr\xF6\xDFe.",
+    densityLabel: "Rasterdichte (Spalten)",
+    detect: "Standort automatisch ermitteln (GPS / IP)",
+    detected: "Ermittelt: {{location}}",
+    detecting: "Wird ermittelt\u2026",
+    detectionFailed: "Ermittlung fehlgeschlagen",
+    device: "Ger\xE4t",
+    dimBrightness: "Gedimmte Helligkeit \xB7 {{percent}}%",
+    dimBrightnessLabel: "Gedimmte Helligkeit",
+    dimFrom: "Dimmen ab",
+    dimHelp: "0% schaltet den Bildschirm w\xE4hrend des Dimmzeitraums aus.",
+    dimMode: "Dimmung / Ausschalten",
+    dimUntil: "Dimmen bis",
+    display: "Anzeige",
+    english: "Englisch",
+    german: "Deutsch",
+    grid: "Raster",
+    language: "Sprache",
+    latitude: "Breitengrad",
+    longitude: "L\xE4ngengrad",
+    off: "Aus",
+    plugins: "Plugins",
+    schedule: "Zeitplan",
+    sunset: "Sonnenuntergang bis Sonnenaufgang",
+    title: "Einstellungen"
+  },
+  immich: {
+    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
+    loading: "Fotos werden geladen\u2026",
+    next: "Weiter",
+    pause: "Pause",
+    play: "Wiedergabe",
+    previous: "Zur\xFCck",
+    title: "Immich-Bilderrahmen"
+  },
+  loading: "Dash Widgeter wird geladen\u2026",
+  manifest: {
+    fields: {
+      calendar: {
+        color: {
+          label: "Farbe"
+        },
+        daysAhead: {
+          label: "Tage im Voraus"
+        },
+        icalUrl: {
+          label: "iCal-URL"
+        },
+        refreshIntervalMinutes: {
+          label: "Aktualisierungsintervall",
+          options: {
+            "5": "5 Minuten",
+            "15": "15 Minuten",
+            "30": "30 Minuten",
+            "60": "60 Minuten"
+          }
+        },
+        showTitle: {
+          help: "Eine \xDCberschrift \xFCber der Termin\xFCbersicht. Bei zusammengef\xFChrten Kalendern meist nicht n\xF6tig.",
+          label: "Titel anzeigen"
+        },
+        sources: {
+          addLabel: "Kalender hinzuf\xFCgen",
+          help: "Alle Kalender werden in einer \xDCbersicht zusammengef\xFChrt. Basis-Authentifizierung in der URL und webcal:// werden unterst\xFCtzt.",
+          label: "Kalender"
+        },
+        title: {
+          label: "Titeltext"
+        }
+      },
+      clock: {
+        dateStyle: {
+          help: "Nur Wochentag zeigt z. B. \u201EMontag\u201C; vollst\xE4ndig erg\xE4nzt Monat und Tag.",
+          label: "Datumsformat",
+          options: {
+            full: "Vollst\xE4ndig (Wochentag, Monat, Tag)",
+            weekday: "Nur Wochentag"
+          }
+        },
+        fontWeight: {
+          label: "Schriftst\xE4rke",
+          options: {
+            "200": "Sehr d\xFCnn",
+            "300": "D\xFCnn",
+            "400": "Normal",
+            "500": "Mittel",
+            "600": "Halbfett",
+            "700": "Fett",
+            "900": "Schwarz"
+          }
+        },
+        showDate: {
+          label: "Datum anzeigen"
+        },
+        showSeconds: {
+          label: "Sekunden anzeigen"
+        },
+        use24Hour: {
+          label: "24-Stunden-Format"
+        }
+      },
+      immich: {
+        albums: {
+          help: "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212). Wird mit Personen und Schlagw\xF6rtern kombiniert.",
+          label: "Alben"
+        },
+        apiKey: {
+          help: "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
+          label: "API-Schl\xFCssel"
+        },
+        cacheEnabled: {
+          label: "Fotos lokal zwischenspeichern"
+        },
+        cacheExpirationDays: {
+          help: "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
+          label: "Bildablauf (Tage)"
+        },
+        cacheMaxMB: {
+          help: "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
+          label: "Speicherlimit (MB)"
+        },
+        imageFit: {
+          label: "Bildanpassung",
+          options: {
+            contain: "Einpassen",
+            cover: "Ausf\xFCllen"
+          }
+        },
+        intervalSeconds: {
+          label: "Sekunden pro Foto"
+        },
+        layout: {
+          label: "Layout",
+          options: {
+            single: "Einzeln",
+            split: "Geteilt (zwei Fotos)"
+          }
+        },
+        listTtlMinutes: {
+          label: "Offline-Listen-G\xFCltigkeit (Minuten)"
+        },
+        metadataPosition: {
+          help: "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
+          label: "Info-Einblendung",
+          options: {
+            "bottom-left": "Unten links",
+            "bottom-right": "Unten rechts",
+            none: "Ausgeblendet",
+            "top-left": "Oben links",
+            "top-right": "Oben rechts"
+          }
+        },
+        metadataShowAlbum: {
+          label: "Album anzeigen"
+        },
+        metadataShowDate: {
+          label: "Datum anzeigen"
+        },
+        metadataShowDescription: {
+          label: "Beschreibung anzeigen"
+        },
+        metadataShowLocation: {
+          label: "Ort anzeigen"
+        },
+        metadataShowPeople: {
+          label: "Personen anzeigen"
+        },
+        metadataShowTags: {
+          label: "Schlagw\xF6rter anzeigen"
+        },
+        onlyWithPersons: {
+          help: "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
+          label: "Nur Fotos mit Personen"
+        },
+        people: {
+          help: "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
+          label: "Personen"
+        },
+        poolMode: {
+          label: "Fotoquelle",
+          options: {
+            favorites: "Favoriten",
+            memories: "Erinnerungen (an diesem Tag)",
+            random: "Alle Fotos"
+          }
+        },
+        preloadCount: {
+          help: "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
+          label: "Kommende Fotos vorladen"
+        },
+        progressBar: {
+          label: "Fortschrittsbalken",
+          options: {
+            bottom: "Unten",
+            none: "Ausgeblendet",
+            top: "Oben"
+          }
+        },
+        rating: {
+          label: "Mindestbewertung (0 = beliebig)"
+        },
+        serverUrl: {
+          help: "Basis-URL Ihrer Immich-Instanz (ohne /api).",
+          label: "Immich-Server-URL"
+        },
+        showControls: {
+          label: "Wiedergabe-/Weiter-Steuerung anzeigen"
+        },
+        showVideos: {
+          label: "Videos einschlie\xDFen"
+        },
+        tags: {
+          help: "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
+          label: "Schlagw\xF6rter"
+        },
+        transition: {
+          label: "\xDCbergang",
+          options: {
+            fade: "\xDCberblenden",
+            kenburns: "Ken Burns",
+            none: "Keiner",
+            pan: "Schwenken",
+            zoom: "Zoom"
+          }
+        },
+        transitionSeconds: {
+          label: "\xDCbergangsdauer"
+        }
+      },
+      weather: {
+        forecastDays: {
+          help: "Anzahl der anzuzeigenden Tage (1\u201316).",
+          label: "Vorhersagetage"
+        },
+        latitude: {
+          label: "Breitengrad"
+        },
+        locationName: {
+          label: "Ortsname"
+        },
+        longitude: {
+          label: "L\xE4ngengrad"
+        },
+        refreshIntervalMinutes: {
+          label: "Aktualisierungsintervall",
+          options: {
+            "5": "5 Minuten",
+            "15": "15 Minuten",
+            "30": "30 Minuten",
+            "60": "60 Minuten"
+          }
+        },
+        showNextEvent: {
+          help: "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
+          label: "N\xE4chsten Niederschlag anzeigen"
+        },
+        showTitle: {
+          help: "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
+          label: "Ortsnamen anzeigen"
+        },
+        unit: {
+          label: "Temperatureinheit",
+          options: {
+            celsius: "Celsius",
+            fahrenheit: "Fahrenheit"
+          }
+        }
+      }
+    },
+    plugins: {
+      calendar: {
+        name: "Kalender"
+      },
+      clock: {
+        name: "Uhr"
+      },
+      immich: {
+        name: "Immich-Bilderrahmen"
+      },
+      weather: {
+        name: "Wetter"
+      }
+    },
+    sections: {
+      Caching: "Zwischenspeicher",
+      Connection: "Verbindung",
+      Date: "Datum",
+      Display: "Anzeige",
+      Feeds: "Kalender",
+      Info_overlay: "Info-Einblendung",
+      Location: "Standort",
+      Slideshow: "Diashow",
+      Source: "Quelle",
+      Style: "Stil",
+      Time: "Uhrzeit"
+    },
+    widgets: {
+      calendar_agenda: {
+        description: "Anstehende Termine aus iCal-Kalendern",
+        name: "Kalender\xFCbersicht"
+      },
+      clock_time: {
+        description: "Aktuelle Uhrzeit und Datum",
+        name: "Uhr"
+      },
+      immich_photoframe: {
+        description: "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
+        name: "Bilderrahmen"
+      },
+      weather_current: {
+        description: "Aktuelle Wetterbedingungen",
+        name: "Aktuelles Wetter"
+      },
+      weather_forecast: {
+        description: "Mehrt\xE4gige Wettervorhersage",
+        name: "Wettervorhersage"
+      }
+    }
+  },
+  palette: {
+    empty: "Keine Widgets registriert.",
+    title: "Widget hinzuf\xFCgen"
+  },
+  plugins: {
+    acceptInstall: "Akzeptieren und installieren",
+    acceptUpdate: "Akzeptieren und aktualisieren",
+    adding: "Wird hinzugef\xFCgt\u2026",
+    addRepository: "Paketquelle hinzuf\xFCgen",
+    anyNetwork: "Beliebige Server im Internet kontaktieren",
+    browse: "Durchsuchen",
+    browseName: "{{name}} durchsuchen",
+    contact: "Kontaktieren: {{hosts}}",
+    decline: "Ablehnen",
+    disabled: "Deaktiviert",
+    enabled: "Aktiviert",
+    enabledLabel: "{{name}} aktiviert",
+    failedAdd: "Paketquelle konnte nicht hinzugef\xFCgt werden",
+    failedLoad: "Paketquelle konnte nicht geladen werden",
+    install: "Installieren",
+    installed: "Installiert",
+    installedState: "Installiert",
+    installFailed: "Installation fehlgeschlagen",
+    installing: "Wird installiert\u2026",
+    localNetwork: "Ger\xE4te im lokalen Netzwerk erreichen",
+    new: "NEU",
+    none: "Keine Plugins registriert.",
+    noNetwork: "Kein Netzwerkzugriff",
+    permissions: "Plugin-Berechtigungen",
+    provideServices: "Dienste bereitstellen: {{services}}",
+    refresh: "Aktualisieren",
+    refreshName: "{{name}} aktualisieren",
+    removeName: "{{name}} entfernen",
+    removeRepository: "Paketquelle entfernen",
+    repoEmpty: "Diese Paketquelle enth\xE4lt keine Plugins.",
+    repositories: "Paketquellen",
+    repositoryUrl: "URL der Paketquelle",
+    reviewInstall: "Dieses Plugin darf:",
+    reviewUpdate: "Berechtigungen f\xFCr die Aktualisierung pr\xFCfen:",
+    uninstall: "{{name}} deinstallieren",
+    updateTo: "Auf v{{version}} aktualisieren",
+    updating: "Wird aktualisiert\u2026",
+    useServices: "Dienste verwenden: {{services}}",
+    widgets_one: "{{count}} Widget",
+    widgets_other: "{{count}} Widgets"
+  },
+  status: {
+    cached: "Zwischengespeicherte Daten werden angezeigt",
+    system: "Systemhinweis",
+    unavailable: "Widget nicht verf\xFCgbar"
+  },
+  toolbar: {
+    add: "Widget hinzuf\xFCgen",
+    done: "Bearbeitung beenden",
+    edit: "Layout bearbeiten",
+    editAgain: "Erneut klicken, um das Layout zu bearbeiten"
+  },
+  wake: "Anzeige f\xFCr 8 Sekunden aufgehellt \xB7 Einstellungen \xF6ffnen, um die Helligkeit anzupassen",
+  weather: {
+    codes: {
+      "0": "Klar",
+      "1": "\xDCberwiegend klar",
+      "2": "Teilweise bew\xF6lkt",
+      "3": "Bedeckt",
+      "45": "Nebel",
+      "48": "Reifnebel",
+      "51": "Leichter Nieselregen",
+      "53": "Nieselregen",
+      "55": "Starker Nieselregen",
+      "61": "Leichter Regen",
+      "63": "Regen",
+      "65": "Starker Regen",
+      "66": "Gefrierender Regen",
+      "67": "Gefrierender Regen",
+      "71": "Leichter Schneefall",
+      "73": "Schnee",
+      "75": "Starker Schneefall",
+      "77": "Schneegriesel",
+      "80": "Regenschauer",
+      "81": "Regenschauer",
+      "82": "Heftige Schauer",
+      "85": "Schneeschauer",
+      "86": "Schneeschauer",
+      "95": "Gewitter",
+      "96": "Gewitter",
+      "99": "Gewitter"
+    },
+    inHours: "in {{count}} Std.",
+    inMinutes: "in {{count}} Min.",
+    loading: "Wetter wird geladen\u2026",
+    loadingForecast: "Vorhersage wird geladen\u2026",
+    nextPrecipitation: "N\xE4chster Niederschlag",
+    now: "jetzt",
+    today: "Heute"
+  },
+  webviewOld: "Die System-WebView dieses Ger\xE4ts (Chrome {{major}}) ist zu alt und kann Darstellungsfehler verursachen. Aktualisieren Sie Android System WebView auf Version {{minimum}} oder neuer.",
+  widget: {
+    remove: "{{name}} entfernen",
+    settings: "Einstellungen f\xFCr {{name}}"
+  }
+};
+
+// src/plugins/translate.ts
+function pluginText(locale, key, params = {}, fallback = key) {
+  const catalog = locale.startsWith("de") ? de_default : en_default;
+  const value = key.split(".").reduce(
+    (entry, part) => typeof entry === "object" && entry !== null ? entry[part] : void 0,
+    catalog
+  );
+  if (typeof value !== "string") return fallback;
+  return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
+}
+
 // src/plugins/weather/WeatherWidget.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-function formatLeadTime(minutes) {
-  if (minutes < 1) return "now";
-  if (minutes < 60) return `in ${minutes} min`;
+function formatLeadTime(locale, minutes) {
+  if (minutes < 1) return pluginText(locale, "weather.now");
+  if (minutes < 60) return pluginText(locale, "weather.inMinutes", { count: minutes });
   const hours = Math.round(minutes / 60);
-  return `in ${hours} h`;
+  return pluginText(locale, "weather.inHours", { count: hours });
 }
 function WeatherWidget({ context }) {
   const config = (0, import_react2.useMemo)(() => readWeatherConfig(context.config), [context.config]);
@@ -24474,7 +25179,7 @@ function WeatherWidget({ context }) {
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
   }
   if (!data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-loading", children: "Loading weather\u2026" });
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-loading", children: pluginText(context.locale, "weather.loading") });
   }
   const current = describeWeather(data.weatherCode);
   const nextEvent = config.showNextEvent ? nextPrecipEvent(data, Date.now()) : null;
@@ -24487,16 +25192,16 @@ function WeatherWidget({ context }) {
           Math.round(data.temperature),
           data.unitLabel
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-desc", children: current.label }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-desc", children: pluginText(context.locale, `weather.codes.${data.weatherCode}`, {}, current.label) }),
         config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-loc", children: config.locationName })
       ] })
     ] }),
-    nextEvent && nextDescription && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-next", title: "Next precipitation", children: [
+    nextEvent && nextDescription && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-next", title: pluginText(context.locale, "weather.nextPrecipitation"), children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: nextDescription.icon, size: 18 }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-next-text", children: [
-        nextDescription.label,
+        pluginText(context.locale, `weather.codes.${nextEvent.weatherCode}`, {}, nextDescription.label),
         " ",
-        formatLeadTime(nextEvent.minutesUntil)
+        formatLeadTime(context.locale, nextEvent.minutesUntil)
       ] })
     ] })
   ] });
@@ -24523,14 +25228,14 @@ function ForecastWidget({ context }) {
     return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
   }
   if (!data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-loading", children: "Loading forecast\u2026" });
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-loading", children: pluginText(context.locale, "weather.loadingForecast") });
   }
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
     config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast-header", children: config.locationName }),
     /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast weather-forecast-full", children: data.daily.slice(0, config.forecastDays).map((day, i) => {
       const d = describeWeather(day.weatherCode);
       return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "weather-day", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "weather-dow", children: i === 0 ? "Today" : new Date(day.dateMs).toLocaleDateString(void 0, { weekday: "short" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "weather-dow", children: i === 0 ? pluginText(context.locale, "weather.today") : new Date(day.dateMs).toLocaleDateString(context.locale, { weekday: "short" }) }),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(WeatherIcon, { icon: d.icon, size: 32 }),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "weather-range", children: [
           Math.round(day.tempMax),

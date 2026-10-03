@@ -6,6 +6,7 @@ import { AssetView } from './AssetView';
 import { OverlayControls } from './OverlayControls';
 import { ProgressBar } from './ProgressBar';
 import { MetadataOverlay } from './MetadataOverlay';
+import { pluginText } from '@/plugins/translate';
 
 /** Full ImmichFrame-equivalent slideshow widget with strong local caching. */
 export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Element {
@@ -57,8 +58,8 @@ export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Eleme
     return (
       <div className="immich-frame immich-empty">
         <div>
-          <strong>Immich Photo Frame</strong>
-          <p>Open settings to add your Immich server URL and API key.</p>
+          <strong>{pluginText(context.locale, 'immich.title')}</strong>
+          <p>{pluginText(context.locale, 'immich.configure')}</p>
         </div>
       </div>
     );
@@ -80,6 +81,7 @@ export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Eleme
               asset={slide.asset}
               position={config.metadataPosition}
               options={metadataOptions}
+              locale={context.locale}
             />
           </div>
         ))}
@@ -99,11 +101,12 @@ export function PhotoFrameWidget({ context }: ReactWidgetProps): React.JSX.Eleme
           onBack={handleBack}
           onTogglePlay={show.togglePlay}
           active={context.isEditing === false}
+          locale={context.locale}
         />
       )}
 
       {show.isLoading && show.slides.length === 0 && (
-        <div className="immich-status">Loading photos…</div>
+        <div className="immich-status">{pluginText(context.locale, 'immich.loading')}</div>
       )}
       {show.error && show.slides.length === 0 && (
         <div className="immich-status immich-error" role="alert">

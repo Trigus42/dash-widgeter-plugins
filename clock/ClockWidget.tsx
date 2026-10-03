@@ -19,7 +19,7 @@ export function ClockWidget({ context }: ReactWidgetProps): React.JSX.Element {
     return () => clearInterval(timer);
   }, [config.showSeconds]);
 
-  const { time, date } = formatClock(now, config);
+  const { time, date } = formatClock(now, config, context.locale);
   const showDate = config.showDate && Boolean(date);
 
   const widgetRef = useRef<HTMLDivElement | null>(null);

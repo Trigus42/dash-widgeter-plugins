@@ -12,7 +12,7 @@ import { CLOCK_DEFAULT_CONFIG } from './types';
 export const clockManifest: PluginManifest = {
   id: 'clock',
   name: 'Clock',
-  version: '1.0.0',
+  version: '1.0.1',
   description: 'Date and time display',
   executionType: 'sandboxed',
   capabilities: [],
