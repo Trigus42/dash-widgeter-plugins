@@ -5,8 +5,33 @@
       "manifest": {
         "id": "clock",
         "name": "Clock",
-        "version": "1.0.1",
+        "version": "1.1.0",
         "description": "Date and time display",
+        "translations": {
+          "de": {
+            "Clock": "Uhr",
+            "Date and time display": "Datums- und Zeitanzeige",
+            "Current time and date": "Aktuelle Uhrzeit und Datum",
+            "Time": "Uhrzeit",
+            "Date": "Datum",
+            "Style": "Stil",
+            "24-hour time": "24-Stunden-Format",
+            "Show seconds": "Sekunden anzeigen",
+            "Show date": "Datum anzeigen",
+            "Date format": "Datumsformat",
+            "Weekday only shows e.g. \"Monday\"; full adds the month and day.": "Nur Wochentag zeigt z. B. „Montag“; vollständig ergänzt Monat und Tag.",
+            "Full (weekday, month, day)": "Vollständig (Wochentag, Monat, Tag)",
+            "Weekday only": "Nur Wochentag",
+            "Text weight": "Schriftstärke",
+            "Thin": "Sehr dünn",
+            "Light": "Dünn",
+            "Regular": "Normal",
+            "Medium": "Mittel",
+            "Semibold": "Halbfett",
+            "Bold": "Fett",
+            "Black": "Schwarz"
+          }
+        },
         "executionType": "sandboxed",
         "capabilities": [],
         "network": [],
@@ -114,8 +139,35 @@
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.1.1",
+        "version": "1.2.0",
         "description": "Current conditions and forecast via Open-Meteo",
+        "translations": {
+          "de": {
+            "Weather": "Wetter",
+            "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage über Open-Meteo",
+            "Weather Now": "Aktuelles Wetter",
+            "Current conditions badge": "Aktuelle Wetterbedingungen",
+            "Weather Forecast": "Wettervorhersage",
+            "Multi-day forecast card": "Mehrtägige Wettervorhersage",
+            "Location": "Standort",
+            "Display": "Anzeige",
+            "Location name": "Ortsname",
+            "Latitude": "Breitengrad",
+            "Longitude": "Längengrad",
+            "Temperature unit": "Temperatureinheit",
+            "Refresh interval": "Aktualisierungsintervall",
+            "5 minutes": "5 Minuten",
+            "15 minutes": "15 Minuten",
+            "30 minutes": "30 Minuten",
+            "60 minutes": "60 Minuten",
+            "Show next precipitation": "Nächsten Niederschlag anzeigen",
+            "A small note like \"Rain in 25 min\" from the 15-minute nowcast.": "Zeigt einen kurzen Hinweis wie „Regen in 25 Min.“ aus der 15-Minuten-Vorhersage.",
+            "Show location name": "Ortsnamen anzeigen",
+            "Turn off to save space — the widget content already makes it obvious.": "Deaktivieren, um Platz zu sparen – der Widget-Inhalt ist bereits eindeutig.",
+            "Forecast days": "Vorhersagetage",
+            "Number of days to show (1–16).": "Anzahl der anzuzeigenden Tage (1–16)."
+          }
+        },
         "executionType": "sandboxed",
         "capabilities": [],
         "network": [
@@ -315,14 +367,36 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather.js",
-      "sha256": "b8e3f426ee33c1449cd3c9229bfe859138587b4eca54dea8f03881bdf9f76d01"
+      "sha256": "b74772c62c7726a9156e4a5f2567c2c0f5a8a02799fd0530c67328255b98fbcc"
     },
     {
       "manifest": {
         "id": "calendar",
         "name": "Calendar",
-        "version": "1.1.1",
+        "version": "1.2.0",
         "description": "Upcoming events from an iCal feed",
+        "translations": {
+          "de": {
+            "Calendar": "Kalender",
+            "Upcoming events from an iCal feed": "Anstehende Termine aus einem iCal-Kalender",
+            "Calendar Agenda": "Kalenderübersicht",
+            "Upcoming events from any iCal (.ics) feed": "Anstehende Termine aus iCal-Kalendern",
+            "Feeds": "Kalender",
+            "Calendars": "Kalender",
+            "Add calendar": "Kalender hinzufügen",
+            "Each feed is merged into one agenda. Basic auth in the URL and webcal:// are supported.": "Alle Kalender werden in einer Übersicht zusammengeführt. Basis-Authentifizierung in der URL und webcal:// werden unterstützt.",
+            "Color": "Farbe",
+            "Days ahead": "Tage im Voraus",
+            "Refresh interval": "Aktualisierungsintervall",
+            "5 minutes": "5 Minuten",
+            "15 minutes": "15 Minuten",
+            "30 minutes": "30 Minuten",
+            "60 minutes": "60 Minuten",
+            "Show title": "Titel anzeigen",
+            "A heading above the agenda. Usually unnecessary once feeds are merged.": "Eine Überschrift über der Terminübersicht. Bei zusammengeführten Kalendern meist nicht nötig.",
+            "Title text": "Titeltext"
+          }
+        },
         "executionType": "sandboxed",
         "capabilities": [],
         "network": [
@@ -422,14 +496,80 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar.js",
-      "sha256": "e6a2491614b2837ee8f7d75f61ad1b56e8070eca5932b5a0e514486238f2df3b"
+      "sha256": "0985dd81a002c5e3498eb2f71b978fe6af302d2a7b653e9ba5729821d1794f85"
     },
     {
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.2.1",
+        "version": "1.3.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
+        "translations": {
+          "de": {
+            "Immich Photo Frame": "Immich-Bilderrahmen",
+            "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen für Immich mit Offline-Zwischenspeicher",
+            "Photo Frame": "Bilderrahmen",
+            "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit Übergängen, Metadaten und Steuerung",
+            "Connection": "Verbindung",
+            "Source": "Quelle",
+            "Slideshow": "Diashow",
+            "Info overlay": "Info-Einblendung",
+            "Caching": "Zwischenspeicher",
+            "Immich Server URL": "Immich-Server-URL",
+            "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
+            "API Key": "API-Schlüssel",
+            "Immich → Account Settings → API Keys.": "Immich → Kontoeinstellungen → API-Schlüssel.",
+            "Photo source": "Fotoquelle",
+            "All photos": "Alle Fotos",
+            "Favorites": "Favoriten",
+            "Memories (on this day)": "Erinnerungen (an diesem Tag)",
+            "Albums": "Alben",
+            "People": "Personen",
+            "Tags": "Schlagwörter",
+            "Tap to include (+), tap again to exclude (−). Combined with people & tags.": "Tippen zum Einschließen (+), erneut tippen zum Ausschließen (−). Wird mit Personen und Schlagwörtern kombiniert.",
+            "Tap to include (+), tap again to exclude (−).": "Tippen zum Einschließen (+), erneut tippen zum Ausschließen (−).",
+            "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
+            "Include videos": "Videos einschließen",
+            "Only photos with people": "Nur Fotos mit Personen",
+            "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
+            "Seconds per photo": "Sekunden pro Foto",
+            "Preload upcoming photos": "Kommende Fotos vorladen",
+            "How many upcoming photos to pre-fetch into cache (0–5).": "Anzahl der kommenden Fotos, die vorgeladen werden (0–5).",
+            "Layout": "Layout",
+            "Single": "Einzeln",
+            "Split (two photos)": "Geteilt (zwei Fotos)",
+            "Transition": "Übergang",
+            "Pan": "Schwenken",
+            "Fade": "Überblenden",
+            "None": "Keiner",
+            "Transition seconds": "Übergangsdauer",
+            "Image fit": "Bildanpassung",
+            "Cover (fill)": "Ausfüllen",
+            "Contain (letterbox)": "Einpassen",
+            "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
+            "Progress bar": "Fortschrittsbalken",
+            "Bottom": "Unten",
+            "Top": "Oben",
+            "Hidden": "Ausgeblendet",
+            "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
+            "Bottom right": "Unten rechts",
+            "Bottom left": "Unten links",
+            "Top right": "Oben rechts",
+            "Top left": "Oben links",
+            "Show location": "Ort anzeigen",
+            "Show date": "Datum anzeigen",
+            "Show people": "Personen anzeigen",
+            "Show album": "Album anzeigen",
+            "Show tags": "Schlagwörter anzeigen",
+            "Show description": "Beschreibung anzeigen",
+            "Cache photos locally": "Fotos lokal zwischenspeichern",
+            "Cache size limit (MB)": "Speicherlimit (MB)",
+            "Oldest images are evicted first when the limit is reached.": "Die ältesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
+            "Cache image expiration (days)": "Bildablauf (Tage)",
+            "Cached images older than this are removed (0 = never expire).": "Ältere zwischengespeicherte Bilder werden entfernt (0 = nie).",
+            "Offline list validity (minutes)": "Offline-Listen-Gültigkeit (Minuten)"
+          }
+        },
         "executionType": "sandboxed",
         "capabilities": [],
         "network": [
@@ -775,7 +915,7 @@
         ]
       },
       "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich.js",
-      "sha256": "00c97d7b44517a7b30bfa65a2c99ebe17c5bfd1da5349be2bf619c613915247d"
+      "sha256": "08c6aceac7e54d177d5885a25e680af33a6c9dfe533d8705eef902303c7fed6e"
     }
   ]
 }

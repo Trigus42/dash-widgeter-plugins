@@ -1,5 +1,6 @@
 import { WIDGET_Z, type PluginManifest } from '@/types';
 import { CLOCK_DEFAULT_CONFIG } from './types';
+import de from './locales/de.json';
 
 /**
  * Static, host-side manifest for the clock plugin. Contains no code: the host
@@ -12,8 +13,9 @@ import { CLOCK_DEFAULT_CONFIG } from './types';
 export const clockManifest: PluginManifest = {
   id: 'clock',
   name: 'Clock',
-  version: '1.0.1',
+  version: '1.1.0',
   description: 'Date and time display',
+  translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
   network: [],

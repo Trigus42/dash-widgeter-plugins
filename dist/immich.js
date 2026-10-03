@@ -24986,299 +24986,103 @@ function AssetView({
 // src/plugins/immich/OverlayControls.tsx
 var import_react5 = __toESM(require_react(), 1);
 
-// src/locales/en.json
-var en_default = {
-  appearance: {
-    background: "Background",
-    backgroundLayer: "Background",
-    backgroundOpacity: "Background opacity \xB7 {{percent}}%",
-    backward: "Send backward",
-    blur: "Background blur \xB7 {{pixels}}px",
-    forward: "Bring forward",
-    general: "General",
-    glass: "Glass (blur)",
-    layer: "Layer (height) \xB7 {{level}}",
-    none: "None",
-    opacity: "Widget opacity \xB7 {{percent}}%",
-    overlayLayer: "Overlay",
-    section: "Appearance",
-    solid: "Solid",
-    widgetLayer: "Widget"
-  },
-  calendar: {
-    allDay: "All day",
-    configure: "Add one or more iCal (.ics) feeds in settings.",
-    none: "No upcoming events",
-    title: "Calendar"
-  },
-  common: {
-    add: "Add",
-    cancel: "Cancel",
-    clear: "Clear",
-    close: "Close",
-    loading: "Loading\u2026",
-    remove: "Remove",
-    save: "Save",
-    settings: "Settings"
-  },
-  device: {
-    autostart: "Start on boot",
-    autostartHelp: "Launch the frame automatically after the device boots. No device owner required. To also make it the home screen, set it as the default launcher in Android settings.",
-    checkEvery: "Check every {{hours}} hours",
-    deviceOwner: "Device owner",
-    hideStatus: "Hide status bar",
-    hideStatusHelp: "Immersive full screen; swipe from the edge to reveal briefly.",
-    operationFailed: "Device operation failed",
-    pinning: "Full-screen pinning",
-    pinningHelp: "Lock Task Mode. With device owner this is a true, non-exitable kiosk.",
-    pinOnBoot: "Start pinned on boot",
-    pinOnBootHelp: "Re-enter pinning automatically when the app launches.",
-    privilege: "Privilege \xB7 {{authority}}",
-    privilegeHelp: "Full kiosk (non-exitable pinning, Wi-Fi control) needs device-owner privilege via OwnDroid/Dhizuku. Without it, pinning falls back to normal screen pinning.",
-    repository: "GitHub repository",
-    requestDhizuku: "Request Dhizuku access",
-    silent: "Request silent installation",
-    silentHelp: "Android only permits this for eligible device-owner installers.",
-    unavailable: "Device controls (kiosk pinning, status bar, volume) are only available in the native Android app.",
-    updates: "Automatic updates",
-    updatesHelp: "Check GitHub Releases periodically and install newer signed APKs.",
-    volume: "Media volume \xB7 {{percent}}%",
-    volumeLabel: "Media volume"
-  },
-  errors: {
-    retry: "Retry",
-    unknownWidget: "Unknown widget: {{id}}",
-    widgetFailed: "{{name}} failed"
-  },
-  fields: {
-    failedOptions: "Failed to load options",
-    loadOptions: "Load options",
-    noOptions: "No options loaded.",
-    reloadOptions: "Reload options",
-    removeItem: "Remove item",
-    secretSet: "set",
-    secretStored: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (stored)"
-  },
-  global: {
-    ambient: "Room brightness (light sensor)",
-    brightness: "Brightness \xB7 {{percent}}%",
-    brightnessLabel: "Display brightness",
-    density: "Grid density \xB7 {{columns}} columns",
-    densityHelp: "More columns = denser grid with smaller cells; widgets keep their cell span.",
-    densityLabel: "Grid density (columns)",
-    detect: "Auto-detect location (GPS / IP)",
-    detected: "Detected: {{location}}",
-    detecting: "Detecting\u2026",
-    detectionFailed: "Detection failed",
-    device: "Device",
-    dimBrightness: "Dimmed brightness \xB7 {{percent}}%",
-    dimBrightnessLabel: "Dimmed brightness",
-    dimFrom: "Dim from",
-    dimHelp: "0% turns the screen off during the dim window.",
-    dimMode: "Dim / off schedule",
-    dimUntil: "Dim until",
-    display: "Display",
-    english: "English",
-    german: "German",
-    grid: "Grid",
-    language: "Language",
-    latitude: "Latitude",
-    longitude: "Longitude",
-    off: "Off",
-    plugins: "Plugins",
-    schedule: "Schedule (time of day)",
-    sunset: "Sunset to sunrise",
-    title: "Settings"
-  },
-  immich: {
-    configure: "Open settings to add your Immich server URL and API key.",
-    loading: "Loading photos\u2026",
-    next: "Next",
-    pause: "Pause",
-    play: "Play",
-    previous: "Previous",
-    title: "Immich Photo Frame"
-  },
-  loading: "Loading Dash Widgeter\u2026",
-  palette: {
-    empty: "No widgets registered.",
-    title: "Add widget"
-  },
-  plugins: {
-    acceptInstall: "Accept & install",
-    acceptUpdate: "Accept & update",
-    adding: "Adding\u2026",
-    addRepository: "Add repository",
-    anyNetwork: "Contact any server on the internet",
-    browse: "Browse",
-    browseName: "Browse {{name}}",
-    contact: "Contact: {{hosts}}",
-    decline: "Decline",
-    disabled: "Disabled",
-    enabled: "Enabled",
-    enabledLabel: "{{name}} enabled",
-    failedAdd: "Failed to add repository",
-    failedLoad: "Failed to load repository",
-    install: "Install",
-    installed: "Installed",
-    installedState: "Installed",
-    installFailed: "Install failed",
-    installing: "Installing\u2026",
-    localNetwork: "Reach devices on your local network",
-    new: "NEW",
-    none: "No plugins registered.",
-    noNetwork: "No network access",
-    permissions: "Plugin permissions",
-    provideServices: "Provide services: {{services}}",
-    refresh: "Refresh",
-    refreshName: "Refresh {{name}}",
-    removeName: "Remove {{name}}",
-    removeRepository: "Remove repository",
-    repoEmpty: "This repository lists no plugins.",
-    repositories: "Repositories",
-    repositoryUrl: "Repository URL",
-    reviewInstall: "This plugin will be able to:",
-    reviewUpdate: "Review permissions for update:",
-    uninstall: "Uninstall {{name}}",
-    updateTo: "Update to v{{version}}",
-    updating: "Updating\u2026",
-    useServices: "Use services: {{services}}",
-    widgets_one: "{{count}} widget",
-    widgets_other: "{{count}} widgets"
-  },
-  status: {
-    cached: "Showing cached data",
-    system: "System notice",
-    unavailable: "Widget unavailable"
-  },
-  toolbar: {
-    add: "Add widget",
-    done: "Done editing",
-    edit: "Edit layout",
-    editAgain: "Click again to edit layout"
-  },
-  wake: "Display awake (8s) \xB7 Open Settings to adjust brightness",
-  weather: {
-    inHours: "in {{count}} h",
-    inMinutes: "in {{count}} min",
-    loading: "Loading weather\u2026",
-    loadingForecast: "Loading forecast\u2026",
-    nextPrecipitation: "Next precipitation",
-    now: "now",
-    today: "Today"
-  },
-  webviewOld: "This device's system WebView (Chrome {{major}}) is too old and may render incorrectly. Update Android System WebView to version {{minimum}} or newer.",
-  widget: {
-    remove: "Remove {{name}}",
-    settings: "{{name}} settings"
-  }
-};
-
-// src/locales/de.json
+// src/plugins/calendar/locales/de.json
 var de_default = {
-  appearance: {
-    background: "Hintergrund",
-    backgroundLayer: "Hintergrund",
-    backgroundOpacity: "Hintergrund-Deckkraft \xB7 {{percent}}%",
-    backward: "Nach hinten",
-    blur: "Hintergrund-Unsch\xE4rfe \xB7 {{pixels}}px",
-    forward: "Nach vorne",
-    general: "Allgemein",
-    glass: "Glas (Unsch\xE4rfe)",
-    layer: "Ebene (H\xF6he) \xB7 {{level}}",
-    none: "Keiner",
-    opacity: "Widget-Deckkraft \xB7 {{percent}}%",
-    overlayLayer: "\xDCberlagerung",
-    section: "Darstellung",
-    solid: "Einfarbig",
-    widgetLayer: "Widget"
+  manifest: {
+    Calendar: "Kalender",
+    "Upcoming events from an iCal feed": "Anstehende Termine aus einem iCal-Kalender",
+    "Calendar Agenda": "Kalender\xFCbersicht",
+    "Upcoming events from any iCal (.ics) feed": "Anstehende Termine aus iCal-Kalendern",
+    Feeds: "Kalender",
+    Calendars: "Kalender",
+    "Add calendar": "Kalender hinzuf\xFCgen",
+    "Each feed is merged into one agenda. Basic auth in the URL and webcal:// are supported.": "Alle Kalender werden in einer \xDCbersicht zusammengef\xFChrt. Basis-Authentifizierung in der URL und webcal:// werden unterst\xFCtzt.",
+    Color: "Farbe",
+    "Days ahead": "Tage im Voraus",
+    "Refresh interval": "Aktualisierungsintervall",
+    "5 minutes": "5 Minuten",
+    "15 minutes": "15 Minuten",
+    "30 minutes": "30 Minuten",
+    "60 minutes": "60 Minuten",
+    "Show title": "Titel anzeigen",
+    "A heading above the agenda. Usually unnecessary once feeds are merged.": "Eine \xDCberschrift \xFCber der Termin\xFCbersicht. Bei zusammengef\xFChrten Kalendern meist nicht n\xF6tig.",
+    "Title text": "Titeltext"
   },
-  calendar: {
+  runtime: {
     allDay: "Ganzt\xE4gig",
     configure: "F\xFCgen Sie in den Einstellungen mindestens einen iCal-Kalender (.ics) hinzu.",
     none: "Keine anstehenden Termine",
     title: "Kalender"
+  }
+};
+
+// src/plugins/immich/locales/de.json
+var de_default2 = {
+  manifest: {
+    "Immich Photo Frame": "Immich-Bilderrahmen",
+    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
+    "Photo Frame": "Bilderrahmen",
+    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
+    Connection: "Verbindung",
+    Source: "Quelle",
+    Slideshow: "Diashow",
+    "Info overlay": "Info-Einblendung",
+    Caching: "Zwischenspeicher",
+    "Immich Server URL": "Immich-Server-URL",
+    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
+    "API Key": "API-Schl\xFCssel",
+    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
+    "Photo source": "Fotoquelle",
+    "All photos": "Alle Fotos",
+    Favorites: "Favoriten",
+    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
+    Albums: "Alben",
+    People: "Personen",
+    Tags: "Schlagw\xF6rter",
+    "Tap to include (+), tap again to exclude (\u2212). Combined with people & tags.": "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212). Wird mit Personen und Schlagw\xF6rtern kombiniert.",
+    "Tap to include (+), tap again to exclude (\u2212).": "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
+    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
+    "Include videos": "Videos einschlie\xDFen",
+    "Only photos with people": "Nur Fotos mit Personen",
+    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
+    "Seconds per photo": "Sekunden pro Foto",
+    "Preload upcoming photos": "Kommende Fotos vorladen",
+    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
+    Layout: "Layout",
+    Single: "Einzeln",
+    "Split (two photos)": "Geteilt (zwei Fotos)",
+    Transition: "\xDCbergang",
+    Pan: "Schwenken",
+    Fade: "\xDCberblenden",
+    None: "Keiner",
+    "Transition seconds": "\xDCbergangsdauer",
+    "Image fit": "Bildanpassung",
+    "Cover (fill)": "Ausf\xFCllen",
+    "Contain (letterbox)": "Einpassen",
+    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
+    "Progress bar": "Fortschrittsbalken",
+    Bottom: "Unten",
+    Top: "Oben",
+    Hidden: "Ausgeblendet",
+    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
+    "Bottom right": "Unten rechts",
+    "Bottom left": "Unten links",
+    "Top right": "Oben rechts",
+    "Top left": "Oben links",
+    "Show location": "Ort anzeigen",
+    "Show date": "Datum anzeigen",
+    "Show people": "Personen anzeigen",
+    "Show album": "Album anzeigen",
+    "Show tags": "Schlagw\xF6rter anzeigen",
+    "Show description": "Beschreibung anzeigen",
+    "Cache photos locally": "Fotos lokal zwischenspeichern",
+    "Cache size limit (MB)": "Speicherlimit (MB)",
+    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
+    "Cache image expiration (days)": "Bildablauf (Tage)",
+    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
+    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
   },
-  common: {
-    add: "Hinzuf\xFCgen",
-    cancel: "Abbrechen",
-    clear: "L\xF6schen",
-    close: "Schlie\xDFen",
-    loading: "Wird geladen\u2026",
-    remove: "Entfernen",
-    save: "Speichern",
-    settings: "Einstellungen"
-  },
-  device: {
-    autostart: "Beim Systemstart starten",
-    autostartHelp: "Startet den Rahmen automatisch nach dem Ger\xE4testart. Ger\xE4teeigent\xFCmerrechte sind nicht erforderlich. Um ihn zus\xE4tzlich als Startbildschirm zu verwenden, in Android als Standard-Launcher festlegen.",
-    checkEvery: "Alle {{hours}} Stunden pr\xFCfen",
-    deviceOwner: "Ger\xE4teeigent\xFCmer",
-    hideStatus: "Statusleiste ausblenden",
-    hideStatusHelp: "Immersiver Vollbildmodus; zum kurzzeitigen Einblenden vom Rand wischen.",
-    operationFailed: "Ger\xE4teaktion fehlgeschlagen",
-    pinning: "Vollbildfixierung",
-    pinningHelp: "Lock-Task-Modus. Mit Ger\xE4teeigent\xFCmerrechten ist dies ein nicht beendbarer Kioskmodus.",
-    pinOnBoot: "Nach dem Start fixieren",
-    pinOnBootHelp: "Beim App-Start automatisch wieder fixieren.",
-    privilege: "Berechtigung \xB7 {{authority}}",
-    privilegeHelp: "Der vollst\xE4ndige Kioskmodus (nicht beendbares Anheften, WLAN-Steuerung) ben\xF6tigt Ger\xE4teeigent\xFCmerrechte \xFCber OwnDroid/Dhizuku. Ohne diese Rechte wird die normale Bildschirmfixierung verwendet.",
-    repository: "GitHub-Repository",
-    requestDhizuku: "Dhizuku-Zugriff anfordern",
-    silent: "Stille Installation anfordern",
-    silentHelp: "Android erlaubt dies nur f\xFCr berechtigte Ger\xE4teeigent\xFCmer-Installationsprogramme.",
-    unavailable: "Ger\xE4testeuerung (Kioskmodus, Statusleiste, Lautst\xE4rke) ist nur in der nativen Android-App verf\xFCgbar.",
-    updates: "Automatische Aktualisierungen",
-    updatesHelp: "GitHub Releases regelm\xE4\xDFig pr\xFCfen und neuere signierte APKs installieren.",
-    volume: "Medienlautst\xE4rke \xB7 {{percent}}%",
-    volumeLabel: "Medienlautst\xE4rke"
-  },
-  errors: {
-    retry: "Erneut versuchen",
-    unknownWidget: "Unbekanntes Widget: {{id}}",
-    widgetFailed: "{{name}} ist fehlgeschlagen"
-  },
-  fields: {
-    failedOptions: "Optionen konnten nicht geladen werden",
-    loadOptions: "Optionen laden",
-    noOptions: "Keine Optionen geladen.",
-    reloadOptions: "Optionen neu laden",
-    removeItem: "Eintrag entfernen",
-    secretSet: "gesetzt",
-    secretStored: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022 (gespeichert)"
-  },
-  global: {
-    ambient: "Raumhelligkeit (Lichtsensor)",
-    brightness: "Helligkeit \xB7 {{percent}}%",
-    brightnessLabel: "Anzeigehelligkeit",
-    density: "Rasterdichte \xB7 {{columns}} Spalten",
-    densityHelp: "Mehr Spalten ergeben ein dichteres Raster mit kleineren Zellen; Widgets behalten ihre Zellengr\xF6\xDFe.",
-    densityLabel: "Rasterdichte (Spalten)",
-    detect: "Standort automatisch ermitteln (GPS / IP)",
-    detected: "Ermittelt: {{location}}",
-    detecting: "Wird ermittelt\u2026",
-    detectionFailed: "Ermittlung fehlgeschlagen",
-    device: "Ger\xE4t",
-    dimBrightness: "Gedimmte Helligkeit \xB7 {{percent}}%",
-    dimBrightnessLabel: "Gedimmte Helligkeit",
-    dimFrom: "Dimmen ab",
-    dimHelp: "0% schaltet den Bildschirm w\xE4hrend des Dimmzeitraums aus.",
-    dimMode: "Dimmung / Ausschalten",
-    dimUntil: "Dimmen bis",
-    display: "Anzeige",
-    english: "Englisch",
-    german: "Deutsch",
-    grid: "Raster",
-    language: "Sprache",
-    latitude: "Breitengrad",
-    longitude: "L\xE4ngengrad",
-    off: "Aus",
-    plugins: "Plugins",
-    schedule: "Zeitplan",
-    sunset: "Sonnenuntergang bis Sonnenaufgang",
-    title: "Einstellungen"
-  },
-  immich: {
+  runtime: {
     configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
     loading: "Fotos werden geladen\u2026",
     next: "Weiter",
@@ -25286,378 +25090,63 @@ var de_default = {
     play: "Wiedergabe",
     previous: "Zur\xFCck",
     title: "Immich-Bilderrahmen"
-  },
-  loading: "Dash Widgeter wird geladen\u2026",
+  }
+};
+
+// src/plugins/weather/locales/de.json
+var de_default3 = {
   manifest: {
-    fields: {
-      calendar: {
-        color: {
-          label: "Farbe"
-        },
-        daysAhead: {
-          label: "Tage im Voraus"
-        },
-        icalUrl: {
-          label: "iCal-URL"
-        },
-        refreshIntervalMinutes: {
-          label: "Aktualisierungsintervall",
-          options: {
-            "5": "5 Minuten",
-            "15": "15 Minuten",
-            "30": "30 Minuten",
-            "60": "60 Minuten"
-          }
-        },
-        showTitle: {
-          help: "Eine \xDCberschrift \xFCber der Termin\xFCbersicht. Bei zusammengef\xFChrten Kalendern meist nicht n\xF6tig.",
-          label: "Titel anzeigen"
-        },
-        sources: {
-          addLabel: "Kalender hinzuf\xFCgen",
-          help: "Alle Kalender werden in einer \xDCbersicht zusammengef\xFChrt. Basis-Authentifizierung in der URL und webcal:// werden unterst\xFCtzt.",
-          label: "Kalender"
-        },
-        title: {
-          label: "Titeltext"
-        }
-      },
-      clock: {
-        dateStyle: {
-          help: "Nur Wochentag zeigt z. B. \u201EMontag\u201C; vollst\xE4ndig erg\xE4nzt Monat und Tag.",
-          label: "Datumsformat",
-          options: {
-            full: "Vollst\xE4ndig (Wochentag, Monat, Tag)",
-            weekday: "Nur Wochentag"
-          }
-        },
-        fontWeight: {
-          label: "Schriftst\xE4rke",
-          options: {
-            "200": "Sehr d\xFCnn",
-            "300": "D\xFCnn",
-            "400": "Normal",
-            "500": "Mittel",
-            "600": "Halbfett",
-            "700": "Fett",
-            "900": "Schwarz"
-          }
-        },
-        showDate: {
-          label: "Datum anzeigen"
-        },
-        showSeconds: {
-          label: "Sekunden anzeigen"
-        },
-        use24Hour: {
-          label: "24-Stunden-Format"
-        }
-      },
-      immich: {
-        albums: {
-          help: "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212). Wird mit Personen und Schlagw\xF6rtern kombiniert.",
-          label: "Alben"
-        },
-        apiKey: {
-          help: "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
-          label: "API-Schl\xFCssel"
-        },
-        cacheEnabled: {
-          label: "Fotos lokal zwischenspeichern"
-        },
-        cacheExpirationDays: {
-          help: "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
-          label: "Bildablauf (Tage)"
-        },
-        cacheMaxMB: {
-          help: "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
-          label: "Speicherlimit (MB)"
-        },
-        imageFit: {
-          label: "Bildanpassung",
-          options: {
-            contain: "Einpassen",
-            cover: "Ausf\xFCllen"
-          }
-        },
-        intervalSeconds: {
-          label: "Sekunden pro Foto"
-        },
-        layout: {
-          label: "Layout",
-          options: {
-            single: "Einzeln",
-            split: "Geteilt (zwei Fotos)"
-          }
-        },
-        listTtlMinutes: {
-          label: "Offline-Listen-G\xFCltigkeit (Minuten)"
-        },
-        metadataPosition: {
-          help: "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
-          label: "Info-Einblendung",
-          options: {
-            "bottom-left": "Unten links",
-            "bottom-right": "Unten rechts",
-            none: "Ausgeblendet",
-            "top-left": "Oben links",
-            "top-right": "Oben rechts"
-          }
-        },
-        metadataShowAlbum: {
-          label: "Album anzeigen"
-        },
-        metadataShowDate: {
-          label: "Datum anzeigen"
-        },
-        metadataShowDescription: {
-          label: "Beschreibung anzeigen"
-        },
-        metadataShowLocation: {
-          label: "Ort anzeigen"
-        },
-        metadataShowPeople: {
-          label: "Personen anzeigen"
-        },
-        metadataShowTags: {
-          label: "Schlagw\xF6rter anzeigen"
-        },
-        onlyWithPersons: {
-          help: "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
-          label: "Nur Fotos mit Personen"
-        },
-        people: {
-          help: "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
-          label: "Personen"
-        },
-        poolMode: {
-          label: "Fotoquelle",
-          options: {
-            favorites: "Favoriten",
-            memories: "Erinnerungen (an diesem Tag)",
-            random: "Alle Fotos"
-          }
-        },
-        preloadCount: {
-          help: "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
-          label: "Kommende Fotos vorladen"
-        },
-        progressBar: {
-          label: "Fortschrittsbalken",
-          options: {
-            bottom: "Unten",
-            none: "Ausgeblendet",
-            top: "Oben"
-          }
-        },
-        rating: {
-          label: "Mindestbewertung (0 = beliebig)"
-        },
-        serverUrl: {
-          help: "Basis-URL Ihrer Immich-Instanz (ohne /api).",
-          label: "Immich-Server-URL"
-        },
-        showControls: {
-          label: "Wiedergabe-/Weiter-Steuerung anzeigen"
-        },
-        showVideos: {
-          label: "Videos einschlie\xDFen"
-        },
-        tags: {
-          help: "Tippen zum Einschlie\xDFen (+), erneut tippen zum Ausschlie\xDFen (\u2212).",
-          label: "Schlagw\xF6rter"
-        },
-        transition: {
-          label: "\xDCbergang",
-          options: {
-            fade: "\xDCberblenden",
-            kenburns: "Ken Burns",
-            none: "Keiner",
-            pan: "Schwenken",
-            zoom: "Zoom"
-          }
-        },
-        transitionSeconds: {
-          label: "\xDCbergangsdauer"
-        }
-      },
-      weather: {
-        forecastDays: {
-          help: "Anzahl der anzuzeigenden Tage (1\u201316).",
-          label: "Vorhersagetage"
-        },
-        latitude: {
-          label: "Breitengrad"
-        },
-        locationName: {
-          label: "Ortsname"
-        },
-        longitude: {
-          label: "L\xE4ngengrad"
-        },
-        refreshIntervalMinutes: {
-          label: "Aktualisierungsintervall",
-          options: {
-            "5": "5 Minuten",
-            "15": "15 Minuten",
-            "30": "30 Minuten",
-            "60": "60 Minuten"
-          }
-        },
-        showNextEvent: {
-          help: "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
-          label: "N\xE4chsten Niederschlag anzeigen"
-        },
-        showTitle: {
-          help: "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
-          label: "Ortsnamen anzeigen"
-        },
-        unit: {
-          label: "Temperatureinheit",
-          options: {
-            celsius: "Celsius",
-            fahrenheit: "Fahrenheit"
-          }
-        }
-      }
-    },
-    plugins: {
-      calendar: {
-        name: "Kalender"
-      },
-      clock: {
-        name: "Uhr"
-      },
-      immich: {
-        name: "Immich-Bilderrahmen"
-      },
-      weather: {
-        name: "Wetter"
-      }
-    },
-    sections: {
-      Caching: "Zwischenspeicher",
-      Connection: "Verbindung",
-      Date: "Datum",
-      Display: "Anzeige",
-      Feeds: "Kalender",
-      Info_overlay: "Info-Einblendung",
-      Location: "Standort",
-      Slideshow: "Diashow",
-      Source: "Quelle",
-      Style: "Stil",
-      Time: "Uhrzeit"
-    },
-    widgets: {
-      calendar_agenda: {
-        description: "Anstehende Termine aus iCal-Kalendern",
-        name: "Kalender\xFCbersicht"
-      },
-      clock_time: {
-        description: "Aktuelle Uhrzeit und Datum",
-        name: "Uhr"
-      },
-      immich_photoframe: {
-        description: "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
-        name: "Bilderrahmen"
-      },
-      weather_current: {
-        description: "Aktuelle Wetterbedingungen",
-        name: "Aktuelles Wetter"
-      },
-      weather_forecast: {
-        description: "Mehrt\xE4gige Wettervorhersage",
-        name: "Wettervorhersage"
-      }
-    }
+    Weather: "Wetter",
+    "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage \xFCber Open-Meteo",
+    "Weather Now": "Aktuelles Wetter",
+    "Current conditions badge": "Aktuelle Wetterbedingungen",
+    "Weather Forecast": "Wettervorhersage",
+    "Multi-day forecast card": "Mehrt\xE4gige Wettervorhersage",
+    Location: "Standort",
+    Display: "Anzeige",
+    "Location name": "Ortsname",
+    Latitude: "Breitengrad",
+    Longitude: "L\xE4ngengrad",
+    "Temperature unit": "Temperatureinheit",
+    "Refresh interval": "Aktualisierungsintervall",
+    "5 minutes": "5 Minuten",
+    "15 minutes": "15 Minuten",
+    "30 minutes": "30 Minuten",
+    "60 minutes": "60 Minuten",
+    "Show next precipitation": "N\xE4chsten Niederschlag anzeigen",
+    'A small note like "Rain in 25 min" from the 15-minute nowcast.': "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
+    "Show location name": "Ortsnamen anzeigen",
+    "Turn off to save space \u2014 the widget content already makes it obvious.": "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
+    "Forecast days": "Vorhersagetage",
+    "Number of days to show (1\u201316).": "Anzahl der anzuzeigenden Tage (1\u201316)."
   },
-  palette: {
-    empty: "Keine Widgets registriert.",
-    title: "Widget hinzuf\xFCgen"
-  },
-  plugins: {
-    acceptInstall: "Akzeptieren und installieren",
-    acceptUpdate: "Akzeptieren und aktualisieren",
-    adding: "Wird hinzugef\xFCgt\u2026",
-    addRepository: "Paketquelle hinzuf\xFCgen",
-    anyNetwork: "Beliebige Server im Internet kontaktieren",
-    browse: "Durchsuchen",
-    browseName: "{{name}} durchsuchen",
-    contact: "Kontaktieren: {{hosts}}",
-    decline: "Ablehnen",
-    disabled: "Deaktiviert",
-    enabled: "Aktiviert",
-    enabledLabel: "{{name}} aktiviert",
-    failedAdd: "Paketquelle konnte nicht hinzugef\xFCgt werden",
-    failedLoad: "Paketquelle konnte nicht geladen werden",
-    install: "Installieren",
-    installed: "Installiert",
-    installedState: "Installiert",
-    installFailed: "Installation fehlgeschlagen",
-    installing: "Wird installiert\u2026",
-    localNetwork: "Ger\xE4te im lokalen Netzwerk erreichen",
-    new: "NEU",
-    none: "Keine Plugins registriert.",
-    noNetwork: "Kein Netzwerkzugriff",
-    permissions: "Plugin-Berechtigungen",
-    provideServices: "Dienste bereitstellen: {{services}}",
-    refresh: "Aktualisieren",
-    refreshName: "{{name}} aktualisieren",
-    removeName: "{{name}} entfernen",
-    removeRepository: "Paketquelle entfernen",
-    repoEmpty: "Diese Paketquelle enth\xE4lt keine Plugins.",
-    repositories: "Paketquellen",
-    repositoryUrl: "URL der Paketquelle",
-    reviewInstall: "Dieses Plugin darf:",
-    reviewUpdate: "Berechtigungen f\xFCr die Aktualisierung pr\xFCfen:",
-    uninstall: "{{name}} deinstallieren",
-    updateTo: "Auf v{{version}} aktualisieren",
-    updating: "Wird aktualisiert\u2026",
-    useServices: "Dienste verwenden: {{services}}",
-    widgets_one: "{{count}} Widget",
-    widgets_other: "{{count}} Widgets"
-  },
-  status: {
-    cached: "Zwischengespeicherte Daten werden angezeigt",
-    system: "Systemhinweis",
-    unavailable: "Widget nicht verf\xFCgbar"
-  },
-  toolbar: {
-    add: "Widget hinzuf\xFCgen",
-    done: "Bearbeitung beenden",
-    edit: "Layout bearbeiten",
-    editAgain: "Erneut klicken, um das Layout zu bearbeiten"
-  },
-  wake: "Anzeige f\xFCr 8 Sekunden aufgehellt \xB7 Einstellungen \xF6ffnen, um die Helligkeit anzupassen",
-  weather: {
-    codes: {
-      "0": "Klar",
-      "1": "\xDCberwiegend klar",
-      "2": "Teilweise bew\xF6lkt",
-      "3": "Bedeckt",
-      "45": "Nebel",
-      "48": "Reifnebel",
-      "51": "Leichter Nieselregen",
-      "53": "Nieselregen",
-      "55": "Starker Nieselregen",
-      "61": "Leichter Regen",
-      "63": "Regen",
-      "65": "Starker Regen",
-      "66": "Gefrierender Regen",
-      "67": "Gefrierender Regen",
-      "71": "Leichter Schneefall",
-      "73": "Schnee",
-      "75": "Starker Schneefall",
-      "77": "Schneegriesel",
-      "80": "Regenschauer",
-      "81": "Regenschauer",
-      "82": "Heftige Schauer",
-      "85": "Schneeschauer",
-      "86": "Schneeschauer",
-      "95": "Gewitter",
-      "96": "Gewitter",
-      "99": "Gewitter"
-    },
+  runtime: {
+    "codes.0": "Klar",
+    "codes.1": "\xDCberwiegend klar",
+    "codes.2": "Teilweise bew\xF6lkt",
+    "codes.3": "Bedeckt",
+    "codes.45": "Nebel",
+    "codes.48": "Reifnebel",
+    "codes.51": "Leichter Nieselregen",
+    "codes.53": "Nieselregen",
+    "codes.55": "Starker Nieselregen",
+    "codes.61": "Leichter Regen",
+    "codes.63": "Regen",
+    "codes.65": "Starker Regen",
+    "codes.66": "Gefrierender Regen",
+    "codes.67": "Gefrierender Regen",
+    "codes.71": "Leichter Schneefall",
+    "codes.73": "Schnee",
+    "codes.75": "Starker Schneefall",
+    "codes.77": "Schneegriesel",
+    "codes.80": "Regenschauer",
+    "codes.81": "Regenschauer",
+    "codes.82": "Heftige Schauer",
+    "codes.85": "Schneeschauer",
+    "codes.86": "Schneeschauer",
+    "codes.95": "Gewitter",
+    "codes.96": "Gewitter",
+    "codes.99": "Gewitter",
     inHours: "in {{count}} Std.",
     inMinutes: "in {{count}} Min.",
     loading: "Wetter wird geladen\u2026",
@@ -25665,21 +25154,19 @@ var de_default = {
     nextPrecipitation: "N\xE4chster Niederschlag",
     now: "jetzt",
     today: "Heute"
-  },
-  webviewOld: "Die System-WebView dieses Ger\xE4ts (Chrome {{major}}) ist zu alt und kann Darstellungsfehler verursachen. Aktualisieren Sie Android System WebView auf Version {{minimum}} oder neuer.",
-  widget: {
-    remove: "{{name}} entfernen",
-    settings: "Einstellungen f\xFCr {{name}}"
   }
 };
 
 // src/plugins/translate.ts
+var translations = {
+  calendar: { de: de_default.runtime },
+  immich: { de: de_default2.runtime },
+  weather: { de: de_default3.runtime }
+};
 function pluginText(locale, key, params = {}, fallback = key) {
-  const catalog = locale.startsWith("de") ? de_default : en_default;
-  const value = key.split(".").reduce(
-    (entry, part) => typeof entry === "object" && entry !== null ? entry[part] : void 0,
-    catalog
-  );
+  var _a, _b;
+  const [pluginId, ...parts] = key.split(".");
+  const value = pluginId ? (_b = (_a = translations[pluginId]) == null ? void 0 : _a[locale.split("-")[0] ?? locale]) == null ? void 0 : _b[parts.join(".")] : void 0;
   if (typeof value !== "string") return fallback;
   return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
 }

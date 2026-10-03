@@ -1,5 +1,6 @@
 import { WIDGET_Z, type PluginManifest, type WidgetSettingField } from '@/types';
 import { WEATHER_DEFAULT_CONFIG } from './types';
+import de from './locales/de.json';
 
 /**
  * Host-side manifest for the weather plugin. No code runs in the host — the
@@ -72,8 +73,9 @@ const forecastSettings: WidgetSettingField[] = [
 export const weatherManifest: PluginManifest = {
   id: 'weather',
   name: 'Weather',
-  version: '1.1.1',
+  version: '1.2.0',
   description: 'Current conditions and forecast via Open-Meteo',
+  translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
   network: ['api.open-meteo.com'],

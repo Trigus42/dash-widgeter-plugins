@@ -1,5 +1,6 @@
 import { BACKGROUND_Z, type PluginManifest, type WidgetSettingField } from '@/types';
 import { IMMICH_DEFAULT_CONFIG } from './types';
+import de from './locales/de.json';
 
 /**
  * Host-side manifest for the Immich photo frame. The server URL is user-
@@ -120,8 +121,9 @@ const settings: WidgetSettingField[] = [
 export const immichManifest: PluginManifest = {
   id: 'immich',
   name: 'Immich Photo Frame',
-  version: '1.2.1',
+  version: '1.3.0',
   description: 'Digital photo frame backed by an Immich server, with offline caching',
+  translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
   network: ['*'],

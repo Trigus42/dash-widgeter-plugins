@@ -1,0 +1,26 @@
+{
+  "manifest": {
+    "Clock": "Uhr",
+    "Date and time display": "Datums- und Zeitanzeige",
+    "Current time and date": "Aktuelle Uhrzeit und Datum",
+    "Time": "Uhrzeit",
+    "Date": "Datum",
+    "Style": "Stil",
+    "24-hour time": "24-Stunden-Format",
+    "Show seconds": "Sekunden anzeigen",
+    "Show date": "Datum anzeigen",
+    "Date format": "Datumsformat",
+    "Weekday only shows e.g. \"Monday\"; full adds the month and day.": "Nur Wochentag zeigt z. B. „Montag“; vollständig ergänzt Monat und Tag.",
+    "Full (weekday, month, day)": "Vollständig (Wochentag, Monat, Tag)",
+    "Weekday only": "Nur Wochentag",
+    "Text weight": "Schriftstärke",
+    "Thin": "Sehr dünn",
+    "Light": "Dünn",
+    "Regular": "Normal",
+    "Medium": "Mittel",
+    "Semibold": "Halbfett",
+    "Bold": "Fett",
+    "Black": "Schwarz"
+  },
+  "runtime": {}
+}

@@ -1,0 +1,28 @@
+{
+  "manifest": {
+    "Calendar": "Kalender",
+    "Upcoming events from an iCal feed": "Anstehende Termine aus einem iCal-Kalender",
+    "Calendar Agenda": "Kalenderübersicht",
+    "Upcoming events from any iCal (.ics) feed": "Anstehende Termine aus iCal-Kalendern",
+    "Feeds": "Kalender",
+    "Calendars": "Kalender",
+    "Add calendar": "Kalender hinzufügen",
+    "Each feed is merged into one agenda. Basic auth in the URL and webcal:// are supported.": "Alle Kalender werden in einer Übersicht zusammengeführt. Basis-Authentifizierung in der URL und webcal:// werden unterstützt.",
+    "Color": "Farbe",
+    "Days ahead": "Tage im Voraus",
+    "Refresh interval": "Aktualisierungsintervall",
+    "5 minutes": "5 Minuten",
+    "15 minutes": "15 Minuten",
+    "30 minutes": "30 Minuten",
+    "60 minutes": "60 Minuten",
+    "Show title": "Titel anzeigen",
+    "A heading above the agenda. Usually unnecessary once feeds are merged.": "Eine Überschrift über der Terminübersicht. Bei zusammengeführten Kalendern meist nicht nötig.",
+    "Title text": "Titeltext"
+  },
+  "runtime": {
+    "allDay": "Ganztägig",
+    "configure": "Fügen Sie in den Einstellungen mindestens einen iCal-Kalender (.ics) hinzu.",
+    "none": "Keine anstehenden Termine",
+    "title": "Kalender"
+  }
+}

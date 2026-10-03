@@ -1,5 +1,6 @@
 import { WIDGET_Z, type PluginManifest } from '@/types';
 import { CALENDAR_DEFAULT_CONFIG } from './types';
+import de from './locales/de.json';
 
 /**
  * Host-side manifest for the calendar plugin. The iCal feed URL is user-
@@ -12,8 +13,9 @@ import { CALENDAR_DEFAULT_CONFIG } from './types';
 export const calendarManifest: PluginManifest = {
   id: 'calendar',
   name: 'Calendar',
-  version: '1.1.1',
+  version: '1.2.0',
   description: 'Upcoming events from an iCal feed',
+  translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
   network: ['*'],
