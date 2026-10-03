@@ -13,12 +13,11 @@ import de from './locales/de.json';
 export const clockManifest: PluginManifest = {
   id: 'clock',
   name: 'Clock',
-  version: '1.2.0',
+  version: '1.3.0',
   description: 'Date and time display',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
-  network: [],
   widgets: [
     {
       id: 'clock.time',

@@ -4,22 +4,33 @@ import de from './locales/de.json';
 
 /**
  * Host-side manifest for the calendar plugin. The iCal feed URL is user-
- * configured, so the plugin's network reach is `*` (any host) — surfaced
- * honestly in the manifest. Self-hosted feeds (e.g. Nextcloud) may live on the
- * LAN, so `ipExceptions` opens loopback + RFC1918; the non-overridable baseline
- * (metadata/link-local/multicast/…) is still refused, so `*` cannot pivot to
- * cloud-metadata or infra regardless.
+ * configured, so the plugin declares two reviewable groups: "Internet" (any
+ * host, any public IP) for cloud feeds, and "Local Networks" for self-hosted
+ * feeds (e.g. Nextcloud) on the LAN. The non-overridable baseline
+ * (metadata/link-local/…) is still refused regardless, and the user can turn
+ * either group off.
  */
 export const calendarManifest: PluginManifest = {
   id: 'calendar',
   name: 'Calendar',
-  version: '1.3.0',
+  version: '1.4.0',
   description: 'Upcoming events from an iCal feed',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
-  network: ['*'],
-  ipExceptions: ['127.0.0.1/32', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
+  permissions: [
+    {
+      name: 'Internet',
+      domains: ['*'],
+      publicIps: ['0.0.0.0/0', '::/0'],
+      properties: { defaultOn: true },
+    },
+    {
+      name: 'Local Networks',
+      privateIps: ['127.0.0.1/32', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
+      properties: { defaultOn: true },
+    },
+  ],
   widgets: [
     {
       id: 'calendar.agenda',

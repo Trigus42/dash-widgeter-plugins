@@ -4,12 +4,12 @@ import de from './locales/de.json';
 
 /**
  * Host-side manifest for the Immich photo frame. The server URL is user-
- * configured, so network reach is `*` (any host) — surfaced honestly. Immich is
- * commonly self-hosted on the home LAN, so `ipExceptions` opens loopback + the
- * RFC1918 private ranges (checked against the resolved IP); the non-overridable
- * baseline (metadata/link-local/multicast/…) is still refused. The API key is a
- * `secret` field: kept in the host-only store and referenced via a placeholder,
- * never delivered into the sandbox frame or shared with other plugins.
+ * configured, so the plugin declares two reviewable groups: "Internet" (any
+ * host, any public IP) for a cloud-hosted Immich, and "Local Networks" since
+ * Immich is commonly self-hosted on the home LAN. The non-overridable baseline
+ * (metadata/link-local/…) is still refused, and the user may disable either
+ * group. The API key is a `secret` field: kept in the host-only store and
+ * referenced via a placeholder, never delivered into the sandbox frame.
  */
 
 const settings: WidgetSettingField[] = [
@@ -121,13 +121,24 @@ const settings: WidgetSettingField[] = [
 export const immichManifest: PluginManifest = {
   id: 'immich',
   name: 'Immich Photo Frame',
-  version: '1.4.0',
+  version: '1.5.0',
   description: 'Digital photo frame backed by an Immich server, with offline caching',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
-  network: ['*'],
-  ipExceptions: ['127.0.0.1/32', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
+  permissions: [
+    {
+      name: 'Internet',
+      domains: ['*'],
+      publicIps: ['0.0.0.0/0', '::/0'],
+      properties: { defaultOn: true },
+    },
+    {
+      name: 'Local Networks',
+      privateIps: ['127.0.0.1/32', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'],
+      properties: { defaultOn: true },
+    },
+  ],
   widgets: [
     {
       id: 'immich.photoframe',

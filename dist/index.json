@@ -5,7 +5,7 @@
       "manifest": {
         "id": "clock",
         "name": "Clock",
-        "version": "1.2.0",
+        "version": "1.3.0",
         "description": "Date and time display",
         "translations": {
           "de": {
@@ -34,7 +34,6 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
-        "network": [],
         "widgets": [
           {
             "id": "clock.time",
@@ -139,7 +138,7 @@
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.4.0",
+        "version": "1.5.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "translations": {
           "de": {
@@ -171,8 +170,20 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
-        "network": [
-          "api.open-meteo.com"
+        "permissions": [
+          {
+            "name": "Weather Service",
+            "domains": [
+              "api.open-meteo.com"
+            ],
+            "publicIps": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          }
         ],
         "widgets": [
           {
@@ -362,7 +373,7 @@
       "manifest": {
         "id": "calendar",
         "name": "Calendar",
-        "version": "1.3.0",
+        "version": "1.4.0",
         "description": "Upcoming events from an iCal feed",
         "translations": {
           "de": {
@@ -388,14 +399,32 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
-        "network": [
-          "*"
-        ],
-        "ipExceptions": [
-          "127.0.0.1/32",
-          "10.0.0.0/8",
-          "172.16.0.0/12",
-          "192.168.0.0/16"
+        "permissions": [
+          {
+            "name": "Internet",
+            "domains": [
+              "*"
+            ],
+            "publicIps": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          },
+          {
+            "name": "Local Networks",
+            "privateIps": [
+              "127.0.0.1/32",
+              "10.0.0.0/8",
+              "172.16.0.0/12",
+              "192.168.0.0/16"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          }
         ],
         "widgets": [
           {
@@ -491,7 +520,7 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.4.0",
+        "version": "1.5.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
         "translations": {
           "de": {
@@ -561,14 +590,32 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
-        "network": [
-          "*"
-        ],
-        "ipExceptions": [
-          "127.0.0.1/32",
-          "10.0.0.0/8",
-          "172.16.0.0/12",
-          "192.168.0.0/16"
+        "permissions": [
+          {
+            "name": "Internet",
+            "domains": [
+              "*"
+            ],
+            "publicIps": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          },
+          {
+            "name": "Local Networks",
+            "privateIps": [
+              "127.0.0.1/32",
+              "10.0.0.0/8",
+              "172.16.0.0/12",
+              "192.168.0.0/16"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          }
         ],
         "widgets": [
           {

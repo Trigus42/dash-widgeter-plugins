@@ -72,12 +72,19 @@ const forecastSettings: WidgetSettingField[] = [
 export const weatherManifest: PluginManifest = {
   id: 'weather',
   name: 'Weather',
-  version: '1.4.0',
+  version: '1.5.0',
   description: 'Current conditions and forecast via Open-Meteo',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
-  network: ['api.open-meteo.com'],
+  permissions: [
+    {
+      name: 'Weather Service',
+      domains: ['api.open-meteo.com'],
+      publicIps: ['0.0.0.0/0', '::/0'],
+      properties: { defaultOn: true },
+    },
+  ],
   widgets: [
     {
       id: 'weather.current',
