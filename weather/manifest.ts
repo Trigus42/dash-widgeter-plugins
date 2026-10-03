@@ -12,8 +12,7 @@ import de from './locales/de.json';
 // Both widgets share the same location/unit settings.
 const sharedSettings: WidgetSettingField[] = [
   { key: 'locationName', label: 'Location name', type: 'text', placeholder: 'Oslo', section: 'Location' },
-  { key: 'latitude', label: 'Latitude', type: 'number', section: 'Location' },
-  { key: 'longitude', label: 'Longitude', type: 'number', section: 'Location' },
+  { key: 'location', label: 'Coordinates', type: 'location', section: 'Location' },
   {
     key: 'unit',
     label: 'Temperature unit',
@@ -73,7 +72,7 @@ const forecastSettings: WidgetSettingField[] = [
 export const weatherManifest: PluginManifest = {
   id: 'weather',
   name: 'Weather',
-  version: '1.3.0',
+  version: '1.4.0',
   description: 'Current conditions and forecast via Open-Meteo',
   translations: { de: de.manifest },
   executionType: 'sandboxed',

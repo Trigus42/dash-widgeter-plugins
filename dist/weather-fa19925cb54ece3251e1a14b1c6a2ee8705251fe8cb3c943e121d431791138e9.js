@@ -24467,6 +24467,7 @@ var de_default = {
     Location: "Standort",
     Display: "Anzeige",
     "Location name": "Ortsname",
+    Coordinates: "Koordinaten",
     Latitude: "Breitengrad",
     Longitude: "L\xE4ngengrad",
     "Temperature unit": "Temperatureinheit",

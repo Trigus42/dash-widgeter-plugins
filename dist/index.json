@@ -139,7 +139,7 @@
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.3.0",
+        "version": "1.4.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "translations": {
           "de": {
@@ -152,6 +152,7 @@
             "Location": "Standort",
             "Display": "Anzeige",
             "Location name": "Ortsname",
+            "Coordinates": "Koordinaten",
             "Latitude": "Breitengrad",
             "Longitude": "Längengrad",
             "Temperature unit": "Temperatureinheit",
@@ -202,15 +203,9 @@
                 "section": "Location"
               },
               {
-                "key": "latitude",
-                "label": "Latitude",
-                "type": "number",
-                "section": "Location"
-              },
-              {
-                "key": "longitude",
-                "label": "Longitude",
-                "type": "number",
+                "key": "location",
+                "label": "Coordinates",
+                "type": "location",
                 "section": "Location"
               },
               {
@@ -297,15 +292,9 @@
                 "section": "Location"
               },
               {
-                "key": "latitude",
-                "label": "Latitude",
-                "type": "number",
-                "section": "Location"
-              },
-              {
-                "key": "longitude",
-                "label": "Longitude",
-                "type": "number",
+                "key": "location",
+                "label": "Coordinates",
+                "type": "location",
                 "section": "Location"
               },
               {
@@ -366,8 +355,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-cc130203bfe3505c9ac483ffbc021cf132e27718dfacfef5c0d2c77be6a181fb.js",
-      "sha256": "cc130203bfe3505c9ac483ffbc021cf132e27718dfacfef5c0d2c77be6a181fb"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-fa19925cb54ece3251e1a14b1c6a2ee8705251fe8cb3c943e121d431791138e9.js",
+      "sha256": "fa19925cb54ece3251e1a14b1c6a2ee8705251fe8cb3c943e121d431791138e9"
     },
     {
       "manifest": {
