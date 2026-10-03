@@ -6,6 +6,11 @@ import { CLOCK_DEFAULT_CONFIG } from './types';
 const when = new Date(2026, 0, 2, 9, 5, 7);
 
 describe('formatClock', () => {
+  it('formats weekday names in the selected locale', () => {
+    const date = new Date('2026-10-03T12:00:00Z');
+    expect(formatClock(date, CLOCK_DEFAULT_CONFIG, 'de-DE').date).toContain('Samstag');
+    expect(formatClock(date, CLOCK_DEFAULT_CONFIG, 'en-US').date).toContain('Saturday');
+  });
   it('formats 24-hour time without seconds by default', () => {
     const { time } = formatClock(when, CLOCK_DEFAULT_CONFIG);
     expect(time).toMatch(/^09[:.]05$/);
