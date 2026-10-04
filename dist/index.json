@@ -138,7 +138,7 @@
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.6.0",
+        "version": "1.7.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "translations": {
           "de": {
@@ -169,7 +169,9 @@
           }
         },
         "executionType": "sandboxed",
-        "capabilities": [],
+        "capabilities": [
+          "device.location.read"
+        ],
         "permissions": [
           {
             "name": "Weather Service",
@@ -179,15 +181,6 @@
             "publicIps": [
               "0.0.0.0/0",
               "::/0"
-            ],
-            "properties": {
-              "defaultOn": true
-            }
-          },
-          {
-            "name": "Device Location",
-            "capabilities": [
-              "device.location.read"
             ],
             "properties": {
               "defaultOn": true

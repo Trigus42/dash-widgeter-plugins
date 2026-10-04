@@ -73,13 +73,13 @@ half:
   `context.cacheGet/cachePut`, `useWidgetData`, `context.log`, etc.). Reaching
   around the context defeats the capability model and won't work in the frame.
 - **All network goes through `context.http`**, pinned to the plugin's declared
-  `permissions` groups (each `{ name, domains?, publicIps?, privateIps?, capabilities?,
+  `permissions` groups (each `{ name, domains?, publicIps?, privateIps?,
   properties: { defaultOn } }`; the host enforces the union of enabled groups).
   Direct `fetch`/`XHR`/`WebSocket` is dead in the sandbox (`connect-src 'none'`).
   Declare the narrowest groups the plugin truly needs: `domains` for hostnames,
   `publicIps` (`0.0.0.0/0`+`::/0` = any public IP) for the public tier, and
-  `privateIps` only when it must reach loopback/LAN, and `capabilities` for
-  device/service tokens such as `device.location.read`.
+  `privateIps` only when it must reach loopback/LAN. Declare independently
+  toggleable device/service tokens such as `device.location.read` in `capabilities`.
 - **Secrets never enter the frame.** Mark credential fields `secret: true`; the
   plugin references them as `{{secret:<key>}}` placeholders in request
   headers/URL, and the host substitutes at egress. Never put tokens in `config`.
