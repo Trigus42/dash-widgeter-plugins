@@ -5,7 +5,7 @@
       "manifest": {
         "id": "clock",
         "name": "Clock",
-        "version": "1.3.0",
+        "version": "1.4.0",
         "description": "Date and time display",
         "translations": {
           "de": {
@@ -39,8 +39,8 @@
             "id": "clock.time",
             "name": "Clock",
             "description": "Current time and date",
-            "minW": 8,
-            "minH": 5,
+            "minW": 3,
+            "minH": 2,
             "defaultW": 18,
             "defaultH": 8,
             "defaultZIndex": 10,
@@ -138,7 +138,7 @@
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.7.0",
+        "version": "1.8.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "translations": {
           "de": {
@@ -192,8 +192,8 @@
             "id": "weather.current",
             "name": "Weather Now",
             "description": "Current conditions badge",
-            "minW": 8,
-            "minH": 5,
+            "minW": 3,
+            "minH": 3,
             "defaultW": 13,
             "defaultH": 8,
             "defaultZIndex": 10,
@@ -281,8 +281,8 @@
             "id": "weather.forecast",
             "name": "Weather Forecast",
             "description": "Multi-day forecast card",
-            "minW": 13,
-            "minH": 8,
+            "minW": 4,
+            "minH": 3,
             "defaultW": 20,
             "defaultH": 10,
             "defaultZIndex": 10,
@@ -375,7 +375,7 @@
       "manifest": {
         "id": "calendar",
         "name": "Calendar",
-        "version": "1.4.0",
+        "version": "1.5.0",
         "description": "Upcoming events from an iCal feed",
         "translations": {
           "de": {
@@ -433,8 +433,8 @@
             "id": "calendar.agenda",
             "name": "Calendar Agenda",
             "description": "Upcoming events from any iCal (.ics) feed",
-            "minW": 5,
-            "minH": 8,
+            "minW": 3,
+            "minH": 3,
             "defaultW": 8,
             "defaultH": 13,
             "defaultZIndex": 10,
@@ -522,7 +522,7 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.7.0",
+        "version": "1.8.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
         "translations": {
           "de": {
@@ -623,8 +623,8 @@
             "id": "immich.photoframe",
             "name": "Photo Frame",
             "description": "ImmichFrame-style slideshow: pools, transitions, metadata, controls",
-            "minW": 5,
-            "minH": 5,
+            "minW": 3,
+            "minH": 3,
             "defaultW": 30,
             "defaultH": 25,
             "defaultZIndex": 0,
