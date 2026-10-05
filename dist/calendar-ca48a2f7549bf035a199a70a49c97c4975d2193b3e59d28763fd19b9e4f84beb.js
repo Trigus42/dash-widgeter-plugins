@@ -31834,7 +31834,8 @@ var CALENDAR_SANDBOX_CSS = `
     font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   }
   .calendar-header { font-size: 15px; font-weight: 600; margin-bottom: 10px; flex-shrink: 0; }
-  .calendar-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .calendar-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scrollbar-width: none; -ms-overflow-style: none; }
+  .calendar-list::-webkit-scrollbar { display: none; }
   .calendar-event { display: flex; flex-direction: column; gap: 1px; padding-left: 10px; border-left: 3px solid #6ba7e8; }
   .calendar-when { font-size: 11px; color: rgba(255,255,255,0.7); }
   .calendar-summary { font-size: 14px; font-weight: 500; }

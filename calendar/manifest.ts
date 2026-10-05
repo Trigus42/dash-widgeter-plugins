@@ -13,7 +13,7 @@ import de from './locales/de.json';
 export const calendarManifest: PluginManifest = {
   id: 'calendar',
   name: 'Calendar',
-  version: '1.5.0',
+  version: '1.6.0',
   description: 'Upcoming events from an iCal feed',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
@@ -42,6 +42,7 @@ export const calendarManifest: PluginManifest = {
       defaultH: 13,
       defaultZIndex: WIDGET_Z,
       defaultConfig: { ...CALENDAR_DEFAULT_CONFIG },
+      defaultAppearance: { background: 'glass', backgroundOpacity: 0.6, backgroundBlur: 4, opacity: 1 },
       settings: [
         {
           key: 'sources',

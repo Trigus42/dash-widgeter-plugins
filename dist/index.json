@@ -138,7 +138,7 @@
       "manifest": {
         "id": "weather",
         "name": "Weather",
-        "version": "1.8.0",
+        "version": "1.9.0",
         "description": "Current conditions and forecast via Open-Meteo",
         "translations": {
           "de": {
@@ -193,7 +193,7 @@
             "name": "Weather Now",
             "description": "Current conditions badge",
             "minW": 3,
-            "minH": 3,
+            "minH": 2,
             "defaultW": 13,
             "defaultH": 8,
             "defaultZIndex": 10,
@@ -206,6 +206,12 @@
               "showNextEvent": true,
               "showTitle": true,
               "refreshIntervalMinutes": 15
+            },
+            "defaultAppearance": {
+              "background": "glass",
+              "backgroundOpacity": 0.6,
+              "backgroundBlur": 4,
+              "opacity": 1
             },
             "settings": [
               {
@@ -281,8 +287,8 @@
             "id": "weather.forecast",
             "name": "Weather Forecast",
             "description": "Multi-day forecast card",
-            "minW": 4,
-            "minH": 3,
+            "minW": 5,
+            "minH": 2,
             "defaultW": 20,
             "defaultH": 10,
             "defaultZIndex": 10,
@@ -295,6 +301,12 @@
               "showNextEvent": true,
               "showTitle": true,
               "refreshIntervalMinutes": 15
+            },
+            "defaultAppearance": {
+              "background": "glass",
+              "backgroundOpacity": 0.6,
+              "backgroundBlur": 4,
+              "opacity": 1
             },
             "settings": [
               {
@@ -375,7 +387,7 @@
       "manifest": {
         "id": "calendar",
         "name": "Calendar",
-        "version": "1.5.0",
+        "version": "1.6.0",
         "description": "Upcoming events from an iCal feed",
         "translations": {
           "de": {
@@ -444,6 +456,12 @@
               "showTitle": false,
               "daysAhead": 7,
               "refreshIntervalMinutes": 15
+            },
+            "defaultAppearance": {
+              "background": "glass",
+              "backgroundOpacity": 0.6,
+              "backgroundBlur": 4,
+              "opacity": 1
             },
             "settings": [
               {
@@ -515,8 +533,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar-a7f215e62afdb676e080449eb40c67e28beb43dc44c6c675a5aeda61e0125a64.js",
-      "sha256": "a7f215e62afdb676e080449eb40c67e28beb43dc44c6c675a5aeda61e0125a64"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/calendar-ca48a2f7549bf035a199a70a49c97c4975d2193b3e59d28763fd19b9e4f84beb.js",
+      "sha256": "ca48a2f7549bf035a199a70a49c97c4975d2193b3e59d28763fd19b9e4f84beb"
     },
     {
       "manifest": {
