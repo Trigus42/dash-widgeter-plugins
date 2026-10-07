@@ -24474,7 +24474,7 @@ async function loadImageBlob(context, backend, config, asset, size = "preview") 
     if (cached) return cached;
   }
   const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!res.ok) throw new Error(`Image fetch failed (${res.status})`);
+  if (!res.ok) throw new Error(`Asset fetch failed (${res.status})`);
   const blob = res.data;
   if (config.cacheEnabled) {
     await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
@@ -25023,300 +25023,143 @@ function definePhotoFrameWidget(options) {
   return definePlugin(module);
 }
 
-// src/plugins/immich/service.ts
+// src/core/net/secret-placeholder.ts
+function secretSentinel(fieldKey) {
+  return `{{secret:${fieldKey}}}`;
+}
+
+// src/plugins/google-photos/service.ts
+var TOKEN_URL = "https://oauth2.googleapis.com/token";
+var API_BASE = "https://photoslibrary.googleapis.com/v1";
 var PROXY = "always";
-var ImmichService = class {
+var PREVIEW = { w: 2048, h: 1365 };
+var THUMBNAIL = { w: 640, h: 640 };
+var GooglePhotosService = class {
   constructor(transport, config) {
     this.transport = transport;
     this.config = config;
   }
-  get base() {
-    return `${this.config.serverUrl.replace(/\/$/, "")}/api`;
-  }
-  get jsonHeaders() {
-    return {
-      // `apiKey` is the `{{secret:apiKey}}` sentinel (a secret field); the host
-      // HTTP layer substitutes the real key at egress, so it never enters this
-      // frame. Sending the sentinel verbatim here is correct.
-      "x-api-key": this.config.apiKey,
-      accept: "application/json",
-      "content-type": "application/json"
-    };
-  }
-  /** Typed request helper: the transport returns `unknown` data (RPC-crossed). */
-  async req(request) {
-    return await this.transport.request(request);
-  }
-  /**
-   * Pool-aware asset-list fetch. Pure network fetch: caching, staleness, and
-   * offline fallback are handled by the shared data layer (useWidgetData /
-   * TanStack Query), not here.
-   */
-  async fetchAssets(count) {
-    return this.fetchPool(count);
-  }
-  /** Stable identity for the asset pool; used as the shared query key. */
+  accessToken = null;
+  tokenExpiresAt = 0;
+  /** Stable identity for the pool (client + album); the shared query key. */
   poolCacheKey() {
-    const c = this.config;
-    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
-    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
-  }
-  async fetchPool(count) {
-    switch (this.config.poolMode) {
-      case "memories":
-        return this.fetchMemories();
-      case "favorites":
-        return this.metadataSearch({ isFavorite: { eq: true } }, count);
-      case "random":
-      default:
-        return this.fetchRandom(count);
-    }
+    return `${this.config.clientId}|${this.config.albumId || "library"}`;
   }
   /**
-   * Builds the modern Immich v3+ structured SearchFilter.
-   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
-   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
-   * All criteria are packaged inside `filter`.
+   * Exchange the refresh token for a fresh access token, caching it until a
+   * minute before expiry. The request body carries the client secret + refresh
+   * token as host-substituted placeholders, so this frame never sees them.
    */
-  buildSearchFilter(extraFilter = {}) {
-    const c = this.config;
-    const filter = { ...extraFilter };
-    if (!c.showVideos) {
-      filter.type = { in: ["IMAGE"] };
-    }
-    if (c.rating > 0) {
-      filter.rating = { ge: c.rating };
-    }
-    if (c.onlyWithPersons) {
-      filter.hasPeople = { eq: true };
-    }
-    const buildIds = (e) => {
-      const res = {};
-      if (e.include.length) res.any = e.include;
-      if (e.exclude.length) res.none = e.exclude;
-      return Object.keys(res).length > 0 ? res : null;
-    };
-    const albumIds = buildIds(c.albums);
-    if (albumIds) filter.albumIds = albumIds;
-    const personIds = buildIds(c.people);
-    if (personIds) filter.personIds = personIds;
-    const tagIds = buildIds(c.tags);
-    if (tagIds) filter.tagIds = tagIds;
-    return filter;
-  }
-  postProcessAssets(items) {
-    let result = items;
-    if (this.config.onlyWithPersons) {
-      result = result.filter((a) => a.people && a.people.length > 0);
-    }
-    if (this.config.people.exclude.length > 0) {
-      const excluded = new Set(this.config.people.exclude);
-      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
-    }
-    if (this.config.tags.exclude.length > 0) {
-      const excluded = new Set(this.config.tags.exclude);
-      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
-    }
-    return result;
-  }
-  async fetchRandom(count) {
-    const filter = this.buildSearchFilter();
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/random`,
+  async accessTokenValue() {
+    const now = Date.now();
+    if (this.accessToken && now < this.tokenExpiresAt) return this.accessToken;
+    const body = `client_id=${encodeURIComponent(this.config.clientId)}&client_secret=${secretSentinel("clientSecret")}&refresh_token=${secretSentinel("refreshToken")}&grant_type=refresh_token`;
+    const res = await this.transport.request({
+      url: TOKEN_URL,
       method: "POST",
-      headers: this.jsonHeaders,
+      headers: { "content-type": "application/x-www-form-urlencoded" },
       body,
       proxy: PROXY
     });
-    if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    const items = Array.isArray(res.data) ? res.data : [];
-    return this.postProcessAssets(items);
+    if (!res.ok || !res.data.access_token) {
+      throw new Error(`Google token refresh failed (${res.status})`);
+    }
+    this.accessToken = res.data.access_token;
+    this.tokenExpiresAt = now + Math.max(0, (res.data.expires_in ?? 3600) - 60) * 1e3;
+    return this.accessToken;
   }
-  async metadataSearch(extraFilter, count) {
-    var _a;
-    const filter = this.buildSearchFilter(extraFilter);
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/metadata`,
+  async authHeaders() {
+    return { authorization: `Bearer ${await this.accessTokenValue()}` };
+  }
+  /** Fetch up to `count` media items from the album, or recent library media. */
+  async fetchAssets(count) {
+    const headers = { ...await this.authHeaders(), "content-type": "application/json" };
+    const body = { pageSize: Math.min(100, Math.max(1, count)) };
+    if (this.config.albumId) body.albumId = this.config.albumId;
+    const res = await this.transport.request({
+      url: `${API_BASE}/mediaItems:search`,
       method: "POST",
-      headers: this.jsonHeaders,
+      headers,
       body,
       proxy: PROXY
     });
-    if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
-    return this.postProcessAssets(items);
+    if (!res.ok) throw new Error(`Google Photos search failed (${res.status})`);
+    const items = res.data.mediaItems ?? [];
+    return items.filter((item) => !item.mimeType || item.mimeType.startsWith("image/"));
   }
-  async fetchMemories() {
-    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
-    const res = await this.req({
-      url: `${this.base}/memories?for=${today}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
-    const now = (/* @__PURE__ */ new Date()).getFullYear();
-    const items = (res.data ?? []).flatMap((memory) => {
-      var _a;
-      const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
-      const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
-      return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
-    });
-    return this.postProcessAssets(items);
-  }
-  async fetchAssetAlbums(assetId) {
-    try {
-      const res = await this.req({
-        url: `${this.base}/albums?assetId=${assetId}`,
-        method: "GET",
-        headers: this.jsonHeaders,
-        proxy: PROXY
-      });
-      if (!res.ok || !Array.isArray(res.data)) return [];
-      return res.data.map((a) => a.albumName).filter(Boolean);
-    } catch {
-      return [];
-    }
-  }
-  /**
-   * Build the request that returns an asset's image bytes. Pure — the shared
-   * SDK engine executes it with `responseType: 'binary'`, caches, and decodes.
-   */
-  imageRequest(assetId, size = "preview") {
-    return {
-      url: `${this.base}/assets/${assetId}/thumbnail?size=${size}`,
-      method: "GET",
-      headers: { "x-api-key": this.config.apiKey },
-      proxy: PROXY
-    };
-  }
-  /** Browser-native playback URL; direct media cannot carry the brokered API key. */
-  videoUrl(assetId) {
-    return `${this.base}/assets/${assetId}/video/playback`;
-  }
-  /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
-  async fetchFaceBox(assetId) {
-    const res = await this.req({
-      url: `${this.base}/faces?id=${assetId}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
-    const f = res.data[0];
-    if (!f || !f.imageWidth || !f.imageHeight) return null;
-    return {
-      cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
-      cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight
-    };
-  }
+  /** List the user's albums for the settings picker (title + id). */
   async listAlbums() {
-    const res = await this.req({
-      url: `${this.base}/albums`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
-    return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
+    const headers = await this.authHeaders();
+    const albums = [];
+    let pageToken = "";
+    for (let page = 0; page < 5; page += 1) {
+      const url = `${API_BASE}/albums?pageSize=50${pageToken ? `&pageToken=${pageToken}` : ""}`;
+      const res = await this.transport.request({ url, method: "GET", headers, proxy: PROXY });
+      if (!res.ok) throw new Error(`Google Photos albums failed (${res.status})`);
+      for (const album of res.data.albums ?? []) {
+        albums.push({ label: album.title || "(untitled album)", value: album.id });
+      }
+      if (!res.data.nextPageToken) break;
+      pageToken = res.data.nextPageToken;
+    }
+    return albums;
   }
-  async listPeople() {
-    const res = await this.req({
-      url: `${this.base}/people?withHidden=false`,
+  /**
+   * Build the request for an item's image bytes. Google Photos baseUrls are
+   * pre-signed (no auth) and take a `=w{W}-h{H}` size suffix. Pure — the SDK
+   * engine runs it with `responseType: 'binary'`, caches and decodes.
+   */
+  imageRequest(baseUrl, size) {
+    const dim = size === "thumbnail" ? THUMBNAIL : PREVIEW;
+    return {
+      url: `${baseUrl}=w${dim.w}-h${dim.h}`,
       method: "GET",
-      headers: this.jsonHeaders,
       proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
-    return (res.data.people ?? []).filter((p) => p.name).map((p) => ({ label: p.name, value: p.id }));
-  }
-  async listTags() {
-    const res = await this.req({
-      url: `${this.base}/tags`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
-    return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
+    };
   }
 };
 
-// src/plugins/immich/types.ts
-var IMMICH_DEFAULT_CONFIG = {
-  serverUrl: "",
-  apiKey: "",
-  poolMode: "random",
-  albums: { include: [], exclude: [] },
-  people: { include: [], exclude: [] },
-  tags: { include: [], exclude: [] },
-  rating: 0,
-  showVideos: false,
-  onlyWithPersons: false
+// src/plugins/google-photos/types.ts
+var GOOGLE_PHOTOS_DEFAULT_CONFIG = {
+  clientId: "",
+  albumId: ""
 };
 
-// src/plugins/immich/config.ts
+// src/plugins/google-photos/config.ts
 function str(raw, fallback) {
   return typeof raw === "string" ? raw : fallback;
 }
-function num2(raw, fallback) {
-  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
-}
-function bool2(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
-}
-function strArray(raw) {
-  if (Array.isArray(raw)) return raw.filter((v) => typeof v === "string");
-  if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
-  return [];
-}
-var POOL_MODES = ["random", "favorites", "memories"];
-function entityFilter(raw, legacyIds) {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const v = raw;
-    return { include: strArray(v.include), exclude: strArray(v.exclude) };
-  }
-  return { include: strArray(legacyIds), exclude: [] };
-}
-function readImmichConfig(raw) {
-  const d = IMMICH_DEFAULT_CONFIG;
-  const poolMode = POOL_MODES.includes(raw.poolMode) ? raw.poolMode : d.poolMode;
+function readGooglePhotosConfig(raw) {
+  const d = GOOGLE_PHOTOS_DEFAULT_CONFIG;
   return {
-    serverUrl: str(raw.serverUrl, d.serverUrl),
-    apiKey: str(raw.apiKey, d.apiKey),
-    poolMode,
-    albums: entityFilter(raw.albums, raw.albumIds),
-    people: entityFilter(raw.people, raw.personIds),
-    tags: entityFilter(raw.tags, raw.tagIds),
-    rating: num2(raw.rating, d.rating),
-    showVideos: bool2(raw.showVideos, d.showVideos),
-    onlyWithPersons: bool2(raw.onlyWithPersons, d.onlyWithPersons)
+    clientId: str(raw.clientId, d.clientId),
+    albumId: str(raw.albumId, d.albumId)
   };
 }
 
-// src/plugins/immich/backend.ts
-var ImmichBackend = class {
+// src/plugins/google-photos/backend.ts
+function toPhotoAsset(item) {
+  var _a;
+  const asset = {
+    // The id is used by the engine for cache keys + React lists, but the image
+    // request needs the pre-signed baseUrl, so stash it in the id. We keep the
+    // baseUrl as the id (stable per render) and read it back in imageRequest.
+    id: item.baseUrl,
+    type: "IMAGE"
+  };
+  if (item.filename) asset.originalFileName = item.filename;
+  const created = (_a = item.mediaMetadata) == null ? void 0 : _a.creationTime;
+  if (created) asset.localDateTime = created;
+  return asset;
+}
+var GooglePhotosBackend = class {
   service;
   configured;
   constructor(context, rawConfig) {
-    const config = readImmichConfig(rawConfig);
-    this.configured = config.serverUrl !== "" && config.apiKey !== "";
+    const config = readGooglePhotosConfig(rawConfig);
+    this.configured = config.clientId.trim() !== "";
     const transport = { request: (req) => context.http(req) };
-    this.service = new ImmichService(transport, config);
+    this.service = new GooglePhotosService(transport, config);
   }
   isConfigured() {
     return this.configured;
@@ -25325,61 +25168,42 @@ var ImmichBackend = class {
     return this.service.poolCacheKey();
   }
   async fetchAssets(count) {
-    const assets = await this.service.fetchAssets(count);
-    return assets.map((asset) => asset.type.toUpperCase() === "VIDEO" ? { ...asset, directUrl: this.service.videoUrl(asset.id) } : asset);
+    const items = await this.service.fetchAssets(count);
+    return items.map(toPhotoAsset);
   }
   imageRequest(asset, size) {
     return this.service.imageRequest(asset.id, size);
   }
-  fetchFaceBox(asset) {
-    return this.service.fetchFaceBox(asset.id);
-  }
-  async enrichAsset(asset) {
-    const immichAsset = asset;
-    if (immichAsset.albumName) return;
-    const albums = await this.service.fetchAssetAlbums(asset.id);
-    if (albums.length > 0) immichAsset.albumName = albums.join(", ");
-  }
 };
-async function loadImmichOptions(context, fieldKey, rawConfig) {
-  const config = readImmichConfig(rawConfig);
-  if (!config.serverUrl || !config.apiKey) {
-    throw new Error("Enter the server URL and API key first.");
+async function loadGooglePhotosAlbums(context, rawConfig) {
+  const config = readGooglePhotosConfig(rawConfig);
+  if (!config.clientId) {
+    throw new Error("Enter the OAuth client id and connect your account first.");
   }
-  const service = new ImmichService({ request: (req) => context.http(req) }, config);
-  if (fieldKey === "albums") return service.listAlbums();
-  if (fieldKey === "people") return service.listPeople();
-  return service.listTags();
+  const service = new GooglePhotosService({ request: (req) => context.http(req) }, config);
+  return service.listAlbums();
 }
 
-// src/plugins/immich/locales/de.json
+// src/plugins/google-photos/locales/de.json
 var de_default = {
   manifest: {
-    "Immich Photo Frame": "Immich-Bilderrahmen",
-    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
+    "Google Photos Frame": "Google-Fotos-Bilderrahmen",
+    "Digital photo frame backed by Google Photos, with offline caching": "Digitaler Bilderrahmen f\xFCr Google Fotos mit Offline-Zwischenspeicher",
     "Photo Frame": "Bilderrahmen",
-    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
+    "Slideshow of your Google Photos: albums or recent media, transitions, metadata": "Diashow aus Google Fotos: Alben oder neueste Medien, mit \xDCberg\xE4ngen und Metadaten",
     Connection: "Verbindung",
     Source: "Quelle",
     Slideshow: "Diashow",
     "Info overlay": "Info-Einblendung",
     Caching: "Zwischenspeicher",
-    "Immich Server URL": "Immich-Server-URL",
-    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
-    "API Key": "API-Schl\xFCssel",
-    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
-    "Photo source": "Fotoquelle",
-    "All photos": "Alle Fotos",
-    Favorites: "Favoriten",
-    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
-    Albums: "Alben",
-    People: "Personen",
-    Tags: "Schlagw\xF6rter",
-    "Tap once to include (\u2713), again to exclude (\u2212). Albums, people and tags are combined.": "Einmal tippen zum Einschlie\xDFen (\u2713), erneut tippen zum Ausschlie\xDFen (\u2212). Alben, Personen und Schlagw\xF6rter werden kombiniert.",
-    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
-    "Include videos": "Videos einschlie\xDFen",
-    "Only photos with people": "Nur Fotos mit Personen",
-    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
+    "OAuth client ID": "OAuth-Client-ID",
+    "Google Cloud console \u2192 Credentials \u2192 OAuth client ID (Desktop app).": "Google-Cloud-Konsole \u2192 Anmeldedaten \u2192 OAuth-Client-ID (Desktop-App).",
+    "OAuth client secret": "OAuth-Client-Schl\xFCssel",
+    "From the same OAuth client. Stored encrypted on the device, never sent to the widget.": "Vom selben OAuth-Client. Verschl\xFCsselt auf dem Ger\xE4t gespeichert, nie an das Widget gesendet.",
+    "Refresh token": "Aktualisierungstoken",
+    "Obtain once via the OAuth consent flow (scope photoslibrary.readonly) and paste it here.": "Einmalig \xFCber den OAuth-Zustimmungsablauf (Bereich photoslibrary.readonly) abrufen und hier einf\xFCgen.",
+    Album: "Album",
+    "Pick an album, or leave unset to show recent library photos.": "Album ausw\xE4hlen oder leer lassen, um neueste Fotos anzuzeigen.",
     "Seconds per photo": "Sekunden pro Foto",
     "Preload upcoming photos": "Kommende Fotos vorladen",
     "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
@@ -25418,20 +25242,20 @@ var de_default = {
     "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
   },
   runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
+    configure: "\xD6ffnen Sie die Einstellungen, um Ihr Google-Fotos-Konto zu verbinden.",
     loading: "Fotos werden geladen\u2026",
     next: "Weiter",
     pause: "Pause",
     play: "Wiedergabe",
     previous: "Zur\xFCck",
-    title: "Immich-Bilderrahmen"
+    title: "Google-Fotos-Bilderrahmen"
   }
 };
 
-// src/plugins/immich/sandbox.ts
+// src/plugins/google-photos/sandbox.ts
 var EN = {
-  title: "Immich Photo Frame",
-  configure: "Open settings to add your Immich server URL and API key.",
+  title: "Google Photos Frame",
+  configure: "Open settings to connect your Google Photos account.",
   loading: "Loading photos\u2026",
   previous: "Previous",
   next: "Next",
@@ -25454,11 +25278,11 @@ function strings(locale) {
   return EN;
 }
 var sandbox_default = definePhotoFrameWidget({
-  widgetId: "immich.photoframe",
-  styleId: "immich-style",
+  widgetId: "google-photos.photoframe",
+  styleId: "google-photos-style",
   strings,
-  createBackend: (context, config) => new ImmichBackend(context, config),
-  loadOptions: (context, fieldKey, config) => loadImmichOptions(context, fieldKey, config)
+  createBackend: (context, config) => new GooglePhotosBackend(context, config),
+  loadOptions: (context, _fieldKey, config) => loadGooglePhotosAlbums(context, config)
 });
 export {
   sandbox_default as default

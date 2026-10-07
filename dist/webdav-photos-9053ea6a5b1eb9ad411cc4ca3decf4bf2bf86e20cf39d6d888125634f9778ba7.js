@@ -24474,7 +24474,7 @@ async function loadImageBlob(context, backend, config, asset, size = "preview") 
     if (cached) return cached;
   }
   const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!res.ok) throw new Error(`Image fetch failed (${res.status})`);
+  if (!res.ok) throw new Error(`Asset fetch failed (${res.status})`);
   const blob = res.data;
   if (config.cacheEnabled) {
     await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
@@ -25024,142 +25024,204 @@ function definePhotoFrameWidget(options) {
 }
 
 // src/core/net/secret-placeholder.ts
-function secretSentinel(fieldKey) {
-  return `{{secret:${fieldKey}}}`;
+function basicAuthSentinel(usernameKey, secretKey) {
+  return `{{basic:${usernameKey}:${secretKey}}}`;
 }
 
-// src/plugins/google-photos/service.ts
-var TOKEN_URL = "https://oauth2.googleapis.com/token";
-var API_BASE = "https://photoslibrary.googleapis.com/v1";
+// src/plugins/webdav-photos/propfind.ts
+function parsePropfind(xml, collectionUrl) {
+  var _a;
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  if (doc.getElementsByTagName("parsererror").length > 0) return [];
+  const origin = originOf(collectionUrl);
+  const selfPath = pathOf(collectionUrl);
+  const entries = [];
+  for (const response of byLocalName(doc, "response")) {
+    const hrefEl = firstByLocalName(response, "href");
+    const rawHref = (_a = hrefEl == null ? void 0 : hrefEl.textContent) == null ? void 0 : _a.trim();
+    if (!rawHref) continue;
+    const href = resolveHref(rawHref, origin);
+    if (pathOf(href) === selfPath) continue;
+    const propstat = findOkPropstat(response);
+    const prop = propstat ? firstByLocalName(propstat, "prop") : null;
+    const contentType = prop ? textByLocalName(prop, "getcontenttype") : null;
+    const lastModifiedRaw = prop ? textByLocalName(prop, "getlastmodified") : null;
+    const lastModified = lastModifiedRaw ? Date.parse(lastModifiedRaw) || null : null;
+    const resourceType = prop ? firstByLocalName(prop, "resourcetype") : null;
+    const isCollection = resourceType ? byLocalName(resourceType, "collection").length > 0 : false;
+    entries.push({ href, contentType, isCollection, lastModified });
+  }
+  return entries;
+}
+function findOkPropstat(response) {
+  var _a;
+  for (const propstat of byLocalName(response, "propstat")) {
+    const status = ((_a = firstByLocalName(propstat, "status")) == null ? void 0 : _a.textContent) ?? "";
+    if (/\s2\d\d\s/.test(status)) return propstat;
+  }
+  return firstByLocalName(response, "propstat");
+}
+function localNameOf(el) {
+  const name = el.localName.toLowerCase();
+  const colon = name.indexOf(":");
+  return colon >= 0 ? name.slice(colon + 1) : name;
+}
+function byLocalName(root, local) {
+  const all = root.getElementsByTagName("*");
+  const out = [];
+  for (let i = 0; i < all.length; i += 1) {
+    const el = all[i];
+    if (el && localNameOf(el) === local) out.push(el);
+  }
+  return out;
+}
+function firstByLocalName(root, local) {
+  return byLocalName(root, local)[0] ?? null;
+}
+function textByLocalName(root, local) {
+  var _a;
+  const el = firstByLocalName(root, local);
+  const text = (_a = el == null ? void 0 : el.textContent) == null ? void 0 : _a.trim();
+  return text && text.length > 0 ? text : null;
+}
+function originOf(url) {
+  const match = /^(https?:\/\/[^/]+)/i.exec(url);
+  return (match == null ? void 0 : match[1]) ?? "";
+}
+function pathOf(url) {
+  const withoutOrigin = url.replace(/^https?:\/\/[^/]+/i, "");
+  const path = withoutOrigin.split("?")[0] ?? withoutOrigin;
+  return decodeURIComponent(path.replace(/\/+$/, "")) || "/";
+}
+function resolveHref(href, origin) {
+  if (/^https?:\/\//i.test(href)) return href;
+  if (href.startsWith("/")) return `${origin}${href}`;
+  return `${origin}/${href}`;
+}
+
+// src/plugins/webdav-photos/service.ts
 var PROXY = "always";
-var PREVIEW = { w: 2048, h: 1365 };
-var THUMBNAIL = { w: 640, h: 640 };
-var GooglePhotosService = class {
+var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "bmp", "heic", "heif"]);
+function isImageResource(href, contentType) {
+  var _a;
+  if (contentType && contentType.toLowerCase().startsWith("image/")) return true;
+  const path = href.split("?")[0] ?? href;
+  const ext = ((_a = path.split(".").pop()) == null ? void 0 : _a.toLowerCase()) ?? "";
+  return IMAGE_EXTENSIONS.has(ext);
+}
+var WebDavService = class {
   constructor(transport, config) {
     this.transport = transport;
     this.config = config;
   }
-  accessToken = null;
-  tokenExpiresAt = 0;
-  /** Stable identity for the pool (client + album); the shared query key. */
+  /** Collection URL with exactly one trailing slash (WebDAV collections end in /). */
+  get collectionUrl() {
+    return `${this.config.folderUrl.replace(/\/+$/, "")}/`;
+  }
+  /** Basic-auth header value: a host-substituted placeholder, never the password. */
+  authHeaders() {
+    if (!this.config.username) return {};
+    return { authorization: basicAuthSentinel("username", "password") };
+  }
+  /** Stable identity for the pool (folder + recursion); the shared query key. */
   poolCacheKey() {
-    return `${this.config.clientId}|${this.config.albumId || "library"}`;
+    return `${this.collectionUrl}|r${this.config.recursive ? 1 : 0}`;
   }
   /**
-   * Exchange the refresh token for a fresh access token, caching it until a
-   * minute before expiry. The request body carries the client secret + refresh
-   * token as host-substituted placeholders, so this frame never sees them.
+   * List image files in the collection via PROPFIND. `Depth: 1` lists the direct
+   * children; `infinity` recurses (servers may refuse infinity, in which case we
+   * fall back to a one-level listing so a locked-down server still shows photos).
    */
-  async accessTokenValue() {
-    const now = Date.now();
-    if (this.accessToken && now < this.tokenExpiresAt) return this.accessToken;
-    const body = `client_id=${encodeURIComponent(this.config.clientId)}&client_secret=${secretSentinel("clientSecret")}&refresh_token=${secretSentinel("refreshToken")}&grant_type=refresh_token`;
+  async listImages() {
+    const depth = this.config.recursive ? "infinity" : "1";
+    let entries = await this.propfind(depth);
+    if (entries === null && depth === "infinity") {
+      entries = await this.propfind("1");
+    }
+    if (entries === null) throw new Error("WebDAV listing failed");
+    return entries.filter((e) => !e.isCollection && isImageResource(e.href, e.contentType));
+  }
+  /** Issue one PROPFIND; returns parsed entries, or null on a non-207 response. */
+  async propfind(depth) {
+    const body = '<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:getcontenttype/><d:getlastmodified/><d:resourcetype/></d:prop></d:propfind>';
     const res = await this.transport.request({
-      url: TOKEN_URL,
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
+      url: this.collectionUrl,
+      method: "PROPFIND",
+      headers: { ...this.authHeaders(), depth, "content-type": "application/xml" },
       body,
+      responseType: "text",
       proxy: PROXY
     });
-    if (!res.ok || !res.data.access_token) {
-      throw new Error(`Google token refresh failed (${res.status})`);
-    }
-    this.accessToken = res.data.access_token;
-    this.tokenExpiresAt = now + Math.max(0, (res.data.expires_in ?? 3600) - 60) * 1e3;
-    return this.accessToken;
-  }
-  async authHeaders() {
-    return { authorization: `Bearer ${await this.accessTokenValue()}` };
-  }
-  /** Fetch up to `count` media items from the album, or recent library media. */
-  async fetchAssets(count) {
-    const headers = { ...await this.authHeaders(), "content-type": "application/json" };
-    const body = { pageSize: Math.min(100, Math.max(1, count)) };
-    if (this.config.albumId) body.albumId = this.config.albumId;
-    const res = await this.transport.request({
-      url: `${API_BASE}/mediaItems:search`,
-      method: "POST",
-      headers,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Google Photos search failed (${res.status})`);
-    const items = res.data.mediaItems ?? [];
-    return items.filter((item) => !item.mimeType || item.mimeType.startsWith("image/"));
-  }
-  /** List the user's albums for the settings picker (title + id). */
-  async listAlbums() {
-    const headers = await this.authHeaders();
-    const albums = [];
-    let pageToken = "";
-    for (let page = 0; page < 5; page += 1) {
-      const url = `${API_BASE}/albums?pageSize=50${pageToken ? `&pageToken=${pageToken}` : ""}`;
-      const res = await this.transport.request({ url, method: "GET", headers, proxy: PROXY });
-      if (!res.ok) throw new Error(`Google Photos albums failed (${res.status})`);
-      for (const album of res.data.albums ?? []) {
-        albums.push({ label: album.title || "(untitled album)", value: album.id });
-      }
-      if (!res.data.nextPageToken) break;
-      pageToken = res.data.nextPageToken;
-    }
-    return albums;
+    if (res.status !== 207 || typeof res.data !== "string") return null;
+    return parsePropfind(res.data, this.collectionUrl);
   }
   /**
-   * Build the request for an item's image bytes. Google Photos baseUrls are
-   * pre-signed (no auth) and take a `=w{W}-h{H}` size suffix. Pure — the SDK
-   * engine runs it with `responseType: 'binary'`, caches and decodes.
+   * Build the request that returns an image's bytes. Pure — the SDK engine runs
+   * it with `responseType: 'binary'`, caches and decodes. WebDAV has no server-
+   * side thumbnailing, so the size tier is ignored (always the original file).
    */
-  imageRequest(baseUrl, size) {
-    const dim = size === "thumbnail" ? THUMBNAIL : PREVIEW;
+  imageRequest(href, _size) {
     return {
-      url: `${baseUrl}=w${dim.w}-h${dim.h}`,
+      url: href,
       method: "GET",
+      headers: this.authHeaders(),
       proxy: PROXY
     };
   }
 };
 
-// src/plugins/google-photos/types.ts
-var GOOGLE_PHOTOS_DEFAULT_CONFIG = {
-  clientId: "",
-  albumId: ""
+// src/plugins/webdav-photos/types.ts
+var WEBDAV_DEFAULT_CONFIG = {
+  folderUrl: "",
+  username: "",
+  recursive: false
 };
 
-// src/plugins/google-photos/config.ts
+// src/plugins/webdav-photos/config.ts
 function str(raw, fallback) {
   return typeof raw === "string" ? raw : fallback;
 }
-function readGooglePhotosConfig(raw) {
-  const d = GOOGLE_PHOTOS_DEFAULT_CONFIG;
+function bool2(raw, fallback) {
+  return typeof raw === "boolean" ? raw : fallback;
+}
+function readWebDavConfig(raw) {
+  const d = WEBDAV_DEFAULT_CONFIG;
   return {
-    clientId: str(raw.clientId, d.clientId),
-    albumId: str(raw.albumId, d.albumId)
+    folderUrl: str(raw.folderUrl, d.folderUrl),
+    username: str(raw.username, d.username),
+    recursive: bool2(raw.recursive, d.recursive)
   };
 }
 
-// src/plugins/google-photos/backend.ts
-function toPhotoAsset(item) {
-  var _a;
+// src/plugins/webdav-photos/backend.ts
+function fileNameOf(href) {
+  const path = href.split("?")[0] ?? href;
+  const segment = path.replace(/\/+$/, "").split("/").pop() ?? "";
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+function toPhotoAsset(entry) {
   const asset = {
-    // The id is used by the engine for cache keys + React lists, but the image
-    // request needs the pre-signed baseUrl, so stash it in the id. We keep the
-    // baseUrl as the id (stable per render) and read it back in imageRequest.
-    id: item.baseUrl,
-    type: "IMAGE"
+    // The absolute href is the stable id (keys the blob cache + React lists) and
+    // the address the image request is built from.
+    id: entry.href,
+    type: "IMAGE",
+    originalFileName: fileNameOf(entry.href)
   };
-  if (item.filename) asset.originalFileName = item.filename;
-  const created = (_a = item.mediaMetadata) == null ? void 0 : _a.creationTime;
-  if (created) asset.localDateTime = created;
+  if (entry.lastModified) asset.localDateTime = new Date(entry.lastModified).toISOString();
   return asset;
 }
-var GooglePhotosBackend = class {
+var WebDavBackend = class {
   service;
   configured;
   constructor(context, rawConfig) {
-    const config = readGooglePhotosConfig(rawConfig);
-    this.configured = config.clientId.trim() !== "";
+    const config = readWebDavConfig(rawConfig);
+    this.configured = config.folderUrl.trim() !== "";
     const transport = { request: (req) => context.http(req) };
-    this.service = new GooglePhotosService(transport, config);
+    this.service = new WebDavService(transport, config);
   }
   isConfigured() {
     return this.configured;
@@ -25167,43 +25229,34 @@ var GooglePhotosBackend = class {
   poolCacheKey() {
     return this.service.poolCacheKey();
   }
-  async fetchAssets(count) {
-    const items = await this.service.fetchAssets(count);
-    return items.map(toPhotoAsset);
+  async fetchAssets(_count) {
+    const entries = await this.service.listImages();
+    return entries.map(toPhotoAsset);
   }
   imageRequest(asset, size) {
     return this.service.imageRequest(asset.id, size);
   }
 };
-async function loadGooglePhotosAlbums(context, rawConfig) {
-  const config = readGooglePhotosConfig(rawConfig);
-  if (!config.clientId) {
-    throw new Error("Enter the OAuth client id and connect your account first.");
-  }
-  const service = new GooglePhotosService({ request: (req) => context.http(req) }, config);
-  return service.listAlbums();
-}
 
-// src/plugins/google-photos/locales/de.json
+// src/plugins/webdav-photos/locales/de.json
 var de_default = {
   manifest: {
-    "Google Photos Frame": "Google-Fotos-Bilderrahmen",
-    "Digital photo frame backed by Google Photos, with offline caching": "Digitaler Bilderrahmen f\xFCr Google Fotos mit Offline-Zwischenspeicher",
+    "WebDAV Photo Frame": "WebDAV-Bilderrahmen",
+    "Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, \u2026), with offline caching": "Digitaler Bilderrahmen f\xFCr einen WebDAV-Ordner (Nextcloud, ownCloud, \u2026) mit Offline-Zwischenspeicher",
     "Photo Frame": "Bilderrahmen",
-    "Slideshow of your Google Photos: albums or recent media, transitions, metadata": "Diashow aus Google Fotos: Alben oder neueste Medien, mit \xDCberg\xE4ngen und Metadaten",
+    "Slideshow of photos from a WebDAV folder: transitions, metadata, controls": "Diashow aus einem WebDAV-Ordner mit \xDCberg\xE4ngen, Metadaten und Steuerung",
     Connection: "Verbindung",
-    Source: "Quelle",
     Slideshow: "Diashow",
     "Info overlay": "Info-Einblendung",
     Caching: "Zwischenspeicher",
-    "OAuth client ID": "OAuth-Client-ID",
-    "Google Cloud console \u2192 Credentials \u2192 OAuth client ID (Desktop app).": "Google-Cloud-Konsole \u2192 Anmeldedaten \u2192 OAuth-Client-ID (Desktop-App).",
-    "OAuth client secret": "OAuth-Client-Schl\xFCssel",
-    "From the same OAuth client. Stored encrypted on the device, never sent to the widget.": "Vom selben OAuth-Client. Verschl\xFCsselt auf dem Ger\xE4t gespeichert, nie an das Widget gesendet.",
-    "Refresh token": "Aktualisierungstoken",
-    "Obtain once via the OAuth consent flow (scope photoslibrary.readonly) and paste it here.": "Einmalig \xFCber den OAuth-Zustimmungsablauf (Bereich photoslibrary.readonly) abrufen und hier einf\xFCgen.",
-    Album: "Album",
-    "Pick an album, or leave unset to show recent library photos.": "Album ausw\xE4hlen oder leer lassen, um neueste Fotos anzuzeigen.",
+    "Folder URL": "Ordner-URL",
+    "WebDAV collection (folder) URL. Nextcloud: Files \u2192 \u22EF \u2192 details shows the dav path.": "WebDAV-Ordner-URL. Nextcloud: Dateien \u2192 \u22EF \u2192 Details zeigt den DAV-Pfad.",
+    Username: "Benutzername",
+    "Leave blank for a public (anonymous) share.": "F\xFCr eine \xF6ffentliche (anonyme) Freigabe leer lassen.",
+    Password: "Passwort",
+    "Use an app password where your provider offers one.": "Verwenden Sie nach M\xF6glichkeit ein App-Passwort.",
+    "Include subfolders": "Unterordner einschlie\xDFen",
+    "List photos in nested folders too (the server may decline deep listings).": "Auch Fotos in Unterordnern auflisten (der Server kann tiefe Auflistungen ablehnen).",
     "Seconds per photo": "Sekunden pro Foto",
     "Preload upcoming photos": "Kommende Fotos vorladen",
     "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
@@ -25242,20 +25295,20 @@ var de_default = {
     "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
   },
   runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um Ihr Google-Fotos-Konto zu verbinden.",
+    configure: "\xD6ffnen Sie die Einstellungen, um die WebDAV-Ordner-URL und Zugangsdaten hinzuzuf\xFCgen.",
     loading: "Fotos werden geladen\u2026",
     next: "Weiter",
     pause: "Pause",
     play: "Wiedergabe",
     previous: "Zur\xFCck",
-    title: "Google-Fotos-Bilderrahmen"
+    title: "WebDAV-Bilderrahmen"
   }
 };
 
-// src/plugins/google-photos/sandbox.ts
+// src/plugins/webdav-photos/sandbox.ts
 var EN = {
-  title: "Google Photos Frame",
-  configure: "Open settings to connect your Google Photos account.",
+  title: "WebDAV Photo Frame",
+  configure: "Open settings to add your WebDAV folder URL and credentials.",
   loading: "Loading photos\u2026",
   previous: "Previous",
   next: "Next",
@@ -25278,11 +25331,10 @@ function strings(locale) {
   return EN;
 }
 var sandbox_default = definePhotoFrameWidget({
-  widgetId: "google-photos.photoframe",
-  styleId: "google-photos-style",
+  widgetId: "webdav-photos.photoframe",
+  styleId: "webdav-photos-style",
   strings,
-  createBackend: (context, config) => new GooglePhotosBackend(context, config),
-  loadOptions: (context, _fieldKey, config) => loadGooglePhotosAlbums(context, config)
+  createBackend: (context, config) => new WebDavBackend(context, config)
 });
 export {
   sandbox_default as default

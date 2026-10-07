@@ -24163,327 +24163,17 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/photoframe/frame-config.ts
-var FRAME_DEFAULT_CONFIG = {
-  intervalSeconds: 15,
-  preloadCount: 2,
-  layout: "single",
-  transition: "kenburns",
-  transitionSeconds: 1.2,
-  imageFit: "cover",
-  showControls: true,
-  progressBar: "bottom",
-  metadataPosition: "bottom-right",
-  metadataShowDate: true,
-  metadataShowLocation: true,
-  metadataShowDescription: false,
-  metadataShowPeople: true,
-  metadataShowAlbum: false,
-  metadataShowTags: true,
-  cacheEnabled: true,
-  cacheMaxMB: 500,
-  cacheExpirationDays: 0,
-  listTtlMinutes: 720
-};
-function num(raw, fallback) {
-  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
+// src/sandbox/sdk.ts
+function definePlugin(module) {
+  return module;
 }
-function bool(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
+function injectStyle(id, css) {
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = css;
+  document.head.appendChild(style);
 }
-var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
-var METADATA_POSITIONS = [
-  "none",
-  "bottom-left",
-  "bottom-right",
-  "top-left",
-  "top-right"
-];
-function readFrameConfig(raw) {
-  const d = FRAME_DEFAULT_CONFIG;
-  const transition = TRANSITIONS.includes(raw.transition) ? raw.transition : d.transition;
-  const layout = raw.layout === "split" ? "split" : "single";
-  const imageFit = raw.imageFit === "contain" ? "contain" : "cover";
-  const progressBar = raw.progressBar === "top" || raw.progressBar === "none" ? raw.progressBar : d.progressBar;
-  const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition) ? raw.metadataPosition : d.metadataPosition;
-  return {
-    intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
-    preloadCount: num(raw.preloadCount, d.preloadCount),
-    layout,
-    transition,
-    transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
-    imageFit,
-    showControls: bool(raw.showControls, d.showControls),
-    progressBar,
-    metadataPosition,
-    metadataShowDate: bool(raw.metadataShowDate, d.metadataShowDate),
-    metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
-    metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
-    metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
-    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
-    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
-    cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
-    cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
-    cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
-    listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes)
-  };
-}
-function cachePolicyFromConfig(config) {
-  const days = config.cacheExpirationDays;
-  return {
-    maxBytes: config.cacheMaxMB * 1024 * 1024,
-    maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
-  };
-}
-function panesForLayout(layout) {
-  return layout === "split" ? 2 : 1;
-}
-
-// src/sandbox/photoframe/metadata.ts
-function deriveMetadata(asset, options, locale) {
-  const exif = asset.exifInfo;
-  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
-  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
-  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
-  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
-  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
-  return {
-    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
-    location: location2,
-    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
-    people,
-    album,
-    tags
-  };
-}
-function hasMetadata(meta) {
-  return Boolean(
-    meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags
-  );
-}
-
-// node_modules/thumbhash/thumbhash.js
-function thumbHashToRGBA(hash) {
-  let { PI, min, max, cos, round } = Math;
-  let header24 = hash[0] | hash[1] << 8 | hash[2] << 16;
-  let header16 = hash[3] | hash[4] << 8;
-  let l_dc = (header24 & 63) / 63;
-  let p_dc = (header24 >> 6 & 63) / 31.5 - 1;
-  let q_dc = (header24 >> 12 & 63) / 31.5 - 1;
-  let l_scale = (header24 >> 18 & 31) / 31;
-  let hasAlpha = header24 >> 23;
-  let p_scale = (header16 >> 3 & 63) / 63;
-  let q_scale = (header16 >> 9 & 63) / 63;
-  let isLandscape = header16 >> 15;
-  let lx = max(3, isLandscape ? hasAlpha ? 5 : 7 : header16 & 7);
-  let ly = max(3, isLandscape ? header16 & 7 : hasAlpha ? 5 : 7);
-  let a_dc = hasAlpha ? (hash[5] & 15) / 15 : 1;
-  let a_scale = (hash[5] >> 4) / 15;
-  let ac_start = hasAlpha ? 6 : 5;
-  let ac_index = 0;
-  let decodeChannel = (nx, ny, scale) => {
-    let ac = [];
-    for (let cy = 0; cy < ny; cy++)
-      for (let cx = cy ? 0 : 1; cx * ny < nx * (ny - cy); cx++)
-        ac.push(((hash[ac_start + (ac_index >> 1)] >> ((ac_index++ & 1) << 2) & 15) / 7.5 - 1) * scale);
-    return ac;
-  };
-  let l_ac = decodeChannel(lx, ly, l_scale);
-  let p_ac = decodeChannel(3, 3, p_scale * 1.25);
-  let q_ac = decodeChannel(3, 3, q_scale * 1.25);
-  let a_ac = hasAlpha && decodeChannel(5, 5, a_scale);
-  let ratio = thumbHashToApproximateAspectRatio(hash);
-  let w = round(ratio > 1 ? 32 : 32 * ratio);
-  let h = round(ratio > 1 ? 32 / ratio : 32);
-  let rgba = new Uint8Array(w * h * 4), fx = [], fy = [];
-  for (let y = 0, i = 0; y < h; y++) {
-    for (let x = 0; x < w; x++, i += 4) {
-      let l = l_dc, p = p_dc, q = q_dc, a = a_dc;
-      for (let cx = 0, n = max(lx, hasAlpha ? 5 : 3); cx < n; cx++)
-        fx[cx] = cos(PI / w * (x + 0.5) * cx);
-      for (let cy = 0, n = max(ly, hasAlpha ? 5 : 3); cy < n; cy++)
-        fy[cy] = cos(PI / h * (y + 0.5) * cy);
-      for (let cy = 0, j = 0; cy < ly; cy++)
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx * ly < lx * (ly - cy); cx++, j++)
-          l += l_ac[j] * fx[cx] * fy2;
-      for (let cy = 0, j = 0; cy < 3; cy++) {
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 3 - cy; cx++, j++) {
-          let f = fx[cx] * fy2;
-          p += p_ac[j] * f;
-          q += q_ac[j] * f;
-        }
-      }
-      if (hasAlpha)
-        for (let cy = 0, j = 0; cy < 5; cy++)
-          for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 5 - cy; cx++, j++)
-            a += a_ac[j] * fx[cx] * fy2;
-      let b = l - 2 / 3 * p;
-      let r = (3 * l - b + q) / 2;
-      let g = r - q;
-      rgba[i] = max(0, 255 * min(1, r));
-      rgba[i + 1] = max(0, 255 * min(1, g));
-      rgba[i + 2] = max(0, 255 * min(1, b));
-      rgba[i + 3] = max(0, 255 * min(1, a));
-    }
-  }
-  return { w, h, rgba };
-}
-function thumbHashToApproximateAspectRatio(hash) {
-  let header = hash[3];
-  let hasAlpha = hash[2] & 128;
-  let isLandscape = hash[4] & 128;
-  let lx = isLandscape ? hasAlpha ? 5 : 7 : header & 7;
-  let ly = isLandscape ? header & 7 : hasAlpha ? 5 : 7;
-  return lx / ly;
-}
-function rgbaToDataURL(w, h, rgba) {
-  let row = w * 4 + 1;
-  let idat = 6 + h * (5 + row);
-  let bytes = [
-    137,
-    80,
-    78,
-    71,
-    13,
-    10,
-    26,
-    10,
-    0,
-    0,
-    0,
-    13,
-    73,
-    72,
-    68,
-    82,
-    0,
-    0,
-    w >> 8,
-    w & 255,
-    0,
-    0,
-    h >> 8,
-    h & 255,
-    8,
-    6,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    idat >>> 24,
-    idat >> 16 & 255,
-    idat >> 8 & 255,
-    idat & 255,
-    73,
-    68,
-    65,
-    84,
-    120,
-    1
-  ];
-  let table = [
-    0,
-    498536548,
-    997073096,
-    651767980,
-    1994146192,
-    1802195444,
-    1303535960,
-    1342533948,
-    -306674912,
-    -267414716,
-    -690576408,
-    -882789492,
-    -1687895376,
-    -2032938284,
-    -1609899400,
-    -1111625188
-  ];
-  let a = 1, b = 0;
-  for (let y = 0, i = 0, end = row - 1; y < h; y++, end += row - 1) {
-    bytes.push(y + 1 < h ? 0 : 1, row & 255, row >> 8, ~row & 255, row >> 8 ^ 255, 0);
-    for (b = (b + a) % 65521; i < end; i++) {
-      let u = rgba[i] & 255;
-      bytes.push(u);
-      a = (a + u) % 65521;
-      b = (b + a) % 65521;
-    }
-  }
-  bytes.push(
-    b >> 8,
-    b & 255,
-    a >> 8,
-    a & 255,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    73,
-    69,
-    78,
-    68,
-    174,
-    66,
-    96,
-    130
-  );
-  for (let [start, end] of [[12, 29], [37, 41 + idat]]) {
-    let c = ~0;
-    for (let i = start; i < end; i++) {
-      c ^= bytes[i];
-      c = c >>> 4 ^ table[c & 15];
-      c = c >>> 4 ^ table[c & 15];
-    }
-    c = ~c;
-    bytes[end++] = c >>> 24;
-    bytes[end++] = c >> 16 & 255;
-    bytes[end++] = c >> 8 & 255;
-    bytes[end++] = c & 255;
-  }
-  return "data:image/png;base64," + btoa(String.fromCharCode(...bytes));
-}
-function thumbHashToDataURL(hash) {
-  let image = thumbHashToRGBA(hash);
-  return rgbaToDataURL(image.w, image.h, image.rgba);
-}
-
-// src/sandbox/photoframe/thumbhash.ts
-function thumbhashToDataUrl(base64) {
-  try {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-    return thumbHashToDataURL(bytes);
-  } catch {
-    return null;
-  }
-}
-
-// src/sandbox/photoframe/load-image.ts
-async function loadImageBlob(context, backend, config, asset, size = "preview") {
-  const cacheKey = `${asset.id}:${size}`;
-  if (config.cacheEnabled) {
-    const cached = await context.cacheGet(cacheKey);
-    if (cached) return cached;
-  }
-  const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!res.ok) throw new Error(`Image fetch failed (${res.status})`);
-  const blob = res.data;
-  if (config.cacheEnabled) {
-    await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
-  }
-  return blob;
-}
-
-// src/sandbox/photoframe/useSlideshow.ts
-var import_react2 = __toESM(require_react(), 1);
 
 // src/sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
@@ -24516,825 +24206,196 @@ function defineReactWidget(Component) {
     }
   };
 }
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
-}
 
-// src/sandbox/photoframe/useSlideshow.ts
-var BATCH = 100;
-function shuffleDeck(items) {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = result[i];
-    result[i] = result[j];
-    result[j] = tmp;
-  }
-  return result;
-}
-function useSlideshow(context, backend, config, tick) {
-  const configured = backend.isConfigured();
-  const panes = panesForLayout(config.layout);
-  const poolKey = (0, import_react2.useMemo)(() => backend.poolCacheKey(), [backend]);
-  const listTtlMs = config.listTtlMinutes * 60 * 1e3;
-  const {
-    data: assets,
-    error,
-    isLoading,
-    refetch
-  } = useWidgetData(context, {
-    key: ["photoframe", poolKey],
-    fetcher: () => backend.fetchAssets(BATCH),
-    enabled: configured,
-    staleTimeMs: listTtlMs,
-    staleMessage: "Offline \u2014 showing cached photos",
-    errorMessage: "No photos found"
-  });
-  const [deck, setDeck] = (0, import_react2.useState)([]);
-  const cursor = (0, import_react2.useRef)(0);
-  const [playing, setPlaying] = (0, import_react2.useState)(true);
-  const [slides, setSlides] = (0, import_react2.useState)([]);
-  const [progressKey, setProgressKey] = (0, import_react2.useState)(0);
-  const generation = (0, import_react2.useRef)(0);
-  (0, import_react2.useEffect)(() => {
-    if (!assets || assets.length === 0) {
-      setDeck([]);
-      return;
-    }
-    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
-    cursor.current = 0;
-  }, [assets]);
-  const showAt = (0, import_react2.useCallback)(
-    async (index) => {
-      if (deck.length === 0) return;
-      const gen = ++generation.current;
-      const picks = [];
-      for (let i = 0; i < panes; i += 1) {
-        const asset = deck[(index + i) % deck.length];
-        if (asset) picks.push(asset);
-      }
-      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
-      if (preloadCount > 0) {
-        for (let p = 1; p <= preloadCount; p += 1) {
-          const nextAsset = deck[(index + panes * p) % deck.length];
-          if (nextAsset && !nextAsset.directUrl) {
-            void loadImageBlob(context, backend, config, nextAsset).catch(() => null);
-          }
-        }
-      }
-      const settled = await Promise.all(
-        picks.map(async (asset) => {
-          try {
-            if (config.metadataShowAlbum && backend.enrichAsset) {
-              await backend.enrichAsset(asset).catch(() => void 0);
-            }
-            const source = asset.directUrl ? { kind: "direct", url: asset.directUrl } : { kind: "blob", blob: await loadImageBlob(context, backend, config, asset) };
-            const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
-            const face = config.transition === "kenburns" && backend.fetchFaceBox ? await backend.fetchFaceBox(asset).catch(() => null) : null;
-            return { asset, source, placeholder, face };
-          } catch {
-            return null;
-          }
-        })
-      );
-      if (gen !== generation.current) return;
-      const loaded = settled.filter((slide) => slide !== null);
-      if (loaded.length === 0) return;
-      setSlides(loaded);
-      setProgressKey((k) => k + 1);
-    },
-    [deck, context, backend, panes, config]
-  );
-  (0, import_react2.useEffect)(() => {
-    cursor.current = 0;
-    if (deck.length > 0) void showAt(0);
-  }, [deck]);
-  const next = (0, import_react2.useCallback)(() => {
-    const nextCursor = cursor.current + panes;
-    if (nextCursor >= deck.length) {
-      refetch();
-      cursor.current = 0;
-    } else {
-      cursor.current = nextCursor;
-    }
-    void showAt(cursor.current);
-  }, [panes, showAt, deck.length, refetch]);
-  const back = (0, import_react2.useCallback)(() => {
-    cursor.current = Math.max(0, cursor.current - panes);
-    void showAt(cursor.current);
-  }, [panes, showAt]);
-  const togglePlay = (0, import_react2.useCallback)(() => setPlaying((p) => !p), []);
-  const lastTick = (0, import_react2.useRef)(tick);
-  (0, import_react2.useEffect)(() => {
-    if (tick !== lastTick.current) {
-      lastTick.current = tick;
-      if (playing && configured) next();
-    }
-  }, [tick, playing, configured, next]);
-  return { slides, playing, error, isLoading, progressKey, next, back, togglePlay };
-}
+// src/plugins/cast-receiver/CastWidget.tsx
+var import_react2 = __toESM(require_react(), 1);
 
-// src/sandbox/photoframe/AssetView.tsx
-var import_react4 = __toESM(require_react(), 1);
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function transitionClass(transition) {
-  switch (transition) {
-    case "kenburns":
-      return "pf-kenburns";
-    case "zoom":
-      return "pf-zoom";
-    case "pan":
-      return "pf-pan";
-    case "none":
-      return "pf-none";
-    default:
-      return "pf-fadeonly";
-  }
-}
-function AssetView({
-  slide,
-  fit,
-  transition,
-  durationSeconds,
-  intervalSeconds
-}) {
-  var _a;
-  const origin = slide.face ? `${(slide.face.cx * 100).toFixed(1)}% ${(slide.face.cy * 100).toFixed(1)}%` : "center";
-  const motionClass = transitionClass(transition);
-  const style = {
-    "--pf-origin": origin,
-    "--pf-motion-duration": `${intervalSeconds + durationSeconds}s`,
-    "--pf-fade-duration": `${durationSeconds}s`
-  };
-  const [blobUrl, setBlobUrl] = (0, import_react4.useState)(null);
-  (0, import_react4.useEffect)(() => {
-    if (slide.source.kind === "direct") {
-      setBlobUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(slide.source.blob);
-    setBlobUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [slide.source]);
-  const assetUrl = slide.source.kind === "direct" ? slide.source.url : blobUrl;
-  const isVideo = ((_a = slide.asset.type) == null ? void 0 : _a.toUpperCase()) === "VIDEO";
-  const imgRef = (0, import_react4.useRef)(null);
-  const [loaded, setLoaded] = (0, import_react4.useState)(false);
-  (0, import_react4.useEffect)(() => {
-    var _a2;
-    setLoaded(false);
-    if (!isVideo && ((_a2 = imgRef.current) == null ? void 0 : _a2.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
-  }, [assetUrl, isVideo]);
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pf-asset", style, children: [
-    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "pf-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
-    assetUrl && (isVideo ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "video",
-      {
-        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: assetUrl,
-        autoPlay: true,
-        loop: true,
-        muted: true,
-        playsInline: true,
-        onCanPlay: () => setLoaded(true)
-      },
-      slide.asset.id
-    ) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "img",
-      {
-        ref: imgRef,
-        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: assetUrl,
-        alt: "",
-        "aria-hidden": true,
-        onLoad: () => setLoaded(true)
-      },
-      slide.asset.id
-    ))
-  ] });
-}
-
-// src/sandbox/photoframe/MetadataOverlay.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-function MetadataOverlay({ asset, position, options, locale }) {
-  if (position === "none") return null;
-  const meta = deriveMetadata(asset, options, locale);
-  if (!hasMetadata(meta)) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `pf-caption pf-caption-${position}`, children: [
-    meta.location && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.location }),
-    meta.album && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.album }),
-    meta.date && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.date }),
-    meta.people && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.people }),
-    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.tags }),
-    meta.description && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-desc", children: meta.description })
-  ] });
-}
-
-// src/sandbox/photoframe/ProgressBar.tsx
-var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ProgressBar({
-  position,
-  durationSeconds,
-  playing,
-  cycleKey
-}) {
-  if (position === "none") return null;
-  const style = {
-    "--pf-progress-duration": `${durationSeconds}s`,
-    animationPlayState: playing ? "running" : "paused"
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `pf-progress pf-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pf-progress-fill", style }, cycleKey) });
-}
-
-// src/sandbox/photoframe/OverlayControls.tsx
-var import_react5 = __toESM(require_react(), 1);
-var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-var HIDE_DELAY_MS = 2500;
-function OverlayControls({
-  playing,
-  onNext,
-  onBack,
-  onTogglePlay,
-  active,
-  labels
-}) {
-  const [visible, setVisible] = (0, import_react5.useState)(false);
-  const hideTimer = (0, import_react5.useRef)(null);
-  const reveal = (0, import_react5.useCallback)(() => {
-    setVisible(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-    };
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    if (!active) return;
-    const handler = (e) => {
-      if (e.key === "ArrowRight") {
-        onNext();
-        reveal();
-      } else if (e.key === "ArrowLeft") {
-        onBack();
-        reveal();
-      } else if (e.key === " ") {
-        e.preventDefault();
-        onTogglePlay();
-        reveal();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [active, onNext, onBack, onTogglePlay, reveal]);
-  const act = (fn) => () => {
-    fn();
-    reveal();
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
-    "div",
-    {
-      className: "pf-controls",
-      "data-active": active,
-      "data-visible": visible,
-      onPointerMove: reveal,
-      onPointerDown: reveal,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onBack), "aria-label": labels.previous, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronLeft, {}) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          "button",
-          {
-            type: "button",
-            className: "pf-zone pf-zone-center",
-            onClick: act(onTogglePlay),
-            "aria-label": playing ? labels.pause : labels.play,
-            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn pf-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlayIcon, {}) })
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onNext), "aria-label": labels.next, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, {}) }) })
-      ]
-    }
-  );
-}
-function ChevronLeft() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function ChevronRight() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function PlayIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M8 5v14l11-7z" }) });
-}
-function PauseIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
-}
-
-// src/sandbox/photoframe/PhotoFrameWidget.tsx
-var import_react6 = __toESM(require_react(), 1);
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
-function PhotoFrameWidget({ context, backend, strings: strings2 }) {
-  const config = (0, import_react6.useMemo)(() => readFrameConfig(context.config), [context.config]);
-  const configured = backend.isConfigured();
-  const [tick, setTick] = (0, import_react6.useState)(0);
-  const show = useSlideshow(context, backend, config, tick);
-  const timerRef = (0, import_react6.useRef)(null);
-  const resetTimer = (0, import_react6.useCallback)(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (!show.playing || !configured) return;
-    timerRef.current = setInterval(
-      () => setTick((t) => t + 1),
-      Math.max(3, config.intervalSeconds) * 1e3
-    );
-  }, [show.playing, configured, config.intervalSeconds]);
-  (0, import_react6.useEffect)(() => {
-    resetTimer();
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [resetTimer, show.progressKey]);
-  const handleNext = (0, import_react6.useCallback)(() => {
-    show.next();
-    resetTimer();
-  }, [show, resetTimer]);
-  const handleBack = (0, import_react6.useCallback)(() => {
-    show.back();
-    resetTimer();
-  }, [show, resetTimer]);
-  const metadataOptions = {
-    showDate: config.metadataShowDate,
-    showLocation: config.metadataShowLocation,
-    showDescription: config.metadataShowDescription,
-    showPeople: config.metadataShowPeople,
-    showAlbum: config.metadataShowAlbum,
-    showTags: config.metadataShowTags
-  };
-  if (!configured) {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-frame pf-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: strings2.title }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: strings2.configure })
-    ] }) });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `pf-frame pf-layout-${config.layout}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pf-pane", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        AssetView,
-        {
-          slide,
-          fit: config.imageFit,
-          transition: config.transition,
-          durationSeconds: config.transitionSeconds,
-          intervalSeconds: config.intervalSeconds
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        MetadataOverlay,
-        {
-          asset: slide.asset,
-          position: config.metadataPosition,
-          options: metadataOptions,
-          locale: context.locale
-        }
-      )
-    ] }, slide.asset.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      ProgressBar,
-      {
-        position: config.progressBar,
-        durationSeconds: Math.max(3, config.intervalSeconds),
-        playing: show.playing,
-        cycleKey: show.progressKey
-      }
-    ),
-    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      OverlayControls,
-      {
-        playing: show.playing,
-        onNext: handleNext,
-        onBack: handleBack,
-        onTogglePlay: show.togglePlay,
-        active: context.isEditing === false,
-        labels: strings2
-      }
-    ),
-    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status", children: strings2.loading }),
-    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status pf-error", role: "alert", children: show.error })
-  ] });
-}
-
-// src/sandbox/sdk.ts
-function definePlugin(module) {
-  return module;
-}
-function injectStyle(id, css) {
-  if (document.getElementById(id)) return;
-  const style = document.createElement("style");
-  style.id = id;
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-// src/sandbox/photoframe/styles.ts
-var PHOTOFRAME_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-  body { width: 100%; height: 100%; }
-  .wg-plugin-root { width: 100%; height: 100%; }
-  .pf-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .pf-panes { display: flex; width: 100%; height: 100%; }
-  .pf-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
-  .pf-layout-split .pf-pane + .pf-pane { border-left: 2px solid rgba(255,255,255,0.12); }
-  .pf-asset { position: absolute; inset: 0; overflow: hidden; }
-  .pf-backdrop, .pf-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .pf-backdrop { filter: blur(14px); transform: scale(1.1); }
-  .pf-fit-cover { object-fit: cover; }
-  .pf-fit-contain { object-fit: contain; }
-  .pf-photo { opacity: 0; transform-origin: var(--pf-origin, center); }
-  .pf-fadeonly, .pf-none { animation: pf-fade var(--pf-fade-duration, 1s) ease both; }
-  .pf-none { animation-duration: 0.01s; }
-  .pf-zoom { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-zoom var(--pf-motion-duration,16s) ease-out both; }
-  .pf-pan { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-pan var(--pf-motion-duration,16s) ease-in-out both; }
-  .pf-kenburns { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-kenburns var(--pf-motion-duration,16s) ease-in-out both; }
-  @keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes pf-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
-  @keyframes pf-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
-  @keyframes pf-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
-  .pf-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
-  .pf-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
-  .pf-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
-  .pf-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .pf-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
-  .pf-progress-top { top: 0; }
-  .pf-progress-bottom { bottom: 0; }
-  .pf-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: pf-progress var(--pf-progress-duration, 15s) linear forwards; }
-  @keyframes pf-progress { from { width: 0; } to { width: 100%; } }
-  .pf-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
-  .pf-controls[data-active='false'] { pointer-events: none; }
-  .pf-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
-  .pf-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
-  .pf-zone-btn-lg { width: 64px; height: 64px; }
-  .pf-controls[data-visible='true'] .pf-zone-btn { opacity: 1; transform: scale(1); }
-  @media (hover: hover) { .pf-zone:hover .pf-zone-btn { opacity: 1; transform: scale(1); } }
-  .pf-zone-btn svg { width: 55%; height: 55%; }
-  .pf-empty, .pf-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
-  .pf-status { background: rgba(0,0,0,0.35); }
-  .pf-empty p { margin-top: 8px; font-size: 13px; }
-  .pf-error { color: #ff8080; }
-`;
-
-// src/sandbox/photoframe/define.tsx
-var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
-function definePhotoFrameWidget(options) {
-  injectStyle(options.styleId ?? "photoframe-style", PHOTOFRAME_SANDBOX_CSS);
-  const renderer = defineReactWidget(({ context }) => {
-    const backend = options.createBackend(context, context.config);
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(PhotoFrameWidget, { context, backend, strings: options.strings(context.locale) });
-  });
-  const module = {
-    widgets: { [options.widgetId]: renderer }
-  };
-  if (options.loadOptions) {
-    const load = options.loadOptions.bind(options);
-    module.loadOptions = (context, _widgetId, fieldKey, config) => load(context, fieldKey, config);
-  }
-  return definePlugin(module);
-}
-
-// src/core/net/secret-placeholder.ts
-function basicAuthSentinel(usernameKey, secretKey) {
-  return `{{basic:${usernameKey}:${secretKey}}}`;
-}
-
-// src/plugins/webdav-photos/propfind.ts
-function parsePropfind(xml, collectionUrl) {
-  var _a;
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
-  if (doc.getElementsByTagName("parsererror").length > 0) return [];
-  const origin = originOf(collectionUrl);
-  const selfPath = pathOf(collectionUrl);
-  const entries = [];
-  for (const response of byLocalName(doc, "response")) {
-    const hrefEl = firstByLocalName(response, "href");
-    const rawHref = (_a = hrefEl == null ? void 0 : hrefEl.textContent) == null ? void 0 : _a.trim();
-    if (!rawHref) continue;
-    const href = resolveHref(rawHref, origin);
-    if (pathOf(href) === selfPath) continue;
-    const propstat = findOkPropstat(response);
-    const prop = propstat ? firstByLocalName(propstat, "prop") : null;
-    const contentType = prop ? textByLocalName(prop, "getcontenttype") : null;
-    const lastModifiedRaw = prop ? textByLocalName(prop, "getlastmodified") : null;
-    const lastModified = lastModifiedRaw ? Date.parse(lastModifiedRaw) || null : null;
-    const resourceType = prop ? firstByLocalName(prop, "resourcetype") : null;
-    const isCollection = resourceType ? byLocalName(resourceType, "collection").length > 0 : false;
-    entries.push({ href, contentType, isCollection, lastModified });
-  }
-  return entries;
-}
-function findOkPropstat(response) {
-  var _a;
-  for (const propstat of byLocalName(response, "propstat")) {
-    const status = ((_a = firstByLocalName(propstat, "status")) == null ? void 0 : _a.textContent) ?? "";
-    if (/\s2\d\d\s/.test(status)) return propstat;
-  }
-  return firstByLocalName(response, "propstat");
-}
-function localNameOf(el) {
-  const name = el.localName.toLowerCase();
-  const colon = name.indexOf(":");
-  return colon >= 0 ? name.slice(colon + 1) : name;
-}
-function byLocalName(root, local) {
-  const all = root.getElementsByTagName("*");
-  const out = [];
-  for (let i = 0; i < all.length; i += 1) {
-    const el = all[i];
-    if (el && localNameOf(el) === local) out.push(el);
-  }
-  return out;
-}
-function firstByLocalName(root, local) {
-  return byLocalName(root, local)[0] ?? null;
-}
-function textByLocalName(root, local) {
-  var _a;
-  const el = firstByLocalName(root, local);
-  const text = (_a = el == null ? void 0 : el.textContent) == null ? void 0 : _a.trim();
-  return text && text.length > 0 ? text : null;
-}
-function originOf(url) {
-  const match = /^(https?:\/\/[^/]+)/i.exec(url);
-  return (match == null ? void 0 : match[1]) ?? "";
-}
-function pathOf(url) {
-  const withoutOrigin = url.replace(/^https?:\/\/[^/]+/i, "");
-  const path = withoutOrigin.split("?")[0] ?? withoutOrigin;
-  return decodeURIComponent(path.replace(/\/+$/, "")) || "/";
-}
-function resolveHref(href, origin) {
-  if (/^https?:\/\//i.test(href)) return href;
-  if (href.startsWith("/")) return `${origin}${href}`;
-  return `${origin}/${href}`;
-}
-
-// src/plugins/webdav-photos/service.ts
-var PROXY = "always";
-var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "bmp", "heic", "heif"]);
-function isImageResource(href, contentType) {
-  var _a;
-  if (contentType && contentType.toLowerCase().startsWith("image/")) return true;
-  const path = href.split("?")[0] ?? href;
-  const ext = ((_a = path.split(".").pop()) == null ? void 0 : _a.toLowerCase()) ?? "";
-  return IMAGE_EXTENSIONS.has(ext);
-}
-var WebDavService = class {
-  constructor(transport, config) {
-    this.transport = transport;
-    this.config = config;
-  }
-  /** Collection URL with exactly one trailing slash (WebDAV collections end in /). */
-  get collectionUrl() {
-    return `${this.config.folderUrl.replace(/\/+$/, "")}/`;
-  }
-  /** Basic-auth header value: a host-substituted placeholder, never the password. */
-  authHeaders() {
-    if (!this.config.username) return {};
-    return { authorization: basicAuthSentinel("username", "password") };
-  }
-  /** Stable identity for the pool (folder + recursion); the shared query key. */
-  poolCacheKey() {
-    return `${this.collectionUrl}|r${this.config.recursive ? 1 : 0}`;
-  }
-  /**
-   * List image files in the collection via PROPFIND. `Depth: 1` lists the direct
-   * children; `infinity` recurses (servers may refuse infinity, in which case we
-   * fall back to a one-level listing so a locked-down server still shows photos).
-   */
-  async listImages() {
-    const depth = this.config.recursive ? "infinity" : "1";
-    let entries = await this.propfind(depth);
-    if (entries === null && depth === "infinity") {
-      entries = await this.propfind("1");
-    }
-    if (entries === null) throw new Error("WebDAV listing failed");
-    return entries.filter((e) => !e.isCollection && isImageResource(e.href, e.contentType));
-  }
-  /** Issue one PROPFIND; returns parsed entries, or null on a non-207 response. */
-  async propfind(depth) {
-    const body = '<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:getcontenttype/><d:getlastmodified/><d:resourcetype/></d:prop></d:propfind>';
-    const res = await this.transport.request({
-      url: this.collectionUrl,
-      method: "PROPFIND",
-      headers: { ...this.authHeaders(), depth, "content-type": "application/xml" },
-      body,
-      responseType: "text",
-      proxy: PROXY
-    });
-    if (res.status !== 207 || typeof res.data !== "string") return null;
-    return parsePropfind(res.data, this.collectionUrl);
-  }
-  /**
-   * Build the request that returns an image's bytes. Pure — the SDK engine runs
-   * it with `responseType: 'binary'`, caches and decodes. WebDAV has no server-
-   * side thumbnailing, so the size tier is ignored (always the original file).
-   */
-  imageRequest(href, _size) {
-    return {
-      url: href,
-      method: "GET",
-      headers: this.authHeaders(),
-      proxy: PROXY
-    };
-  }
+// src/plugins/cast-receiver/types.ts
+var CAST_DEFAULT_CONFIG = {
+  sourceKind: "idle",
+  sourceUrl: "",
+  overlayMode: "cover",
+  showPairingWhenIdle: true,
+  muted: true
 };
 
-// src/plugins/webdav-photos/types.ts
-var WEBDAV_DEFAULT_CONFIG = {
-  folderUrl: "",
-  username: "",
-  recursive: false
-};
-
-// src/plugins/webdav-photos/config.ts
+// src/plugins/cast-receiver/resolve.ts
 function str(raw, fallback) {
   return typeof raw === "string" ? raw : fallback;
 }
-function bool2(raw, fallback) {
+function bool(raw, fallback) {
   return typeof raw === "boolean" ? raw : fallback;
 }
-function readWebDavConfig(raw) {
-  const d = WEBDAV_DEFAULT_CONFIG;
+var SOURCE_KINDS = ["idle", "website", "media", "youtube", "spotify"];
+var OVERLAY_MODES = ["inline", "cover", "dim"];
+function readCastConfig(raw) {
+  const d = CAST_DEFAULT_CONFIG;
+  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind) ? raw.sourceKind : d.sourceKind;
+  const overlayMode = OVERLAY_MODES.includes(raw.overlayMode) ? raw.overlayMode : d.overlayMode;
   return {
-    folderUrl: str(raw.folderUrl, d.folderUrl),
-    username: str(raw.username, d.username),
-    recursive: bool2(raw.recursive, d.recursive)
+    sourceKind,
+    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
+    overlayMode,
+    showPairingWhenIdle: bool(raw.showPairingWhenIdle, d.showPairingWhenIdle),
+    muted: bool(raw.muted, d.muted)
   };
 }
-
-// src/plugins/webdav-photos/backend.ts
-function fileNameOf(href) {
-  const path = href.split("?")[0] ?? href;
-  const segment = path.replace(/\/+$/, "").split("/").pop() ?? "";
+function youTubeVideoId(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const patterns = [
+    /[?&]v=([A-Za-z0-9_-]{11})/,
+    // watch?v=ID
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+    // youtu.be/ID
+    /\/embed\/([A-Za-z0-9_-]{11})/,
+    // /embed/ID
+    /\/shorts\/([A-Za-z0-9_-]{11})/
+    // /shorts/ID
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(trimmed);
+    if (match == null ? void 0 : match[1]) return match[1];
+  }
+  return null;
+}
+function isHttpsUrl(value) {
   try {
-    return decodeURIComponent(segment);
+    return new URL(value).protocol === "https:";
   } catch {
-    return segment;
+    return false;
   }
 }
-function toPhotoAsset(entry) {
-  const asset = {
-    // The absolute href is the stable id (keys the blob cache + React lists) and
-    // the address the image request is built from.
-    id: entry.href,
-    type: "IMAGE",
-    originalFileName: fileNameOf(entry.href)
-  };
-  if (entry.lastModified) asset.localDateTime = new Date(entry.lastModified).toISOString();
-  return asset;
+function spotifyEmbedUrl(input) {
+  const trimmed = input.trim();
+  const uri = /^spotify:(track|album|playlist|episode|show):([A-Za-z0-9]+)$/.exec(trimmed);
+  if ((uri == null ? void 0 : uri[1]) && uri[2]) return `https://open.spotify.com/embed/${uri[1]}/${uri[2]}?utm_source=generator`;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "https:" || url.hostname !== "open.spotify.com") return null;
+    const match = /^\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)\/?$/.exec(url.pathname);
+    return (match == null ? void 0 : match[1]) && match[2] ? `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator` : null;
+  } catch {
+    return null;
+  }
 }
-var WebDavBackend = class {
-  service;
-  configured;
-  constructor(context, rawConfig) {
-    const config = readWebDavConfig(rawConfig);
-    this.configured = config.folderUrl.trim() !== "";
-    const transport = { request: (req) => context.http(req) };
-    this.service = new WebDavService(transport, config);
+function youTubeEmbedUrl(videoId, muted) {
+  const params = new URLSearchParams({
+    autoplay: "1",
+    mute: muted ? "1" : "0",
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1"
+  });
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+}
+function resolveCastTarget(config) {
+  if (config.sourceKind === "idle") return { kind: "idle" };
+  if (config.sourceKind === "youtube") {
+    const videoId = youTubeVideoId(config.sourceUrl);
+    return videoId ? { kind: "youtube", embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: "idle" };
   }
-  isConfigured() {
-    return this.configured;
+  if (config.sourceKind === "spotify") {
+    const embedUrl = spotifyEmbedUrl(config.sourceUrl);
+    return embedUrl ? { kind: "spotify", embedUrl } : { kind: "idle" };
   }
-  poolCacheKey() {
-    return this.service.poolCacheKey();
-  }
-  async fetchAssets(_count) {
-    const entries = await this.service.listImages();
-    return entries.map(toPhotoAsset);
-  }
-  imageRequest(asset, size) {
-    return this.service.imageRequest(asset.id, size);
-  }
-};
+  if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
+  return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
+}
 
-// src/plugins/webdav-photos/locales/de.json
+// src/plugins/cast-receiver/locales/de.json
 var de_default = {
   manifest: {
-    "WebDAV Photo Frame": "WebDAV-Bilderrahmen",
-    "Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, \u2026), with offline caching": "Digitaler Bilderrahmen f\xFCr einen WebDAV-Ordner (Nextcloud, ownCloud, \u2026) mit Offline-Zwischenspeicher",
-    "Photo Frame": "Bilderrahmen",
-    "Slideshow of photos from a WebDAV folder: transitions, metadata, controls": "Diashow aus einem WebDAV-Ordner mit \xDCberg\xE4ngen, Metadaten und Steuerung",
-    Connection: "Verbindung",
-    Slideshow: "Diashow",
-    "Info overlay": "Info-Einblendung",
-    Caching: "Zwischenspeicher",
-    "Folder URL": "Ordner-URL",
-    "WebDAV collection (folder) URL. Nextcloud: Files \u2192 \u22EF \u2192 details shows the dav path.": "WebDAV-Ordner-URL. Nextcloud: Dateien \u2192 \u22EF \u2192 Details zeigt den DAV-Pfad.",
-    Username: "Benutzername",
-    "Leave blank for a public (anonymous) share.": "F\xFCr eine \xF6ffentliche (anonyme) Freigabe leer lassen.",
-    Password: "Passwort",
-    "Use an app password where your provider offers one.": "Verwenden Sie nach M\xF6glichkeit ein App-Passwort.",
-    "Include subfolders": "Unterordner einschlie\xDFen",
-    "List photos in nested folders too (the server may decline deep listings).": "Auch Fotos in Unterordnern auflisten (der Server kann tiefe Auflistungen ablehnen).",
-    "Seconds per photo": "Sekunden pro Foto",
-    "Preload upcoming photos": "Kommende Fotos vorladen",
-    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
-    Layout: "Layout",
-    Single: "Einzeln",
-    "Split (two photos)": "Geteilt (zwei Fotos)",
-    Transition: "\xDCbergang",
-    Pan: "Schwenken",
-    Fade: "\xDCberblenden",
-    None: "Keiner",
-    "Transition seconds": "\xDCbergangsdauer",
-    "Image fit": "Bildanpassung",
-    "Cover (fill)": "Ausf\xFCllen",
-    "Contain (letterbox)": "Einpassen",
-    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
-    "Progress bar": "Fortschrittsbalken",
-    Bottom: "Unten",
-    Top: "Oben",
-    Hidden: "Ausgeblendet",
-    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
-    "Bottom right": "Unten rechts",
-    "Bottom left": "Unten links",
-    "Top right": "Oben rechts",
-    "Top left": "Oben links",
-    "Show location": "Ort anzeigen",
-    "Show date": "Datum anzeigen",
-    "Show people": "Personen anzeigen",
-    "Show album": "Album anzeigen",
-    "Show tags": "Schlagw\xF6rter anzeigen",
-    "Show description": "Beschreibung anzeigen",
-    "Cache photos locally": "Fotos lokal zwischenspeichern",
-    "Cache size limit (MB)": "Speicherlimit (MB)",
-    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
-    "Cache image expiration (days)": "Bildablauf (Tage)",
-    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
-    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
+    "Cast Receiver": "Cast-Empf\xE4nger",
+    "Mostly-invisible screen receiver: cast a website, media stream, or YouTube video to this display": "Fast unsichtbarer Bildschirm-Empf\xE4nger: Website, Medienstream oder YouTube-Video auf dieses Display casten",
+    "Full-bleed receiver that shows cast content and a pairing code when idle": "Vollfl\xE4chiger Empf\xE4nger, der Cast-Inhalte und im Leerlauf einen Kopplungscode anzeigt",
+    Cast: "Cast",
+    Presentation: "Darstellung",
+    "What to cast": "Was gecastet wird",
+    "Nothing (show pairing code)": "Nichts (Kopplungscode anzeigen)",
+    Website: "Website",
+    "Media stream (video/audio URL)": "Medienstream (Video-/Audio-URL)",
+    "YouTube video": "YouTube-Video",
+    "Cast target": "Cast-Ziel",
+    "An https website or media URL, or a YouTube link/id (per the type above).": "Eine https-Website oder Medien-URL oder ein YouTube-Link/-ID (gem\xE4\xDF Typ oben).",
+    "Pairing code": "Kopplungscode",
+    "Shown while idle so a sender knows which screen it controls.": "Wird im Leerlauf angezeigt, damit ein Sender wei\xDF, welchen Bildschirm er steuert.",
+    "Overlay style": "\xDCberlagerungsstil",
+    "Cover (opaque)": "Deckend",
+    "Dim backdrop": "Hintergrund abdunkeln",
+    "Inline (transparent)": "Inline (transparent)",
+    "Show pairing code when idle": "Kopplungscode im Leerlauf anzeigen",
+    "Start muted": "Stummgeschaltet starten"
   },
   runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die WebDAV-Ordner-URL und Zugangsdaten hinzuzuf\xFCgen.",
-    loading: "Fotos werden geladen\u2026",
-    next: "Weiter",
-    pause: "Pause",
-    play: "Wiedergabe",
-    previous: "Zur\xFCck",
-    title: "WebDAV-Bilderrahmen"
+    idleTitle: "Bereit zum Casten",
+    idleHint: "Lege ein Cast-Ziel in den Einstellungen fest oder sende eines von einem gekoppelten Ger\xE4t.",
+    pairingLabel: "Kopplungscode"
   }
 };
 
-// src/plugins/webdav-photos/sandbox.ts
+// src/plugins/cast-receiver/CastWidget.tsx
+var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
 var EN = {
-  title: "WebDAV Photo Frame",
-  configure: "Open settings to add your WebDAV folder URL and credentials.",
-  loading: "Loading photos\u2026",
-  previous: "Previous",
-  next: "Next",
-  play: "Play",
-  pause: "Pause"
+  idleTitle: "Ready to cast",
+  idleHint: "Open /cast on a phone and enter the pairing code shown by the host."
 };
-function strings(locale) {
-  if (locale.split("-")[0] === "de") {
-    const r = de_default.runtime;
-    return {
-      title: r.title,
-      configure: r.configure,
-      loading: r.loading,
-      previous: r.previous,
-      next: r.next,
-      play: r.play,
-      pause: r.pause
-    };
-  }
-  return EN;
+function castStrings(locale) {
+  if (locale.split("-")[0] !== "de") return EN;
+  return { idleTitle: de_default.runtime.idleTitle, idleHint: de_default.runtime.idleHint };
 }
-var sandbox_default = definePhotoFrameWidget({
-  widgetId: "webdav-photos.photoframe",
-  styleId: "webdav-photos-style",
-  strings,
-  createBackend: (context, config) => new WebDavBackend(context, config)
+function CastWidget({ context }) {
+  const config = (0, import_react2.useMemo)(() => readCastConfig(context.config), [context.config]);
+  const strings = (0, import_react2.useMemo)(() => castStrings(context.locale), [context.locale]);
+  const target = (0, import_react2.useMemo)(() => resolveCastTarget(config), [config]);
+  if (target.kind === "idle") {
+    if (!config.showPairingWhenIdle) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle-blank" });
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cast-idle-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cast-idle-title", children: strings.idleTitle }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "cast-idle-hint", children: strings.idleHint })
+    ] }) });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: target.kind === "media" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: config.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+    "iframe",
+    {
+      className: "cast-frame",
+      src: target.kind === "website" ? target.url : target.embedUrl,
+      title: target.kind === "spotify" ? "Spotify" : "Cast",
+      allow: "autoplay; fullscreen; encrypted-media; picture-in-picture",
+      referrerPolicy: "no-referrer"
+    }
+  ) });
+}
+
+// src/plugins/cast-receiver/styles.ts
+var CAST_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body { width: 100%; height: 100%; }
+  .wg-plugin-root { width: 100%; height: 100%; }
+  .cast-root { position: relative; width: 100%; height: 100%; overflow: hidden;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #fff; }
+  .cast-active[data-overlay='cover'] { background: #000; }
+  .cast-active[data-overlay='dim'] { background: rgba(0,0,0,0.6); }
+  .cast-active[data-overlay='inline'] { background: transparent; }
+  .cast-frame, .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .cast-media { object-fit: contain; background: #000; }
+  .cast-idle-blank { background: transparent; }
+  .cast-idle { display: grid; place-items: center; background: radial-gradient(120% 120% at 50% 0, #1b2b40, #0b1420 70%); }
+  .cast-idle-card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 28px; text-align: center; }
+  .cast-idle-title { font-size: clamp(16px, 3cqw, 26px); font-weight: 600; }
+  .cast-idle-hint { margin: 0; max-width: 32ch; font-size: clamp(12px, 1.8cqw, 15px); font-weight: 300; opacity: 0.78; line-height: 1.4; }
+  .cast-pairing { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 6px; padding: 12px 20px; border-radius: 14px; background: rgba(255,255,255,0.08); }
+  .cast-pairing-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
+  .cast-pairing-code { font-size: clamp(26px, 6cqw, 48px); font-weight: 700; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
+`;
+
+// src/plugins/cast-receiver/sandbox.ts
+injectStyle("cast-receiver-style", CAST_SANDBOX_CSS);
+var sandbox_default = definePlugin({
+  widgets: {
+    "cast-receiver.screen": defineReactWidget(CastWidget)
+  }
 });
 export {
   sandbox_default as default

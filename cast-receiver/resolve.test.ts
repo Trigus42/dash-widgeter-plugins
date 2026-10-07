@@ -3,6 +3,7 @@ import {
   isHttpsUrl,
   readCastConfig,
   resolveCastTarget,
+  spotifyEmbedUrl,
   youTubeEmbedUrl,
   youTubeVideoId,
 } from './resolve';
@@ -39,6 +40,18 @@ describe('youTubeEmbedUrl', () => {
     expect(url).toContain('youtube-nocookie.com/embed/dQw4w9WgXcQ');
     expect(url).toContain('mute=1');
     expect(youTubeEmbedUrl('dQw4w9WgXcQ', false)).toContain('mute=0');
+  });
+});
+
+describe('spotifyEmbedUrl', () => {
+  it('accepts official share URLs and URIs', () => {
+    expect(spotifyEmbedUrl('https://open.spotify.com/track/abc123')).toContain('/embed/track/abc123');
+    expect(spotifyEmbedUrl('spotify:playlist:xyz789')).toContain('/embed/playlist/xyz789');
+  });
+
+  it('rejects spoofed hosts and unsupported paths', () => {
+    expect(spotifyEmbedUrl('https://open.spotify.com.evil.test/track/abc')).toBeNull();
+    expect(spotifyEmbedUrl('https://open.spotify.com/user/abc')).toBeNull();
   });
 });
 
@@ -81,5 +94,10 @@ describe('resolveCastTarget', () => {
     expect(target.kind).toBe('youtube');
     if (target.kind === 'youtube') expect(target.embedUrl).toContain('youtube-nocookie.com');
     expect(resolveCastTarget({ ...base, sourceKind: 'youtube', sourceUrl: 'garbage' })).toEqual({ kind: 'idle' });
+  });
+
+  it('spotify resolves to the official embed', () => {
+    const target = resolveCastTarget({ ...base, sourceKind: 'spotify', sourceUrl: 'spotify:album:abc123' });
+    expect(target).toEqual({ kind: 'spotify', embedUrl: 'https://open.spotify.com/embed/album/abc123?utm_source=generator' });
   });
 });

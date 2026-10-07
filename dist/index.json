@@ -975,8 +975,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-59b55c1a2f017553596d30c736b1591d0c5b9dd796a1cb7a806daafea0d8ab5a.js",
-      "sha256": "59b55c1a2f017553596d30c736b1591d0c5b9dd796a1cb7a806daafea0d8ab5a"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-e3910146c8ac73cfe2836bf871c760673f96f9000de7e364643d6caf846bd140.js",
+      "sha256": "e3910146c8ac73cfe2836bf871c760673f96f9000de7e364643d6caf846bd140"
     },
     {
       "manifest": {
@@ -1338,8 +1338,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-60f073e2f58db90d0c90265fef1d09204b4a3b885d618ce5175753dac5eeabb1.js",
-      "sha256": "60f073e2f58db90d0c90265fef1d09204b4a3b885d618ce5175753dac5eeabb1"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-9053ea6a5b1eb9ad411cc4ca3decf4bf2bf86e20cf39d6d888125634f9778ba7.js",
+      "sha256": "9053ea6a5b1eb9ad411cc4ca3decf4bf2bf86e20cf39d6d888125634f9778ba7"
     },
     {
       "manifest": {
@@ -1694,15 +1694,15 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-741f718e8d9fddcd5c8add3e89efece8f0482f048728027b7f7399ba7fe48c7f.js",
-      "sha256": "741f718e8d9fddcd5c8add3e89efece8f0482f048728027b7f7399ba7fe48c7f"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-f8483c1e67a3930b3b6d61363eeb82bb654aaf94581ce9d7a20ea17c3cce8669.js",
+      "sha256": "f8483c1e67a3930b3b6d61363eeb82bb654aaf94581ce9d7a20ea17c3cce8669"
     },
     {
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "1.0.0",
-        "description": "Mostly-invisible screen receiver: cast a website, media stream, or YouTube video to this display",
+        "version": "2.0.0",
+        "description": "Remote receiver for YouTube, Spotify, screen sharing, websites, and media",
         "translations": {
           "de": {
             "Cast Receiver": "Cast-Empfänger",
@@ -1734,16 +1734,15 @@
           {
             "id": "cast-receiver.screen",
             "name": "Cast Receiver",
-            "description": "Full-bleed receiver that shows cast content and a pairing code when idle",
+            "description": "Movable overlay receiver for links, media, and live screen sharing",
             "minW": 3,
             "minH": 3,
             "defaultW": 30,
             "defaultH": 25,
-            "defaultZIndex": 0,
+            "defaultZIndex": 100,
             "defaultConfig": {
               "sourceKind": "idle",
               "sourceUrl": "",
-              "pairingCode": "",
               "overlayMode": "cover",
               "showPairingWhenIdle": true,
               "muted": true
@@ -1778,6 +1777,10 @@
                   {
                     "label": "YouTube video",
                     "value": "youtube"
+                  },
+                  {
+                    "label": "Spotify",
+                    "value": "spotify"
                   }
                 ]
               },
@@ -1785,15 +1788,8 @@
                 "key": "sourceUrl",
                 "label": "Cast target",
                 "type": "text",
-                "placeholder": "https://… or a YouTube link/id",
-                "help": "An https website or media URL, or a YouTube link/id (per the type above).",
-                "section": "Cast"
-              },
-              {
-                "key": "pairingCode",
-                "label": "Pairing code",
-                "type": "text",
-                "help": "Shown while idle so a sender knows which screen it controls.",
+                "placeholder": "https://… or a YouTube/Spotify link",
+                "help": "An HTTPS website/media URL, YouTube link/id, or Spotify share URL/URI.",
                 "section": "Cast"
               },
               {
@@ -1832,8 +1828,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-462c87a735c43e21da2c0689eb86d46e3b2274023d68dc0c74cdcf2652f4780b.js",
-      "sha256": "462c87a735c43e21da2c0689eb86d46e3b2274023d68dc0c74cdcf2652f4780b"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-36591d18c3c0147e6b32f9e39ad8c96fb14649d5d870536bed372360250233de.js",
+      "sha256": "36591d18c3c0147e6b32f9e39ad8c96fb14649d5d870536bed372360250233de"
     }
   ]
 }
