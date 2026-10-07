@@ -50,8 +50,8 @@ const settings: WidgetSettingField[] = [
 export const immichManifest: PluginManifest = {
   id: 'immich',
   name: 'Immich Photo Frame',
-  version: '1.9.0',
-  description: 'Digital photo frame backed by an Immich server, with offline caching',
+  version: '1.10.0',
+  description: 'Digital photo frame backed by an Immich server, with offline caching and video playback',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
@@ -80,6 +80,7 @@ export const immichManifest: PluginManifest = {
       defaultZIndex: BACKGROUND_Z,
       defaultConfig: { ...FRAME_DEFAULT_CONFIG, ...IMMICH_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 1 },
+      sandboxPolicy: ['remote-media'],
       settings,
     },
   ],

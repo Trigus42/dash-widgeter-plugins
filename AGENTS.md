@@ -72,17 +72,21 @@ half:
   capabilities through the injected sandbox context (`context.http`,
   `context.cacheGet/cachePut`, `useWidgetData`, `context.log`, etc.). Reaching
   around the context defeats the capability model and won't work in the frame.
-- **All network goes through `context.http`**, pinned to the plugin's declared
+- **Ordinary API network uses `context.http`**, pinned to the plugin's declared
   `permissions` groups (each `{ name, domains?, publicIps?, privateIps?,
   properties: { defaultOn } }`; the host enforces the union of enabled groups).
-  Direct `fetch`/`XHR`/`WebSocket` is dead in the sandbox (`connect-src 'none'`).
-  Declare the narrowest groups the plugin truly needs: `domains` for hostnames,
-  `publicIps` (`0.0.0.0/0`+`::/0` = any public IP) for the public tier, and
-  `privateIps` only when it must reach loopback/LAN. Declare independently
-  toggleable device/service tokens such as `device.location.read` in `capabilities`.
-- **Secrets never enter the frame.** Mark credential fields `secret: true`; the
-  plugin references them as `{{secret:<key>}}` placeholders in request
-  headers/URL, and the host substitutes at egress. Never put tokens in `config`.
+  Direct `fetch`/XHR/WebSocket is blocked by `connect-src 'none'`. A widget may
+  separately declare and receive user grants for remote-content profiles such as
+  `remote-images`, `remote-media`, or `embed-sites`; matching DOM elements then
+  load HTTPS resources directly, outside proxy hostname/IP rules, telemetry, and
+  credential injection. Use direct media for native streaming/range behavior and
+  `context.http` for APIs, credentials, caching, and brokered binary files.
+- **Host-managed secrets are a convenience and exposure reduction, not proof
+  against hostile plugin code.** Mark credential fields `secret: true`; brokered
+  requests reference `{{secret:<key>}}` placeholders and the host substitutes
+  them at egress. Direct remote-content loads cannot receive injected headers or
+  bodies; use scoped short-lived URLs when authenticated direct media is needed.
+  Never put durable tokens in `config`.
 - **Data fetching + caching + stale/offline** is the host's shared TanStack
   Query layer via `useWidgetData` — do not hand-roll fetch-then-cache-then-stale
   per plugin. Report offline/stale/error through the host status API, not a

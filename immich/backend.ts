@@ -35,8 +35,11 @@ export class ImmichBackend implements PhotoBackend {
     return this.service.poolCacheKey();
   }
 
-  fetchAssets(count: number): Promise<PhotoAsset[]> {
-    return this.service.fetchAssets(count);
+  async fetchAssets(count: number): Promise<PhotoAsset[]> {
+    const assets = await this.service.fetchAssets(count);
+    return assets.map((asset) => asset.type.toUpperCase() === 'VIDEO'
+      ? { ...asset, directUrl: this.service.videoUrl(asset.id) }
+      : asset);
   }
 
   imageRequest(asset: PhotoAsset, size: PhotoImageSize): HttpRequest {

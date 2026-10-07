@@ -540,8 +540,8 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.9.0",
-        "description": "Digital photo frame backed by an Immich server, with offline caching",
+        "version": "1.10.0",
+        "description": "Digital photo frame backed by an Immich server, with offline caching and video playback",
         "translations": {
           "de": {
             "Immich Photo Frame": "Immich-Bilderrahmen",
@@ -689,6 +689,9 @@
               "background": "none",
               "backgroundOpacity": 1
             },
+            "sandboxPolicy": [
+              "remote-media"
+            ],
             "settings": [
               {
                 "key": "serverUrl",
@@ -972,8 +975,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-84eca48ca1b60bd026858331afaa4ea45d6465fa8da49a67fd2c3f19a8ece718.js",
-      "sha256": "84eca48ca1b60bd026858331afaa4ea45d6465fa8da49a67fd2c3f19a8ece718"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-59b55c1a2f017553596d30c736b1591d0c5b9dd796a1cb7a806daafea0d8ab5a.js",
+      "sha256": "59b55c1a2f017553596d30c736b1591d0c5b9dd796a1cb7a806daafea0d8ab5a"
     },
     {
       "manifest": {
@@ -1335,8 +1338,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-8d4dd43d4915285e042e110b8b2d32cab7bbabde885bd2e3cccc9f1512ce995d.js",
-      "sha256": "8d4dd43d4915285e042e110b8b2d32cab7bbabde885bd2e3cccc9f1512ce995d"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-60f073e2f58db90d0c90265fef1d09204b4a3b885d618ce5175753dac5eeabb1.js",
+      "sha256": "60f073e2f58db90d0c90265fef1d09204b4a3b885d618ce5175753dac5eeabb1"
     },
     {
       "manifest": {
@@ -1691,8 +1694,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-765c98d66dc1629690fca84017d7e97fd0992e175a9bf2b7135b6956c9cd2eb2.js",
-      "sha256": "765c98d66dc1629690fca84017d7e97fd0992e175a9bf2b7135b6956c9cd2eb2"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-741f718e8d9fddcd5c8add3e89efece8f0482f048728027b7f7399ba7fe48c7f.js",
+      "sha256": "741f718e8d9fddcd5c8add3e89efece8f0482f048728027b7f7399ba7fe48c7f"
     },
     {
       "manifest": {

@@ -235,6 +235,11 @@ export class ImmichService {
     };
   }
 
+  /** Browser-native playback URL; direct media cannot carry the brokered API key. */
+  videoUrl(assetId: string): string {
+    return `${this.base}/assets/${assetId}/video/playback`;
+  }
+
   /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
   async fetchFaceBox(assetId: string): Promise<FaceBox | null> {
     const res = await this.req<
