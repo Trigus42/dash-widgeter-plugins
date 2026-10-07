@@ -1,4 +1,5 @@
 import { BACKGROUND_Z, type PluginManifest, type WidgetSettingField } from '@/types';
+import { FRAME_SETTINGS, FRAME_DEFAULT_CONFIG } from '@/sandbox/photoframe';
 import { IMMICH_DEFAULT_CONFIG } from './types';
 import de from './locales/de.json';
 
@@ -41,87 +42,15 @@ const settings: WidgetSettingField[] = [
   { key: 'rating', label: 'Minimum rating (0 = any)', type: 'number', section: 'Source' },
   { key: 'showVideos', label: 'Include videos', type: 'boolean', section: 'Source' },
   { key: 'onlyWithPersons', label: 'Only photos with people', type: 'boolean', help: 'Filter out photos where no person or face is detected.', section: 'Source' },
-  // Slideshow
-  { key: 'intervalSeconds', label: 'Seconds per photo', type: 'number', section: 'Slideshow' },
-  { key: 'preloadCount', label: 'Preload upcoming photos', type: 'number', help: 'How many upcoming photos to pre-fetch into cache (0–5).', section: 'Slideshow' },
-  {
-    key: 'layout',
-    label: 'Layout',
-    type: 'select',
-    section: 'Slideshow',
-    options: [
-      { label: 'Single', value: 'single' },
-      { label: 'Split (two photos)', value: 'split' },
-    ],
-  },
-  {
-    key: 'transition',
-    label: 'Transition',
-    type: 'select',
-    section: 'Slideshow',
-    options: [
-      { label: 'Ken Burns', value: 'kenburns' },
-      { label: 'Zoom', value: 'zoom' },
-      { label: 'Pan', value: 'pan' },
-      { label: 'Fade', value: 'fade' },
-      { label: 'None', value: 'none' },
-    ],
-  },
-  { key: 'transitionSeconds', label: 'Transition seconds', type: 'number', section: 'Slideshow' },
-  {
-    key: 'imageFit',
-    label: 'Image fit',
-    type: 'select',
-    section: 'Slideshow',
-    options: [
-      { label: 'Cover (fill)', value: 'cover' },
-      { label: 'Contain (letterbox)', value: 'contain' },
-    ],
-  },
-  { key: 'showControls', label: 'Show play/next controls', type: 'boolean', section: 'Slideshow' },
-  {
-    key: 'progressBar',
-    label: 'Progress bar',
-    type: 'select',
-    section: 'Slideshow',
-    options: [
-      { label: 'Bottom', value: 'bottom' },
-      { label: 'Top', value: 'top' },
-      { label: 'Hidden', value: 'none' },
-    ],
-  },
-  // Info overlay
-  {
-    key: 'metadataPosition',
-    label: 'Info overlay',
-    type: 'select',
-    section: 'Info overlay',
-    help: 'Show a caption (location, date, people) in a corner of the photo.',
-    options: [
-      { label: 'Bottom right', value: 'bottom-right' },
-      { label: 'Bottom left', value: 'bottom-left' },
-      { label: 'Top right', value: 'top-right' },
-      { label: 'Top left', value: 'top-left' },
-      { label: 'Hidden', value: 'none' },
-    ],
-  },
-  { key: 'metadataShowLocation', label: 'Show location', type: 'boolean', section: 'Info overlay' },
-  { key: 'metadataShowDate', label: 'Show date', type: 'boolean', section: 'Info overlay' },
-  { key: 'metadataShowPeople', label: 'Show people', type: 'boolean', section: 'Info overlay' },
-  { key: 'metadataShowAlbum', label: 'Show album', type: 'boolean', section: 'Info overlay' },
-  { key: 'metadataShowTags', label: 'Show tags', type: 'boolean', section: 'Info overlay' },
-  { key: 'metadataShowDescription', label: 'Show description', type: 'boolean', section: 'Info overlay' },
-  // Caching
-  { key: 'cacheEnabled', label: 'Cache photos locally', type: 'boolean', section: 'Caching' },
-  { key: 'cacheMaxMB', label: 'Cache size limit (MB)', type: 'number', help: 'Oldest images are evicted first when the limit is reached.', section: 'Caching' },
-  { key: 'cacheExpirationDays', label: 'Cache image expiration (days)', type: 'number', help: 'Cached images older than this are removed (0 = never expire).', section: 'Caching' },
-  { key: 'listTtlMinutes', label: 'Offline list validity (minutes)', type: 'number', section: 'Caching' },
+  // Slideshow / Info overlay / Caching are the shared photo-frame SDK fields,
+  // identical across every photo-source plugin and read by the SDK engine.
+  ...FRAME_SETTINGS,
 ];
 
 export const immichManifest: PluginManifest = {
   id: 'immich',
   name: 'Immich Photo Frame',
-  version: '1.8.0',
+  version: '1.9.0',
   description: 'Digital photo frame backed by an Immich server, with offline caching',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
@@ -149,7 +78,7 @@ export const immichManifest: PluginManifest = {
       defaultW: 30,
       defaultH: 25,
       defaultZIndex: BACKGROUND_Z,
-      defaultConfig: { ...IMMICH_DEFAULT_CONFIG },
+      defaultConfig: { ...FRAME_DEFAULT_CONFIG, ...IMMICH_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 1 },
       settings,
     },

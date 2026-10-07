@@ -540,7 +540,7 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.8.0",
+        "version": "1.9.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching",
         "translations": {
           "de": {
@@ -647,24 +647,6 @@
             "defaultH": 25,
             "defaultZIndex": 0,
             "defaultConfig": {
-              "serverUrl": "",
-              "apiKey": "",
-              "poolMode": "random",
-              "albums": {
-                "include": [],
-                "exclude": []
-              },
-              "people": {
-                "include": [],
-                "exclude": []
-              },
-              "tags": {
-                "include": [],
-                "exclude": []
-              },
-              "rating": 0,
-              "showVideos": false,
-              "onlyWithPersons": false,
               "intervalSeconds": 15,
               "preloadCount": 2,
               "layout": "single",
@@ -683,7 +665,25 @@
               "cacheEnabled": true,
               "cacheMaxMB": 500,
               "cacheExpirationDays": 0,
-              "listTtlMinutes": 720
+              "listTtlMinutes": 720,
+              "serverUrl": "",
+              "apiKey": "",
+              "poolMode": "random",
+              "albums": {
+                "include": [],
+                "exclude": []
+              },
+              "people": {
+                "include": [],
+                "exclude": []
+              },
+              "tags": {
+                "include": [],
+                "exclude": []
+              },
+              "rating": 0,
+              "showVideos": false,
+              "onlyWithPersons": false
             },
             "defaultAppearance": {
               "background": "none",
@@ -972,8 +972,865 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-c7ad00d18ab81009d7a485e96e19edf2a0d78dc568f9053e74386e7695ba324c.js",
-      "sha256": "c7ad00d18ab81009d7a485e96e19edf2a0d78dc568f9053e74386e7695ba324c"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-84eca48ca1b60bd026858331afaa4ea45d6465fa8da49a67fd2c3f19a8ece718.js",
+      "sha256": "84eca48ca1b60bd026858331afaa4ea45d6465fa8da49a67fd2c3f19a8ece718"
+    },
+    {
+      "manifest": {
+        "id": "webdav-photos",
+        "name": "WebDAV Photo Frame",
+        "version": "1.0.0",
+        "description": "Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, …), with offline caching",
+        "translations": {
+          "de": {
+            "WebDAV Photo Frame": "WebDAV-Bilderrahmen",
+            "Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, …), with offline caching": "Digitaler Bilderrahmen für einen WebDAV-Ordner (Nextcloud, ownCloud, …) mit Offline-Zwischenspeicher",
+            "Photo Frame": "Bilderrahmen",
+            "Slideshow of photos from a WebDAV folder: transitions, metadata, controls": "Diashow aus einem WebDAV-Ordner mit Übergängen, Metadaten und Steuerung",
+            "Connection": "Verbindung",
+            "Slideshow": "Diashow",
+            "Info overlay": "Info-Einblendung",
+            "Caching": "Zwischenspeicher",
+            "Folder URL": "Ordner-URL",
+            "WebDAV collection (folder) URL. Nextcloud: Files → ⋯ → details shows the dav path.": "WebDAV-Ordner-URL. Nextcloud: Dateien → ⋯ → Details zeigt den DAV-Pfad.",
+            "Username": "Benutzername",
+            "Leave blank for a public (anonymous) share.": "Für eine öffentliche (anonyme) Freigabe leer lassen.",
+            "Password": "Passwort",
+            "Use an app password where your provider offers one.": "Verwenden Sie nach Möglichkeit ein App-Passwort.",
+            "Include subfolders": "Unterordner einschließen",
+            "List photos in nested folders too (the server may decline deep listings).": "Auch Fotos in Unterordnern auflisten (der Server kann tiefe Auflistungen ablehnen).",
+            "Seconds per photo": "Sekunden pro Foto",
+            "Preload upcoming photos": "Kommende Fotos vorladen",
+            "How many upcoming photos to pre-fetch into cache (0–5).": "Anzahl der kommenden Fotos, die vorgeladen werden (0–5).",
+            "Layout": "Layout",
+            "Single": "Einzeln",
+            "Split (two photos)": "Geteilt (zwei Fotos)",
+            "Transition": "Übergang",
+            "Pan": "Schwenken",
+            "Fade": "Überblenden",
+            "None": "Keiner",
+            "Transition seconds": "Übergangsdauer",
+            "Image fit": "Bildanpassung",
+            "Cover (fill)": "Ausfüllen",
+            "Contain (letterbox)": "Einpassen",
+            "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
+            "Progress bar": "Fortschrittsbalken",
+            "Bottom": "Unten",
+            "Top": "Oben",
+            "Hidden": "Ausgeblendet",
+            "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
+            "Bottom right": "Unten rechts",
+            "Bottom left": "Unten links",
+            "Top right": "Oben rechts",
+            "Top left": "Oben links",
+            "Show location": "Ort anzeigen",
+            "Show date": "Datum anzeigen",
+            "Show people": "Personen anzeigen",
+            "Show album": "Album anzeigen",
+            "Show tags": "Schlagwörter anzeigen",
+            "Show description": "Beschreibung anzeigen",
+            "Cache photos locally": "Fotos lokal zwischenspeichern",
+            "Cache size limit (MB)": "Speicherlimit (MB)",
+            "Oldest images are evicted first when the limit is reached.": "Die ältesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
+            "Cache image expiration (days)": "Bildablauf (Tage)",
+            "Cached images older than this are removed (0 = never expire).": "Ältere zwischengespeicherte Bilder werden entfernt (0 = nie).",
+            "Offline list validity (minutes)": "Offline-Listen-Gültigkeit (Minuten)"
+          }
+        },
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "permissions": [
+          {
+            "name": "Internet",
+            "domains": [
+              "*"
+            ],
+            "publicIps": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          },
+          {
+            "name": "Local Networks",
+            "privateIps": [
+              "127.0.0.1/32",
+              "10.0.0.0/8",
+              "172.16.0.0/12",
+              "192.168.0.0/16"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          }
+        ],
+        "widgets": [
+          {
+            "id": "webdav-photos.photoframe",
+            "name": "Photo Frame",
+            "description": "Slideshow of photos from a WebDAV folder: transitions, metadata, controls",
+            "minW": 3,
+            "minH": 3,
+            "defaultW": 30,
+            "defaultH": 25,
+            "defaultZIndex": 0,
+            "defaultConfig": {
+              "intervalSeconds": 15,
+              "preloadCount": 2,
+              "layout": "single",
+              "transition": "kenburns",
+              "transitionSeconds": 1.2,
+              "imageFit": "cover",
+              "showControls": true,
+              "progressBar": "bottom",
+              "metadataPosition": "bottom-right",
+              "metadataShowDate": true,
+              "metadataShowLocation": true,
+              "metadataShowDescription": false,
+              "metadataShowPeople": true,
+              "metadataShowAlbum": false,
+              "metadataShowTags": true,
+              "cacheEnabled": true,
+              "cacheMaxMB": 500,
+              "cacheExpirationDays": 0,
+              "listTtlMinutes": 720,
+              "folderUrl": "",
+              "username": "",
+              "recursive": false
+            },
+            "defaultAppearance": {
+              "background": "none",
+              "backgroundOpacity": 1
+            },
+            "settings": [
+              {
+                "key": "folderUrl",
+                "label": "Folder URL",
+                "type": "text",
+                "placeholder": "https://cloud.example.com/remote.php/dav/files/me/Photos",
+                "help": "WebDAV collection (folder) URL. Nextcloud: Files → ⋯ → details shows the dav path.",
+                "section": "Connection"
+              },
+              {
+                "key": "username",
+                "label": "Username",
+                "type": "text",
+                "help": "Leave blank for a public (anonymous) share.",
+                "section": "Connection"
+              },
+              {
+                "key": "password",
+                "label": "Password",
+                "type": "password",
+                "secret": true,
+                "help": "Use an app password where your provider offers one.",
+                "section": "Connection"
+              },
+              {
+                "key": "recursive",
+                "label": "Include subfolders",
+                "type": "boolean",
+                "help": "List photos in nested folders too (the server may decline deep listings).",
+                "section": "Connection"
+              },
+              {
+                "key": "intervalSeconds",
+                "label": "Seconds per photo",
+                "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "preloadCount",
+                "label": "Preload upcoming photos",
+                "type": "number",
+                "help": "How many upcoming photos to pre-fetch into cache (0–5).",
+                "section": "Slideshow"
+              },
+              {
+                "key": "layout",
+                "label": "Layout",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Single",
+                    "value": "single"
+                  },
+                  {
+                    "label": "Split (two photos)",
+                    "value": "split"
+                  }
+                ]
+              },
+              {
+                "key": "transition",
+                "label": "Transition",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Ken Burns",
+                    "value": "kenburns"
+                  },
+                  {
+                    "label": "Zoom",
+                    "value": "zoom"
+                  },
+                  {
+                    "label": "Pan",
+                    "value": "pan"
+                  },
+                  {
+                    "label": "Fade",
+                    "value": "fade"
+                  },
+                  {
+                    "label": "None",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "transitionSeconds",
+                "label": "Transition seconds",
+                "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "imageFit",
+                "label": "Image fit",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Cover (fill)",
+                    "value": "cover"
+                  },
+                  {
+                    "label": "Contain (letterbox)",
+                    "value": "contain"
+                  }
+                ]
+              },
+              {
+                "key": "showControls",
+                "label": "Show play/next controls",
+                "type": "boolean",
+                "section": "Slideshow"
+              },
+              {
+                "key": "progressBar",
+                "label": "Progress bar",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Bottom",
+                    "value": "bottom"
+                  },
+                  {
+                    "label": "Top",
+                    "value": "top"
+                  },
+                  {
+                    "label": "Hidden",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "metadataPosition",
+                "label": "Info overlay",
+                "type": "select",
+                "section": "Info overlay",
+                "help": "Show a caption (location, date, people) in a corner of the photo.",
+                "options": [
+                  {
+                    "label": "Bottom right",
+                    "value": "bottom-right"
+                  },
+                  {
+                    "label": "Bottom left",
+                    "value": "bottom-left"
+                  },
+                  {
+                    "label": "Top right",
+                    "value": "top-right"
+                  },
+                  {
+                    "label": "Top left",
+                    "value": "top-left"
+                  },
+                  {
+                    "label": "Hidden",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "metadataShowLocation",
+                "label": "Show location",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowDate",
+                "label": "Show date",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowPeople",
+                "label": "Show people",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowAlbum",
+                "label": "Show album",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowTags",
+                "label": "Show tags",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowDescription",
+                "label": "Show description",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "cacheEnabled",
+                "label": "Cache photos locally",
+                "type": "boolean",
+                "section": "Caching"
+              },
+              {
+                "key": "cacheMaxMB",
+                "label": "Cache size limit (MB)",
+                "type": "number",
+                "help": "Oldest images are evicted first when the limit is reached.",
+                "section": "Caching"
+              },
+              {
+                "key": "cacheExpirationDays",
+                "label": "Cache image expiration (days)",
+                "type": "number",
+                "help": "Cached images older than this are removed (0 = never expire).",
+                "section": "Caching"
+              },
+              {
+                "key": "listTtlMinutes",
+                "label": "Offline list validity (minutes)",
+                "type": "number",
+                "section": "Caching"
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-8d4dd43d4915285e042e110b8b2d32cab7bbabde885bd2e3cccc9f1512ce995d.js",
+      "sha256": "8d4dd43d4915285e042e110b8b2d32cab7bbabde885bd2e3cccc9f1512ce995d"
+    },
+    {
+      "manifest": {
+        "id": "google-photos",
+        "name": "Google Photos Frame",
+        "version": "1.0.0",
+        "description": "Digital photo frame backed by Google Photos, with offline caching",
+        "translations": {
+          "de": {
+            "Google Photos Frame": "Google-Fotos-Bilderrahmen",
+            "Digital photo frame backed by Google Photos, with offline caching": "Digitaler Bilderrahmen für Google Fotos mit Offline-Zwischenspeicher",
+            "Photo Frame": "Bilderrahmen",
+            "Slideshow of your Google Photos: albums or recent media, transitions, metadata": "Diashow aus Google Fotos: Alben oder neueste Medien, mit Übergängen und Metadaten",
+            "Connection": "Verbindung",
+            "Source": "Quelle",
+            "Slideshow": "Diashow",
+            "Info overlay": "Info-Einblendung",
+            "Caching": "Zwischenspeicher",
+            "OAuth client ID": "OAuth-Client-ID",
+            "Google Cloud console → Credentials → OAuth client ID (Desktop app).": "Google-Cloud-Konsole → Anmeldedaten → OAuth-Client-ID (Desktop-App).",
+            "OAuth client secret": "OAuth-Client-Schlüssel",
+            "From the same OAuth client. Stored encrypted on the device, never sent to the widget.": "Vom selben OAuth-Client. Verschlüsselt auf dem Gerät gespeichert, nie an das Widget gesendet.",
+            "Refresh token": "Aktualisierungstoken",
+            "Obtain once via the OAuth consent flow (scope photoslibrary.readonly) and paste it here.": "Einmalig über den OAuth-Zustimmungsablauf (Bereich photoslibrary.readonly) abrufen und hier einfügen.",
+            "Album": "Album",
+            "Pick an album, or leave unset to show recent library photos.": "Album auswählen oder leer lassen, um neueste Fotos anzuzeigen.",
+            "Seconds per photo": "Sekunden pro Foto",
+            "Preload upcoming photos": "Kommende Fotos vorladen",
+            "How many upcoming photos to pre-fetch into cache (0–5).": "Anzahl der kommenden Fotos, die vorgeladen werden (0–5).",
+            "Layout": "Layout",
+            "Single": "Einzeln",
+            "Split (two photos)": "Geteilt (zwei Fotos)",
+            "Transition": "Übergang",
+            "Pan": "Schwenken",
+            "Fade": "Überblenden",
+            "None": "Keiner",
+            "Transition seconds": "Übergangsdauer",
+            "Image fit": "Bildanpassung",
+            "Cover (fill)": "Ausfüllen",
+            "Contain (letterbox)": "Einpassen",
+            "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
+            "Progress bar": "Fortschrittsbalken",
+            "Bottom": "Unten",
+            "Top": "Oben",
+            "Hidden": "Ausgeblendet",
+            "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
+            "Bottom right": "Unten rechts",
+            "Bottom left": "Unten links",
+            "Top right": "Oben rechts",
+            "Top left": "Oben links",
+            "Show location": "Ort anzeigen",
+            "Show date": "Datum anzeigen",
+            "Show people": "Personen anzeigen",
+            "Show album": "Album anzeigen",
+            "Show tags": "Schlagwörter anzeigen",
+            "Show description": "Beschreibung anzeigen",
+            "Cache photos locally": "Fotos lokal zwischenspeichern",
+            "Cache size limit (MB)": "Speicherlimit (MB)",
+            "Oldest images are evicted first when the limit is reached.": "Die ältesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
+            "Cache image expiration (days)": "Bildablauf (Tage)",
+            "Cached images older than this are removed (0 = never expire).": "Ältere zwischengespeicherte Bilder werden entfernt (0 = nie).",
+            "Offline list validity (minutes)": "Offline-Listen-Gültigkeit (Minuten)"
+          }
+        },
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "permissions": [
+          {
+            "name": "Google Photos",
+            "domains": [
+              "photoslibrary.googleapis.com",
+              "oauth2.googleapis.com",
+              "*.googleusercontent.com"
+            ],
+            "publicIps": [
+              "0.0.0.0/0",
+              "::/0"
+            ],
+            "properties": {
+              "defaultOn": true
+            }
+          }
+        ],
+        "widgets": [
+          {
+            "id": "google-photos.photoframe",
+            "name": "Photo Frame",
+            "description": "Slideshow of your Google Photos: albums or recent media, transitions, metadata",
+            "minW": 3,
+            "minH": 3,
+            "defaultW": 30,
+            "defaultH": 25,
+            "defaultZIndex": 0,
+            "defaultConfig": {
+              "intervalSeconds": 15,
+              "preloadCount": 2,
+              "layout": "single",
+              "transition": "kenburns",
+              "transitionSeconds": 1.2,
+              "imageFit": "cover",
+              "showControls": true,
+              "progressBar": "bottom",
+              "metadataPosition": "bottom-right",
+              "metadataShowDate": true,
+              "metadataShowLocation": true,
+              "metadataShowDescription": false,
+              "metadataShowPeople": true,
+              "metadataShowAlbum": false,
+              "metadataShowTags": true,
+              "cacheEnabled": true,
+              "cacheMaxMB": 500,
+              "cacheExpirationDays": 0,
+              "listTtlMinutes": 720,
+              "clientId": "",
+              "albumId": ""
+            },
+            "defaultAppearance": {
+              "background": "none",
+              "backgroundOpacity": 1
+            },
+            "settings": [
+              {
+                "key": "clientId",
+                "label": "OAuth client ID",
+                "type": "text",
+                "placeholder": "xxxxx.apps.googleusercontent.com",
+                "help": "Google Cloud console → Credentials → OAuth client ID (Desktop app).",
+                "section": "Connection"
+              },
+              {
+                "key": "clientSecret",
+                "label": "OAuth client secret",
+                "type": "password",
+                "secret": true,
+                "help": "From the same OAuth client. Stored encrypted on the device, never sent to the widget.",
+                "section": "Connection"
+              },
+              {
+                "key": "refreshToken",
+                "label": "Refresh token",
+                "type": "password",
+                "secret": true,
+                "help": "Obtain once via the OAuth consent flow (scope photoslibrary.readonly) and paste it here.",
+                "section": "Connection"
+              },
+              {
+                "key": "albumId",
+                "label": "Album",
+                "type": "select",
+                "help": "Pick an album, or leave unset to show recent library photos.",
+                "section": "Source",
+                "dynamicOptions": true,
+                "subpage": true
+              },
+              {
+                "key": "intervalSeconds",
+                "label": "Seconds per photo",
+                "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "preloadCount",
+                "label": "Preload upcoming photos",
+                "type": "number",
+                "help": "How many upcoming photos to pre-fetch into cache (0–5).",
+                "section": "Slideshow"
+              },
+              {
+                "key": "layout",
+                "label": "Layout",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Single",
+                    "value": "single"
+                  },
+                  {
+                    "label": "Split (two photos)",
+                    "value": "split"
+                  }
+                ]
+              },
+              {
+                "key": "transition",
+                "label": "Transition",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Ken Burns",
+                    "value": "kenburns"
+                  },
+                  {
+                    "label": "Zoom",
+                    "value": "zoom"
+                  },
+                  {
+                    "label": "Pan",
+                    "value": "pan"
+                  },
+                  {
+                    "label": "Fade",
+                    "value": "fade"
+                  },
+                  {
+                    "label": "None",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "transitionSeconds",
+                "label": "Transition seconds",
+                "type": "number",
+                "section": "Slideshow"
+              },
+              {
+                "key": "imageFit",
+                "label": "Image fit",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Cover (fill)",
+                    "value": "cover"
+                  },
+                  {
+                    "label": "Contain (letterbox)",
+                    "value": "contain"
+                  }
+                ]
+              },
+              {
+                "key": "showControls",
+                "label": "Show play/next controls",
+                "type": "boolean",
+                "section": "Slideshow"
+              },
+              {
+                "key": "progressBar",
+                "label": "Progress bar",
+                "type": "select",
+                "section": "Slideshow",
+                "options": [
+                  {
+                    "label": "Bottom",
+                    "value": "bottom"
+                  },
+                  {
+                    "label": "Top",
+                    "value": "top"
+                  },
+                  {
+                    "label": "Hidden",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "metadataPosition",
+                "label": "Info overlay",
+                "type": "select",
+                "section": "Info overlay",
+                "help": "Show a caption (location, date, people) in a corner of the photo.",
+                "options": [
+                  {
+                    "label": "Bottom right",
+                    "value": "bottom-right"
+                  },
+                  {
+                    "label": "Bottom left",
+                    "value": "bottom-left"
+                  },
+                  {
+                    "label": "Top right",
+                    "value": "top-right"
+                  },
+                  {
+                    "label": "Top left",
+                    "value": "top-left"
+                  },
+                  {
+                    "label": "Hidden",
+                    "value": "none"
+                  }
+                ]
+              },
+              {
+                "key": "metadataShowLocation",
+                "label": "Show location",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowDate",
+                "label": "Show date",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowPeople",
+                "label": "Show people",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowAlbum",
+                "label": "Show album",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowTags",
+                "label": "Show tags",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "metadataShowDescription",
+                "label": "Show description",
+                "type": "boolean",
+                "section": "Info overlay"
+              },
+              {
+                "key": "cacheEnabled",
+                "label": "Cache photos locally",
+                "type": "boolean",
+                "section": "Caching"
+              },
+              {
+                "key": "cacheMaxMB",
+                "label": "Cache size limit (MB)",
+                "type": "number",
+                "help": "Oldest images are evicted first when the limit is reached.",
+                "section": "Caching"
+              },
+              {
+                "key": "cacheExpirationDays",
+                "label": "Cache image expiration (days)",
+                "type": "number",
+                "help": "Cached images older than this are removed (0 = never expire).",
+                "section": "Caching"
+              },
+              {
+                "key": "listTtlMinutes",
+                "label": "Offline list validity (minutes)",
+                "type": "number",
+                "section": "Caching"
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-765c98d66dc1629690fca84017d7e97fd0992e175a9bf2b7135b6956c9cd2eb2.js",
+      "sha256": "765c98d66dc1629690fca84017d7e97fd0992e175a9bf2b7135b6956c9cd2eb2"
+    },
+    {
+      "manifest": {
+        "id": "cast-receiver",
+        "name": "Cast Receiver",
+        "version": "1.0.0",
+        "description": "Mostly-invisible screen receiver: cast a website, media stream, or YouTube video to this display",
+        "translations": {
+          "de": {
+            "Cast Receiver": "Cast-Empfänger",
+            "Mostly-invisible screen receiver: cast a website, media stream, or YouTube video to this display": "Fast unsichtbarer Bildschirm-Empfänger: Website, Medienstream oder YouTube-Video auf dieses Display casten",
+            "Full-bleed receiver that shows cast content and a pairing code when idle": "Vollflächiger Empfänger, der Cast-Inhalte und im Leerlauf einen Kopplungscode anzeigt",
+            "Cast": "Cast",
+            "Presentation": "Darstellung",
+            "What to cast": "Was gecastet wird",
+            "Nothing (show pairing code)": "Nichts (Kopplungscode anzeigen)",
+            "Website": "Website",
+            "Media stream (video/audio URL)": "Medienstream (Video-/Audio-URL)",
+            "YouTube video": "YouTube-Video",
+            "Cast target": "Cast-Ziel",
+            "An https website or media URL, or a YouTube link/id (per the type above).": "Eine https-Website oder Medien-URL oder ein YouTube-Link/-ID (gemäß Typ oben).",
+            "Pairing code": "Kopplungscode",
+            "Shown while idle so a sender knows which screen it controls.": "Wird im Leerlauf angezeigt, damit ein Sender weiß, welchen Bildschirm er steuert.",
+            "Overlay style": "Überlagerungsstil",
+            "Cover (opaque)": "Deckend",
+            "Dim backdrop": "Hintergrund abdunkeln",
+            "Inline (transparent)": "Inline (transparent)",
+            "Show pairing code when idle": "Kopplungscode im Leerlauf anzeigen",
+            "Start muted": "Stummgeschaltet starten"
+          }
+        },
+        "executionType": "sandboxed",
+        "capabilities": [],
+        "permissions": [],
+        "widgets": [
+          {
+            "id": "cast-receiver.screen",
+            "name": "Cast Receiver",
+            "description": "Full-bleed receiver that shows cast content and a pairing code when idle",
+            "minW": 3,
+            "minH": 3,
+            "defaultW": 30,
+            "defaultH": 25,
+            "defaultZIndex": 0,
+            "defaultConfig": {
+              "sourceKind": "idle",
+              "sourceUrl": "",
+              "pairingCode": "",
+              "overlayMode": "cover",
+              "showPairingWhenIdle": true,
+              "muted": true
+            },
+            "defaultAppearance": {
+              "background": "none",
+              "backgroundOpacity": 1
+            },
+            "sandboxPolicy": [
+              "embed-sites",
+              "remote-media"
+            ],
+            "settings": [
+              {
+                "key": "sourceKind",
+                "label": "What to cast",
+                "type": "select",
+                "section": "Cast",
+                "options": [
+                  {
+                    "label": "Nothing (show pairing code)",
+                    "value": "idle"
+                  },
+                  {
+                    "label": "Website",
+                    "value": "website"
+                  },
+                  {
+                    "label": "Media stream (video/audio URL)",
+                    "value": "media"
+                  },
+                  {
+                    "label": "YouTube video",
+                    "value": "youtube"
+                  }
+                ]
+              },
+              {
+                "key": "sourceUrl",
+                "label": "Cast target",
+                "type": "text",
+                "placeholder": "https://… or a YouTube link/id",
+                "help": "An https website or media URL, or a YouTube link/id (per the type above).",
+                "section": "Cast"
+              },
+              {
+                "key": "pairingCode",
+                "label": "Pairing code",
+                "type": "text",
+                "help": "Shown while idle so a sender knows which screen it controls.",
+                "section": "Cast"
+              },
+              {
+                "key": "overlayMode",
+                "label": "Overlay style",
+                "type": "select",
+                "section": "Presentation",
+                "options": [
+                  {
+                    "label": "Cover (opaque)",
+                    "value": "cover"
+                  },
+                  {
+                    "label": "Dim backdrop",
+                    "value": "dim"
+                  },
+                  {
+                    "label": "Inline (transparent)",
+                    "value": "inline"
+                  }
+                ]
+              },
+              {
+                "key": "showPairingWhenIdle",
+                "label": "Show pairing code when idle",
+                "type": "boolean",
+                "section": "Presentation"
+              },
+              {
+                "key": "muted",
+                "label": "Start muted",
+                "type": "boolean",
+                "section": "Presentation"
+              }
+            ]
+          }
+        ]
+      },
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-462c87a735c43e21da2c0689eb86d46e3b2274023d68dc0c74cdcf2652f4780b.js",
+      "sha256": "462c87a735c43e21da2c0689eb86d46e3b2274023d68dc0c74cdcf2652f4780b"
     }
   ]
 }

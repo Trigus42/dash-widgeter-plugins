@@ -1,23 +1,44 @@
-import { definePlugin, injectStyle } from '@/sandbox/sdk';
-import { defineReactWidget } from '@/sandbox/react';
-import { PhotoFrameWidget } from './PhotoFrameWidget';
-import { loadImmichOptions } from './settings-options';
-import { IMMICH_SANDBOX_CSS } from './photoframe-styles';
+import { definePhotoFrameWidget, type FrameStrings } from '@/sandbox/photoframe';
+import { ImmichBackend, loadImmichOptions } from './backend';
+import de from './locales/de.json';
 
 /**
- * Immich plugin sandbox entry: the photo-frame widget in the plugin's
- * null-origin iframe. Image fetch + blob caching + iCal-style pooling all run
- * through the host HTTP + blob-cache capabilities; dynamic album/people/tag
- * options resolve via the host over RPC (loadOptions).
+ * Immich plugin sandbox entry. The whole slideshow — pooling, transitions,
+ * overlay, blob caching, dynamic options — is the shared photo-frame SDK engine;
+ * this plugin supplies only the Immich backend adapter and its strings. The
+ * backend's image fetch + list pooling run through the host HTTP + blob-cache
+ * capabilities; album/people/tag options resolve via the host over RPC.
  */
-injectStyle('immich-style', IMMICH_SANDBOX_CSS);
+const EN: FrameStrings = {
+  title: 'Immich Photo Frame',
+  configure: 'Open settings to add your Immich server URL and API key.',
+  loading: 'Loading photos…',
+  previous: 'Previous',
+  next: 'Next',
+  play: 'Play',
+  pause: 'Pause',
+};
 
-export default definePlugin({
-  widgets: {
-    'immich.photoframe': defineReactWidget(PhotoFrameWidget),
-  },
-  loadOptions(context, _widgetId, fieldKey, config) {
-    const kind = fieldKey === 'albums' ? 'albums' : fieldKey === 'people' ? 'people' : 'tags';
-    return loadImmichOptions(context, kind, config);
-  },
+function strings(locale: string): FrameStrings {
+  if (locale.split('-')[0] === 'de') {
+    const r = de.runtime;
+    return {
+      title: r.title,
+      configure: r.configure,
+      loading: r.loading,
+      previous: r.previous,
+      next: r.next,
+      play: r.play,
+      pause: r.pause,
+    };
+  }
+  return EN;
+}
+
+export default definePhotoFrameWidget({
+  widgetId: 'immich.photoframe',
+  styleId: 'immich-style',
+  strings,
+  createBackend: (context, config) => new ImmichBackend(context, config),
+  loadOptions: (context, fieldKey, config) => loadImmichOptions(context, fieldKey, config),
 });

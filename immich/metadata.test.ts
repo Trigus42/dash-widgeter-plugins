@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deriveMetadata, hasMetadata, type MetadataOptions } from './metadata';
+import { deriveMetadata, hasMetadata, type MetadataOptions } from '@/sandbox/photoframe';
 import { readImmichConfig } from './config';
 import type { ImmichAsset } from './types';
 
@@ -27,7 +27,7 @@ const asset: ImmichAsset = {
   tags: [{ id: 't1', name: 'nature', value: 'nature' }],
 };
 
-describe('deriveMetadata', () => {
+describe('deriveMetadata (shared SDK) with Immich assets', () => {
   it('includes enabled fields', () => {
     const meta = deriveMetadata(asset, ALL_ON);
     expect(meta.location).toContain('Oslo');
@@ -60,25 +60,12 @@ describe('deriveMetadata', () => {
   });
 });
 
-describe('readImmichConfig — metadata overlay', () => {
-  it('defaults the overlay to a bottom corner with location + date on', () => {
-    const cfg = readImmichConfig({});
-    expect(cfg.metadataPosition).toBe('bottom-right');
-    expect(cfg.metadataShowLocation).toBe(true);
-    expect(cfg.metadataShowDate).toBe(true);
-  });
-
-  it('validates the overlay position enum and can hide it', () => {
-    expect(readImmichConfig({ metadataPosition: 'bogus' }).metadataPosition).toBe('bottom-right');
-    expect(readImmichConfig({ metadataPosition: 'top-left' }).metadataPosition).toBe('top-left');
-    expect(readImmichConfig({ metadataPosition: 'none' }).metadataPosition).toBe('none');
-  });
-
-  it('coerces pool/transition/layout enums', () => {
-    const cfg = readImmichConfig({ poolMode: 'bogus', transition: 'zoom', layout: 'split' });
+describe('readImmichConfig — connection + source', () => {
+  it('coerces pool enum and defaults', () => {
+    const cfg = readImmichConfig({ poolMode: 'bogus' });
     expect(cfg.poolMode).toBe('random');
-    expect(cfg.transition).toBe('zoom');
-    expect(cfg.layout).toBe('split');
+    expect(cfg.serverUrl).toBe('');
+    expect(cfg.apiKey).toBe('');
   });
 
   it('migrates legacy flat album/person/tag ids into the include filter', () => {

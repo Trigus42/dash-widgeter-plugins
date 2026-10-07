@@ -3,6 +3,9 @@
     { "id": "clock", "dir": "clock" },
     { "id": "weather", "dir": "weather" },
     { "id": "calendar", "dir": "calendar" },
-    { "id": "immich", "dir": "immich" }
+    { "id": "immich", "dir": "immich" },
+    { "id": "webdav-photos", "dir": "webdav-photos" },
+    { "id": "google-photos", "dir": "google-photos" },
+    { "id": "cast-receiver", "dir": "cast-receiver" }
   ]
 }

@@ -20,6 +20,10 @@ export interface ImmichTag {
   value: string;
 }
 
+/**
+ * One Immich asset. Structurally a superset of the SDK's `PhotoAsset`, so the
+ * shared slideshow engine renders it directly without a mapping step.
+ */
 export interface ImmichAsset {
   id: string;
   type: string;
@@ -51,18 +55,17 @@ export interface EntityFilter {
   exclude: string[];
 }
 
-export type FrameLayout = 'single' | 'split';
-export type TransitionMode = 'fade' | 'zoom' | 'pan' | 'kenburns' | 'none';
-export type ImageFit = 'contain' | 'cover';
-export type ProgressBarPosition = 'top' | 'bottom' | 'none';
-export type MetadataPosition = 'none' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
-
 /** Named picklist option for album/person/tag selection in settings. */
 export interface SelectOption {
   label: string;
   value: string;
 }
 
+/**
+ * Immich-specific connection + source config. The slideshow / overlay / caching
+ * fields are owned by the shared photo-frame SDK (`FrameConfig`) and read from
+ * the same instance config via `readFrameConfig`, so they are not duplicated here.
+ */
 export interface ImmichConfig {
   // Connection
   serverUrl: string;
@@ -77,33 +80,6 @@ export interface ImmichConfig {
   rating: number; // 0 = any
   showVideos: boolean;
   onlyWithPersons: boolean;
-
-  // Slideshow
-  intervalSeconds: number;
-  preloadCount: number;
-  layout: FrameLayout;
-  transition: TransitionMode;
-  transitionSeconds: number;
-  imageFit: ImageFit;
-  showControls: boolean;
-
-  // Overlay
-  progressBar: ProgressBarPosition;
-  /** Corner for the info overlay (date/location/people), or 'none' to hide. */
-  metadataPosition: MetadataPosition;
-  metadataShowDate: boolean;
-  metadataShowLocation: boolean;
-  metadataShowDescription: boolean;
-  metadataShowPeople: boolean;
-  metadataShowAlbum: boolean;
-  metadataShowTags: boolean;
-
-  // Caching
-  cacheEnabled: boolean;
-  cacheMaxMB: number;
-  /** Cached images older than this are evicted (0 = never expire). */
-  cacheExpirationDays: number;
-  listTtlMinutes: number;
 }
 
 export const IMMICH_DEFAULT_CONFIG: ImmichConfig = {
@@ -116,28 +92,4 @@ export const IMMICH_DEFAULT_CONFIG: ImmichConfig = {
   rating: 0,
   showVideos: false,
   onlyWithPersons: false,
-  intervalSeconds: 15,
-  preloadCount: 2,
-  layout: 'single',
-  transition: 'kenburns',
-  transitionSeconds: 1.2,
-  imageFit: 'cover',
-  showControls: true,
-  progressBar: 'bottom',
-  metadataPosition: 'bottom-right',
-  metadataShowDate: true,
-  metadataShowLocation: true,
-  metadataShowDescription: false,
-  metadataShowPeople: true,
-  metadataShowAlbum: false,
-  metadataShowTags: true,
-  cacheEnabled: true,
-  cacheMaxMB: 500,
-  cacheExpirationDays: 0,
-  listTtlMinutes: 720,
 };
-
-/** Layout uses two panes only for portrait pairing in split mode. */
-export function panesForLayout(layout: FrameLayout): number {
-  return layout === 'split' ? 2 : 1;
-}

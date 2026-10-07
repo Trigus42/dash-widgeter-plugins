@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text2) {
-        if (text2) {
+      function setTextContent(node, text) {
+        if (text) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text2;
+            firstChild.nodeValue = text;
             return;
           }
         }
-        node.textContent = text2;
+        node.textContent = text;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text2) {
-        textInstance.nodeValue = text2;
+      function unhideTextInstance(textInstance, text) {
+        textInstance.nodeValue = text;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
-        if ("" === text2) return null;
+      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
+        if ("" === text) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -24163,84 +24163,8 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/sdk.ts
-function definePlugin(module) {
-  return module;
-}
-function injectStyle(id, css) {
-  if (document.getElementById(id)) return;
-  const style = document.createElement("style");
-  style.id = id;
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-// src/sandbox/react.tsx
-var import_react = __toESM(require_react(), 1);
-var import_client = __toESM(require_client(), 1);
-var import_pulltorefreshjs = __toESM(require_index_umd(), 1);
-var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
-function defineReactWidget(Component) {
-  let root = null;
-  let context = null;
-  const draw = () => {
-    if (!root || !context) return;
-    root.render(
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, { context }) })
-    );
-  };
-  return {
-    mount(el, ctx) {
-      context = ctx;
-      root = (0, import_client.createRoot)(el);
-      draw();
-    },
-    update(ctx) {
-      context = ctx;
-      draw();
-    },
-    unmount() {
-      root == null ? void 0 : root.unmount();
-      root = null;
-      context = null;
-    }
-  };
-}
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
-}
-
-// src/plugins/immich/PhotoFrameWidget.tsx
-var import_react6 = __toESM(require_react(), 1);
-
-// src/plugins/immich/types.ts
-var IMMICH_DEFAULT_CONFIG = {
-  serverUrl: "",
-  apiKey: "",
-  poolMode: "random",
-  albums: { include: [], exclude: [] },
-  people: { include: [], exclude: [] },
-  tags: { include: [], exclude: [] },
-  rating: 0,
-  showVideos: false,
-  onlyWithPersons: false,
+// src/sandbox/photoframe/frame-config.ts
+var FRAME_DEFAULT_CONFIG = {
   intervalSeconds: 15,
   preloadCount: 2,
   layout: "single",
@@ -24261,32 +24185,11 @@ var IMMICH_DEFAULT_CONFIG = {
   cacheExpirationDays: 0,
   listTtlMinutes: 720
 };
-function panesForLayout(layout) {
-  return layout === "split" ? 2 : 1;
-}
-
-// src/plugins/immich/config.ts
-function str(raw, fallback) {
-  return typeof raw === "string" ? raw : fallback;
-}
 function num(raw, fallback) {
   return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
 }
 function bool(raw, fallback) {
   return typeof raw === "boolean" ? raw : fallback;
-}
-function strArray(raw) {
-  if (Array.isArray(raw)) return raw.filter((v) => typeof v === "string");
-  if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
-  return [];
-}
-var POOL_MODES = ["random", "favorites", "memories"];
-function entityFilter(raw, legacyIds) {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const v = raw;
-    return { include: strArray(v.include), exclude: strArray(v.exclude) };
-  }
-  return { include: strArray(legacyIds), exclude: [] };
 }
 var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
 var METADATA_POSITIONS = [
@@ -24296,24 +24199,14 @@ var METADATA_POSITIONS = [
   "top-left",
   "top-right"
 ];
-function readImmichConfig(raw) {
-  const d = IMMICH_DEFAULT_CONFIG;
-  const poolMode = POOL_MODES.includes(raw.poolMode) ? raw.poolMode : d.poolMode;
+function readFrameConfig(raw) {
+  const d = FRAME_DEFAULT_CONFIG;
   const transition = TRANSITIONS.includes(raw.transition) ? raw.transition : d.transition;
   const layout = raw.layout === "split" ? "split" : "single";
   const imageFit = raw.imageFit === "contain" ? "contain" : "cover";
   const progressBar = raw.progressBar === "top" || raw.progressBar === "none" ? raw.progressBar : d.progressBar;
   const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition) ? raw.metadataPosition : d.metadataPosition;
   return {
-    serverUrl: str(raw.serverUrl, d.serverUrl),
-    apiKey: str(raw.apiKey, d.apiKey),
-    poolMode,
-    albums: entityFilter(raw.albums, raw.albumIds),
-    people: entityFilter(raw.people, raw.personIds),
-    tags: entityFilter(raw.tags, raw.tagIds),
-    rating: num(raw.rating, d.rating),
-    showVideos: bool(raw.showVideos, d.showVideos),
-    onlyWithPersons: bool(raw.onlyWithPersons, d.onlyWithPersons),
     intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
     preloadCount: num(raw.preloadCount, d.preloadCount),
     layout,
@@ -24335,263 +24228,39 @@ function readImmichConfig(raw) {
     listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes)
   };
 }
+function cachePolicyFromConfig(config) {
+  const days = config.cacheExpirationDays;
+  return {
+    maxBytes: config.cacheMaxMB * 1024 * 1024,
+    maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
+  };
+}
+function panesForLayout(layout) {
+  return layout === "split" ? 2 : 1;
+}
 
-// src/plugins/immich/useSlideshow.ts
-var import_react2 = __toESM(require_react(), 1);
-
-// src/plugins/immich/service.ts
-var PROXY = "always";
-var ImmichService = class {
-  constructor(transport, config) {
-    this.transport = transport;
-    this.config = config;
-  }
-  get base() {
-    return `${this.config.serverUrl.replace(/\/$/, "")}/api`;
-  }
-  /** Host-enforced eviction bounds for cached image blobs, from user config.
-   *  cacheExpirationDays of 0 means never expire (maxAgeMs = Infinity). */
-  get cachePolicy() {
-    const days = this.config.cacheExpirationDays;
-    return {
-      maxBytes: this.config.cacheMaxMB * 1024 * 1024,
-      maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
-    };
-  }
-  get jsonHeaders() {
-    return {
-      // `apiKey` is the `{{secret:apiKey}}` sentinel (a secret field); the host
-      // HTTP layer substitutes the real key at egress, so it never enters this
-      // frame. Sending the sentinel verbatim here is correct.
-      "x-api-key": this.config.apiKey,
-      accept: "application/json",
-      "content-type": "application/json"
-    };
-  }
-  /** Typed request helper: the transport returns `unknown` data (RPC-crossed). */
-  async req(request) {
-    return await this.transport.request(request);
-  }
-  /**
-   * Pool-aware asset-list fetch. Pure network fetch: caching, staleness, and
-   * offline fallback are handled by the shared data layer (useWidgetData /
-   * TanStack Query), not here. Image bytes still use the dedicated size-capped
-   * blob cache (see fetchImageBlob) because that needs LRU eviction the query
-   * cache does not provide.
-   */
-  async fetchAssets(count) {
-    return this.fetchPool(count);
-  }
-  /** Stable identity for the asset pool; used as the shared query key. */
-  poolCacheKey() {
-    const c = this.config;
-    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
-    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
-  }
-  async fetchPool(count) {
-    switch (this.config.poolMode) {
-      case "memories":
-        return this.fetchMemories();
-      case "favorites":
-        return this.metadataSearch({ isFavorite: { eq: true } }, count);
-      case "random":
-      default:
-        return this.fetchRandom(count);
-    }
-  }
-  /**
-   * Builds the modern Immich v3+ structured SearchFilter.
-   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
-   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
-   * All criteria are packaged inside `filter`.
-   */
-  buildSearchFilter(extraFilter = {}) {
-    const c = this.config;
-    const filter = { ...extraFilter };
-    if (!c.showVideos) {
-      filter.type = { in: ["IMAGE"] };
-    }
-    if (c.rating > 0) {
-      filter.rating = { ge: c.rating };
-    }
-    if (c.onlyWithPersons) {
-      filter.hasPeople = { eq: true };
-    }
-    const buildIds = (e) => {
-      const res = {};
-      if (e.include.length) res.any = e.include;
-      if (e.exclude.length) res.none = e.exclude;
-      return Object.keys(res).length > 0 ? res : null;
-    };
-    const albumIds = buildIds(c.albums);
-    if (albumIds) filter.albumIds = albumIds;
-    const personIds = buildIds(c.people);
-    if (personIds) filter.personIds = personIds;
-    const tagIds = buildIds(c.tags);
-    if (tagIds) filter.tagIds = tagIds;
-    return filter;
-  }
-  postProcessAssets(items) {
-    let result = items;
-    if (this.config.onlyWithPersons) {
-      result = result.filter((a) => a.people && a.people.length > 0);
-    }
-    if (this.config.people.exclude.length > 0) {
-      const excluded = new Set(this.config.people.exclude);
-      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
-    }
-    if (this.config.tags.exclude.length > 0) {
-      const excluded = new Set(this.config.tags.exclude);
-      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
-    }
-    return result;
-  }
-  async fetchRandom(count) {
-    const filter = this.buildSearchFilter();
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/random`,
-      method: "POST",
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    const items = Array.isArray(res.data) ? res.data : [];
-    return this.postProcessAssets(items);
-  }
-  async metadataSearch(extraFilter, count) {
-    var _a;
-    const filter = this.buildSearchFilter(extraFilter);
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/metadata`,
-      method: "POST",
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
-    return this.postProcessAssets(items);
-  }
-  async fetchMemories() {
-    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
-    const res = await this.req({
-      url: `${this.base}/memories?for=${today}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
-    const now = (/* @__PURE__ */ new Date()).getFullYear();
-    const items = (res.data ?? []).flatMap((memory) => {
-      var _a;
-      const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
-      const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
-      return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
-    });
-    return this.postProcessAssets(items);
-  }
-  async fetchAssetAlbums(assetId) {
-    try {
-      const res = await this.req({
-        url: `${this.base}/albums?assetId=${assetId}`,
-        method: "GET",
-        headers: this.jsonHeaders,
-        proxy: PROXY
-      });
-      if (!res.ok || !Array.isArray(res.data)) return [];
-      return res.data.map((a) => a.albumName).filter(Boolean);
-    } catch {
-      return [];
-    }
-  }
-  /**
-   * Fetch a preview image as a Blob, serving from the local size-capped blob
-   * cache first (offline + instant). Network responses are cached and the store
-   * is pruned to the configured budget. Returns the Blob itself — the caller
-   * owns object-URL creation and revocation so the URL lifecycle is tied to the
-   * element that renders it.
-   */
-  async fetchImageBlob(assetId, size = "preview") {
-    const cacheKey = `${assetId}:${size}`;
-    if (this.config.cacheEnabled) {
-      const cached = await this.transport.cacheGet(cacheKey);
-      if (cached) return cached;
-    }
-    const res = await this.req({
-      url: `${this.base}/assets/${assetId}/thumbnail?size=${size}`,
-      method: "GET",
-      headers: { "x-api-key": this.config.apiKey },
-      responseType: "binary",
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich image failed (${res.status})`);
-    if (this.config.cacheEnabled) {
-      await this.transport.cachePut(cacheKey, res.data, this.cachePolicy);
-    }
-    return res.data;
-  }
-  /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
-  async fetchFaceBox(assetId) {
-    const res = await this.req({
-      url: `${this.base}/faces?id=${assetId}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
-    const f = res.data[0];
-    if (!f || !f.imageWidth || !f.imageHeight) return null;
-    return {
-      cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
-      cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight
-    };
-  }
-  async listAlbums() {
-    const res = await this.req({
-      url: `${this.base}/albums`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
-    return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
-  }
-  async listPeople() {
-    const res = await this.req({
-      url: `${this.base}/people?withHidden=false`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
-    return (res.data.people ?? []).filter((p) => p.name).map((p) => ({ label: p.name, value: p.id }));
-  }
-  async listTags() {
-    const res = await this.req({
-      url: `${this.base}/tags`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
-    return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
-  }
-};
+// src/sandbox/photoframe/metadata.ts
+function deriveMetadata(asset, options, locale) {
+  const exif = asset.exifInfo;
+  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
+  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
+  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
+  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
+  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
+  return {
+    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
+    location: location2,
+    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
+    people,
+    album,
+    tags
+  };
+}
+function hasMetadata(meta) {
+  return Boolean(
+    meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags
+  );
+}
 
 // node_modules/thumbhash/thumbhash.js
 function thumbHashToRGBA(hash) {
@@ -24785,7 +24454,7 @@ function thumbHashToDataURL(hash) {
   return rgbaToDataURL(image.w, image.h, image.rgba);
 }
 
-// src/plugins/immich/thumbhash.ts
+// src/sandbox/photoframe/thumbhash.ts
 function thumbhashToDataUrl(base64) {
   try {
     const binary = atob(base64);
@@ -24797,7 +24466,78 @@ function thumbhashToDataUrl(base64) {
   }
 }
 
-// src/plugins/immich/useSlideshow.ts
+// src/sandbox/photoframe/load-image.ts
+async function loadImageBlob(context, backend, config, asset, size = "preview") {
+  const cacheKey = `${asset.id}:${size}`;
+  if (config.cacheEnabled) {
+    const cached = await context.cacheGet(cacheKey);
+    if (cached) return cached;
+  }
+  const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
+  if (!res.ok) throw new Error(`Image fetch failed (${res.status})`);
+  const blob = res.data;
+  if (config.cacheEnabled) {
+    await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
+  }
+  return blob;
+}
+
+// src/sandbox/photoframe/useSlideshow.ts
+var import_react2 = __toESM(require_react(), 1);
+
+// src/sandbox/react.tsx
+var import_react = __toESM(require_react(), 1);
+var import_client = __toESM(require_client(), 1);
+var import_pulltorefreshjs = __toESM(require_index_umd(), 1);
+var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
+function defineReactWidget(Component) {
+  let root = null;
+  let context = null;
+  const draw = () => {
+    if (!root || !context) return;
+    root.render(
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, { context }) })
+    );
+  };
+  return {
+    mount(el, ctx) {
+      context = ctx;
+      root = (0, import_client.createRoot)(el);
+      draw();
+    },
+    update(ctx) {
+      context = ctx;
+      draw();
+    },
+    unmount() {
+      root == null ? void 0 : root.unmount();
+      root = null;
+      context = null;
+    }
+  };
+}
+function useWidgetData(context, options) {
+  const [snapshot, setSnapshot] = (0, import_react.useState)({
+    data: void 0,
+    isLoading: true,
+    isStale: false,
+    fetchedAt: null,
+    error: null
+  });
+  const refetchRef = (0, import_react.useRef)(() => void 0);
+  const keyId = JSON.stringify(options.key);
+  (0, import_react.useEffect)(() => {
+    const sub = context.useData({
+      ...options,
+      onUpdate: (snap) => setSnapshot(snap)
+    });
+    refetchRef.current = () => sub.refetch();
+    return () => sub.dispose();
+  }, [keyId]);
+  return { ...snapshot, refetch: () => refetchRef.current() };
+}
+
+// src/sandbox/photoframe/useSlideshow.ts
 var BATCH = 100;
 function shuffleDeck(items) {
   const result = [...items];
@@ -24809,19 +24549,10 @@ function shuffleDeck(items) {
   }
   return result;
 }
-function makeService(context, config) {
-  const transport = {
-    request: (req) => context.http(req),
-    cacheGet: (key) => context.cacheGet(key),
-    cachePut: (key, blob, policy) => context.cachePut(key, blob, policy)
-  };
-  return new ImmichService(transport, config);
-}
-function useSlideshow(context, config, tick) {
-  const configured = config.serverUrl !== "" && config.apiKey !== "";
+function useSlideshow(context, backend, config, tick) {
+  const configured = backend.isConfigured();
   const panes = panesForLayout(config.layout);
-  const service = (0, import_react2.useMemo)(() => makeService(context, config), [context, config]);
-  const poolKey = (0, import_react2.useMemo)(() => service.poolCacheKey(), [service]);
+  const poolKey = (0, import_react2.useMemo)(() => backend.poolCacheKey(), [backend]);
   const listTtlMs = config.listTtlMinutes * 60 * 1e3;
   const {
     data: assets,
@@ -24829,8 +24560,8 @@ function useSlideshow(context, config, tick) {
     isLoading,
     refetch
   } = useWidgetData(context, {
-    key: ["immich", poolKey],
-    fetcher: () => service.fetchAssets(BATCH),
+    key: ["photoframe", poolKey],
+    fetcher: () => backend.fetchAssets(BATCH),
     enabled: configured,
     staleTimeMs: listTtlMs,
     staleMessage: "Offline \u2014 showing cached photos",
@@ -24864,20 +24595,19 @@ function useSlideshow(context, config, tick) {
         for (let p = 1; p <= preloadCount; p += 1) {
           const nextAsset = deck[(index + panes * p) % deck.length];
           if (nextAsset) {
-            void service.fetchImageBlob(nextAsset.id).catch(() => null);
+            void loadImageBlob(context, backend, config, nextAsset).catch(() => null);
           }
         }
       }
       const settled = await Promise.all(
         picks.map(async (asset) => {
           try {
-            if (config.metadataShowAlbum && !asset.albumName) {
-              const albums = await service.fetchAssetAlbums(asset.id);
-              if (albums.length > 0) asset.albumName = albums.join(", ");
+            if (config.metadataShowAlbum && backend.enrichAsset) {
+              await backend.enrichAsset(asset).catch(() => void 0);
             }
-            const blob = await service.fetchImageBlob(asset.id);
+            const blob = await loadImageBlob(context, backend, config, asset);
             const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
-            const face = config.transition === "kenburns" ? await service.fetchFaceBox(asset.id).catch(() => null) : null;
+            const face = config.transition === "kenburns" && backend.fetchFaceBox ? await backend.fetchFaceBox(asset).catch(() => null) : null;
             return { asset, blob, placeholder, face };
           } catch {
             return null;
@@ -24890,7 +24620,7 @@ function useSlideshow(context, config, tick) {
       setSlides(loaded);
       setProgressKey((k) => k + 1);
     },
-    [deck, service, panes, config.transition, config.preloadCount, config.metadataShowAlbum]
+    [deck, context, backend, panes, config]
   );
   (0, import_react2.useEffect)(() => {
     cursor.current = 0;
@@ -24921,21 +24651,21 @@ function useSlideshow(context, config, tick) {
   return { slides, playing, error, isLoading, progressKey, next, back, togglePlay };
 }
 
-// src/plugins/immich/AssetView.tsx
+// src/sandbox/photoframe/AssetView.tsx
 var import_react4 = __toESM(require_react(), 1);
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
 function transitionClass(transition) {
   switch (transition) {
     case "kenburns":
-      return "immich-kenburns";
+      return "pf-kenburns";
     case "zoom":
-      return "immich-zoom";
+      return "pf-zoom";
     case "pan":
-      return "immich-pan";
+      return "pf-pan";
     case "none":
-      return "immich-none";
+      return "pf-none";
     default:
-      return "immich-fadeonly";
+      return "pf-fadeonly";
   }
 }
 function AssetView({
@@ -24948,9 +24678,9 @@ function AssetView({
   const origin = slide.face ? `${(slide.face.cx * 100).toFixed(1)}% ${(slide.face.cy * 100).toFixed(1)}%` : "center";
   const motionClass = transitionClass(transition);
   const style = {
-    "--immich-origin": origin,
-    "--immich-motion-duration": `${intervalSeconds + durationSeconds}s`,
-    "--immich-fade-duration": `${durationSeconds}s`
+    "--pf-origin": origin,
+    "--pf-motion-duration": `${intervalSeconds + durationSeconds}s`,
+    "--pf-fade-duration": `${durationSeconds}s`
   };
   const [imageUrl, setImageUrl] = (0, import_react4.useState)(null);
   (0, import_react4.useEffect)(() => {
@@ -24965,13 +24695,13 @@ function AssetView({
     setLoaded(false);
     if (((_a = imgRef.current) == null ? void 0 : _a.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
   }, [imageUrl]);
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "immich-asset", style, children: [
-    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "immich-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pf-asset", style, children: [
+    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "pf-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
     imageUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
       "img",
       {
         ref: imgRef,
-        className: `immich-photo immich-fit-${fit} ${loaded ? motionClass : ""}`,
+        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
         "data-loaded": loaded,
         src: imageUrl,
         alt: "",
@@ -24983,37 +24713,477 @@ function AssetView({
   ] });
 }
 
-// src/plugins/immich/OverlayControls.tsx
-var import_react5 = __toESM(require_react(), 1);
+// src/sandbox/photoframe/MetadataOverlay.tsx
+var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+function MetadataOverlay({ asset, position, options, locale }) {
+  if (position === "none") return null;
+  const meta = deriveMetadata(asset, options, locale);
+  if (!hasMetadata(meta)) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `pf-caption pf-caption-${position}`, children: [
+    meta.location && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.location }),
+    meta.album && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.album }),
+    meta.date && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.date }),
+    meta.people && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.people }),
+    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.tags }),
+    meta.description && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-desc", children: meta.description })
+  ] });
+}
 
-// src/plugins/immich/locales/de.json
+// src/sandbox/photoframe/ProgressBar.tsx
+var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
+function ProgressBar({
+  position,
+  durationSeconds,
+  playing,
+  cycleKey
+}) {
+  if (position === "none") return null;
+  const style = {
+    "--pf-progress-duration": `${durationSeconds}s`,
+    animationPlayState: playing ? "running" : "paused"
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `pf-progress pf-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pf-progress-fill", style }, cycleKey) });
+}
+
+// src/sandbox/photoframe/OverlayControls.tsx
+var import_react5 = __toESM(require_react(), 1);
+var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+var HIDE_DELAY_MS = 2500;
+function OverlayControls({
+  playing,
+  onNext,
+  onBack,
+  onTogglePlay,
+  active,
+  labels
+}) {
+  const [visible, setVisible] = (0, import_react5.useState)(false);
+  const hideTimer = (0, import_react5.useRef)(null);
+  const reveal = (0, import_react5.useCallback)(() => {
+    setVisible(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
+  }, []);
+  (0, import_react5.useEffect)(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
+  (0, import_react5.useEffect)(() => {
+    if (!active) return;
+    const handler = (e) => {
+      if (e.key === "ArrowRight") {
+        onNext();
+        reveal();
+      } else if (e.key === "ArrowLeft") {
+        onBack();
+        reveal();
+      } else if (e.key === " ") {
+        e.preventDefault();
+        onTogglePlay();
+        reveal();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [active, onNext, onBack, onTogglePlay, reveal]);
+  const act = (fn) => () => {
+    fn();
+    reveal();
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+    "div",
+    {
+      className: "pf-controls",
+      "data-active": active,
+      "data-visible": visible,
+      onPointerMove: reveal,
+      onPointerDown: reveal,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onBack), "aria-label": labels.previous, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronLeft, {}) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "pf-zone pf-zone-center",
+            onClick: act(onTogglePlay),
+            "aria-label": playing ? labels.pause : labels.play,
+            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn pf-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlayIcon, {}) })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onNext), "aria-label": labels.next, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, {}) }) })
+      ]
+    }
+  );
+}
+function ChevronLeft() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
+}
+function ChevronRight() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
+}
+function PlayIcon() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M8 5v14l11-7z" }) });
+}
+function PauseIcon() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
+}
+
+// src/sandbox/photoframe/PhotoFrameWidget.tsx
+var import_react6 = __toESM(require_react(), 1);
+var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+function PhotoFrameWidget({ context, backend, strings: strings2 }) {
+  const config = (0, import_react6.useMemo)(() => readFrameConfig(context.config), [context.config]);
+  const configured = backend.isConfigured();
+  const [tick, setTick] = (0, import_react6.useState)(0);
+  const show = useSlideshow(context, backend, config, tick);
+  const timerRef = (0, import_react6.useRef)(null);
+  const resetTimer = (0, import_react6.useCallback)(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (!show.playing || !configured) return;
+    timerRef.current = setInterval(
+      () => setTick((t) => t + 1),
+      Math.max(3, config.intervalSeconds) * 1e3
+    );
+  }, [show.playing, configured, config.intervalSeconds]);
+  (0, import_react6.useEffect)(() => {
+    resetTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [resetTimer, show.progressKey]);
+  const handleNext = (0, import_react6.useCallback)(() => {
+    show.next();
+    resetTimer();
+  }, [show, resetTimer]);
+  const handleBack = (0, import_react6.useCallback)(() => {
+    show.back();
+    resetTimer();
+  }, [show, resetTimer]);
+  const metadataOptions = {
+    showDate: config.metadataShowDate,
+    showLocation: config.metadataShowLocation,
+    showDescription: config.metadataShowDescription,
+    showPeople: config.metadataShowPeople,
+    showAlbum: config.metadataShowAlbum,
+    showTags: config.metadataShowTags
+  };
+  if (!configured) {
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-frame pf-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: strings2.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: strings2.configure })
+    ] }) });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `pf-frame pf-layout-${config.layout}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pf-pane", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        AssetView,
+        {
+          slide,
+          fit: config.imageFit,
+          transition: config.transition,
+          durationSeconds: config.transitionSeconds,
+          intervalSeconds: config.intervalSeconds
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        MetadataOverlay,
+        {
+          asset: slide.asset,
+          position: config.metadataPosition,
+          options: metadataOptions,
+          locale: context.locale
+        }
+      )
+    ] }, slide.asset.id)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      ProgressBar,
+      {
+        position: config.progressBar,
+        durationSeconds: Math.max(3, config.intervalSeconds),
+        playing: show.playing,
+        cycleKey: show.progressKey
+      }
+    ),
+    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      OverlayControls,
+      {
+        playing: show.playing,
+        onNext: handleNext,
+        onBack: handleBack,
+        onTogglePlay: show.togglePlay,
+        active: context.isEditing === false,
+        labels: strings2
+      }
+    ),
+    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status", children: strings2.loading }),
+    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status pf-error", role: "alert", children: show.error })
+  ] });
+}
+
+// src/sandbox/sdk.ts
+function definePlugin(module) {
+  return module;
+}
+function injectStyle(id, css) {
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = css;
+  document.head.appendChild(style);
+}
+
+// src/sandbox/photoframe/styles.ts
+var PHOTOFRAME_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body { width: 100%; height: 100%; }
+  .wg-plugin-root { width: 100%; height: 100%; }
+  .pf-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  .pf-panes { display: flex; width: 100%; height: 100%; }
+  .pf-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
+  .pf-layout-split .pf-pane + .pf-pane { border-left: 2px solid rgba(255,255,255,0.12); }
+  .pf-asset { position: absolute; inset: 0; overflow: hidden; }
+  .pf-backdrop, .pf-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pf-backdrop { filter: blur(14px); transform: scale(1.1); }
+  .pf-fit-cover { object-fit: cover; }
+  .pf-fit-contain { object-fit: contain; }
+  .pf-photo { opacity: 0; transform-origin: var(--pf-origin, center); }
+  .pf-fadeonly, .pf-none { animation: pf-fade var(--pf-fade-duration, 1s) ease both; }
+  .pf-none { animation-duration: 0.01s; }
+  .pf-zoom { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-zoom var(--pf-motion-duration,16s) ease-out both; }
+  .pf-pan { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-pan var(--pf-motion-duration,16s) ease-in-out both; }
+  .pf-kenburns { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-kenburns var(--pf-motion-duration,16s) ease-in-out both; }
+  @keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pf-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
+  @keyframes pf-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
+  @keyframes pf-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
+  .pf-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
+  .pf-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
+  .pf-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
+  .pf-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .pf-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
+  .pf-progress-top { top: 0; }
+  .pf-progress-bottom { bottom: 0; }
+  .pf-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: pf-progress var(--pf-progress-duration, 15s) linear forwards; }
+  @keyframes pf-progress { from { width: 0; } to { width: 100%; } }
+  .pf-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .pf-controls[data-active='false'] { pointer-events: none; }
+  .pf-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
+  .pf-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
+  .pf-zone-btn-lg { width: 64px; height: 64px; }
+  .pf-controls[data-visible='true'] .pf-zone-btn { opacity: 1; transform: scale(1); }
+  @media (hover: hover) { .pf-zone:hover .pf-zone-btn { opacity: 1; transform: scale(1); } }
+  .pf-zone-btn svg { width: 55%; height: 55%; }
+  .pf-empty, .pf-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
+  .pf-status { background: rgba(0,0,0,0.35); }
+  .pf-empty p { margin-top: 8px; font-size: 13px; }
+  .pf-error { color: #ff8080; }
+`;
+
+// src/sandbox/photoframe/define.tsx
+var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+function definePhotoFrameWidget(options) {
+  injectStyle(options.styleId ?? "photoframe-style", PHOTOFRAME_SANDBOX_CSS);
+  const renderer = defineReactWidget(({ context }) => {
+    const backend = options.createBackend(context, context.config);
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(PhotoFrameWidget, { context, backend, strings: options.strings(context.locale) });
+  });
+  const module = {
+    widgets: { [options.widgetId]: renderer }
+  };
+  if (options.loadOptions) {
+    const load = options.loadOptions.bind(options);
+    module.loadOptions = (context, _widgetId, fieldKey, config) => load(context, fieldKey, config);
+  }
+  return definePlugin(module);
+}
+
+// src/core/net/secret-placeholder.ts
+function secretSentinel(fieldKey) {
+  return `{{secret:${fieldKey}}}`;
+}
+
+// src/plugins/google-photos/service.ts
+var TOKEN_URL = "https://oauth2.googleapis.com/token";
+var API_BASE = "https://photoslibrary.googleapis.com/v1";
+var PROXY = "always";
+var PREVIEW = { w: 2048, h: 1365 };
+var THUMBNAIL = { w: 640, h: 640 };
+var GooglePhotosService = class {
+  constructor(transport, config) {
+    this.transport = transport;
+    this.config = config;
+  }
+  accessToken = null;
+  tokenExpiresAt = 0;
+  /** Stable identity for the pool (client + album); the shared query key. */
+  poolCacheKey() {
+    return `${this.config.clientId}|${this.config.albumId || "library"}`;
+  }
+  /**
+   * Exchange the refresh token for a fresh access token, caching it until a
+   * minute before expiry. The request body carries the client secret + refresh
+   * token as host-substituted placeholders, so this frame never sees them.
+   */
+  async accessTokenValue() {
+    const now = Date.now();
+    if (this.accessToken && now < this.tokenExpiresAt) return this.accessToken;
+    const body = `client_id=${encodeURIComponent(this.config.clientId)}&client_secret=${secretSentinel("clientSecret")}&refresh_token=${secretSentinel("refreshToken")}&grant_type=refresh_token`;
+    const res = await this.transport.request({
+      url: TOKEN_URL,
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+      proxy: PROXY
+    });
+    if (!res.ok || !res.data.access_token) {
+      throw new Error(`Google token refresh failed (${res.status})`);
+    }
+    this.accessToken = res.data.access_token;
+    this.tokenExpiresAt = now + Math.max(0, (res.data.expires_in ?? 3600) - 60) * 1e3;
+    return this.accessToken;
+  }
+  async authHeaders() {
+    return { authorization: `Bearer ${await this.accessTokenValue()}` };
+  }
+  /** Fetch up to `count` media items from the album, or recent library media. */
+  async fetchAssets(count) {
+    const headers = { ...await this.authHeaders(), "content-type": "application/json" };
+    const body = { pageSize: Math.min(100, Math.max(1, count)) };
+    if (this.config.albumId) body.albumId = this.config.albumId;
+    const res = await this.transport.request({
+      url: `${API_BASE}/mediaItems:search`,
+      method: "POST",
+      headers,
+      body,
+      proxy: PROXY
+    });
+    if (!res.ok) throw new Error(`Google Photos search failed (${res.status})`);
+    const items = res.data.mediaItems ?? [];
+    return items.filter((item) => !item.mimeType || item.mimeType.startsWith("image/"));
+  }
+  /** List the user's albums for the settings picker (title + id). */
+  async listAlbums() {
+    const headers = await this.authHeaders();
+    const albums = [];
+    let pageToken = "";
+    for (let page = 0; page < 5; page += 1) {
+      const url = `${API_BASE}/albums?pageSize=50${pageToken ? `&pageToken=${pageToken}` : ""}`;
+      const res = await this.transport.request({ url, method: "GET", headers, proxy: PROXY });
+      if (!res.ok) throw new Error(`Google Photos albums failed (${res.status})`);
+      for (const album of res.data.albums ?? []) {
+        albums.push({ label: album.title || "(untitled album)", value: album.id });
+      }
+      if (!res.data.nextPageToken) break;
+      pageToken = res.data.nextPageToken;
+    }
+    return albums;
+  }
+  /**
+   * Build the request for an item's image bytes. Google Photos baseUrls are
+   * pre-signed (no auth) and take a `=w{W}-h{H}` size suffix. Pure — the SDK
+   * engine runs it with `responseType: 'binary'`, caches and decodes.
+   */
+  imageRequest(baseUrl, size) {
+    const dim = size === "thumbnail" ? THUMBNAIL : PREVIEW;
+    return {
+      url: `${baseUrl}=w${dim.w}-h${dim.h}`,
+      method: "GET",
+      proxy: PROXY
+    };
+  }
+};
+
+// src/plugins/google-photos/types.ts
+var GOOGLE_PHOTOS_DEFAULT_CONFIG = {
+  clientId: "",
+  albumId: ""
+};
+
+// src/plugins/google-photos/config.ts
+function str(raw, fallback) {
+  return typeof raw === "string" ? raw : fallback;
+}
+function readGooglePhotosConfig(raw) {
+  const d = GOOGLE_PHOTOS_DEFAULT_CONFIG;
+  return {
+    clientId: str(raw.clientId, d.clientId),
+    albumId: str(raw.albumId, d.albumId)
+  };
+}
+
+// src/plugins/google-photos/backend.ts
+function toPhotoAsset(item) {
+  var _a;
+  const asset = {
+    // The id is used by the engine for cache keys + React lists, but the image
+    // request needs the pre-signed baseUrl, so stash it in the id. We keep the
+    // baseUrl as the id (stable per render) and read it back in imageRequest.
+    id: item.baseUrl,
+    type: "IMAGE"
+  };
+  if (item.filename) asset.originalFileName = item.filename;
+  const created = (_a = item.mediaMetadata) == null ? void 0 : _a.creationTime;
+  if (created) asset.localDateTime = created;
+  return asset;
+}
+var GooglePhotosBackend = class {
+  service;
+  configured;
+  constructor(context, rawConfig) {
+    const config = readGooglePhotosConfig(rawConfig);
+    this.configured = config.clientId.trim() !== "";
+    const transport = { request: (req) => context.http(req) };
+    this.service = new GooglePhotosService(transport, config);
+  }
+  isConfigured() {
+    return this.configured;
+  }
+  poolCacheKey() {
+    return this.service.poolCacheKey();
+  }
+  async fetchAssets(count) {
+    const items = await this.service.fetchAssets(count);
+    return items.map(toPhotoAsset);
+  }
+  imageRequest(asset, size) {
+    return this.service.imageRequest(asset.id, size);
+  }
+};
+async function loadGooglePhotosAlbums(context, rawConfig) {
+  const config = readGooglePhotosConfig(rawConfig);
+  if (!config.clientId) {
+    throw new Error("Enter the OAuth client id and connect your account first.");
+  }
+  const service = new GooglePhotosService({ request: (req) => context.http(req) }, config);
+  return service.listAlbums();
+}
+
+// src/plugins/google-photos/locales/de.json
 var de_default = {
   manifest: {
-    "Immich Photo Frame": "Immich-Bilderrahmen",
-    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
+    "Google Photos Frame": "Google-Fotos-Bilderrahmen",
+    "Digital photo frame backed by Google Photos, with offline caching": "Digitaler Bilderrahmen f\xFCr Google Fotos mit Offline-Zwischenspeicher",
     "Photo Frame": "Bilderrahmen",
-    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
+    "Slideshow of your Google Photos: albums or recent media, transitions, metadata": "Diashow aus Google Fotos: Alben oder neueste Medien, mit \xDCberg\xE4ngen und Metadaten",
     Connection: "Verbindung",
     Source: "Quelle",
     Slideshow: "Diashow",
     "Info overlay": "Info-Einblendung",
     Caching: "Zwischenspeicher",
-    "Immich Server URL": "Immich-Server-URL",
-    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
-    "API Key": "API-Schl\xFCssel",
-    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
-    "Photo source": "Fotoquelle",
-    "All photos": "Alle Fotos",
-    Favorites: "Favoriten",
-    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
-    Albums: "Alben",
-    People: "Personen",
-    Tags: "Schlagw\xF6rter",
-    "Tap once to include (\u2713), again to exclude (\u2212). Albums, people and tags are combined.": "Einmal tippen zum Einschlie\xDFen (\u2713), erneut tippen zum Ausschlie\xDFen (\u2212). Alben, Personen und Schlagw\xF6rter werden kombiniert.",
-    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
-    "Include videos": "Videos einschlie\xDFen",
-    "Only photos with people": "Nur Fotos mit Personen",
-    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
+    "OAuth client ID": "OAuth-Client-ID",
+    "Google Cloud console \u2192 Credentials \u2192 OAuth client ID (Desktop app).": "Google-Cloud-Konsole \u2192 Anmeldedaten \u2192 OAuth-Client-ID (Desktop-App).",
+    "OAuth client secret": "OAuth-Client-Schl\xFCssel",
+    "From the same OAuth client. Stored encrypted on the device, never sent to the widget.": "Vom selben OAuth-Client. Verschl\xFCsselt auf dem Ger\xE4t gespeichert, nie an das Widget gesendet.",
+    "Refresh token": "Aktualisierungstoken",
+    "Obtain once via the OAuth consent flow (scope photoslibrary.readonly) and paste it here.": "Einmalig \xFCber den OAuth-Zustimmungsablauf (Bereich photoslibrary.readonly) abrufen und hier einf\xFCgen.",
+    Album: "Album",
+    "Pick an album, or leave unset to show recent library photos.": "Album ausw\xE4hlen oder leer lassen, um neueste Fotos anzuzeigen.",
     "Seconds per photo": "Sekunden pro Foto",
     "Preload upcoming photos": "Kommende Fotos vorladen",
     "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
@@ -25052,329 +25222,47 @@ var de_default = {
     "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
   },
   runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
+    configure: "\xD6ffnen Sie die Einstellungen, um Ihr Google-Fotos-Konto zu verbinden.",
     loading: "Fotos werden geladen\u2026",
     next: "Weiter",
     pause: "Pause",
     play: "Wiedergabe",
     previous: "Zur\xFCck",
-    title: "Immich-Bilderrahmen"
+    title: "Google-Fotos-Bilderrahmen"
   }
 };
 
-// src/plugins/immich/translate.ts
-var translations = { de: de_default.runtime };
-function text(locale, key, fallback = key) {
-  var _a;
-  return ((_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key]) ?? fallback;
-}
-
-// src/plugins/immich/OverlayControls.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-var HIDE_DELAY_MS = 2500;
-function OverlayControls({
-  playing,
-  onNext,
-  onBack,
-  onTogglePlay,
-  active,
-  locale
-}) {
-  const [visible, setVisible] = (0, import_react5.useState)(false);
-  const hideTimer = (0, import_react5.useRef)(null);
-  const reveal = (0, import_react5.useCallback)(() => {
-    setVisible(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
+// src/plugins/google-photos/sandbox.ts
+var EN = {
+  title: "Google Photos Frame",
+  configure: "Open settings to connect your Google Photos account.",
+  loading: "Loading photos\u2026",
+  previous: "Previous",
+  next: "Next",
+  play: "Play",
+  pause: "Pause"
+};
+function strings(locale) {
+  if (locale.split("-")[0] === "de") {
+    const r = de_default.runtime;
+    return {
+      title: r.title,
+      configure: r.configure,
+      loading: r.loading,
+      previous: r.previous,
+      next: r.next,
+      play: r.play,
+      pause: r.pause
     };
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    if (!active) return;
-    const handler = (e) => {
-      if (e.key === "ArrowRight") {
-        onNext();
-        reveal();
-      } else if (e.key === "ArrowLeft") {
-        onBack();
-        reveal();
-      } else if (e.key === " ") {
-        e.preventDefault();
-        onTogglePlay();
-        reveal();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [active, onNext, onBack, onTogglePlay, reveal]);
-  const act = (fn) => () => {
-    fn();
-    reveal();
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-    "div",
-    {
-      className: "immich-controls",
-      "data-active": active,
-      "data-visible": visible,
-      onPointerMove: reveal,
-      onPointerDown: reveal,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: act(onBack), "aria-label": text(locale, "previous"), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronLeft, {}) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-          "button",
-          {
-            type: "button",
-            className: "immich-zone immich-zone-center",
-            onClick: act(onTogglePlay),
-            "aria-label": playing ? text(locale, "pause") : text(locale, "play"),
-            children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn immich-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(PlayIcon, {}) })
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { type: "button", className: "immich-zone immich-zone-side", onClick: act(onNext), "aria-label": text(locale, "next"), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "immich-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(ChevronRight, {}) }) })
-      ]
-    }
-  );
-}
-function ChevronLeft() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function ChevronRight() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function PlayIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M8 5v14l11-7z" }) });
-}
-function PauseIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
-}
-
-// src/plugins/immich/ProgressBar.tsx
-var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ProgressBar({
-  position,
-  durationSeconds,
-  playing,
-  cycleKey
-}) {
-  if (position === "none") return null;
-  const style = {
-    "--immich-progress-duration": `${durationSeconds}s`,
-    animationPlayState: playing ? "running" : "paused"
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `immich-progress immich-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "immich-progress-fill", style }, cycleKey) });
-}
-
-// src/plugins/immich/metadata.ts
-function deriveMetadata(asset, options, locale) {
-  const exif = asset.exifInfo;
-  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
-  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
-  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
-  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
-  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
-  return {
-    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
-    location: location2,
-    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
-    people,
-    album,
-    tags
-  };
-}
-function hasMetadata(meta) {
-  return Boolean(meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags);
-}
-
-// src/plugins/immich/MetadataOverlay.tsx
-var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-function MetadataOverlay({ asset, position, options, locale }) {
-  if (position === "none") return null;
-  const meta = deriveMetadata(asset, options, locale);
-  if (!hasMetadata(meta)) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { className: `immich-caption immich-caption-${position}`, children: [
-    meta.location && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-primary", children: meta.location }),
-    meta.album && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-primary", children: meta.album }),
-    meta.date && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.date }),
-    meta.people && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.people }),
-    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-secondary", children: meta.tags }),
-    meta.description && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "immich-caption-desc", children: meta.description })
-  ] });
-}
-
-// src/plugins/immich/PhotoFrameWidget.tsx
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
-function PhotoFrameWidget({ context }) {
-  const config = (0, import_react6.useMemo)(() => readImmichConfig(context.config), [context.config]);
-  const configured = config.serverUrl !== "" && config.apiKey !== "";
-  const [tick, setTick] = (0, import_react6.useState)(0);
-  const show = useSlideshow(context, config, tick);
-  const timerRef = (0, import_react6.useRef)(null);
-  const resetTimer = (0, import_react6.useCallback)(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (!show.playing || !configured) return;
-    timerRef.current = setInterval(
-      () => setTick((t) => t + 1),
-      Math.max(3, config.intervalSeconds) * 1e3
-    );
-  }, [show.playing, configured, config.intervalSeconds]);
-  (0, import_react6.useEffect)(() => {
-    resetTimer();
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [resetTimer, show.progressKey]);
-  const handleNext = (0, import_react6.useCallback)(() => {
-    show.next();
-    resetTimer();
-  }, [show, resetTimer]);
-  const handleBack = (0, import_react6.useCallback)(() => {
-    show.back();
-    resetTimer();
-  }, [show, resetTimer]);
-  const metadataOptions = {
-    showDate: config.metadataShowDate,
-    showLocation: config.metadataShowLocation,
-    showDescription: config.metadataShowDescription,
-    showPeople: config.metadataShowPeople,
-    showAlbum: config.metadataShowAlbum,
-    showTags: config.metadataShowTags
-  };
-  if (!configured) {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-frame immich-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: text(context.locale, "title") }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: text(context.locale, "configure") })
-    ] }) });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `immich-frame immich-layout-${config.layout}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "immich-pane", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        AssetView,
-        {
-          slide,
-          fit: config.imageFit,
-          transition: config.transition,
-          durationSeconds: config.transitionSeconds,
-          intervalSeconds: config.intervalSeconds
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        MetadataOverlay,
-        {
-          asset: slide.asset,
-          position: config.metadataPosition,
-          options: metadataOptions,
-          locale: context.locale
-        }
-      )
-    ] }, slide.asset.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      ProgressBar,
-      {
-        position: config.progressBar,
-        durationSeconds: Math.max(3, config.intervalSeconds),
-        playing: show.playing,
-        cycleKey: show.progressKey
-      }
-    ),
-    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      OverlayControls,
-      {
-        playing: show.playing,
-        onNext: handleNext,
-        onBack: handleBack,
-        onTogglePlay: show.togglePlay,
-        active: context.isEditing === false,
-        locale: context.locale
-      }
-    ),
-    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-status", children: text(context.locale, "loading") }),
-    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "immich-status immich-error", role: "alert", children: show.error })
-  ] });
+  return EN;
 }
-
-// src/plugins/immich/settings-options.ts
-async function loadImmichOptions(context, kind, rawConfig) {
-  const config = readImmichConfig(rawConfig);
-  if (!config.serverUrl || !config.apiKey) {
-    throw new Error("Enter the server URL and API key first.");
-  }
-  const transport = {
-    request: (req) => context.http(req),
-    cacheGet: () => Promise.resolve(null),
-    cachePut: () => Promise.resolve()
-  };
-  const service = new ImmichService(transport, config);
-  if (kind === "albums") return service.listAlbums();
-  if (kind === "people") return service.listPeople();
-  return service.listTags();
-}
-
-// src/plugins/immich/photoframe-styles.ts
-var IMMICH_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-  body { width: 100%; height: 100%; }
-  .wg-plugin-root { width: 100%; height: 100%; }
-  .immich-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .immich-panes { display: flex; width: 100%; height: 100%; }
-  .immich-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
-  .immich-layout-split .immich-pane + .immich-pane { border-left: 2px solid rgba(255,255,255,0.12); }
-  .immich-asset { position: absolute; inset: 0; overflow: hidden; }
-  .immich-backdrop, .immich-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .immich-backdrop { filter: blur(14px); transform: scale(1.1); }
-  .immich-fit-cover { object-fit: cover; }
-  .immich-fit-contain { object-fit: contain; }
-  .immich-photo { opacity: 0; transform-origin: var(--immich-origin, center); }
-  .immich-fadeonly, .immich-none { animation: immich-fade var(--immich-fade-duration, 1s) ease both; }
-  .immich-none { animation-duration: 0.01s; }
-  .immich-zoom { animation: immich-fade var(--immich-fade-duration,1s) ease both, immich-zoom var(--immich-motion-duration,16s) ease-out both; }
-  .immich-pan { animation: immich-fade var(--immich-fade-duration,1s) ease both, immich-pan var(--immich-motion-duration,16s) ease-in-out both; }
-  .immich-kenburns { animation: immich-fade var(--immich-fade-duration,1s) ease both, immich-kenburns var(--immich-motion-duration,16s) ease-in-out both; }
-  @keyframes immich-fade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes immich-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
-  @keyframes immich-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
-  @keyframes immich-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
-  .immich-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
-  .immich-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
-  .immich-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
-  .immich-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
-  .immich-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .immich-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
-  .immich-progress-top { top: 0; }
-  .immich-progress-bottom { bottom: 0; }
-  .immich-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: immich-progress var(--immich-progress-duration, 15s) linear forwards; }
-  @keyframes immich-progress { from { width: 0; } to { width: 100%; } }
-  .immich-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
-  .immich-controls[data-active='false'] { pointer-events: none; }
-  .immich-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
-  .immich-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
-  .immich-zone-btn-lg { width: 64px; height: 64px; }
-  .immich-controls[data-visible='true'] .immich-zone-btn { opacity: 1; transform: scale(1); }
-  @media (hover: hover) { .immich-zone:hover .immich-zone-btn { opacity: 1; transform: scale(1); } }
-  .immich-zone-btn svg { width: 55%; height: 55%; }
-  .immich-empty, .immich-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
-  .immich-status { background: rgba(0,0,0,0.35); }
-  .immich-empty p { margin-top: 8px; font-size: 13px; }
-  .immich-error { color: #ff8080; }
-`;
-
-// src/plugins/immich/sandbox.ts
-injectStyle("immich-style", IMMICH_SANDBOX_CSS);
-var sandbox_default = definePlugin({
-  widgets: {
-    "immich.photoframe": defineReactWidget(PhotoFrameWidget)
-  },
-  loadOptions(context, _widgetId, fieldKey, config) {
-    const kind = fieldKey === "albums" ? "albums" : fieldKey === "people" ? "people" : "tags";
-    return loadImmichOptions(context, kind, config);
-  }
+var sandbox_default = definePhotoFrameWidget({
+  widgetId: "google-photos.photoframe",
+  styleId: "google-photos-style",
+  strings,
+  createBackend: (context, config) => new GooglePhotosBackend(context, config),
+  loadOptions: (context, _fieldKey, config) => loadGooglePhotosAlbums(context, config)
 });
 export {
   sandbox_default as default

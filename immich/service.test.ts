@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ImmichService, type ImmichTransport } from './service';
-import type { CachePolicy, HttpRequest } from '@/types';
+import type { HttpRequest } from '@/types';
 import { IMMICH_DEFAULT_CONFIG, type ImmichConfig } from './types';
 
 const config: ImmichConfig = {
@@ -19,8 +19,6 @@ function stubHttp(
       const r = handler(req);
       return Promise.resolve({ status: r.status, ok: r.ok, headers: {}, data: r.data });
     },
-    cacheGet: () => Promise.resolve(null),
-    cachePut: () => Promise.resolve(),
   };
   return { transport, calls };
 }
@@ -143,40 +141,19 @@ describe('ImmichService pool routing', () => {
   });
 });
 
-/** A transport that records cachePut(key, blob, policy) calls. */
-function cachingTransport(): {
-  transport: ImmichTransport;
-  puts: Array<{ key: string; policy: CachePolicy | undefined }>;
-} {
-  const puts: Array<{ key: string; policy: CachePolicy | undefined }> = [];
-  const transport: ImmichTransport = {
-    request: () =>
-      Promise.resolve({ status: 200, ok: true, headers: {}, data: new Blob(['img']) }),
-    cacheGet: () => Promise.resolve(null),
-    cachePut: (key, _blob, policy) => {
-      puts.push({ key, policy });
-      return Promise.resolve();
-    },
-  };
-  return { transport, puts };
-}
-
-describe('ImmichService image caching policy', () => {
-  it('writes with the size + age bounds from config', async () => {
-    const { transport, puts } = cachingTransport();
-    await service(transport, { ...config, cacheEnabled: true, cacheMaxMB: 500, cacheExpirationDays: 3 })
-      .fetchImageBlob('asset-1');
-    expect(puts).toHaveLength(1);
-    expect(puts[0]?.policy).toEqual({
-      maxBytes: 500 * 1024 * 1024,
-      maxAgeMs: 3 * 24 * 60 * 60 * 1000,
-    });
+describe('ImmichService.imageRequest', () => {
+  it('builds a thumbnail request with the api-key header and proxy, by size', () => {
+    const req = service(stubHttp(() => ({ ok: true, status: 200, data: [] })).transport)
+      .imageRequest('asset-1', 'preview');
+    expect(req.url).toBe('http://immich.local/api/assets/asset-1/thumbnail?size=preview');
+    expect(req.headers?.['x-api-key']).toBe('secret-key');
+    expect(req.proxy).toBe('always');
+    expect(req.method).toBe('GET');
   });
 
-  it('maps 0 expiration days to never-expire (Infinity)', async () => {
-    const { transport, puts } = cachingTransport();
-    await service(transport, { ...config, cacheEnabled: true, cacheExpirationDays: 0 })
-      .fetchImageBlob('asset-1');
-    expect(puts[0]?.policy?.maxAgeMs).toBe(Infinity);
+  it('honors the thumbnail size tier', () => {
+    const req = service(stubHttp(() => ({ ok: true, status: 200, data: [] })).transport)
+      .imageRequest('a2', 'thumbnail');
+    expect(req.url).toContain('size=thumbnail');
   });
 });

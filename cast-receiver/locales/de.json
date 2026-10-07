@@ -1,0 +1,29 @@
+{
+  "manifest": {
+    "Cast Receiver": "Cast-Empfänger",
+    "Mostly-invisible screen receiver: cast a website, media stream, or YouTube video to this display": "Fast unsichtbarer Bildschirm-Empfänger: Website, Medienstream oder YouTube-Video auf dieses Display casten",
+    "Full-bleed receiver that shows cast content and a pairing code when idle": "Vollflächiger Empfänger, der Cast-Inhalte und im Leerlauf einen Kopplungscode anzeigt",
+    "Cast": "Cast",
+    "Presentation": "Darstellung",
+    "What to cast": "Was gecastet wird",
+    "Nothing (show pairing code)": "Nichts (Kopplungscode anzeigen)",
+    "Website": "Website",
+    "Media stream (video/audio URL)": "Medienstream (Video-/Audio-URL)",
+    "YouTube video": "YouTube-Video",
+    "Cast target": "Cast-Ziel",
+    "An https website or media URL, or a YouTube link/id (per the type above).": "Eine https-Website oder Medien-URL oder ein YouTube-Link/-ID (gemäß Typ oben).",
+    "Pairing code": "Kopplungscode",
+    "Shown while idle so a sender knows which screen it controls.": "Wird im Leerlauf angezeigt, damit ein Sender weiß, welchen Bildschirm er steuert.",
+    "Overlay style": "Überlagerungsstil",
+    "Cover (opaque)": "Deckend",
+    "Dim backdrop": "Hintergrund abdunkeln",
+    "Inline (transparent)": "Inline (transparent)",
+    "Show pairing code when idle": "Kopplungscode im Leerlauf anzeigen",
+    "Start muted": "Stummgeschaltet starten"
+  },
+  "runtime": {
+    "idleTitle": "Bereit zum Casten",
+    "idleHint": "Lege ein Cast-Ziel in den Einstellungen fest oder sende eines von einem gekoppelten Gerät.",
+    "pairingLabel": "Kopplungscode"
+  }
+}

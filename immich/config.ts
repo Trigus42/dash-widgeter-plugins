@@ -1,13 +1,8 @@
 import {
   IMMICH_DEFAULT_CONFIG,
   type EntityFilter,
-  type FrameLayout,
-  type ImageFit,
   type ImmichConfig,
   type ImmichPoolMode,
-  type MetadataPosition,
-  type ProgressBarPosition,
-  type TransitionMode,
 } from './types';
 
 function str(raw: unknown, fallback: string): string {
@@ -40,16 +35,12 @@ function entityFilter(raw: unknown, legacyIds: unknown): EntityFilter {
   }
   return { include: strArray(legacyIds), exclude: [] };
 }
-const TRANSITIONS: TransitionMode[] = ['fade', 'zoom', 'pan', 'kenburns', 'none'];
-const METADATA_POSITIONS: MetadataPosition[] = [
-  'none',
-  'bottom-left',
-  'bottom-right',
-  'top-left',
-  'top-right',
-];
 
-/** Coerce persisted config (unknown JSON) into a validated ImmichConfig. */
+/**
+ * Coerce persisted config (unknown JSON) into the validated Immich connection +
+ * source fields. The slideshow / overlay / caching fields live on the same
+ * instance config but are read by the shared SDK via `readFrameConfig`.
+ */
 export function readImmichConfig(raw: Record<string, unknown>): ImmichConfig {
   const d = IMMICH_DEFAULT_CONFIG;
   // Legacy 'albums'/'people'/'tags' pool modes are gone: those are now
@@ -58,18 +49,6 @@ export function readImmichConfig(raw: Record<string, unknown>): ImmichConfig {
   const poolMode = POOL_MODES.includes(raw.poolMode as ImmichPoolMode)
     ? (raw.poolMode as ImmichPoolMode)
     : d.poolMode;
-  const transition = TRANSITIONS.includes(raw.transition as TransitionMode)
-    ? (raw.transition as TransitionMode)
-    : d.transition;
-  const layout: FrameLayout = raw.layout === 'split' ? 'split' : 'single';
-  const imageFit: ImageFit = raw.imageFit === 'contain' ? 'contain' : 'cover';
-  const progressBar: ProgressBarPosition =
-    raw.progressBar === 'top' || raw.progressBar === 'none'
-      ? raw.progressBar
-      : d.progressBar;
-  const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition as MetadataPosition)
-    ? (raw.metadataPosition as MetadataPosition)
-    : d.metadataPosition;
 
   return {
     serverUrl: str(raw.serverUrl, d.serverUrl),
@@ -81,24 +60,5 @@ export function readImmichConfig(raw: Record<string, unknown>): ImmichConfig {
     rating: num(raw.rating, d.rating),
     showVideos: bool(raw.showVideos, d.showVideos),
     onlyWithPersons: bool(raw.onlyWithPersons, d.onlyWithPersons),
-    intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
-    preloadCount: num(raw.preloadCount, d.preloadCount),
-    layout,
-    transition,
-    transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
-    imageFit,
-    showControls: bool(raw.showControls, d.showControls),
-    progressBar,
-    metadataPosition,
-    metadataShowDate: bool(raw.metadataShowDate, d.metadataShowDate),
-    metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
-    metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
-    metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
-    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
-    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
-    cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
-    cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
-    cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
-    listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes),
   };
 }
