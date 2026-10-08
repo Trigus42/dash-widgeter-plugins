@@ -24467,19 +24467,40 @@ function thumbhashToDataUrl(base64) {
 }
 
 // src/sandbox/photoframe/load-image.ts
-async function loadImageBlob(context, backend, config, asset, size = "preview") {
-  const cacheKey = `${asset.id}:${size}`;
+var inFlightLoads = /* @__PURE__ */ new WeakMap();
+function loadsFor(context) {
+  let loads = inFlightLoads.get(context);
+  if (!loads) {
+    loads = /* @__PURE__ */ new Map();
+    inFlightLoads.set(context, loads);
+  }
+  return loads;
+}
+async function fetchImageBlob(context, backend, config, asset, size, cacheKey) {
   if (config.cacheEnabled) {
     const cached = await context.cacheGet(cacheKey);
     if (cached) return cached;
   }
-  const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!res.ok) throw new Error(`Asset fetch failed (${res.status})`);
-  const blob = res.data;
-  if (config.cacheEnabled) {
-    await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
-  }
+  const response = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
+  if (!response.ok) throw new Error(`Asset fetch failed (${response.status})`);
+  const blob = response.data;
+  if (config.cacheEnabled) await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
   return blob;
+}
+async function loadImageBlob(context, backend, config, asset, size = "preview") {
+  const cacheKey = `${asset.id}:${size}`;
+  const policyKey = config.cacheEnabled ? `${config.cacheMaxMB}:${config.cacheExpirationDays}` : "uncached";
+  const loadKey = `${backend.poolCacheKey()}:${cacheKey}:${policyKey}`;
+  const loads = loadsFor(context);
+  const existing = loads.get(loadKey);
+  if (existing) return existing;
+  const load = fetchImageBlob(context, backend, config, asset, size, cacheKey);
+  loads.set(loadKey, load);
+  try {
+    return await load;
+  } finally {
+    loads.delete(loadKey);
+  }
 }
 
 // src/sandbox/photoframe/useSlideshow.ts
@@ -24857,19 +24878,22 @@ function PhotoFrameWidget({ context, backend, strings: strings2 }) {
   const configured = backend.isConfigured();
   const [tick, setTick] = (0, import_react6.useState)(0);
   const show = useSlideshow(context, backend, config, tick);
-  const timerRef = (0, import_react6.useRef)(null);
+  const timerRef = (0, import_react6.useRef)(void 0);
   const resetTimer = (0, import_react6.useCallback)(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (!show.playing || !configured) return;
-    timerRef.current = setInterval(
-      () => setTick((t) => t + 1),
+    clearTimeout(timerRef.current);
+    if (!show.playing || !configured || document.hidden) return;
+    timerRef.current = window.setTimeout(
+      () => setTick((value) => value + 1),
       Math.max(3, config.intervalSeconds) * 1e3
     );
   }, [show.playing, configured, config.intervalSeconds]);
   (0, import_react6.useEffect)(() => {
     resetTimer();
+    const onVisibility = () => resetTimer();
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      clearTimeout(timerRef.current);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [resetTimer, show.progressKey]);
   const handleNext = (0, import_react6.useCallback)(() => {
@@ -25023,205 +25047,300 @@ function definePhotoFrameWidget(options) {
   return definePlugin(module);
 }
 
-// src/core/net/secret-placeholder.ts
-function basicAuthSentinel(usernameKey, secretKey) {
-  return `{{basic:${usernameKey}:${secretKey}}}`;
-}
-
-// src/plugins/webdav-photos/propfind.ts
-function parsePropfind(xml, collectionUrl) {
-  var _a;
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
-  if (doc.getElementsByTagName("parsererror").length > 0) return [];
-  const origin = originOf(collectionUrl);
-  const selfPath = pathOf(collectionUrl);
-  const entries = [];
-  for (const response of byLocalName(doc, "response")) {
-    const hrefEl = firstByLocalName(response, "href");
-    const rawHref = (_a = hrefEl == null ? void 0 : hrefEl.textContent) == null ? void 0 : _a.trim();
-    if (!rawHref) continue;
-    const href = resolveHref(rawHref, origin);
-    if (pathOf(href) === selfPath) continue;
-    const propstat = findOkPropstat(response);
-    const prop = propstat ? firstByLocalName(propstat, "prop") : null;
-    const contentType = prop ? textByLocalName(prop, "getcontenttype") : null;
-    const lastModifiedRaw = prop ? textByLocalName(prop, "getlastmodified") : null;
-    const lastModified = lastModifiedRaw ? Date.parse(lastModifiedRaw) || null : null;
-    const resourceType = prop ? firstByLocalName(prop, "resourcetype") : null;
-    const isCollection = resourceType ? byLocalName(resourceType, "collection").length > 0 : false;
-    entries.push({ href, contentType, isCollection, lastModified });
-  }
-  return entries;
-}
-function findOkPropstat(response) {
-  var _a;
-  for (const propstat of byLocalName(response, "propstat")) {
-    const status = ((_a = firstByLocalName(propstat, "status")) == null ? void 0 : _a.textContent) ?? "";
-    if (/\s2\d\d\s/.test(status)) return propstat;
-  }
-  return firstByLocalName(response, "propstat");
-}
-function localNameOf(el) {
-  const name = el.localName.toLowerCase();
-  const colon = name.indexOf(":");
-  return colon >= 0 ? name.slice(colon + 1) : name;
-}
-function byLocalName(root, local) {
-  const all = root.getElementsByTagName("*");
-  const out = [];
-  for (let i = 0; i < all.length; i += 1) {
-    const el = all[i];
-    if (el && localNameOf(el) === local) out.push(el);
-  }
-  return out;
-}
-function firstByLocalName(root, local) {
-  return byLocalName(root, local)[0] ?? null;
-}
-function textByLocalName(root, local) {
-  var _a;
-  const el = firstByLocalName(root, local);
-  const text = (_a = el == null ? void 0 : el.textContent) == null ? void 0 : _a.trim();
-  return text && text.length > 0 ? text : null;
-}
-function originOf(url) {
-  const match = /^(https?:\/\/[^/]+)/i.exec(url);
-  return (match == null ? void 0 : match[1]) ?? "";
-}
-function pathOf(url) {
-  const withoutOrigin = url.replace(/^https?:\/\/[^/]+/i, "");
-  const path = withoutOrigin.split("?")[0] ?? withoutOrigin;
-  return decodeURIComponent(path.replace(/\/+$/, "")) || "/";
-}
-function resolveHref(href, origin) {
-  if (/^https?:\/\//i.test(href)) return href;
-  if (href.startsWith("/")) return `${origin}${href}`;
-  return `${origin}/${href}`;
-}
-
-// src/plugins/webdav-photos/service.ts
+// src/plugins/immich/service.ts
 var PROXY = "always";
-var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set(["jpg", "jpeg", "png", "gif", "webp", "avif", "bmp", "heic", "heif"]);
-function isImageResource(href, contentType) {
-  var _a;
-  if (contentType && contentType.toLowerCase().startsWith("image/")) return true;
-  const path = href.split("?")[0] ?? href;
-  const ext = ((_a = path.split(".").pop()) == null ? void 0 : _a.toLowerCase()) ?? "";
-  return IMAGE_EXTENSIONS.has(ext);
-}
-var WebDavService = class {
+var ImmichService = class {
   constructor(transport, config) {
     this.transport = transport;
     this.config = config;
   }
-  /** Collection URL with exactly one trailing slash (WebDAV collections end in /). */
-  get collectionUrl() {
-    return `${this.config.folderUrl.replace(/\/+$/, "")}/`;
+  get base() {
+    return `${this.config.serverUrl.replace(/\/$/, "")}/api`;
   }
-  /** Basic-auth header value: a host-substituted placeholder, never the password. */
-  authHeaders() {
-    if (!this.config.username) return {};
-    return { authorization: basicAuthSentinel("username", "password") };
+  get jsonHeaders() {
+    return {
+      // `apiKey` is the `{{secret:apiKey}}` sentinel (a secret field); the host
+      // HTTP layer substitutes the real key at egress, so it never enters this
+      // frame. Sending the sentinel verbatim here is correct.
+      "x-api-key": this.config.apiKey,
+      accept: "application/json",
+      "content-type": "application/json"
+    };
   }
-  /** Stable identity for the pool (folder + recursion); the shared query key. */
-  poolCacheKey() {
-    return `${this.collectionUrl}|r${this.config.recursive ? 1 : 0}`;
+  /** Typed request helper: the transport returns `unknown` data (RPC-crossed). */
+  async req(request) {
+    return await this.transport.request(request);
   }
   /**
-   * List image files in the collection via PROPFIND. `Depth: 1` lists the direct
-   * children; `infinity` recurses (servers may refuse infinity, in which case we
-   * fall back to a one-level listing so a locked-down server still shows photos).
+   * Pool-aware asset-list fetch. Pure network fetch: caching, staleness, and
+   * offline fallback are handled by the shared data layer (useWidgetData /
+   * TanStack Query), not here.
    */
-  async listImages() {
-    const depth = this.config.recursive ? "infinity" : "1";
-    let entries = await this.propfind(depth);
-    if (entries === null && depth === "infinity") {
-      entries = await this.propfind("1");
-    }
-    if (entries === null) throw new Error("WebDAV listing failed");
-    return entries.filter((e) => !e.isCollection && isImageResource(e.href, e.contentType));
+  async fetchAssets(count) {
+    return this.fetchPool(count);
   }
-  /** Issue one PROPFIND; returns parsed entries, or null on a non-207 response. */
-  async propfind(depth) {
-    const body = '<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:"><d:prop><d:getcontenttype/><d:getlastmodified/><d:resourcetype/></d:prop></d:propfind>';
-    const res = await this.transport.request({
-      url: this.collectionUrl,
-      method: "PROPFIND",
-      headers: { ...this.authHeaders(), depth, "content-type": "application/xml" },
+  /** Stable identity for the asset pool; used as the shared query key. */
+  poolCacheKey() {
+    const c = this.config;
+    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
+    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
+  }
+  async fetchPool(count) {
+    switch (this.config.poolMode) {
+      case "memories":
+        return this.fetchMemories();
+      case "favorites":
+        return this.metadataSearch({ isFavorite: { eq: true } }, count);
+      case "random":
+      default:
+        return this.fetchRandom(count);
+    }
+  }
+  /**
+   * Builds the modern Immich v3+ structured SearchFilter.
+   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
+   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
+   * All criteria are packaged inside `filter`.
+   */
+  buildSearchFilter(extraFilter = {}) {
+    const c = this.config;
+    const filter = { ...extraFilter };
+    if (!c.showVideos) {
+      filter.type = { in: ["IMAGE"] };
+    }
+    if (c.rating > 0) {
+      filter.rating = { ge: c.rating };
+    }
+    if (c.onlyWithPersons) {
+      filter.hasPeople = { eq: true };
+    }
+    const buildIds = (e) => {
+      const res = {};
+      if (e.include.length) res.any = e.include;
+      if (e.exclude.length) res.none = e.exclude;
+      return Object.keys(res).length > 0 ? res : null;
+    };
+    const albumIds = buildIds(c.albums);
+    if (albumIds) filter.albumIds = albumIds;
+    const personIds = buildIds(c.people);
+    if (personIds) filter.personIds = personIds;
+    const tagIds = buildIds(c.tags);
+    if (tagIds) filter.tagIds = tagIds;
+    return filter;
+  }
+  postProcessAssets(items) {
+    let result = items;
+    if (this.config.onlyWithPersons) {
+      result = result.filter((a) => a.people && a.people.length > 0);
+    }
+    if (this.config.people.exclude.length > 0) {
+      const excluded = new Set(this.config.people.exclude);
+      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
+    }
+    if (this.config.tags.exclude.length > 0) {
+      const excluded = new Set(this.config.tags.exclude);
+      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
+    }
+    return result;
+  }
+  async fetchRandom(count) {
+    const filter = this.buildSearchFilter();
+    const hasFilter = Object.keys(filter).length > 0;
+    const body = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...hasFilter ? { filter } : {}
+    };
+    const res = await this.req({
+      url: `${this.base}/search/random`,
+      method: "POST",
+      headers: this.jsonHeaders,
       body,
-      responseType: "text",
       proxy: PROXY
     });
-    if (res.status !== 207 || typeof res.data !== "string") return null;
-    return parsePropfind(res.data, this.collectionUrl);
+    if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
+    const items = Array.isArray(res.data) ? res.data : [];
+    return this.postProcessAssets(items);
+  }
+  async metadataSearch(extraFilter, count) {
+    var _a;
+    const filter = this.buildSearchFilter(extraFilter);
+    const hasFilter = Object.keys(filter).length > 0;
+    const body = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...hasFilter ? { filter } : {}
+    };
+    const res = await this.req({
+      url: `${this.base}/search/metadata`,
+      method: "POST",
+      headers: this.jsonHeaders,
+      body,
+      proxy: PROXY
+    });
+    if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
+    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
+    return this.postProcessAssets(items);
+  }
+  async fetchMemories() {
+    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    const res = await this.req({
+      url: `${this.base}/memories?for=${today}`,
+      method: "GET",
+      headers: this.jsonHeaders,
+      proxy: PROXY
+    });
+    if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
+    const now = (/* @__PURE__ */ new Date()).getFullYear();
+    const items = (res.data ?? []).flatMap((memory) => {
+      var _a;
+      const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
+      const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
+      return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
+    });
+    return this.postProcessAssets(items);
+  }
+  async fetchAssetAlbums(assetId) {
+    try {
+      const res = await this.req({
+        url: `${this.base}/albums?assetId=${assetId}`,
+        method: "GET",
+        headers: this.jsonHeaders,
+        proxy: PROXY
+      });
+      if (!res.ok || !Array.isArray(res.data)) return [];
+      return res.data.map((a) => a.albumName).filter(Boolean);
+    } catch {
+      return [];
+    }
   }
   /**
-   * Build the request that returns an image's bytes. Pure — the SDK engine runs
-   * it with `responseType: 'binary'`, caches and decodes. WebDAV has no server-
-   * side thumbnailing, so the size tier is ignored (always the original file).
+   * Build the request that returns an asset's image bytes. Pure — the shared
+   * SDK engine executes it with `responseType: 'binary'`, caches, and decodes.
    */
-  imageRequest(href, _size) {
+  imageRequest(assetId, size = "preview") {
     return {
-      url: href,
+      url: `${this.base}/assets/${assetId}/thumbnail?size=${size}`,
       method: "GET",
-      headers: this.authHeaders(),
+      headers: { "x-api-key": this.config.apiKey },
       proxy: PROXY
     };
   }
+  /** Browser-native playback URL; direct media cannot carry the brokered API key. */
+  videoUrl(assetId) {
+    return `${this.base}/assets/${assetId}/video/playback`;
+  }
+  /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
+  async fetchFaceBox(assetId) {
+    const res = await this.req({
+      url: `${this.base}/faces?id=${assetId}`,
+      method: "GET",
+      headers: this.jsonHeaders,
+      proxy: PROXY
+    });
+    if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
+    const f = res.data[0];
+    if (!f || !f.imageWidth || !f.imageHeight) return null;
+    return {
+      cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
+      cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight
+    };
+  }
+  async listAlbums() {
+    const res = await this.req({
+      url: `${this.base}/albums`,
+      method: "GET",
+      headers: this.jsonHeaders,
+      proxy: PROXY
+    });
+    if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
+    return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
+  }
+  async listPeople() {
+    const res = await this.req({
+      url: `${this.base}/people?withHidden=false`,
+      method: "GET",
+      headers: this.jsonHeaders,
+      proxy: PROXY
+    });
+    if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
+    return (res.data.people ?? []).filter((p) => p.name).map((p) => ({ label: p.name, value: p.id }));
+  }
+  async listTags() {
+    const res = await this.req({
+      url: `${this.base}/tags`,
+      method: "GET",
+      headers: this.jsonHeaders,
+      proxy: PROXY
+    });
+    if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
+    return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
+  }
 };
 
-// src/plugins/webdav-photos/types.ts
-var WEBDAV_DEFAULT_CONFIG = {
-  folderUrl: "",
-  username: "",
-  recursive: false
+// src/plugins/immich/types.ts
+var IMMICH_DEFAULT_CONFIG = {
+  serverUrl: "",
+  apiKey: "",
+  poolMode: "random",
+  albums: { include: [], exclude: [] },
+  people: { include: [], exclude: [] },
+  tags: { include: [], exclude: [] },
+  rating: 0,
+  showVideos: false,
+  onlyWithPersons: false
 };
 
-// src/plugins/webdav-photos/config.ts
+// src/plugins/immich/config.ts
 function str(raw, fallback) {
   return typeof raw === "string" ? raw : fallback;
+}
+function num2(raw, fallback) {
+  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
 }
 function bool2(raw, fallback) {
   return typeof raw === "boolean" ? raw : fallback;
 }
-function readWebDavConfig(raw) {
-  const d = WEBDAV_DEFAULT_CONFIG;
+function strArray(raw) {
+  if (Array.isArray(raw)) return raw.filter((v) => typeof v === "string");
+  if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
+  return [];
+}
+var POOL_MODES = ["random", "favorites", "memories"];
+function entityFilter(raw, legacyIds) {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const v = raw;
+    return { include: strArray(v.include), exclude: strArray(v.exclude) };
+  }
+  return { include: strArray(legacyIds), exclude: [] };
+}
+function readImmichConfig(raw) {
+  const d = IMMICH_DEFAULT_CONFIG;
+  const poolMode = POOL_MODES.includes(raw.poolMode) ? raw.poolMode : d.poolMode;
   return {
-    folderUrl: str(raw.folderUrl, d.folderUrl),
-    username: str(raw.username, d.username),
-    recursive: bool2(raw.recursive, d.recursive)
+    serverUrl: str(raw.serverUrl, d.serverUrl),
+    apiKey: str(raw.apiKey, d.apiKey),
+    poolMode,
+    albums: entityFilter(raw.albums, raw.albumIds),
+    people: entityFilter(raw.people, raw.personIds),
+    tags: entityFilter(raw.tags, raw.tagIds),
+    rating: num2(raw.rating, d.rating),
+    showVideos: bool2(raw.showVideos, d.showVideos),
+    onlyWithPersons: bool2(raw.onlyWithPersons, d.onlyWithPersons)
   };
 }
 
-// src/plugins/webdav-photos/backend.ts
-function fileNameOf(href) {
-  const path = href.split("?")[0] ?? href;
-  const segment = path.replace(/\/+$/, "").split("/").pop() ?? "";
-  try {
-    return decodeURIComponent(segment);
-  } catch {
-    return segment;
-  }
-}
-function toPhotoAsset(entry) {
-  const asset = {
-    // The absolute href is the stable id (keys the blob cache + React lists) and
-    // the address the image request is built from.
-    id: entry.href,
-    type: "IMAGE",
-    originalFileName: fileNameOf(entry.href)
-  };
-  if (entry.lastModified) asset.localDateTime = new Date(entry.lastModified).toISOString();
-  return asset;
-}
-var WebDavBackend = class {
+// src/plugins/immich/backend.ts
+var ImmichBackend = class {
   service;
   configured;
   constructor(context, rawConfig) {
-    const config = readWebDavConfig(rawConfig);
-    this.configured = config.folderUrl.trim() !== "";
+    const config = readImmichConfig(rawConfig);
+    this.configured = config.serverUrl !== "" && config.apiKey !== "";
     const transport = { request: (req) => context.http(req) };
-    this.service = new WebDavService(transport, config);
+    this.service = new ImmichService(transport, config);
   }
   isConfigured() {
     return this.configured;
@@ -25229,34 +25348,62 @@ var WebDavBackend = class {
   poolCacheKey() {
     return this.service.poolCacheKey();
   }
-  async fetchAssets(_count) {
-    const entries = await this.service.listImages();
-    return entries.map(toPhotoAsset);
+  async fetchAssets(count) {
+    const assets = await this.service.fetchAssets(count);
+    return assets.map((asset) => asset.type.toUpperCase() === "VIDEO" ? { ...asset, directUrl: this.service.videoUrl(asset.id) } : asset);
   }
   imageRequest(asset, size) {
     return this.service.imageRequest(asset.id, size);
   }
+  fetchFaceBox(asset) {
+    return this.service.fetchFaceBox(asset.id);
+  }
+  async enrichAsset(asset) {
+    const immichAsset = asset;
+    if (immichAsset.albumName) return;
+    const albums = await this.service.fetchAssetAlbums(asset.id);
+    if (albums.length > 0) immichAsset.albumName = albums.join(", ");
+  }
 };
+async function loadImmichOptions(context, fieldKey, rawConfig) {
+  const config = readImmichConfig(rawConfig);
+  if (!config.serverUrl || !config.apiKey) {
+    throw new Error("Enter the server URL and API key first.");
+  }
+  const service = new ImmichService({ request: (req) => context.http(req) }, config);
+  if (fieldKey === "albums") return service.listAlbums();
+  if (fieldKey === "people") return service.listPeople();
+  return service.listTags();
+}
 
-// src/plugins/webdav-photos/locales/de.json
+// src/plugins/immich/locales/de.json
 var de_default = {
   manifest: {
-    "WebDAV Photo Frame": "WebDAV-Bilderrahmen",
-    "Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, \u2026), with offline caching": "Digitaler Bilderrahmen f\xFCr einen WebDAV-Ordner (Nextcloud, ownCloud, \u2026) mit Offline-Zwischenspeicher",
+    "Immich Photo Frame": "Immich-Bilderrahmen",
+    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
     "Photo Frame": "Bilderrahmen",
-    "Slideshow of photos from a WebDAV folder: transitions, metadata, controls": "Diashow aus einem WebDAV-Ordner mit \xDCberg\xE4ngen, Metadaten und Steuerung",
+    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
     Connection: "Verbindung",
+    Source: "Quelle",
     Slideshow: "Diashow",
     "Info overlay": "Info-Einblendung",
     Caching: "Zwischenspeicher",
-    "Folder URL": "Ordner-URL",
-    "WebDAV collection (folder) URL. Nextcloud: Files \u2192 \u22EF \u2192 details shows the dav path.": "WebDAV-Ordner-URL. Nextcloud: Dateien \u2192 \u22EF \u2192 Details zeigt den DAV-Pfad.",
-    Username: "Benutzername",
-    "Leave blank for a public (anonymous) share.": "F\xFCr eine \xF6ffentliche (anonyme) Freigabe leer lassen.",
-    Password: "Passwort",
-    "Use an app password where your provider offers one.": "Verwenden Sie nach M\xF6glichkeit ein App-Passwort.",
-    "Include subfolders": "Unterordner einschlie\xDFen",
-    "List photos in nested folders too (the server may decline deep listings).": "Auch Fotos in Unterordnern auflisten (der Server kann tiefe Auflistungen ablehnen).",
+    "Immich Server URL": "Immich-Server-URL",
+    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
+    "API Key": "API-Schl\xFCssel",
+    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
+    "Photo source": "Fotoquelle",
+    "All photos": "Alle Fotos",
+    Favorites: "Favoriten",
+    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
+    Albums: "Alben",
+    People: "Personen",
+    Tags: "Schlagw\xF6rter",
+    "Tap once to include (\u2713), again to exclude (\u2212). Albums, people and tags are combined.": "Einmal tippen zum Einschlie\xDFen (\u2713), erneut tippen zum Ausschlie\xDFen (\u2212). Alben, Personen und Schlagw\xF6rter werden kombiniert.",
+    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
+    "Include videos": "Videos einschlie\xDFen",
+    "Only photos with people": "Nur Fotos mit Personen",
+    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
     "Seconds per photo": "Sekunden pro Foto",
     "Preload upcoming photos": "Kommende Fotos vorladen",
     "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
@@ -25295,20 +25442,20 @@ var de_default = {
     "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
   },
   runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die WebDAV-Ordner-URL und Zugangsdaten hinzuzuf\xFCgen.",
+    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
     loading: "Fotos werden geladen\u2026",
     next: "Weiter",
     pause: "Pause",
     play: "Wiedergabe",
     previous: "Zur\xFCck",
-    title: "WebDAV-Bilderrahmen"
+    title: "Immich-Bilderrahmen"
   }
 };
 
-// src/plugins/webdav-photos/sandbox.ts
+// src/plugins/immich/sandbox.ts
 var EN = {
-  title: "WebDAV Photo Frame",
-  configure: "Open settings to add your WebDAV folder URL and credentials.",
+  title: "Immich Photo Frame",
+  configure: "Open settings to add your Immich server URL and API key.",
   loading: "Loading photos\u2026",
   previous: "Previous",
   next: "Next",
@@ -25331,10 +25478,11 @@ function strings(locale) {
   return EN;
 }
 var sandbox_default = definePhotoFrameWidget({
-  widgetId: "webdav-photos.photoframe",
-  styleId: "webdav-photos-style",
+  widgetId: "immich.photoframe",
+  styleId: "immich-style",
   strings,
-  createBackend: (context, config) => new WebDavBackend(context, config)
+  createBackend: (context, config) => new ImmichBackend(context, config),
+  loadOptions: (context, fieldKey, config) => loadImmichOptions(context, fieldKey, config)
 });
 export {
   sandbox_default as default

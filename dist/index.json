@@ -5,7 +5,7 @@
       "manifest": {
         "id": "clock",
         "name": "Clock",
-        "version": "1.4.0",
+        "version": "1.5.0",
         "description": "Date and time display",
         "translations": {
           "de": {
@@ -131,8 +131,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock-63821d061a54d85f7920ef61797ed0da59010788b4284590d6754f3302d0e2be.js",
-      "sha256": "63821d061a54d85f7920ef61797ed0da59010788b4284590d6754f3302d0e2be"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock-8eb132a0f9bae77e1c4b2c64a9438cebc8fb416e816acb47ac73d09771860bd4.js",
+      "sha256": "8eb132a0f9bae77e1c4b2c64a9438cebc8fb416e816acb47ac73d09771860bd4"
     },
     {
       "manifest": {
@@ -975,8 +975,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-e3910146c8ac73cfe2836bf871c760673f96f9000de7e364643d6caf846bd140.js",
-      "sha256": "e3910146c8ac73cfe2836bf871c760673f96f9000de7e364643d6caf846bd140"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-b6522dfee8da57500ae3e33a9f302b1e9792531789acde7a4f9e361c814996dd.js",
+      "sha256": "b6522dfee8da57500ae3e33a9f302b1e9792531789acde7a4f9e361c814996dd"
     },
     {
       "manifest": {
@@ -1338,8 +1338,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-9053ea6a5b1eb9ad411cc4ca3decf4bf2bf86e20cf39d6d888125634f9778ba7.js",
-      "sha256": "9053ea6a5b1eb9ad411cc4ca3decf4bf2bf86e20cf39d6d888125634f9778ba7"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-c5fa7597c54f78e6e7523cb18e0adcb3059ffa071f3102a08cd32e2c32afe19d.js",
+      "sha256": "c5fa7597c54f78e6e7523cb18e0adcb3059ffa071f3102a08cd32e2c32afe19d"
     },
     {
       "manifest": {
@@ -1694,8 +1694,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-f8483c1e67a3930b3b6d61363eeb82bb654aaf94581ce9d7a20ea17c3cce8669.js",
-      "sha256": "f8483c1e67a3930b3b6d61363eeb82bb654aaf94581ce9d7a20ea17c3cce8669"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-872c81b5bd0ab0a563a7bb817d3f77dab0463604f857bf5be5e8c7d95d2f465d.js",
+      "sha256": "872c81b5bd0ab0a563a7bb817d3f77dab0463604f857bf5be5e8c7d95d2f465d"
     },
     {
       "manifest": {

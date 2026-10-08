@@ -24467,19 +24467,40 @@ function thumbhashToDataUrl(base64) {
 }
 
 // src/sandbox/photoframe/load-image.ts
-async function loadImageBlob(context, backend, config, asset, size = "preview") {
-  const cacheKey = `${asset.id}:${size}`;
+var inFlightLoads = /* @__PURE__ */ new WeakMap();
+function loadsFor(context) {
+  let loads = inFlightLoads.get(context);
+  if (!loads) {
+    loads = /* @__PURE__ */ new Map();
+    inFlightLoads.set(context, loads);
+  }
+  return loads;
+}
+async function fetchImageBlob(context, backend, config, asset, size, cacheKey) {
   if (config.cacheEnabled) {
     const cached = await context.cacheGet(cacheKey);
     if (cached) return cached;
   }
-  const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!res.ok) throw new Error(`Asset fetch failed (${res.status})`);
-  const blob = res.data;
-  if (config.cacheEnabled) {
-    await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
-  }
+  const response = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
+  if (!response.ok) throw new Error(`Asset fetch failed (${response.status})`);
+  const blob = response.data;
+  if (config.cacheEnabled) await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
   return blob;
+}
+async function loadImageBlob(context, backend, config, asset, size = "preview") {
+  const cacheKey = `${asset.id}:${size}`;
+  const policyKey = config.cacheEnabled ? `${config.cacheMaxMB}:${config.cacheExpirationDays}` : "uncached";
+  const loadKey = `${backend.poolCacheKey()}:${cacheKey}:${policyKey}`;
+  const loads = loadsFor(context);
+  const existing = loads.get(loadKey);
+  if (existing) return existing;
+  const load = fetchImageBlob(context, backend, config, asset, size, cacheKey);
+  loads.set(loadKey, load);
+  try {
+    return await load;
+  } finally {
+    loads.delete(loadKey);
+  }
 }
 
 // src/sandbox/photoframe/useSlideshow.ts
@@ -24857,19 +24878,22 @@ function PhotoFrameWidget({ context, backend, strings: strings2 }) {
   const configured = backend.isConfigured();
   const [tick, setTick] = (0, import_react6.useState)(0);
   const show = useSlideshow(context, backend, config, tick);
-  const timerRef = (0, import_react6.useRef)(null);
+  const timerRef = (0, import_react6.useRef)(void 0);
   const resetTimer = (0, import_react6.useCallback)(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (!show.playing || !configured) return;
-    timerRef.current = setInterval(
-      () => setTick((t) => t + 1),
+    clearTimeout(timerRef.current);
+    if (!show.playing || !configured || document.hidden) return;
+    timerRef.current = window.setTimeout(
+      () => setTick((value) => value + 1),
       Math.max(3, config.intervalSeconds) * 1e3
     );
   }, [show.playing, configured, config.intervalSeconds]);
   (0, import_react6.useEffect)(() => {
     resetTimer();
+    const onVisibility = () => resetTimer();
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      clearTimeout(timerRef.current);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [resetTimer, show.progressKey]);
   const handleNext = (0, import_react6.useCallback)(() => {

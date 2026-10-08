@@ -24163,327 +24163,17 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/photoframe/frame-config.ts
-var FRAME_DEFAULT_CONFIG = {
-  intervalSeconds: 15,
-  preloadCount: 2,
-  layout: "single",
-  transition: "kenburns",
-  transitionSeconds: 1.2,
-  imageFit: "cover",
-  showControls: true,
-  progressBar: "bottom",
-  metadataPosition: "bottom-right",
-  metadataShowDate: true,
-  metadataShowLocation: true,
-  metadataShowDescription: false,
-  metadataShowPeople: true,
-  metadataShowAlbum: false,
-  metadataShowTags: true,
-  cacheEnabled: true,
-  cacheMaxMB: 500,
-  cacheExpirationDays: 0,
-  listTtlMinutes: 720
-};
-function num(raw, fallback) {
-  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
+// src/sandbox/sdk.ts
+function definePlugin(module) {
+  return module;
 }
-function bool(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
+function injectStyle(id, css) {
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = css;
+  document.head.appendChild(style);
 }
-var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
-var METADATA_POSITIONS = [
-  "none",
-  "bottom-left",
-  "bottom-right",
-  "top-left",
-  "top-right"
-];
-function readFrameConfig(raw) {
-  const d = FRAME_DEFAULT_CONFIG;
-  const transition = TRANSITIONS.includes(raw.transition) ? raw.transition : d.transition;
-  const layout = raw.layout === "split" ? "split" : "single";
-  const imageFit = raw.imageFit === "contain" ? "contain" : "cover";
-  const progressBar = raw.progressBar === "top" || raw.progressBar === "none" ? raw.progressBar : d.progressBar;
-  const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition) ? raw.metadataPosition : d.metadataPosition;
-  return {
-    intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
-    preloadCount: num(raw.preloadCount, d.preloadCount),
-    layout,
-    transition,
-    transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
-    imageFit,
-    showControls: bool(raw.showControls, d.showControls),
-    progressBar,
-    metadataPosition,
-    metadataShowDate: bool(raw.metadataShowDate, d.metadataShowDate),
-    metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
-    metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
-    metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
-    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
-    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
-    cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
-    cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
-    cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
-    listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes)
-  };
-}
-function cachePolicyFromConfig(config) {
-  const days = config.cacheExpirationDays;
-  return {
-    maxBytes: config.cacheMaxMB * 1024 * 1024,
-    maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
-  };
-}
-function panesForLayout(layout) {
-  return layout === "split" ? 2 : 1;
-}
-
-// src/sandbox/photoframe/metadata.ts
-function deriveMetadata(asset, options, locale) {
-  const exif = asset.exifInfo;
-  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
-  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
-  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
-  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
-  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
-  return {
-    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
-    location: location2,
-    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
-    people,
-    album,
-    tags
-  };
-}
-function hasMetadata(meta) {
-  return Boolean(
-    meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags
-  );
-}
-
-// node_modules/thumbhash/thumbhash.js
-function thumbHashToRGBA(hash) {
-  let { PI, min, max, cos, round } = Math;
-  let header24 = hash[0] | hash[1] << 8 | hash[2] << 16;
-  let header16 = hash[3] | hash[4] << 8;
-  let l_dc = (header24 & 63) / 63;
-  let p_dc = (header24 >> 6 & 63) / 31.5 - 1;
-  let q_dc = (header24 >> 12 & 63) / 31.5 - 1;
-  let l_scale = (header24 >> 18 & 31) / 31;
-  let hasAlpha = header24 >> 23;
-  let p_scale = (header16 >> 3 & 63) / 63;
-  let q_scale = (header16 >> 9 & 63) / 63;
-  let isLandscape = header16 >> 15;
-  let lx = max(3, isLandscape ? hasAlpha ? 5 : 7 : header16 & 7);
-  let ly = max(3, isLandscape ? header16 & 7 : hasAlpha ? 5 : 7);
-  let a_dc = hasAlpha ? (hash[5] & 15) / 15 : 1;
-  let a_scale = (hash[5] >> 4) / 15;
-  let ac_start = hasAlpha ? 6 : 5;
-  let ac_index = 0;
-  let decodeChannel = (nx, ny, scale) => {
-    let ac = [];
-    for (let cy = 0; cy < ny; cy++)
-      for (let cx = cy ? 0 : 1; cx * ny < nx * (ny - cy); cx++)
-        ac.push(((hash[ac_start + (ac_index >> 1)] >> ((ac_index++ & 1) << 2) & 15) / 7.5 - 1) * scale);
-    return ac;
-  };
-  let l_ac = decodeChannel(lx, ly, l_scale);
-  let p_ac = decodeChannel(3, 3, p_scale * 1.25);
-  let q_ac = decodeChannel(3, 3, q_scale * 1.25);
-  let a_ac = hasAlpha && decodeChannel(5, 5, a_scale);
-  let ratio = thumbHashToApproximateAspectRatio(hash);
-  let w = round(ratio > 1 ? 32 : 32 * ratio);
-  let h = round(ratio > 1 ? 32 / ratio : 32);
-  let rgba = new Uint8Array(w * h * 4), fx = [], fy = [];
-  for (let y = 0, i = 0; y < h; y++) {
-    for (let x = 0; x < w; x++, i += 4) {
-      let l = l_dc, p = p_dc, q = q_dc, a = a_dc;
-      for (let cx = 0, n = max(lx, hasAlpha ? 5 : 3); cx < n; cx++)
-        fx[cx] = cos(PI / w * (x + 0.5) * cx);
-      for (let cy = 0, n = max(ly, hasAlpha ? 5 : 3); cy < n; cy++)
-        fy[cy] = cos(PI / h * (y + 0.5) * cy);
-      for (let cy = 0, j = 0; cy < ly; cy++)
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx * ly < lx * (ly - cy); cx++, j++)
-          l += l_ac[j] * fx[cx] * fy2;
-      for (let cy = 0, j = 0; cy < 3; cy++) {
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 3 - cy; cx++, j++) {
-          let f = fx[cx] * fy2;
-          p += p_ac[j] * f;
-          q += q_ac[j] * f;
-        }
-      }
-      if (hasAlpha)
-        for (let cy = 0, j = 0; cy < 5; cy++)
-          for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 5 - cy; cx++, j++)
-            a += a_ac[j] * fx[cx] * fy2;
-      let b = l - 2 / 3 * p;
-      let r = (3 * l - b + q) / 2;
-      let g = r - q;
-      rgba[i] = max(0, 255 * min(1, r));
-      rgba[i + 1] = max(0, 255 * min(1, g));
-      rgba[i + 2] = max(0, 255 * min(1, b));
-      rgba[i + 3] = max(0, 255 * min(1, a));
-    }
-  }
-  return { w, h, rgba };
-}
-function thumbHashToApproximateAspectRatio(hash) {
-  let header = hash[3];
-  let hasAlpha = hash[2] & 128;
-  let isLandscape = hash[4] & 128;
-  let lx = isLandscape ? hasAlpha ? 5 : 7 : header & 7;
-  let ly = isLandscape ? header & 7 : hasAlpha ? 5 : 7;
-  return lx / ly;
-}
-function rgbaToDataURL(w, h, rgba) {
-  let row = w * 4 + 1;
-  let idat = 6 + h * (5 + row);
-  let bytes = [
-    137,
-    80,
-    78,
-    71,
-    13,
-    10,
-    26,
-    10,
-    0,
-    0,
-    0,
-    13,
-    73,
-    72,
-    68,
-    82,
-    0,
-    0,
-    w >> 8,
-    w & 255,
-    0,
-    0,
-    h >> 8,
-    h & 255,
-    8,
-    6,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    idat >>> 24,
-    idat >> 16 & 255,
-    idat >> 8 & 255,
-    idat & 255,
-    73,
-    68,
-    65,
-    84,
-    120,
-    1
-  ];
-  let table = [
-    0,
-    498536548,
-    997073096,
-    651767980,
-    1994146192,
-    1802195444,
-    1303535960,
-    1342533948,
-    -306674912,
-    -267414716,
-    -690576408,
-    -882789492,
-    -1687895376,
-    -2032938284,
-    -1609899400,
-    -1111625188
-  ];
-  let a = 1, b = 0;
-  for (let y = 0, i = 0, end = row - 1; y < h; y++, end += row - 1) {
-    bytes.push(y + 1 < h ? 0 : 1, row & 255, row >> 8, ~row & 255, row >> 8 ^ 255, 0);
-    for (b = (b + a) % 65521; i < end; i++) {
-      let u = rgba[i] & 255;
-      bytes.push(u);
-      a = (a + u) % 65521;
-      b = (b + a) % 65521;
-    }
-  }
-  bytes.push(
-    b >> 8,
-    b & 255,
-    a >> 8,
-    a & 255,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    73,
-    69,
-    78,
-    68,
-    174,
-    66,
-    96,
-    130
-  );
-  for (let [start, end] of [[12, 29], [37, 41 + idat]]) {
-    let c = ~0;
-    for (let i = start; i < end; i++) {
-      c ^= bytes[i];
-      c = c >>> 4 ^ table[c & 15];
-      c = c >>> 4 ^ table[c & 15];
-    }
-    c = ~c;
-    bytes[end++] = c >>> 24;
-    bytes[end++] = c >> 16 & 255;
-    bytes[end++] = c >> 8 & 255;
-    bytes[end++] = c & 255;
-  }
-  return "data:image/png;base64," + btoa(String.fromCharCode(...bytes));
-}
-function thumbHashToDataURL(hash) {
-  let image = thumbHashToRGBA(hash);
-  return rgbaToDataURL(image.w, image.h, image.rgba);
-}
-
-// src/sandbox/photoframe/thumbhash.ts
-function thumbhashToDataUrl(base64) {
-  try {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-    return thumbHashToDataURL(bytes);
-  } catch {
-    return null;
-  }
-}
-
-// src/sandbox/photoframe/load-image.ts
-async function loadImageBlob(context, backend, config, asset, size = "preview") {
-  const cacheKey = `${asset.id}:${size}`;
-  if (config.cacheEnabled) {
-    const cached = await context.cacheGet(cacheKey);
-    if (cached) return cached;
-  }
-  const res = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!res.ok) throw new Error(`Asset fetch failed (${res.status})`);
-  const blob = res.data;
-  if (config.cacheEnabled) {
-    await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
-  }
-  return blob;
-}
-
-// src/sandbox/photoframe/useSlideshow.ts
-var import_react2 = __toESM(require_react(), 1);
 
 // src/sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
@@ -24516,949 +24206,143 @@ function defineReactWidget(Component) {
     }
   };
 }
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
+
+// src/plugins/clock/ClockWidget.tsx
+var import_react2 = __toESM(require_react(), 1);
+
+// src/plugins/clock/types.ts
+var CLOCK_DEFAULT_CONFIG = {
+  use24Hour: true,
+  showSeconds: false,
+  showDate: true,
+  dateStyle: "full",
+  fontWeight: 700
+};
+function clampNumber(raw, fallback, min, max) {
+  const n = typeof raw === "string" ? Number(raw) : raw;
+  return typeof n === "number" && !Number.isNaN(n) ? Math.max(min, Math.min(max, n)) : fallback;
+}
+function readClockConfig(raw) {
+  return {
+    use24Hour: typeof raw.use24Hour === "boolean" ? raw.use24Hour : CLOCK_DEFAULT_CONFIG.use24Hour,
+    showSeconds: typeof raw.showSeconds === "boolean" ? raw.showSeconds : CLOCK_DEFAULT_CONFIG.showSeconds,
+    showDate: typeof raw.showDate === "boolean" ? raw.showDate : CLOCK_DEFAULT_CONFIG.showDate,
+    dateStyle: raw.dateStyle === "weekday" ? "weekday" : "full",
+    fontWeight: clampNumber(raw.fontWeight, CLOCK_DEFAULT_CONFIG.fontWeight, 100, 900)
+  };
 }
 
-// src/sandbox/photoframe/useSlideshow.ts
-var BATCH = 100;
-function shuffleDeck(items) {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = result[i];
-    result[i] = result[j];
-    result[j] = tmp;
-  }
-  return result;
-}
-function useSlideshow(context, backend, config, tick) {
-  const configured = backend.isConfigured();
-  const panes = panesForLayout(config.layout);
-  const poolKey = (0, import_react2.useMemo)(() => backend.poolCacheKey(), [backend]);
-  const listTtlMs = config.listTtlMinutes * 60 * 1e3;
-  const {
-    data: assets,
-    error,
-    isLoading,
-    refetch
-  } = useWidgetData(context, {
-    key: ["photoframe", poolKey],
-    fetcher: () => backend.fetchAssets(BATCH),
-    enabled: configured,
-    staleTimeMs: listTtlMs,
-    staleMessage: "Offline \u2014 showing cached photos",
-    errorMessage: "No photos found"
-  });
-  const [deck, setDeck] = (0, import_react2.useState)([]);
-  const cursor = (0, import_react2.useRef)(0);
-  const [playing, setPlaying] = (0, import_react2.useState)(true);
-  const [slides, setSlides] = (0, import_react2.useState)([]);
-  const [progressKey, setProgressKey] = (0, import_react2.useState)(0);
-  const generation = (0, import_react2.useRef)(0);
-  (0, import_react2.useEffect)(() => {
-    if (!assets || assets.length === 0) {
-      setDeck([]);
-      return;
-    }
-    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
-    cursor.current = 0;
-  }, [assets]);
-  const showAt = (0, import_react2.useCallback)(
-    async (index) => {
-      if (deck.length === 0) return;
-      const gen = ++generation.current;
-      const picks = [];
-      for (let i = 0; i < panes; i += 1) {
-        const asset = deck[(index + i) % deck.length];
-        if (asset) picks.push(asset);
-      }
-      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
-      if (preloadCount > 0) {
-        for (let p = 1; p <= preloadCount; p += 1) {
-          const nextAsset = deck[(index + panes * p) % deck.length];
-          if (nextAsset && !nextAsset.directUrl) {
-            void loadImageBlob(context, backend, config, nextAsset).catch(() => null);
-          }
-        }
-      }
-      const settled = await Promise.all(
-        picks.map(async (asset) => {
-          try {
-            if (config.metadataShowAlbum && backend.enrichAsset) {
-              await backend.enrichAsset(asset).catch(() => void 0);
-            }
-            const source = asset.directUrl ? { kind: "direct", url: asset.directUrl } : { kind: "blob", blob: await loadImageBlob(context, backend, config, asset) };
-            const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
-            const face = config.transition === "kenburns" && backend.fetchFaceBox ? await backend.fetchFaceBox(asset).catch(() => null) : null;
-            return { asset, source, placeholder, face };
-          } catch {
-            return null;
-          }
-        })
-      );
-      if (gen !== generation.current) return;
-      const loaded = settled.filter((slide) => slide !== null);
-      if (loaded.length === 0) return;
-      setSlides(loaded);
-      setProgressKey((k) => k + 1);
-    },
-    [deck, context, backend, panes, config]
-  );
-  (0, import_react2.useEffect)(() => {
-    cursor.current = 0;
-    if (deck.length > 0) void showAt(0);
-  }, [deck]);
-  const next = (0, import_react2.useCallback)(() => {
-    const nextCursor = cursor.current + panes;
-    if (nextCursor >= deck.length) {
-      refetch();
-      cursor.current = 0;
-    } else {
-      cursor.current = nextCursor;
-    }
-    void showAt(cursor.current);
-  }, [panes, showAt, deck.length, refetch]);
-  const back = (0, import_react2.useCallback)(() => {
-    cursor.current = Math.max(0, cursor.current - panes);
-    void showAt(cursor.current);
-  }, [panes, showAt]);
-  const togglePlay = (0, import_react2.useCallback)(() => setPlaying((p) => !p), []);
-  const lastTick = (0, import_react2.useRef)(tick);
-  (0, import_react2.useEffect)(() => {
-    if (tick !== lastTick.current) {
-      lastTick.current = tick;
-      if (playing && configured) next();
-    }
-  }, [tick, playing, configured, next]);
-  return { slides, playing, error, isLoading, progressKey, next, back, togglePlay };
+// src/plugins/clock/format.ts
+function formatClock(now, config, locale) {
+  const timeOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: !config.use24Hour
+  };
+  if (config.showSeconds) timeOptions.second = "2-digit";
+  const time = new Intl.DateTimeFormat(locale, timeOptions).format(now);
+  const dateOptions = config.dateStyle === "weekday" ? { weekday: "long" } : { weekday: "long", month: "short", day: "numeric" };
+  const date = config.showDate ? new Intl.DateTimeFormat(locale, dateOptions).format(now) : "";
+  return { time, date };
 }
 
-// src/sandbox/photoframe/AssetView.tsx
-var import_react4 = __toESM(require_react(), 1);
+// src/plugins/clock/fit.ts
+var MIN_FONT_PX = 12;
+var TIME_HEIGHT_SHARE = 0.7;
+var DATE_HEIGHT_SHARE = 0.22;
+function fittedFontSize(heightBudgetPx, measuredWidthPx, availWidthPx) {
+  const scaled = measuredWidthPx > availWidthPx ? heightBudgetPx * (availWidthPx / measuredWidthPx) : heightBudgetPx;
+  return Math.max(MIN_FONT_PX, Math.floor(scaled));
+}
+function fitLine(el, heightBudgetPx, availWidthPx) {
+  el.style.fontSize = `${heightBudgetPx}px`;
+  el.style.fontSize = `${fittedFontSize(heightBudgetPx, el.scrollWidth, availWidthPx)}px`;
+}
+function fitClock(widget, timeEl, dateEl) {
+  const style = getComputedStyle(widget);
+  const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+  const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+  const availW = widget.clientWidth - padX;
+  const availH = widget.clientHeight - padY;
+  if (availW <= 0 || availH <= 0) return;
+  const hasDate = Boolean(dateEl);
+  fitLine(timeEl, availH * (hasDate ? TIME_HEIGHT_SHARE : 0.92), availW);
+  if (dateEl) fitLine(dateEl, availH * DATE_HEIGHT_SHARE, availW);
+}
+
+// src/plugins/clock/ClockWidget.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function transitionClass(transition) {
-  switch (transition) {
-    case "kenburns":
-      return "pf-kenburns";
-    case "zoom":
-      return "pf-zoom";
-    case "pan":
-      return "pf-pan";
-    case "none":
-      return "pf-none";
-    default:
-      return "pf-fadeonly";
-  }
-}
-function AssetView({
-  slide,
-  fit,
-  transition,
-  durationSeconds,
-  intervalSeconds
-}) {
-  var _a;
-  const origin = slide.face ? `${(slide.face.cx * 100).toFixed(1)}% ${(slide.face.cy * 100).toFixed(1)}%` : "center";
-  const motionClass = transitionClass(transition);
-  const style = {
-    "--pf-origin": origin,
-    "--pf-motion-duration": `${intervalSeconds + durationSeconds}s`,
-    "--pf-fade-duration": `${durationSeconds}s`
-  };
-  const [blobUrl, setBlobUrl] = (0, import_react4.useState)(null);
-  (0, import_react4.useEffect)(() => {
-    if (slide.source.kind === "direct") {
-      setBlobUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(slide.source.blob);
-    setBlobUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [slide.source]);
-  const assetUrl = slide.source.kind === "direct" ? slide.source.url : blobUrl;
-  const isVideo = ((_a = slide.asset.type) == null ? void 0 : _a.toUpperCase()) === "VIDEO";
-  const imgRef = (0, import_react4.useRef)(null);
-  const [loaded, setLoaded] = (0, import_react4.useState)(false);
-  (0, import_react4.useEffect)(() => {
-    var _a2;
-    setLoaded(false);
-    if (!isVideo && ((_a2 = imgRef.current) == null ? void 0 : _a2.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
-  }, [assetUrl, isVideo]);
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pf-asset", style, children: [
-    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "pf-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
-    assetUrl && (isVideo ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "video",
-      {
-        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: assetUrl,
-        autoPlay: true,
-        loop: true,
-        muted: true,
-        playsInline: true,
-        onCanPlay: () => setLoaded(true)
-      },
-      slide.asset.id
-    ) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "img",
-      {
-        ref: imgRef,
-        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: assetUrl,
-        alt: "",
-        "aria-hidden": true,
-        onLoad: () => setLoaded(true)
-      },
-      slide.asset.id
-    ))
-  ] });
-}
-
-// src/sandbox/photoframe/MetadataOverlay.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-function MetadataOverlay({ asset, position, options, locale }) {
-  if (position === "none") return null;
-  const meta = deriveMetadata(asset, options, locale);
-  if (!hasMetadata(meta)) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `pf-caption pf-caption-${position}`, children: [
-    meta.location && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.location }),
-    meta.album && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.album }),
-    meta.date && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.date }),
-    meta.people && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.people }),
-    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.tags }),
-    meta.description && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-desc", children: meta.description })
-  ] });
-}
-
-// src/sandbox/photoframe/ProgressBar.tsx
-var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ProgressBar({
-  position,
-  durationSeconds,
-  playing,
-  cycleKey
-}) {
-  if (position === "none") return null;
-  const style = {
-    "--pf-progress-duration": `${durationSeconds}s`,
-    animationPlayState: playing ? "running" : "paused"
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `pf-progress pf-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pf-progress-fill", style }, cycleKey) });
-}
-
-// src/sandbox/photoframe/OverlayControls.tsx
-var import_react5 = __toESM(require_react(), 1);
-var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-var HIDE_DELAY_MS = 2500;
-function OverlayControls({
-  playing,
-  onNext,
-  onBack,
-  onTogglePlay,
-  active,
-  labels
-}) {
-  const [visible, setVisible] = (0, import_react5.useState)(false);
-  const hideTimer = (0, import_react5.useRef)(null);
-  const reveal = (0, import_react5.useCallback)(() => {
-    setVisible(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
-  }, []);
-  (0, import_react5.useEffect)(() => {
+function ClockWidget({ context }) {
+  const config = (0, import_react2.useMemo)(() => readClockConfig(context.config), [context.config]);
+  const [now, setNow] = (0, import_react2.useState)(() => /* @__PURE__ */ new Date());
+  (0, import_react2.useEffect)(() => {
+    let timer;
+    const schedule = () => {
+      clearTimeout(timer);
+      if (document.hidden) return;
+      const period = config.showSeconds ? 1e3 : 6e4;
+      timer = setTimeout(() => {
+        setNow(/* @__PURE__ */ new Date());
+        schedule();
+      }, period - Date.now() % period);
+    };
+    schedule();
+    document.addEventListener("visibilitychange", schedule);
     return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", schedule);
     };
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    if (!active) return;
-    const handler = (e) => {
-      if (e.key === "ArrowRight") {
-        onNext();
-        reveal();
-      } else if (e.key === "ArrowLeft") {
-        onBack();
-        reveal();
-      } else if (e.key === " ") {
-        e.preventDefault();
-        onTogglePlay();
-        reveal();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [active, onNext, onBack, onTogglePlay, reveal]);
-  const act = (fn) => () => {
-    fn();
-    reveal();
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
-    "div",
-    {
-      className: "pf-controls",
-      "data-active": active,
-      "data-visible": visible,
-      onPointerMove: reveal,
-      onPointerDown: reveal,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onBack), "aria-label": labels.previous, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronLeft, {}) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          "button",
-          {
-            type: "button",
-            className: "pf-zone pf-zone-center",
-            onClick: act(onTogglePlay),
-            "aria-label": playing ? labels.pause : labels.play,
-            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn pf-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlayIcon, {}) })
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onNext), "aria-label": labels.next, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, {}) }) })
-      ]
-    }
-  );
-}
-function ChevronLeft() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function ChevronRight() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function PlayIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M8 5v14l11-7z" }) });
-}
-function PauseIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
-}
-
-// src/sandbox/photoframe/PhotoFrameWidget.tsx
-var import_react6 = __toESM(require_react(), 1);
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
-function PhotoFrameWidget({ context, backend, strings: strings2 }) {
-  const config = (0, import_react6.useMemo)(() => readFrameConfig(context.config), [context.config]);
-  const configured = backend.isConfigured();
-  const [tick, setTick] = (0, import_react6.useState)(0);
-  const show = useSlideshow(context, backend, config, tick);
-  const timerRef = (0, import_react6.useRef)(null);
-  const resetTimer = (0, import_react6.useCallback)(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (!show.playing || !configured) return;
-    timerRef.current = setInterval(
-      () => setTick((t) => t + 1),
-      Math.max(3, config.intervalSeconds) * 1e3
-    );
-  }, [show.playing, configured, config.intervalSeconds]);
-  (0, import_react6.useEffect)(() => {
-    resetTimer();
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [resetTimer, show.progressKey]);
-  const handleNext = (0, import_react6.useCallback)(() => {
-    show.next();
-    resetTimer();
-  }, [show, resetTimer]);
-  const handleBack = (0, import_react6.useCallback)(() => {
-    show.back();
-    resetTimer();
-  }, [show, resetTimer]);
-  const metadataOptions = {
-    showDate: config.metadataShowDate,
-    showLocation: config.metadataShowLocation,
-    showDescription: config.metadataShowDescription,
-    showPeople: config.metadataShowPeople,
-    showAlbum: config.metadataShowAlbum,
-    showTags: config.metadataShowTags
-  };
-  if (!configured) {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-frame pf-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: strings2.title }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: strings2.configure })
-    ] }) });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `pf-frame pf-layout-${config.layout}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pf-pane", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        AssetView,
-        {
-          slide,
-          fit: config.imageFit,
-          transition: config.transition,
-          durationSeconds: config.transitionSeconds,
-          intervalSeconds: config.intervalSeconds
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        MetadataOverlay,
-        {
-          asset: slide.asset,
-          position: config.metadataPosition,
-          options: metadataOptions,
-          locale: context.locale
-        }
-      )
-    ] }, slide.asset.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      ProgressBar,
-      {
-        position: config.progressBar,
-        durationSeconds: Math.max(3, config.intervalSeconds),
-        playing: show.playing,
-        cycleKey: show.progressKey
-      }
-    ),
-    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      OverlayControls,
-      {
-        playing: show.playing,
-        onNext: handleNext,
-        onBack: handleBack,
-        onTogglePlay: show.togglePlay,
-        active: context.isEditing === false,
-        labels: strings2
-      }
-    ),
-    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status", children: strings2.loading }),
-    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status pf-error", role: "alert", children: show.error })
+  }, [config.showSeconds]);
+  const { time, date } = formatClock(now, config, context.locale);
+  const showDate = config.showDate && Boolean(date);
+  const widgetRef = (0, import_react2.useRef)(null);
+  const timeRef = (0, import_react2.useRef)(null);
+  const dateRef = (0, import_react2.useRef)(null);
+  (0, import_react2.useLayoutEffect)(() => {
+    const widget = widgetRef.current;
+    const timeEl = timeRef.current;
+    if (!widget || !timeEl) return;
+    const fit = () => fitClock(widget, timeEl, showDate ? dateRef.current : null);
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(widget);
+    return () => observer.disconnect();
+  }, [time, date, showDate]);
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "clock-widget", ref: widgetRef, style: { fontWeight: config.fontWeight }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "clock-time", ref: timeRef, style: { fontWeight: config.fontWeight }, children: time }),
+    showDate && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "clock-date", ref: dateRef, children: date })
   ] });
 }
 
-// src/sandbox/sdk.ts
-function definePlugin(module) {
-  return module;
-}
-function injectStyle(id, css) {
-  if (document.getElementById(id)) return;
-  const style = document.createElement("style");
-  style.id = id;
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-// src/sandbox/photoframe/styles.ts
-var PHOTOFRAME_SANDBOX_CSS = `
+// src/plugins/clock/clock-styles.ts
+var CLOCK_SANDBOX_CSS = `
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
   body { width: 100%; height: 100%; }
   .wg-plugin-root { width: 100%; height: 100%; }
-  .pf-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .pf-panes { display: flex; width: 100%; height: 100%; }
-  .pf-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
-  .pf-layout-split .pf-pane + .pf-pane { border-left: 2px solid rgba(255,255,255,0.12); }
-  .pf-asset { position: absolute; inset: 0; overflow: hidden; }
-  .pf-backdrop, .pf-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .pf-backdrop { filter: blur(14px); transform: scale(1.1); }
-  .pf-fit-cover { object-fit: cover; }
-  .pf-fit-contain { object-fit: contain; }
-  .pf-photo { opacity: 0; transform-origin: var(--pf-origin, center); }
-  .pf-fadeonly, .pf-none { animation: pf-fade var(--pf-fade-duration, 1s) ease both; }
-  .pf-none { animation-duration: 0.01s; }
-  .pf-zoom { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-zoom var(--pf-motion-duration,16s) ease-out both; }
-  .pf-pan { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-pan var(--pf-motion-duration,16s) ease-in-out both; }
-  .pf-kenburns { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-kenburns var(--pf-motion-duration,16s) ease-in-out both; }
-  @keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes pf-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
-  @keyframes pf-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
-  @keyframes pf-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
-  .pf-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
-  .pf-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
-  .pf-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
-  .pf-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .pf-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
-  .pf-progress-top { top: 0; }
-  .pf-progress-bottom { bottom: 0; }
-  .pf-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: pf-progress var(--pf-progress-duration, 15s) linear forwards; }
-  @keyframes pf-progress { from { width: 0; } to { width: 100%; } }
-  .pf-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
-  .pf-controls[data-active='false'] { pointer-events: none; }
-  .pf-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
-  .pf-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
-  .pf-zone-btn-lg { width: 64px; height: 64px; }
-  .pf-controls[data-visible='true'] .pf-zone-btn { opacity: 1; transform: scale(1); }
-  @media (hover: hover) { .pf-zone:hover .pf-zone-btn { opacity: 1; transform: scale(1); } }
-  .pf-zone-btn svg { width: 55%; height: 55%; }
-  .pf-empty, .pf-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
-  .pf-status { background: rgba(0,0,0,0.35); }
-  .pf-empty p { margin-top: 8px; font-size: 13px; }
-  .pf-error { color: #ff8080; }
+  .clock-widget {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.04em; padding: 2% 4%;
+    box-sizing: border-box; overflow: hidden; text-align: center; color: #fff;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .clock-time {
+    font-weight: 700; line-height: 0.92; letter-spacing: 0.01em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.45);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .clock-date {
+    font-weight: 300; line-height: 1;
+    color: rgba(255,255,255,0.82); text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    white-space: nowrap;
+  }
 `;
 
-// src/sandbox/photoframe/define.tsx
-var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
-function definePhotoFrameWidget(options) {
-  injectStyle(options.styleId ?? "photoframe-style", PHOTOFRAME_SANDBOX_CSS);
-  const renderer = defineReactWidget(({ context }) => {
-    const backend = options.createBackend(context, context.config);
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(PhotoFrameWidget, { context, backend, strings: options.strings(context.locale) });
-  });
-  const module = {
-    widgets: { [options.widgetId]: renderer }
-  };
-  if (options.loadOptions) {
-    const load = options.loadOptions.bind(options);
-    module.loadOptions = (context, _widgetId, fieldKey, config) => load(context, fieldKey, config);
+// src/plugins/clock/sandbox.ts
+injectStyle("clock-style", CLOCK_SANDBOX_CSS);
+var sandbox_default = definePlugin({
+  widgets: {
+    "clock.time": defineReactWidget(ClockWidget)
   }
-  return definePlugin(module);
-}
-
-// src/plugins/immich/service.ts
-var PROXY = "always";
-var ImmichService = class {
-  constructor(transport, config) {
-    this.transport = transport;
-    this.config = config;
-  }
-  get base() {
-    return `${this.config.serverUrl.replace(/\/$/, "")}/api`;
-  }
-  get jsonHeaders() {
-    return {
-      // `apiKey` is the `{{secret:apiKey}}` sentinel (a secret field); the host
-      // HTTP layer substitutes the real key at egress, so it never enters this
-      // frame. Sending the sentinel verbatim here is correct.
-      "x-api-key": this.config.apiKey,
-      accept: "application/json",
-      "content-type": "application/json"
-    };
-  }
-  /** Typed request helper: the transport returns `unknown` data (RPC-crossed). */
-  async req(request) {
-    return await this.transport.request(request);
-  }
-  /**
-   * Pool-aware asset-list fetch. Pure network fetch: caching, staleness, and
-   * offline fallback are handled by the shared data layer (useWidgetData /
-   * TanStack Query), not here.
-   */
-  async fetchAssets(count) {
-    return this.fetchPool(count);
-  }
-  /** Stable identity for the asset pool; used as the shared query key. */
-  poolCacheKey() {
-    const c = this.config;
-    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
-    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
-  }
-  async fetchPool(count) {
-    switch (this.config.poolMode) {
-      case "memories":
-        return this.fetchMemories();
-      case "favorites":
-        return this.metadataSearch({ isFavorite: { eq: true } }, count);
-      case "random":
-      default:
-        return this.fetchRandom(count);
-    }
-  }
-  /**
-   * Builds the modern Immich v3+ structured SearchFilter.
-   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
-   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
-   * All criteria are packaged inside `filter`.
-   */
-  buildSearchFilter(extraFilter = {}) {
-    const c = this.config;
-    const filter = { ...extraFilter };
-    if (!c.showVideos) {
-      filter.type = { in: ["IMAGE"] };
-    }
-    if (c.rating > 0) {
-      filter.rating = { ge: c.rating };
-    }
-    if (c.onlyWithPersons) {
-      filter.hasPeople = { eq: true };
-    }
-    const buildIds = (e) => {
-      const res = {};
-      if (e.include.length) res.any = e.include;
-      if (e.exclude.length) res.none = e.exclude;
-      return Object.keys(res).length > 0 ? res : null;
-    };
-    const albumIds = buildIds(c.albums);
-    if (albumIds) filter.albumIds = albumIds;
-    const personIds = buildIds(c.people);
-    if (personIds) filter.personIds = personIds;
-    const tagIds = buildIds(c.tags);
-    if (tagIds) filter.tagIds = tagIds;
-    return filter;
-  }
-  postProcessAssets(items) {
-    let result = items;
-    if (this.config.onlyWithPersons) {
-      result = result.filter((a) => a.people && a.people.length > 0);
-    }
-    if (this.config.people.exclude.length > 0) {
-      const excluded = new Set(this.config.people.exclude);
-      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
-    }
-    if (this.config.tags.exclude.length > 0) {
-      const excluded = new Set(this.config.tags.exclude);
-      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
-    }
-    return result;
-  }
-  async fetchRandom(count) {
-    const filter = this.buildSearchFilter();
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/random`,
-      method: "POST",
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    const items = Array.isArray(res.data) ? res.data : [];
-    return this.postProcessAssets(items);
-  }
-  async metadataSearch(extraFilter, count) {
-    var _a;
-    const filter = this.buildSearchFilter(extraFilter);
-    const hasFilter = Object.keys(filter).length > 0;
-    const body = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...hasFilter ? { filter } : {}
-    };
-    const res = await this.req({
-      url: `${this.base}/search/metadata`,
-      method: "POST",
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
-    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
-    return this.postProcessAssets(items);
-  }
-  async fetchMemories() {
-    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
-    const res = await this.req({
-      url: `${this.base}/memories?for=${today}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
-    const now = (/* @__PURE__ */ new Date()).getFullYear();
-    const items = (res.data ?? []).flatMap((memory) => {
-      var _a;
-      const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
-      const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
-      return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
-    });
-    return this.postProcessAssets(items);
-  }
-  async fetchAssetAlbums(assetId) {
-    try {
-      const res = await this.req({
-        url: `${this.base}/albums?assetId=${assetId}`,
-        method: "GET",
-        headers: this.jsonHeaders,
-        proxy: PROXY
-      });
-      if (!res.ok || !Array.isArray(res.data)) return [];
-      return res.data.map((a) => a.albumName).filter(Boolean);
-    } catch {
-      return [];
-    }
-  }
-  /**
-   * Build the request that returns an asset's image bytes. Pure — the shared
-   * SDK engine executes it with `responseType: 'binary'`, caches, and decodes.
-   */
-  imageRequest(assetId, size = "preview") {
-    return {
-      url: `${this.base}/assets/${assetId}/thumbnail?size=${size}`,
-      method: "GET",
-      headers: { "x-api-key": this.config.apiKey },
-      proxy: PROXY
-    };
-  }
-  /** Browser-native playback URL; direct media cannot carry the brokered API key. */
-  videoUrl(assetId) {
-    return `${this.base}/assets/${assetId}/video/playback`;
-  }
-  /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
-  async fetchFaceBox(assetId) {
-    const res = await this.req({
-      url: `${this.base}/faces?id=${assetId}`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
-    const f = res.data[0];
-    if (!f || !f.imageWidth || !f.imageHeight) return null;
-    return {
-      cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
-      cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight
-    };
-  }
-  async listAlbums() {
-    const res = await this.req({
-      url: `${this.base}/albums`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
-    return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
-  }
-  async listPeople() {
-    const res = await this.req({
-      url: `${this.base}/people?withHidden=false`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
-    return (res.data.people ?? []).filter((p) => p.name).map((p) => ({ label: p.name, value: p.id }));
-  }
-  async listTags() {
-    const res = await this.req({
-      url: `${this.base}/tags`,
-      method: "GET",
-      headers: this.jsonHeaders,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
-    return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
-  }
-};
-
-// src/plugins/immich/types.ts
-var IMMICH_DEFAULT_CONFIG = {
-  serverUrl: "",
-  apiKey: "",
-  poolMode: "random",
-  albums: { include: [], exclude: [] },
-  people: { include: [], exclude: [] },
-  tags: { include: [], exclude: [] },
-  rating: 0,
-  showVideos: false,
-  onlyWithPersons: false
-};
-
-// src/plugins/immich/config.ts
-function str(raw, fallback) {
-  return typeof raw === "string" ? raw : fallback;
-}
-function num2(raw, fallback) {
-  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
-}
-function bool2(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
-}
-function strArray(raw) {
-  if (Array.isArray(raw)) return raw.filter((v) => typeof v === "string");
-  if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
-  return [];
-}
-var POOL_MODES = ["random", "favorites", "memories"];
-function entityFilter(raw, legacyIds) {
-  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-    const v = raw;
-    return { include: strArray(v.include), exclude: strArray(v.exclude) };
-  }
-  return { include: strArray(legacyIds), exclude: [] };
-}
-function readImmichConfig(raw) {
-  const d = IMMICH_DEFAULT_CONFIG;
-  const poolMode = POOL_MODES.includes(raw.poolMode) ? raw.poolMode : d.poolMode;
-  return {
-    serverUrl: str(raw.serverUrl, d.serverUrl),
-    apiKey: str(raw.apiKey, d.apiKey),
-    poolMode,
-    albums: entityFilter(raw.albums, raw.albumIds),
-    people: entityFilter(raw.people, raw.personIds),
-    tags: entityFilter(raw.tags, raw.tagIds),
-    rating: num2(raw.rating, d.rating),
-    showVideos: bool2(raw.showVideos, d.showVideos),
-    onlyWithPersons: bool2(raw.onlyWithPersons, d.onlyWithPersons)
-  };
-}
-
-// src/plugins/immich/backend.ts
-var ImmichBackend = class {
-  service;
-  configured;
-  constructor(context, rawConfig) {
-    const config = readImmichConfig(rawConfig);
-    this.configured = config.serverUrl !== "" && config.apiKey !== "";
-    const transport = { request: (req) => context.http(req) };
-    this.service = new ImmichService(transport, config);
-  }
-  isConfigured() {
-    return this.configured;
-  }
-  poolCacheKey() {
-    return this.service.poolCacheKey();
-  }
-  async fetchAssets(count) {
-    const assets = await this.service.fetchAssets(count);
-    return assets.map((asset) => asset.type.toUpperCase() === "VIDEO" ? { ...asset, directUrl: this.service.videoUrl(asset.id) } : asset);
-  }
-  imageRequest(asset, size) {
-    return this.service.imageRequest(asset.id, size);
-  }
-  fetchFaceBox(asset) {
-    return this.service.fetchFaceBox(asset.id);
-  }
-  async enrichAsset(asset) {
-    const immichAsset = asset;
-    if (immichAsset.albumName) return;
-    const albums = await this.service.fetchAssetAlbums(asset.id);
-    if (albums.length > 0) immichAsset.albumName = albums.join(", ");
-  }
-};
-async function loadImmichOptions(context, fieldKey, rawConfig) {
-  const config = readImmichConfig(rawConfig);
-  if (!config.serverUrl || !config.apiKey) {
-    throw new Error("Enter the server URL and API key first.");
-  }
-  const service = new ImmichService({ request: (req) => context.http(req) }, config);
-  if (fieldKey === "albums") return service.listAlbums();
-  if (fieldKey === "people") return service.listPeople();
-  return service.listTags();
-}
-
-// src/plugins/immich/locales/de.json
-var de_default = {
-  manifest: {
-    "Immich Photo Frame": "Immich-Bilderrahmen",
-    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
-    "Photo Frame": "Bilderrahmen",
-    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
-    Connection: "Verbindung",
-    Source: "Quelle",
-    Slideshow: "Diashow",
-    "Info overlay": "Info-Einblendung",
-    Caching: "Zwischenspeicher",
-    "Immich Server URL": "Immich-Server-URL",
-    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
-    "API Key": "API-Schl\xFCssel",
-    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
-    "Photo source": "Fotoquelle",
-    "All photos": "Alle Fotos",
-    Favorites: "Favoriten",
-    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
-    Albums: "Alben",
-    People: "Personen",
-    Tags: "Schlagw\xF6rter",
-    "Tap once to include (\u2713), again to exclude (\u2212). Albums, people and tags are combined.": "Einmal tippen zum Einschlie\xDFen (\u2713), erneut tippen zum Ausschlie\xDFen (\u2212). Alben, Personen und Schlagw\xF6rter werden kombiniert.",
-    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
-    "Include videos": "Videos einschlie\xDFen",
-    "Only photos with people": "Nur Fotos mit Personen",
-    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
-    "Seconds per photo": "Sekunden pro Foto",
-    "Preload upcoming photos": "Kommende Fotos vorladen",
-    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
-    Layout: "Layout",
-    Single: "Einzeln",
-    "Split (two photos)": "Geteilt (zwei Fotos)",
-    Transition: "\xDCbergang",
-    Pan: "Schwenken",
-    Fade: "\xDCberblenden",
-    None: "Keiner",
-    "Transition seconds": "\xDCbergangsdauer",
-    "Image fit": "Bildanpassung",
-    "Cover (fill)": "Ausf\xFCllen",
-    "Contain (letterbox)": "Einpassen",
-    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
-    "Progress bar": "Fortschrittsbalken",
-    Bottom: "Unten",
-    Top: "Oben",
-    Hidden: "Ausgeblendet",
-    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
-    "Bottom right": "Unten rechts",
-    "Bottom left": "Unten links",
-    "Top right": "Oben rechts",
-    "Top left": "Oben links",
-    "Show location": "Ort anzeigen",
-    "Show date": "Datum anzeigen",
-    "Show people": "Personen anzeigen",
-    "Show album": "Album anzeigen",
-    "Show tags": "Schlagw\xF6rter anzeigen",
-    "Show description": "Beschreibung anzeigen",
-    "Cache photos locally": "Fotos lokal zwischenspeichern",
-    "Cache size limit (MB)": "Speicherlimit (MB)",
-    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
-    "Cache image expiration (days)": "Bildablauf (Tage)",
-    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
-    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
-  },
-  runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
-    loading: "Fotos werden geladen\u2026",
-    next: "Weiter",
-    pause: "Pause",
-    play: "Wiedergabe",
-    previous: "Zur\xFCck",
-    title: "Immich-Bilderrahmen"
-  }
-};
-
-// src/plugins/immich/sandbox.ts
-var EN = {
-  title: "Immich Photo Frame",
-  configure: "Open settings to add your Immich server URL and API key.",
-  loading: "Loading photos\u2026",
-  previous: "Previous",
-  next: "Next",
-  play: "Play",
-  pause: "Pause"
-};
-function strings(locale) {
-  if (locale.split("-")[0] === "de") {
-    const r = de_default.runtime;
-    return {
-      title: r.title,
-      configure: r.configure,
-      loading: r.loading,
-      previous: r.previous,
-      next: r.next,
-      play: r.play,
-      pause: r.pause
-    };
-  }
-  return EN;
-}
-var sandbox_default = definePhotoFrameWidget({
-  widgetId: "immich.photoframe",
-  styleId: "immich-style",
-  strings,
-  createBackend: (context, config) => new ImmichBackend(context, config),
-  loadOptions: (context, fieldKey, config) => loadImmichOptions(context, fieldKey, config)
 });
 export {
   sandbox_default as default
