@@ -14,9 +14,22 @@ export function ClockWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const period = config.showSeconds ? 1000 : 15000;
-    const timer = setInterval(() => setNow(new Date()), period);
-    return () => clearInterval(timer);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const schedule = (): void => {
+      clearTimeout(timer);
+      if (document.hidden) return;
+      const period = config.showSeconds ? 1000 : 60_000;
+      timer = setTimeout(() => {
+        setNow(new Date());
+        schedule();
+      }, period - (Date.now() % period));
+    };
+    schedule();
+    document.addEventListener('visibilitychange', schedule);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('visibilitychange', schedule);
+    };
   }, [config.showSeconds]);
 
   const { time, date } = formatClock(now, config, context.locale);
