@@ -28,14 +28,14 @@ export interface PairingSession {
   close(): Promise<void>;
 }
 
-export async function createPairingSession(baseUrl: string, signal: AbortSignal): Promise<PairingSession> {
+export async function createPairingSession(baseUrl: string, signal: AbortSignal, validateOrigin: (url: string) => Promise<void>): Promise<PairingSession> {
   const base = new URL(baseUrl);
   if (base.username || base.password || base.search || base.hash) throw new Error('Invalid signaling URL');
   const response = await fetch(new URL('/session', base), { method: 'POST', signal });
   if (!response.ok) throw new Error(`Signaling service rejected session (${response.status})`);
   const session = parseSession(await response.json());
   const websocket = new URL(session.websocketUrl);
-  if (websocket.hostname !== base.hostname) throw new Error('Signaling service returned an unapproved WebSocket host');
+  await validateOrigin(websocket.href);
   return {
     options: { relayUrl: websocket.href, roomCode: session.roomCode, password: session.password },
     roomCode: session.roomCode,

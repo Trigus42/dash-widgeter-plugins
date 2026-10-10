@@ -24320,14 +24320,14 @@ function parseSession(value) {
   }
   return session;
 }
-async function createPairingSession(baseUrl, signal) {
+async function createPairingSession(baseUrl, signal, validateOrigin) {
   const base = new URL(baseUrl);
   if (base.username || base.password || base.search || base.hash) throw new Error("Invalid signaling URL");
   const response = await fetch(new URL("/session", base), { method: "POST", signal });
   if (!response.ok) throw new Error(`Signaling service rejected session (${response.status})`);
   const session = parseSession(await response.json());
   const websocket = new URL(session.websocketUrl);
-  if (websocket.hostname !== base.hostname) throw new Error("Signaling service returned an unapproved WebSocket host");
+  await validateOrigin(websocket.href);
   return {
     options: { relayUrl: websocket.href, roomCode: session.roomCode, password: session.password },
     roomCode: session.roomCode,
@@ -28170,7 +28170,11 @@ function useReceiver(context) {
     let close = null;
     let renewal;
     const open = async () => {
-      const session = await createPairingSession(config.relayUrl, abort.signal);
+      const session = await createPairingSession(
+        config.relayUrl,
+        abort.signal,
+        (url) => context.validateNativeOrigin("signaling", url)
+      );
       if (abort.signal.aborted) {
         await session.close();
         return;

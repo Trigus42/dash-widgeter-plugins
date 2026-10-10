@@ -24,7 +24,8 @@ export function useReceiver(context: GuestWidgetContext): ReceiverViewState {
     let close: (() => Promise<void>) | null = null;
     let renewal: number | undefined;
     const open = async (): Promise<void> => {
-      const session = await createPairingSession(config.relayUrl, abort.signal);
+      const session = await createPairingSession(config.relayUrl, abort.signal,
+        (url) => context.validateNativeOrigin('signaling', url));
       if (abort.signal.aborted) { await session.close(); return; }
       stop?.(); if (close) await close().catch(() => undefined);
       close = () => session.close();
