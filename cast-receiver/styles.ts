@@ -24,4 +24,5 @@ export const CAST_SANDBOX_CSS = `
   .cast-pairing { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 6px; padding: 12px 20px; border-radius: 14px; background: rgba(255,255,255,0.08); }
   .cast-pairing-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
   .cast-pairing-code { font-size: clamp(26px, 6cqw, 48px); font-weight: 700; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
+  .cast-sender-link { max-width: min(70cqw, 24rem); color: inherit; font-size: 13px; font-weight: 600; text-underline-offset: 3px; overflow-wrap: anywhere; }
 `;

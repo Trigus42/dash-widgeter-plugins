@@ -28233,15 +28233,26 @@ var de_default = {
   runtime: {
     idleTitle: "Bereit zum Casten",
     idleHint: "Lege ein Cast-Ziel in den Einstellungen fest oder sende eines von einem gekoppelten Ger\xE4t.",
-    pairingLabel: "Kopplungscode"
+    pairingLabel: "Kopplungscode",
+    openSender: "Sender \xF6ffnen"
   }
 };
 
 // src/plugins/cast-receiver/CastWidget.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-var EN = { idleTitle: "Ready to cast", idleHint: "Open the sender and enter this pairing code." };
+var EN = {
+  idleTitle: "Ready to cast",
+  idleHint: "Open the sender and enter this pairing code.",
+  pairingLabel: "Pairing code",
+  openSender: "Open sender"
+};
 function castStrings(locale) {
-  return locale.split("-")[0] === "de" ? { idleTitle: de_default.runtime.idleTitle, idleHint: de_default.runtime.idleHint } : EN;
+  return locale.split("-")[0] === "de" ? {
+    idleTitle: de_default.runtime.idleTitle,
+    idleHint: de_default.runtime.idleHint,
+    pairingLabel: de_default.runtime.pairingLabel,
+    openSender: de_default.runtime.openSender
+  } : EN;
 }
 function CastWidget({ context }) {
   const config = (0, import_react3.useMemo)(() => readCastConfig(context.config), [context.config]);
@@ -28250,9 +28261,10 @@ function CastWidget({ context }) {
   const videoRef = (0, import_react3.useRef)(null);
   (0, import_react3.useEffect)(() => {
     const video = videoRef.current;
-    if (video) video.srcObject = receiver.stream;
+    if (!video) return;
+    video.srcObject = receiver.stream;
     return () => {
-      if (video) video.srcObject = null;
+      video.srcObject = null;
     };
   }, [receiver.stream]);
   if (receiver.stream) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: true, playsInline: true });
@@ -28262,9 +28274,12 @@ function CastWidget({ context }) {
     const senderUrl = config.senderUrl && receiver.roomCode ? `${config.senderUrl}?relay=${encodeURIComponent(config.relayUrl)}&code=${receiver.roomCode}` : "";
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cast-idle-card", children: [
       /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cast-idle-title", children: strings.idleTitle }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("strong", { children: receiver.roomCode || receiver.status }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cast-pairing", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cast-pairing-label", children: strings.pairingLabel }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("strong", { className: "cast-pairing-code", children: receiver.roomCode || receiver.status })
+      ] }),
       /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "cast-idle-hint", children: receiver.error ?? strings.idleHint }),
-      senderUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("a", { href: senderUrl, target: "_blank", rel: "noreferrer", children: senderUrl })
+      senderUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("a", { className: "cast-sender-link", href: senderUrl, target: "_blank", rel: "noreferrer", children: strings.openSender })
     ] }) });
   }
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: target.kind === "media" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: config.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
@@ -28299,6 +28314,7 @@ var CAST_SANDBOX_CSS = `
   .cast-pairing { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 6px; padding: 12px 20px; border-radius: 14px; background: rgba(255,255,255,0.08); }
   .cast-pairing-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
   .cast-pairing-code { font-size: clamp(26px, 6cqw, 48px); font-weight: 700; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
+  .cast-sender-link { max-width: min(70cqw, 24rem); color: inherit; font-size: 13px; font-weight: 600; text-underline-offset: 3px; overflow-wrap: anywhere; }
 `;
 
 // src/plugins/cast-receiver/sandbox.ts

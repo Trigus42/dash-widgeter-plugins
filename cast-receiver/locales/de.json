@@ -24,6 +24,7 @@
   "runtime": {
     "idleTitle": "Bereit zum Casten",
     "idleHint": "Lege ein Cast-Ziel in den Einstellungen fest oder sende eines von einem gekoppelten Gerät.",
-    "pairingLabel": "Kopplungscode"
+    "pairingLabel": "Kopplungscode",
+    "openSender": "Sender öffnen"
   }
 }

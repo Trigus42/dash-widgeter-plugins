@@ -4,12 +4,16 @@ import { readCastConfig, resolveCastTarget } from './resolve';
 import { useReceiver } from './useReceiver';
 import de from './locales/de.json';
 
-interface CastStrings { idleTitle: string; idleHint: string }
-const EN: CastStrings = { idleTitle: 'Ready to cast', idleHint: 'Open the sender and enter this pairing code.' };
+interface CastStrings { idleTitle: string; idleHint: string; pairingLabel: string; openSender: string }
+const EN: CastStrings = {
+  idleTitle: 'Ready to cast', idleHint: 'Open the sender and enter this pairing code.',
+  pairingLabel: 'Pairing code', openSender: 'Open sender',
+};
 
 function castStrings(locale: string): CastStrings {
   return locale.split('-')[0] === 'de'
-    ? { idleTitle: de.runtime.idleTitle, idleHint: de.runtime.idleHint }
+    ? { idleTitle: de.runtime.idleTitle, idleHint: de.runtime.idleHint,
+      pairingLabel: de.runtime.pairingLabel, openSender: de.runtime.openSender }
     : EN;
 }
 
@@ -20,8 +24,9 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const video = videoRef.current;
-    if (video) video.srcObject = receiver.stream;
-    return () => { if (video) video.srcObject = null; };
+    if (!video) return;
+    video.srcObject = receiver.stream;
+    return () => { video.srcObject = null; };
   }, [receiver.stream]);
   if (receiver.stream) return <video ref={videoRef} className="cast-media" autoPlay muted playsInline />;
   const target = resolveCastTarget(receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: 'idle' });
@@ -31,9 +36,12 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
       ? `${config.senderUrl}?relay=${encodeURIComponent(config.relayUrl)}&code=${receiver.roomCode}` : '';
     return <div className="cast-root cast-idle"><div className="cast-idle-card">
       <span className="cast-idle-title">{strings.idleTitle}</span>
-      <strong>{receiver.roomCode || receiver.status}</strong>
+      <div className="cast-pairing">
+        <span className="cast-pairing-label">{strings.pairingLabel}</span>
+        <strong className="cast-pairing-code">{receiver.roomCode || receiver.status}</strong>
+      </div>
       <p className="cast-idle-hint">{receiver.error ?? strings.idleHint}</p>
-      {senderUrl && <a href={senderUrl} target="_blank" rel="noreferrer">{senderUrl}</a>}
+      {senderUrl && <a className="cast-sender-link" href={senderUrl} target="_blank" rel="noreferrer">{strings.openSender}</a>}
     </div></div>;
   }
   return <div className="cast-root cast-active" data-overlay={config.overlayMode}>
