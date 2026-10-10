@@ -22,6 +22,8 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
   return {
     sourceKind,
     sourceUrl: str(raw.sourceUrl, d.sourceUrl),
+    relayUrl: str(raw.relayUrl, d.relayUrl),
+    senderUrl: str(raw.senderUrl, d.senderUrl),
     overlayMode,
     showPairingWhenIdle: bool(raw.showPairingWhenIdle, d.showPairingWhenIdle),
     muted: bool(raw.muted, d.muted),

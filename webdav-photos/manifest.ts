@@ -52,11 +52,18 @@ const settings: WidgetSettingField[] = [
 export const webdavManifest: PluginManifest = {
   id: 'webdav-photos',
   name: 'WebDAV Photo Frame',
-  version: '1.0.0',
+  version: '1.1.0',
   description: 'Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, …), with offline caching',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
+  secrets: [{
+    key: 'password',
+    access: 'injected-only',
+    allowProxyPermissionOrigins: true,
+    placements: ['header'],
+  }],
+  storage: { blobBytes: 500 * 1024 * 1024, blobEntryBytes: 50 * 1024 * 1024 },
   permissions: [
     {
       name: 'Internet',

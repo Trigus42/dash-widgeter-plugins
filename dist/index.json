@@ -540,7 +540,7 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.10.0",
+        "version": "1.11.0",
         "description": "Digital photo frame backed by an Immich server, with offline caching and video playback",
         "translations": {
           "de": {
@@ -609,6 +609,20 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
+        "secrets": [
+          {
+            "key": "apiKey",
+            "access": "injected-only",
+            "allowProxyPermissionOrigins": true,
+            "placements": [
+              "header"
+            ]
+          }
+        ],
+        "storage": {
+          "blobBytes": 524288000,
+          "blobEntryBytes": 52428800
+        },
         "permissions": [
           {
             "name": "Internet",
@@ -975,14 +989,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-b6522dfee8da57500ae3e33a9f302b1e9792531789acde7a4f9e361c814996dd.js",
-      "sha256": "b6522dfee8da57500ae3e33a9f302b1e9792531789acde7a4f9e361c814996dd"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-8a9c63d4a797c51ce8803d37e1011a5e103cefb741456ebf21b000454fc679e9.js",
+      "sha256": "8a9c63d4a797c51ce8803d37e1011a5e103cefb741456ebf21b000454fc679e9"
     },
     {
       "manifest": {
         "id": "webdav-photos",
         "name": "WebDAV Photo Frame",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Digital photo frame backed by a WebDAV folder (Nextcloud, ownCloud, …), with offline caching",
         "translations": {
           "de": {
@@ -1042,6 +1056,20 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
+        "secrets": [
+          {
+            "key": "password",
+            "access": "injected-only",
+            "allowProxyPermissionOrigins": true,
+            "placements": [
+              "header"
+            ]
+          }
+        ],
+        "storage": {
+          "blobBytes": 524288000,
+          "blobEntryBytes": 52428800
+        },
         "permissions": [
           {
             "name": "Internet",
@@ -1338,14 +1366,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-c5fa7597c54f78e6e7523cb18e0adcb3059ffa071f3102a08cd32e2c32afe19d.js",
-      "sha256": "c5fa7597c54f78e6e7523cb18e0adcb3059ffa071f3102a08cd32e2c32afe19d"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-540b156322e35cbcf85a069c1150d8b9fbf873869ce22001be816bbaa3fa33d6.js",
+      "sha256": "540b156322e35cbcf85a069c1150d8b9fbf873869ce22001be816bbaa3fa33d6"
     },
     {
       "manifest": {
         "id": "google-photos",
         "name": "Google Photos Frame",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "description": "Digital photo frame backed by Google Photos, with offline caching",
         "translations": {
           "de": {
@@ -1406,6 +1434,32 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
+        "secrets": [
+          {
+            "key": "clientSecret",
+            "access": "injected-only",
+            "origins": [
+              "https://oauth2.googleapis.com"
+            ],
+            "placements": [
+              "body"
+            ]
+          },
+          {
+            "key": "refreshToken",
+            "access": "injected-only",
+            "origins": [
+              "https://oauth2.googleapis.com"
+            ],
+            "placements": [
+              "body"
+            ]
+          }
+        ],
+        "storage": {
+          "blobBytes": 524288000,
+          "blobEntryBytes": 52428800
+        },
         "permissions": [
           {
             "name": "Google Photos",
@@ -1694,14 +1748,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-872c81b5bd0ab0a563a7bb817d3f77dab0463604f857bf5be5e8c7d95d2f465d.js",
-      "sha256": "872c81b5bd0ab0a563a7bb817d3f77dab0463604f857bf5be5e8c7d95d2f465d"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-f716a74371f7e44a015328fce50c46c32f1421ddcbe6e52f8f5a70b42b08ad13.js",
+      "sha256": "f716a74371f7e44a015328fce50c46c32f1421ddcbe6e52f8f5a70b42b08ad13"
     },
     {
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "2.0.0",
+        "version": "3.0.0",
         "description": "Remote receiver for YouTube, Spotify, screen sharing, websites, and media",
         "translations": {
           "de": {
@@ -1729,7 +1783,20 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
-        "permissions": [],
+        "nativeNetwork": [
+          {
+            "id": "signaling",
+            "label": "Cast signaling",
+            "purpose": "Pair peers and exchange WebRTC connection details",
+            "surface": "connect",
+            "origins": [],
+            "allowCustomOrigins": true
+          }
+        ],
+        "webRtc": {
+          "label": "Direct peer connection",
+          "purpose": "Receive commands and media directly from one paired sender"
+        },
         "widgets": [
           {
             "id": "cast-receiver.screen",
@@ -1743,6 +1810,8 @@
             "defaultConfig": {
               "sourceKind": "idle",
               "sourceUrl": "",
+              "relayUrl": "",
+              "senderUrl": "",
               "overlayMode": "cover",
               "showPairingWhenIdle": true,
               "muted": true
@@ -1751,11 +1820,30 @@
               "background": "none",
               "backgroundOpacity": 1
             },
+            "nativeNetwork": [
+              "signaling"
+            ],
+            "webRtc": true,
             "sandboxPolicy": [
               "embed-sites",
               "remote-media"
             ],
             "settings": [
+              {
+                "key": "relayUrl",
+                "label": "Signaling URL",
+                "type": "text",
+                "placeholder": "https://signal.example",
+                "help": "Must match the signaling origin approved in plugin permissions.",
+                "section": "Connection"
+              },
+              {
+                "key": "senderUrl",
+                "label": "Sender URL",
+                "type": "text",
+                "placeholder": "https://signal.example/cast",
+                "section": "Connection"
+              },
               {
                 "key": "sourceKind",
                 "label": "What to cast",
@@ -1828,8 +1916,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-36591d18c3c0147e6b32f9e39ad8c96fb14649d5d870536bed372360250233de.js",
-      "sha256": "36591d18c3c0147e6b32f9e39ad8c96fb14649d5d870536bed372360250233de"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-1a4e811c1ebafbe9e4e30353d4c8e43f77cf78956d669c4a32871c499c997342.js",
+      "sha256": "1a4e811c1ebafbe9e4e30353d4c8e43f77cf78956d669c4a32871c499c997342"
     }
   ]
 }

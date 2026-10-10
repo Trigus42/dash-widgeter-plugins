@@ -1005,9 +1005,9 @@ var require_react_development = __commonJS({
       exports.useState = function(initialState) {
         return resolveDispatcher().useState(initialState);
       };
-      exports.useSyncExternalStore = function(subscribe, getSnapshot, getServerSnapshot) {
+      exports.useSyncExternalStore = function(subscribe2, getSnapshot, getServerSnapshot) {
         return resolveDispatcher().useSyncExternalStore(
-          subscribe,
+          subscribe2,
           getSnapshot,
           getServerSnapshot
         );
@@ -5076,28 +5076,28 @@ var require_react_dom_client_development = __commonJS({
       }
       function scheduleFibersWithFamiliesRecursively(fiber, updatedFamilies, staleFamilies) {
         do {
-          var _fiber = fiber, alternate = _fiber.alternate, child = _fiber.child, sibling = _fiber.sibling, tag = _fiber.tag, type = _fiber.type, elementType = _fiber.elementType, candidateType = null;
+          var _fiber = fiber, alternate = _fiber.alternate, child = _fiber.child, sibling = _fiber.sibling, tag = _fiber.tag, type = _fiber.type, elementType = _fiber.elementType, candidateType2 = null;
           _fiber = null;
           switch (tag) {
             case 0:
             case 1:
-              candidateType = type;
+              candidateType2 = type;
               break;
             case 15:
-              candidateType = type;
+              candidateType2 = type;
               _fiber = elementType;
               break;
             case 14:
               _fiber = elementType;
               break;
             case 11:
-              candidateType = type.render, _fiber = elementType;
+              candidateType2 = type.render, _fiber = elementType;
           }
           if (null === resolveFamily)
             throw Error("Expected resolveFamily to be set during hot reload.");
           var resolve = resolveFamily;
           type = elementType = false;
-          null !== candidateType && (candidateType = resolve(candidateType), void 0 !== candidateType && (staleFamilies.has(candidateType) ? type = true : updatedFamilies.has(candidateType) && (1 === tag ? type = true : elementType = true)));
+          null !== candidateType2 && (candidateType2 = resolve(candidateType2), void 0 !== candidateType2 && (staleFamilies.has(candidateType2) ? type = true : updatedFamilies.has(candidateType2) && (1 === tag ? type = true : elementType = true)));
           type || null === _fiber || (tag = resolve(_fiber), void 0 !== tag && staleFamilies.has(tag) ? type = true : "object" === typeof _fiber && _fiber.$$typeof === REACT_LAZY_TYPE && (tag = _fiber._payload, 1 === tag._status && (tag = resolve(tag._result.default), void 0 !== tag && staleFamilies.has(tag) && (type = true))));
           null !== failedBoundaries && (failedBoundaries.has(fiber) || null !== alternate && failedBoundaries.has(alternate)) && (type = true);
           type && (fiber._debugNeedsRemount = true);
@@ -6108,8 +6108,8 @@ var require_react_dom_client_development = __commonJS({
         return null;
       }
       function validateFragmentProps(element, fiber, returnFiber) {
-        for (var keys = Object.keys(element.props), i = 0; i < keys.length; i++) {
-          var key = keys[i];
+        for (var keys2 = Object.keys(element.props), i = 0; i < keys2.length; i++) {
+          var key = keys2[i];
           if ("children" !== key && "key" !== key && "ref" !== key) {
             null === fiber && (fiber = createFiberFromElement(element, returnFiber.mode, 0), fiber._debugInfo = currentDebugInfo, fiber.return = returnFiber);
             runWithFiberInDEV(
@@ -7551,7 +7551,7 @@ var require_react_dom_client_development = __commonJS({
         }
         return [newState, dispatch];
       }
-      function mountSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) {
+      function mountSyncExternalStore(subscribe2, getSnapshot, getServerSnapshot) {
         var fiber = currentlyRenderingFiber, hook = mountWorkInProgressHook();
         if (isHydrating) {
           if (void 0 === getServerSnapshot)
@@ -7577,8 +7577,8 @@ var require_react_dom_client_development = __commonJS({
         getServerSnapshot = { value: nextSnapshot, getSnapshot };
         hook.queue = getServerSnapshot;
         mountEffect(
-          subscribeToStore.bind(null, fiber, getServerSnapshot, subscribe),
-          [subscribe]
+          subscribeToStore.bind(null, fiber, getServerSnapshot, subscribe2),
+          [subscribe2]
         );
         fiber.flags |= 2048;
         pushSimpleEffect(
@@ -7595,7 +7595,7 @@ var require_react_dom_client_development = __commonJS({
         );
         return nextSnapshot;
       }
-      function updateSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) {
+      function updateSyncExternalStore(subscribe2, getSnapshot, getServerSnapshot) {
         var fiber = currentlyRenderingFiber, hook = updateWorkInProgressHook(), isHydrating$jscomp$0 = isHydrating;
         if (isHydrating$jscomp$0) {
           if (void 0 === getServerSnapshot)
@@ -7615,11 +7615,11 @@ var require_react_dom_client_development = __commonJS({
         ))
           hook.memoizedState = getServerSnapshot, didReceiveUpdate = true;
         hook = hook.queue;
-        var create = subscribeToStore.bind(null, fiber, hook, subscribe);
-        updateEffectImpl(2048, Passive, create, [subscribe]);
-        subscribe = hook.getSnapshot !== getSnapshot || cachedSnapshot || null !== workInProgressHook && (workInProgressHook.memoizedState.tag & HasEffect) !== NoFlags;
+        var create = subscribeToStore.bind(null, fiber, hook, subscribe2);
+        updateEffectImpl(2048, Passive, create, [subscribe2]);
+        subscribe2 = hook.getSnapshot !== getSnapshot || cachedSnapshot || null !== workInProgressHook && (workInProgressHook.memoizedState.tag & HasEffect) !== NoFlags;
         pushSimpleEffect(
-          subscribe ? HasEffect | Passive : Passive,
+          subscribe2 ? HasEffect | Passive : Passive,
           { destroy: void 0 },
           updateStoreInstance.bind(
             null,
@@ -7630,7 +7630,7 @@ var require_react_dom_client_development = __commonJS({
           ),
           null
         );
-        if (subscribe) {
+        if (subscribe2) {
           fiber.flags |= 2048;
           if (null === workInProgressRoot)
             throw Error(
@@ -7651,8 +7651,8 @@ var require_react_dom_client_development = __commonJS({
         inst.getSnapshot = getSnapshot;
         checkIfSnapshotChanged(inst) && forceStoreRerender(fiber);
       }
-      function subscribeToStore(fiber, inst, subscribe) {
-        return subscribe(function() {
+      function subscribeToStore(fiber, inst, subscribe2) {
+        return subscribe2(function() {
           checkIfSnapshotChanged(inst) && (startUpdateTimerByLane(2, "updateSyncExternalStore()", fiber), forceStoreRerender(fiber));
         });
       }
@@ -21794,11 +21794,11 @@ var require_react_dom_client_development = __commonJS({
           mountHookTypesDev();
           return mountTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           mountHookTypesDev();
           return mountSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -21924,11 +21924,11 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return mountTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           updateHookTypesDev();
           return mountSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22054,11 +22054,11 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return updateTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22184,11 +22184,11 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return rerenderTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22331,12 +22331,12 @@ var require_react_dom_client_development = __commonJS({
           mountHookTypesDev();
           return mountTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           warnInvalidHookAccess();
           mountHookTypesDev();
           return mountSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22486,12 +22486,12 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return updateTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           warnInvalidHookAccess();
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22641,12 +22641,12 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return rerenderTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           warnInvalidHookAccess();
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -24057,15 +24057,15 @@ var require_react_jsx_runtime_development = __commonJS({
           else validateChildKeys(children);
         if (hasOwnProperty.call(config, "key")) {
           children = getComponentNameFromType(type);
-          var keys = Object.keys(config).filter(function(k) {
+          var keys2 = Object.keys(config).filter(function(k) {
             return "key" !== k;
           });
-          isStaticChildren = 0 < keys.length ? "{key: someKey, " + keys.join(": ..., ") + ": ...}" : "{key: someKey}";
-          didWarnAboutKeySpread[children + isStaticChildren] || (keys = 0 < keys.length ? "{" + keys.join(": ..., ") + ": ...}" : "{}", console.error(
+          isStaticChildren = 0 < keys2.length ? "{key: someKey, " + keys2.join(": ..., ") + ": ...}" : "{key: someKey}";
+          didWarnAboutKeySpread[children + isStaticChildren] || (keys2 = 0 < keys2.length ? "{" + keys2.join(": ..., ") + ": ...}" : "{}", console.error(
             'A props object containing a "key" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />',
             isStaticChildren,
             children,
-            keys,
+            keys2,
             children
           ), didWarnAboutKeySpread[children + isStaticChildren] = true);
         }
@@ -24163,348 +24163,17 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/photoframe/frame-config.ts
-var FRAME_DEFAULT_CONFIG = {
-  intervalSeconds: 15,
-  preloadCount: 2,
-  layout: "single",
-  transition: "kenburns",
-  transitionSeconds: 1.2,
-  imageFit: "cover",
-  showControls: true,
-  progressBar: "bottom",
-  metadataPosition: "bottom-right",
-  metadataShowDate: true,
-  metadataShowLocation: true,
-  metadataShowDescription: false,
-  metadataShowPeople: true,
-  metadataShowAlbum: false,
-  metadataShowTags: true,
-  cacheEnabled: true,
-  cacheMaxMB: 500,
-  cacheExpirationDays: 0,
-  listTtlMinutes: 720
-};
-function num(raw, fallback) {
-  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
+// src/sandbox/sdk.ts
+function definePlugin(module) {
+  return module;
 }
-function bool(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
+function injectStyle(id, css) {
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = css;
+  document.head.appendChild(style);
 }
-var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
-var METADATA_POSITIONS = [
-  "none",
-  "bottom-left",
-  "bottom-right",
-  "top-left",
-  "top-right"
-];
-function readFrameConfig(raw) {
-  const d = FRAME_DEFAULT_CONFIG;
-  const transition = TRANSITIONS.includes(raw.transition) ? raw.transition : d.transition;
-  const layout = raw.layout === "split" ? "split" : "single";
-  const imageFit = raw.imageFit === "contain" ? "contain" : "cover";
-  const progressBar = raw.progressBar === "top" || raw.progressBar === "none" ? raw.progressBar : d.progressBar;
-  const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition) ? raw.metadataPosition : d.metadataPosition;
-  return {
-    intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
-    preloadCount: num(raw.preloadCount, d.preloadCount),
-    layout,
-    transition,
-    transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
-    imageFit,
-    showControls: bool(raw.showControls, d.showControls),
-    progressBar,
-    metadataPosition,
-    metadataShowDate: bool(raw.metadataShowDate, d.metadataShowDate),
-    metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
-    metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
-    metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
-    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
-    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
-    cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
-    cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
-    cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
-    listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes)
-  };
-}
-function cachePolicyFromConfig(config) {
-  const days = config.cacheExpirationDays;
-  return {
-    maxBytes: config.cacheMaxMB * 1024 * 1024,
-    maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
-  };
-}
-function panesForLayout(layout) {
-  return layout === "split" ? 2 : 1;
-}
-
-// src/sandbox/photoframe/metadata.ts
-function deriveMetadata(asset, options, locale) {
-  const exif = asset.exifInfo;
-  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
-  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
-  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
-  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
-  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
-  return {
-    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
-    location: location2,
-    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
-    people,
-    album,
-    tags
-  };
-}
-function hasMetadata(meta) {
-  return Boolean(
-    meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags
-  );
-}
-
-// node_modules/thumbhash/thumbhash.js
-function thumbHashToRGBA(hash) {
-  let { PI, min, max, cos, round } = Math;
-  let header24 = hash[0] | hash[1] << 8 | hash[2] << 16;
-  let header16 = hash[3] | hash[4] << 8;
-  let l_dc = (header24 & 63) / 63;
-  let p_dc = (header24 >> 6 & 63) / 31.5 - 1;
-  let q_dc = (header24 >> 12 & 63) / 31.5 - 1;
-  let l_scale = (header24 >> 18 & 31) / 31;
-  let hasAlpha = header24 >> 23;
-  let p_scale = (header16 >> 3 & 63) / 63;
-  let q_scale = (header16 >> 9 & 63) / 63;
-  let isLandscape = header16 >> 15;
-  let lx = max(3, isLandscape ? hasAlpha ? 5 : 7 : header16 & 7);
-  let ly = max(3, isLandscape ? header16 & 7 : hasAlpha ? 5 : 7);
-  let a_dc = hasAlpha ? (hash[5] & 15) / 15 : 1;
-  let a_scale = (hash[5] >> 4) / 15;
-  let ac_start = hasAlpha ? 6 : 5;
-  let ac_index = 0;
-  let decodeChannel = (nx, ny, scale) => {
-    let ac = [];
-    for (let cy = 0; cy < ny; cy++)
-      for (let cx = cy ? 0 : 1; cx * ny < nx * (ny - cy); cx++)
-        ac.push(((hash[ac_start + (ac_index >> 1)] >> ((ac_index++ & 1) << 2) & 15) / 7.5 - 1) * scale);
-    return ac;
-  };
-  let l_ac = decodeChannel(lx, ly, l_scale);
-  let p_ac = decodeChannel(3, 3, p_scale * 1.25);
-  let q_ac = decodeChannel(3, 3, q_scale * 1.25);
-  let a_ac = hasAlpha && decodeChannel(5, 5, a_scale);
-  let ratio = thumbHashToApproximateAspectRatio(hash);
-  let w = round(ratio > 1 ? 32 : 32 * ratio);
-  let h = round(ratio > 1 ? 32 / ratio : 32);
-  let rgba = new Uint8Array(w * h * 4), fx = [], fy = [];
-  for (let y = 0, i = 0; y < h; y++) {
-    for (let x = 0; x < w; x++, i += 4) {
-      let l = l_dc, p = p_dc, q = q_dc, a = a_dc;
-      for (let cx = 0, n = max(lx, hasAlpha ? 5 : 3); cx < n; cx++)
-        fx[cx] = cos(PI / w * (x + 0.5) * cx);
-      for (let cy = 0, n = max(ly, hasAlpha ? 5 : 3); cy < n; cy++)
-        fy[cy] = cos(PI / h * (y + 0.5) * cy);
-      for (let cy = 0, j = 0; cy < ly; cy++)
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx * ly < lx * (ly - cy); cx++, j++)
-          l += l_ac[j] * fx[cx] * fy2;
-      for (let cy = 0, j = 0; cy < 3; cy++) {
-        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 3 - cy; cx++, j++) {
-          let f = fx[cx] * fy2;
-          p += p_ac[j] * f;
-          q += q_ac[j] * f;
-        }
-      }
-      if (hasAlpha)
-        for (let cy = 0, j = 0; cy < 5; cy++)
-          for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 5 - cy; cx++, j++)
-            a += a_ac[j] * fx[cx] * fy2;
-      let b = l - 2 / 3 * p;
-      let r = (3 * l - b + q) / 2;
-      let g = r - q;
-      rgba[i] = max(0, 255 * min(1, r));
-      rgba[i + 1] = max(0, 255 * min(1, g));
-      rgba[i + 2] = max(0, 255 * min(1, b));
-      rgba[i + 3] = max(0, 255 * min(1, a));
-    }
-  }
-  return { w, h, rgba };
-}
-function thumbHashToApproximateAspectRatio(hash) {
-  let header = hash[3];
-  let hasAlpha = hash[2] & 128;
-  let isLandscape = hash[4] & 128;
-  let lx = isLandscape ? hasAlpha ? 5 : 7 : header & 7;
-  let ly = isLandscape ? header & 7 : hasAlpha ? 5 : 7;
-  return lx / ly;
-}
-function rgbaToDataURL(w, h, rgba) {
-  let row = w * 4 + 1;
-  let idat = 6 + h * (5 + row);
-  let bytes = [
-    137,
-    80,
-    78,
-    71,
-    13,
-    10,
-    26,
-    10,
-    0,
-    0,
-    0,
-    13,
-    73,
-    72,
-    68,
-    82,
-    0,
-    0,
-    w >> 8,
-    w & 255,
-    0,
-    0,
-    h >> 8,
-    h & 255,
-    8,
-    6,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    idat >>> 24,
-    idat >> 16 & 255,
-    idat >> 8 & 255,
-    idat & 255,
-    73,
-    68,
-    65,
-    84,
-    120,
-    1
-  ];
-  let table = [
-    0,
-    498536548,
-    997073096,
-    651767980,
-    1994146192,
-    1802195444,
-    1303535960,
-    1342533948,
-    -306674912,
-    -267414716,
-    -690576408,
-    -882789492,
-    -1687895376,
-    -2032938284,
-    -1609899400,
-    -1111625188
-  ];
-  let a = 1, b = 0;
-  for (let y = 0, i = 0, end = row - 1; y < h; y++, end += row - 1) {
-    bytes.push(y + 1 < h ? 0 : 1, row & 255, row >> 8, ~row & 255, row >> 8 ^ 255, 0);
-    for (b = (b + a) % 65521; i < end; i++) {
-      let u = rgba[i] & 255;
-      bytes.push(u);
-      a = (a + u) % 65521;
-      b = (b + a) % 65521;
-    }
-  }
-  bytes.push(
-    b >> 8,
-    b & 255,
-    a >> 8,
-    a & 255,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    73,
-    69,
-    78,
-    68,
-    174,
-    66,
-    96,
-    130
-  );
-  for (let [start, end] of [[12, 29], [37, 41 + idat]]) {
-    let c = ~0;
-    for (let i = start; i < end; i++) {
-      c ^= bytes[i];
-      c = c >>> 4 ^ table[c & 15];
-      c = c >>> 4 ^ table[c & 15];
-    }
-    c = ~c;
-    bytes[end++] = c >>> 24;
-    bytes[end++] = c >> 16 & 255;
-    bytes[end++] = c >> 8 & 255;
-    bytes[end++] = c & 255;
-  }
-  return "data:image/png;base64," + btoa(String.fromCharCode(...bytes));
-}
-function thumbHashToDataURL(hash) {
-  let image = thumbHashToRGBA(hash);
-  return rgbaToDataURL(image.w, image.h, image.rgba);
-}
-
-// src/sandbox/photoframe/thumbhash.ts
-function thumbhashToDataUrl(base64) {
-  try {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-    return thumbHashToDataURL(bytes);
-  } catch {
-    return null;
-  }
-}
-
-// src/sandbox/photoframe/load-image.ts
-var inFlightLoads = /* @__PURE__ */ new WeakMap();
-function loadsFor(context) {
-  let loads = inFlightLoads.get(context);
-  if (!loads) {
-    loads = /* @__PURE__ */ new Map();
-    inFlightLoads.set(context, loads);
-  }
-  return loads;
-}
-async function fetchImageBlob(context, backend, config, asset, size, cacheKey) {
-  if (config.cacheEnabled) {
-    const cached = await context.cacheGet(cacheKey);
-    if (cached) return cached;
-  }
-  const response = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
-  if (!response.ok) throw new Error(`Asset fetch failed (${response.status})`);
-  const blob = response.data;
-  if (config.cacheEnabled) await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
-  return blob;
-}
-async function loadImageBlob(context, backend, config, asset, size = "preview") {
-  const cacheKey = `${asset.id}:${size}`;
-  const policyKey = config.cacheEnabled ? `${config.cacheMaxMB}:${config.cacheExpirationDays}` : "uncached";
-  const loadKey = `${backend.poolCacheKey()}:${cacheKey}:${policyKey}`;
-  const loads = loadsFor(context);
-  const existing = loads.get(loadKey);
-  if (existing) return existing;
-  const load = fetchImageBlob(context, backend, config, asset, size, cacheKey);
-  loads.set(loadKey, load);
-  try {
-    return await load;
-  } finally {
-    loads.delete(loadKey);
-  }
-}
-
-// src/sandbox/photoframe/useSlideshow.ts
-var import_react2 = __toESM(require_react(), 1);
 
 // src/sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
@@ -24537,776 +24206,4107 @@ function defineReactWidget(Component) {
     }
   };
 }
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
-}
 
-// src/sandbox/photoframe/useSlideshow.ts
-var BATCH = 100;
-function shuffleDeck(items) {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = result[i];
-    result[i] = result[j];
-    result[j] = tmp;
-  }
-  return result;
-}
-function useSlideshow(context, backend, config, tick) {
-  const configured = backend.isConfigured();
-  const panes = panesForLayout(config.layout);
-  const poolKey = (0, import_react2.useMemo)(() => backend.poolCacheKey(), [backend]);
-  const listTtlMs = config.listTtlMinutes * 60 * 1e3;
-  const {
-    data: assets,
-    error,
-    isLoading,
-    refetch
-  } = useWidgetData(context, {
-    key: ["photoframe", poolKey],
-    fetcher: () => backend.fetchAssets(BATCH),
-    enabled: configured,
-    staleTimeMs: listTtlMs,
-    staleMessage: "Offline \u2014 showing cached photos",
-    errorMessage: "No photos found"
-  });
-  const [deck, setDeck] = (0, import_react2.useState)([]);
-  const cursor = (0, import_react2.useRef)(0);
-  const [playing, setPlaying] = (0, import_react2.useState)(true);
-  const [slides, setSlides] = (0, import_react2.useState)([]);
-  const [progressKey, setProgressKey] = (0, import_react2.useState)(0);
-  const generation = (0, import_react2.useRef)(0);
-  (0, import_react2.useEffect)(() => {
-    if (!assets || assets.length === 0) {
-      setDeck([]);
-      return;
-    }
-    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
-    cursor.current = 0;
-  }, [assets]);
-  const showAt = (0, import_react2.useCallback)(
-    async (index) => {
-      if (deck.length === 0) return;
-      const gen = ++generation.current;
-      const picks = [];
-      for (let i = 0; i < panes; i += 1) {
-        const asset = deck[(index + i) % deck.length];
-        if (asset) picks.push(asset);
-      }
-      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
-      if (preloadCount > 0) {
-        for (let p = 1; p <= preloadCount; p += 1) {
-          const nextAsset = deck[(index + panes * p) % deck.length];
-          if (nextAsset && !nextAsset.directUrl) {
-            void loadImageBlob(context, backend, config, nextAsset).catch(() => null);
-          }
-        }
-      }
-      const settled = await Promise.all(
-        picks.map(async (asset) => {
-          try {
-            if (config.metadataShowAlbum && backend.enrichAsset) {
-              await backend.enrichAsset(asset).catch(() => void 0);
-            }
-            const source = asset.directUrl ? { kind: "direct", url: asset.directUrl } : { kind: "blob", blob: await loadImageBlob(context, backend, config, asset) };
-            const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
-            const face = config.transition === "kenburns" && backend.fetchFaceBox ? await backend.fetchFaceBox(asset).catch(() => null) : null;
-            return { asset, source, placeholder, face };
-          } catch {
-            return null;
-          }
-        })
-      );
-      if (gen !== generation.current) return;
-      const loaded = settled.filter((slide) => slide !== null);
-      if (loaded.length === 0) return;
-      setSlides(loaded);
-      setProgressKey((k) => k + 1);
-    },
-    [deck, context, backend, panes, config]
-  );
-  (0, import_react2.useEffect)(() => {
-    cursor.current = 0;
-    if (deck.length > 0) void showAt(0);
-  }, [deck]);
-  const next = (0, import_react2.useCallback)(() => {
-    const nextCursor = cursor.current + panes;
-    if (nextCursor >= deck.length) {
-      refetch();
-      cursor.current = 0;
-    } else {
-      cursor.current = nextCursor;
-    }
-    void showAt(cursor.current);
-  }, [panes, showAt, deck.length, refetch]);
-  const back = (0, import_react2.useCallback)(() => {
-    cursor.current = Math.max(0, cursor.current - panes);
-    void showAt(cursor.current);
-  }, [panes, showAt]);
-  const togglePlay = (0, import_react2.useCallback)(() => setPlaying((p) => !p), []);
-  const lastTick = (0, import_react2.useRef)(tick);
-  (0, import_react2.useEffect)(() => {
-    if (tick !== lastTick.current) {
-      lastTick.current = tick;
-      if (playing && configured) next();
-    }
-  }, [tick, playing, configured, next]);
-  return { slides, playing, error, isLoading, progressKey, next, back, togglePlay };
-}
+// src/plugins/cast-receiver/CastWidget.tsx
+var import_react3 = __toESM(require_react(), 1);
 
-// src/sandbox/photoframe/AssetView.tsx
-var import_react4 = __toESM(require_react(), 1);
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function transitionClass(transition) {
-  switch (transition) {
-    case "kenburns":
-      return "pf-kenburns";
-    case "zoom":
-      return "pf-zoom";
-    case "pan":
-      return "pf-pan";
-    case "none":
-      return "pf-none";
-    default:
-      return "pf-fadeonly";
-  }
-}
-function AssetView({
-  slide,
-  fit,
-  transition,
-  durationSeconds,
-  intervalSeconds
-}) {
-  var _a;
-  const origin = slide.face ? `${(slide.face.cx * 100).toFixed(1)}% ${(slide.face.cy * 100).toFixed(1)}%` : "center";
-  const motionClass = transitionClass(transition);
-  const style = {
-    "--pf-origin": origin,
-    "--pf-motion-duration": `${intervalSeconds + durationSeconds}s`,
-    "--pf-fade-duration": `${durationSeconds}s`
-  };
-  const [blobUrl, setBlobUrl] = (0, import_react4.useState)(null);
-  (0, import_react4.useEffect)(() => {
-    if (slide.source.kind === "direct") {
-      setBlobUrl(null);
-      return;
-    }
-    const url = URL.createObjectURL(slide.source.blob);
-    setBlobUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [slide.source]);
-  const assetUrl = slide.source.kind === "direct" ? slide.source.url : blobUrl;
-  const isVideo = ((_a = slide.asset.type) == null ? void 0 : _a.toUpperCase()) === "VIDEO";
-  const imgRef = (0, import_react4.useRef)(null);
-  const [loaded, setLoaded] = (0, import_react4.useState)(false);
-  (0, import_react4.useEffect)(() => {
-    var _a2;
-    setLoaded(false);
-    if (!isVideo && ((_a2 = imgRef.current) == null ? void 0 : _a2.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
-  }, [assetUrl, isVideo]);
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pf-asset", style, children: [
-    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "pf-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
-    assetUrl && (isVideo ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "video",
-      {
-        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: assetUrl,
-        autoPlay: true,
-        loop: true,
-        muted: true,
-        playsInline: true,
-        onCanPlay: () => setLoaded(true)
-      },
-      slide.asset.id
-    ) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-      "img",
-      {
-        ref: imgRef,
-        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
-        "data-loaded": loaded,
-        src: assetUrl,
-        alt: "",
-        "aria-hidden": true,
-        onLoad: () => setLoaded(true)
-      },
-      slide.asset.id
-    ))
-  ] });
-}
-
-// src/sandbox/photoframe/MetadataOverlay.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-function MetadataOverlay({ asset, position, options, locale }) {
-  if (position === "none") return null;
-  const meta = deriveMetadata(asset, options, locale);
-  if (!hasMetadata(meta)) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `pf-caption pf-caption-${position}`, children: [
-    meta.location && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.location }),
-    meta.album && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.album }),
-    meta.date && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.date }),
-    meta.people && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.people }),
-    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.tags }),
-    meta.description && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-desc", children: meta.description })
-  ] });
-}
-
-// src/sandbox/photoframe/ProgressBar.tsx
-var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ProgressBar({
-  position,
-  durationSeconds,
-  playing,
-  cycleKey
-}) {
-  if (position === "none") return null;
-  const style = {
-    "--pf-progress-duration": `${durationSeconds}s`,
-    animationPlayState: playing ? "running" : "paused"
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `pf-progress pf-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pf-progress-fill", style }, cycleKey) });
-}
-
-// src/sandbox/photoframe/OverlayControls.tsx
-var import_react5 = __toESM(require_react(), 1);
-var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-var HIDE_DELAY_MS = 2500;
-function OverlayControls({
-  playing,
-  onNext,
-  onBack,
-  onTogglePlay,
-  active,
-  labels
-}) {
-  const [visible, setVisible] = (0, import_react5.useState)(false);
-  const hideTimer = (0, import_react5.useRef)(null);
-  const reveal = (0, import_react5.useCallback)(() => {
-    setVisible(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    return () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current);
-    };
-  }, []);
-  (0, import_react5.useEffect)(() => {
-    if (!active) return;
-    const handler = (e) => {
-      if (e.key === "ArrowRight") {
-        onNext();
-        reveal();
-      } else if (e.key === "ArrowLeft") {
-        onBack();
-        reveal();
-      } else if (e.key === " ") {
-        e.preventDefault();
-        onTogglePlay();
-        reveal();
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [active, onNext, onBack, onTogglePlay, reveal]);
-  const act = (fn) => () => {
-    fn();
-    reveal();
-  };
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
-    "div",
-    {
-      className: "pf-controls",
-      "data-active": active,
-      "data-visible": visible,
-      onPointerMove: reveal,
-      onPointerDown: reveal,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onBack), "aria-label": labels.previous, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronLeft, {}) }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-          "button",
-          {
-            type: "button",
-            className: "pf-zone pf-zone-center",
-            onClick: act(onTogglePlay),
-            "aria-label": playing ? labels.pause : labels.play,
-            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn pf-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlayIcon, {}) })
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onNext), "aria-label": labels.next, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, {}) }) })
-      ]
-    }
-  );
-}
-function ChevronLeft() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function ChevronRight() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
-}
-function PlayIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M8 5v14l11-7z" }) });
-}
-function PauseIcon() {
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
-}
-
-// src/sandbox/photoframe/PhotoFrameWidget.tsx
-var import_react6 = __toESM(require_react(), 1);
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
-function PhotoFrameWidget({ context, backend, strings: strings2 }) {
-  const config = (0, import_react6.useMemo)(() => readFrameConfig(context.config), [context.config]);
-  const configured = backend.isConfigured();
-  const [tick, setTick] = (0, import_react6.useState)(0);
-  const show = useSlideshow(context, backend, config, tick);
-  const timerRef = (0, import_react6.useRef)(void 0);
-  const resetTimer = (0, import_react6.useCallback)(() => {
-    clearTimeout(timerRef.current);
-    if (!show.playing || !configured || document.hidden) return;
-    timerRef.current = window.setTimeout(
-      () => setTick((value) => value + 1),
-      Math.max(3, config.intervalSeconds) * 1e3
-    );
-  }, [show.playing, configured, config.intervalSeconds]);
-  (0, import_react6.useEffect)(() => {
-    resetTimer();
-    const onVisibility = () => resetTimer();
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      clearTimeout(timerRef.current);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [resetTimer, show.progressKey]);
-  const handleNext = (0, import_react6.useCallback)(() => {
-    show.next();
-    resetTimer();
-  }, [show, resetTimer]);
-  const handleBack = (0, import_react6.useCallback)(() => {
-    show.back();
-    resetTimer();
-  }, [show, resetTimer]);
-  const metadataOptions = {
-    showDate: config.metadataShowDate,
-    showLocation: config.metadataShowLocation,
-    showDescription: config.metadataShowDescription,
-    showPeople: config.metadataShowPeople,
-    showAlbum: config.metadataShowAlbum,
-    showTags: config.metadataShowTags
-  };
-  if (!configured) {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-frame pf-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: strings2.title }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: strings2.configure })
-    ] }) });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `pf-frame pf-layout-${config.layout}`, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pf-pane", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        AssetView,
-        {
-          slide,
-          fit: config.imageFit,
-          transition: config.transition,
-          durationSeconds: config.transitionSeconds,
-          intervalSeconds: config.intervalSeconds
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-        MetadataOverlay,
-        {
-          asset: slide.asset,
-          position: config.metadataPosition,
-          options: metadataOptions,
-          locale: context.locale
-        }
-      )
-    ] }, slide.asset.id)) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      ProgressBar,
-      {
-        position: config.progressBar,
-        durationSeconds: Math.max(3, config.intervalSeconds),
-        playing: show.playing,
-        cycleKey: show.progressKey
-      }
-    ),
-    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
-      OverlayControls,
-      {
-        playing: show.playing,
-        onNext: handleNext,
-        onBack: handleBack,
-        onTogglePlay: show.togglePlay,
-        active: context.isEditing === false,
-        labels: strings2
-      }
-    ),
-    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status", children: strings2.loading }),
-    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status pf-error", role: "alert", children: show.error })
-  ] });
-}
-
-// src/sandbox/sdk.ts
-function definePlugin(module) {
-  return module;
-}
-function injectStyle(id, css) {
-  if (document.getElementById(id)) return;
-  const style = document.createElement("style");
-  style.id = id;
-  style.textContent = css;
-  document.head.appendChild(style);
-}
-
-// src/sandbox/photoframe/styles.ts
-var PHOTOFRAME_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-  body { width: 100%; height: 100%; }
-  .wg-plugin-root { width: 100%; height: 100%; }
-  .pf-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .pf-panes { display: flex; width: 100%; height: 100%; }
-  .pf-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
-  .pf-layout-split .pf-pane + .pf-pane { border-left: 2px solid rgba(255,255,255,0.12); }
-  .pf-asset { position: absolute; inset: 0; overflow: hidden; }
-  .pf-backdrop, .pf-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .pf-backdrop { filter: blur(14px); transform: scale(1.1); }
-  .pf-fit-cover { object-fit: cover; }
-  .pf-fit-contain { object-fit: contain; }
-  .pf-photo { opacity: 0; transform-origin: var(--pf-origin, center); }
-  .pf-fadeonly, .pf-none { animation: pf-fade var(--pf-fade-duration, 1s) ease both; }
-  .pf-none { animation-duration: 0.01s; }
-  .pf-zoom { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-zoom var(--pf-motion-duration,16s) ease-out both; }
-  .pf-pan { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-pan var(--pf-motion-duration,16s) ease-in-out both; }
-  .pf-kenburns { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-kenburns var(--pf-motion-duration,16s) ease-in-out both; }
-  @keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes pf-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
-  @keyframes pf-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
-  @keyframes pf-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
-  .pf-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
-  .pf-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
-  .pf-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
-  .pf-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
-  .pf-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .pf-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
-  .pf-progress-top { top: 0; }
-  .pf-progress-bottom { bottom: 0; }
-  .pf-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: pf-progress var(--pf-progress-duration, 15s) linear forwards; }
-  @keyframes pf-progress { from { width: 0; } to { width: 100%; } }
-  .pf-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
-  .pf-controls[data-active='false'] { pointer-events: none; }
-  .pf-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
-  .pf-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
-  .pf-zone-btn-lg { width: 64px; height: 64px; }
-  .pf-controls[data-visible='true'] .pf-zone-btn { opacity: 1; transform: scale(1); }
-  @media (hover: hover) { .pf-zone:hover .pf-zone-btn { opacity: 1; transform: scale(1); } }
-  .pf-zone-btn svg { width: 55%; height: 55%; }
-  .pf-empty, .pf-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
-  .pf-status { background: rgba(0,0,0,0.35); }
-  .pf-empty p { margin-top: 8px; font-size: 13px; }
-  .pf-error { color: #ff8080; }
-`;
-
-// src/sandbox/photoframe/define.tsx
-var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
-function definePhotoFrameWidget(options) {
-  injectStyle(options.styleId ?? "photoframe-style", PHOTOFRAME_SANDBOX_CSS);
-  const renderer = defineReactWidget(({ context }) => {
-    const backend = options.createBackend(context, context.config);
-    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(PhotoFrameWidget, { context, backend, strings: options.strings(context.locale) });
-  });
-  const module = {
-    widgets: { [options.widgetId]: renderer }
-  };
-  if (options.loadOptions) {
-    const load = options.loadOptions.bind(options);
-    module.loadOptions = (context, _widgetId, fieldKey, config) => load(context, fieldKey, config);
-  }
-  return definePlugin(module);
-}
-
-// src/core/net/secret-placeholder.ts
-function secretSentinel(fieldKey) {
-  return `{{secret:${fieldKey}}}`;
-}
-
-// src/plugins/google-photos/service.ts
-var TOKEN_URL = "https://oauth2.googleapis.com/token";
-var API_BASE = "https://photoslibrary.googleapis.com/v1";
-var PROXY = "always";
-var PREVIEW = { w: 2048, h: 1365 };
-var THUMBNAIL = { w: 640, h: 640 };
-var GooglePhotosService = class {
-  constructor(transport, config) {
-    this.transport = transport;
-    this.config = config;
-  }
-  accessToken = null;
-  tokenExpiresAt = 0;
-  /** Stable identity for the pool (client + album); the shared query key. */
-  poolCacheKey() {
-    return `${this.config.clientId}|${this.config.albumId || "library"}`;
-  }
-  /**
-   * Exchange the refresh token for a fresh access token, caching it until a
-   * minute before expiry. The request body carries the client secret + refresh
-   * token as host-substituted placeholders, so this frame never sees them.
-   */
-  async accessTokenValue() {
-    const now = Date.now();
-    if (this.accessToken && now < this.tokenExpiresAt) return this.accessToken;
-    const body = `client_id=${encodeURIComponent(this.config.clientId)}&client_secret=${secretSentinel("clientSecret")}&refresh_token=${secretSentinel("refreshToken")}&grant_type=refresh_token`;
-    const res = await this.transport.request({
-      url: TOKEN_URL,
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok || !res.data.access_token) {
-      throw new Error(`Google token refresh failed (${res.status})`);
-    }
-    this.accessToken = res.data.access_token;
-    this.tokenExpiresAt = now + Math.max(0, (res.data.expires_in ?? 3600) - 60) * 1e3;
-    return this.accessToken;
-  }
-  async authHeaders() {
-    return { authorization: `Bearer ${await this.accessTokenValue()}` };
-  }
-  /** Fetch up to `count` media items from the album, or recent library media. */
-  async fetchAssets(count) {
-    const headers = { ...await this.authHeaders(), "content-type": "application/json" };
-    const body = { pageSize: Math.min(100, Math.max(1, count)) };
-    if (this.config.albumId) body.albumId = this.config.albumId;
-    const res = await this.transport.request({
-      url: `${API_BASE}/mediaItems:search`,
-      method: "POST",
-      headers,
-      body,
-      proxy: PROXY
-    });
-    if (!res.ok) throw new Error(`Google Photos search failed (${res.status})`);
-    const items = res.data.mediaItems ?? [];
-    return items.filter((item) => !item.mimeType || item.mimeType.startsWith("image/"));
-  }
-  /** List the user's albums for the settings picker (title + id). */
-  async listAlbums() {
-    const headers = await this.authHeaders();
-    const albums = [];
-    let pageToken = "";
-    for (let page = 0; page < 5; page += 1) {
-      const url = `${API_BASE}/albums?pageSize=50${pageToken ? `&pageToken=${pageToken}` : ""}`;
-      const res = await this.transport.request({ url, method: "GET", headers, proxy: PROXY });
-      if (!res.ok) throw new Error(`Google Photos albums failed (${res.status})`);
-      for (const album of res.data.albums ?? []) {
-        albums.push({ label: album.title || "(untitled album)", value: album.id });
-      }
-      if (!res.data.nextPageToken) break;
-      pageToken = res.data.nextPageToken;
-    }
-    return albums;
-  }
-  /**
-   * Build the request for an item's image bytes. Google Photos baseUrls are
-   * pre-signed (no auth) and take a `=w{W}-h{H}` size suffix. Pure — the SDK
-   * engine runs it with `responseType: 'binary'`, caches and decodes.
-   */
-  imageRequest(baseUrl, size) {
-    const dim = size === "thumbnail" ? THUMBNAIL : PREVIEW;
-    return {
-      url: `${baseUrl}=w${dim.w}-h${dim.h}`,
-      method: "GET",
-      proxy: PROXY
-    };
-  }
+// src/plugins/cast-receiver/types.ts
+var CAST_DEFAULT_CONFIG = {
+  sourceKind: "idle",
+  sourceUrl: "",
+  relayUrl: "",
+  senderUrl: "",
+  overlayMode: "cover",
+  showPairingWhenIdle: true,
+  muted: true
 };
 
-// src/plugins/google-photos/types.ts
-var GOOGLE_PHOTOS_DEFAULT_CONFIG = {
-  clientId: "",
-  albumId: ""
-};
-
-// src/plugins/google-photos/config.ts
+// src/plugins/cast-receiver/resolve.ts
 function str(raw, fallback) {
   return typeof raw === "string" ? raw : fallback;
 }
-function readGooglePhotosConfig(raw) {
-  const d = GOOGLE_PHOTOS_DEFAULT_CONFIG;
+function bool(raw, fallback) {
+  return typeof raw === "boolean" ? raw : fallback;
+}
+var SOURCE_KINDS = ["idle", "website", "media", "youtube", "spotify"];
+var OVERLAY_MODES = ["inline", "cover", "dim"];
+function readCastConfig(raw) {
+  const d = CAST_DEFAULT_CONFIG;
+  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind) ? raw.sourceKind : d.sourceKind;
+  const overlayMode = OVERLAY_MODES.includes(raw.overlayMode) ? raw.overlayMode : d.overlayMode;
   return {
-    clientId: str(raw.clientId, d.clientId),
-    albumId: str(raw.albumId, d.albumId)
+    sourceKind,
+    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
+    relayUrl: str(raw.relayUrl, d.relayUrl),
+    senderUrl: str(raw.senderUrl, d.senderUrl),
+    overlayMode,
+    showPairingWhenIdle: bool(raw.showPairingWhenIdle, d.showPairingWhenIdle),
+    muted: bool(raw.muted, d.muted)
+  };
+}
+function youTubeVideoId(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const patterns = [
+    /[?&]v=([A-Za-z0-9_-]{11})/,
+    // watch?v=ID
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+    // youtu.be/ID
+    /\/embed\/([A-Za-z0-9_-]{11})/,
+    // /embed/ID
+    /\/shorts\/([A-Za-z0-9_-]{11})/
+    // /shorts/ID
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(trimmed);
+    if (match == null ? void 0 : match[1]) return match[1];
+  }
+  return null;
+}
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+function spotifyEmbedUrl(input) {
+  const trimmed = input.trim();
+  const uri = /^spotify:(track|album|playlist|episode|show):([A-Za-z0-9]+)$/.exec(trimmed);
+  if ((uri == null ? void 0 : uri[1]) && uri[2]) return `https://open.spotify.com/embed/${uri[1]}/${uri[2]}?utm_source=generator`;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== "https:" || url.hostname !== "open.spotify.com") return null;
+    const match = /^\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)\/?$/.exec(url.pathname);
+    return (match == null ? void 0 : match[1]) && match[2] ? `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator` : null;
+  } catch {
+    return null;
+  }
+}
+function youTubeEmbedUrl(videoId, muted) {
+  const params = new URLSearchParams({
+    autoplay: "1",
+    mute: muted ? "1" : "0",
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1"
+  });
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+}
+function resolveCastTarget(config) {
+  if (config.sourceKind === "idle") return { kind: "idle" };
+  if (config.sourceKind === "youtube") {
+    const videoId = youTubeVideoId(config.sourceUrl);
+    return videoId ? { kind: "youtube", embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: "idle" };
+  }
+  if (config.sourceKind === "spotify") {
+    const embedUrl = spotifyEmbedUrl(config.sourceUrl);
+    return embedUrl ? { kind: "spotify", embedUrl } : { kind: "idle" };
+  }
+  if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
+  return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
+}
+
+// src/plugins/cast-receiver/useReceiver.ts
+var import_react2 = __toESM(require_react(), 1);
+
+// src/plugins/cast-receiver/pairing.ts
+function parseSession(value) {
+  if (!value || typeof value !== "object") throw new Error("Cast signaling service returned an invalid session");
+  const session = value;
+  if (typeof session.roomCode !== "string" || !/^\d{6}$/.test(session.roomCode) || typeof session.password !== "string" || session.password.length < 32 || typeof session.managementToken !== "string" || session.managementToken.length < 32 || typeof session.expiresAt !== "number" || session.expiresAt <= Date.now() || typeof session.websocketUrl !== "string" || !/^wss?:\/\//.test(session.websocketUrl)) {
+    throw new Error("Cast signaling service returned an invalid session");
+  }
+  return session;
+}
+async function createPairingSession(baseUrl, signal) {
+  const base = new URL(baseUrl);
+  if (base.username || base.password || base.search || base.hash) throw new Error("Invalid signaling URL");
+  const response = await fetch(new URL("/session", base), { method: "POST", signal });
+  if (!response.ok) throw new Error(`Signaling service rejected session (${response.status})`);
+  const session = parseSession(await response.json());
+  const websocket = new URL(session.websocketUrl);
+  if (websocket.hostname !== base.hostname) throw new Error("Signaling service returned an unapproved WebSocket host");
+  return {
+    options: { relayUrl: websocket.href, roomCode: session.roomCode, password: session.password },
+    roomCode: session.roomCode,
+    expiresAt: session.expiresAt,
+    async close() {
+      const cleanup = await fetch(new URL(`/session/${session.roomCode}`, base), {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${session.managementToken}` }
+      });
+      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
+    }
   };
 }
 
-// src/plugins/google-photos/backend.ts
-function toPhotoAsset(item) {
-  var _a;
-  const asset = {
-    // The id is used by the engine for cache keys + React lists, but the image
-    // request needs the pre-signed baseUrl, so stash it in the id. We keep the
-    // baseUrl as the id (stable per render) and read it back in imageRequest.
-    id: item.baseUrl,
-    type: "IMAGE"
+// node_modules/@trystero-p2p/core/dist/utils.mjs
+var { floor, min, sin } = Math;
+var libName = "Trystero";
+var alloc = (n, f) => Array(n).fill(void 0).map(f);
+var charSet = "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+var genId = (n) => alloc(n, () => charSet[floor(Math.random() * 62)] ?? "").join("");
+var selfId = genId(20);
+var all = Promise.all.bind(Promise);
+var isBrowser = typeof window !== "undefined";
+var { entries, fromEntries, keys, values } = Object;
+var noOp = () => {
+};
+var candidateType = "candidate";
+var resetTimer = (timer) => {
+  if (timer !== null) clearTimeout(timer);
+  return null;
+};
+var mkErr = (msg) => /* @__PURE__ */ new Error(`${libName}: ${msg}`);
+var toErrorMessage = (reason, fallback) => {
+  if (reason instanceof Error && reason.message) return reason.message;
+  if (typeof reason === "string" && reason) return reason;
+  return toJson(reason ?? fallback);
+};
+var toError = (reason, fallback) => reason instanceof Error ? reason : mkErr(toErrorMessage(reason, fallback));
+var encoder = new TextEncoder();
+var decoder = new TextDecoder();
+var encodeBytes = (txt) => encoder.encode(txt);
+var decodeBytes = (buffer) => decoder.decode(buffer);
+var toHex = (buffer) => buffer.reduce((a, c) => a + c.toString(16).padStart(2, "0"), "");
+var topicPath = (...parts) => parts.join("@");
+var toJson = JSON.stringify;
+var fromJson = (s) => {
+  try {
+    return JSON.parse(s);
+  } catch {
+    throw mkErr(`failed to parse JSON: ${s}`);
+  }
+};
+var defaultRetryMs = 3333;
+var maxRetryMs = 6e4;
+var socketRetryPeriods = {};
+var reconnectionLockingPromise = null;
+var resolver = null;
+var pauseRelayReconnection = () => {
+  if (!reconnectionLockingPromise) reconnectionLockingPromise = new Promise((resolve) => {
+    resolver = resolve;
+  }).finally(() => {
+    resolver = null;
+    reconnectionLockingPromise = null;
+  });
+};
+var resumeRelayReconnection = () => {
+  resolver == null ? void 0 : resolver();
+};
+var makeSocket = (url, onMessage, onReconnect) => {
+  const client = {};
+  let didOpen = false;
+  let isReconnectPending = false;
+  let retryTimer;
+  let resolveReady = noOp;
+  client.isClosed = false;
+  client.ready = new Promise((res) => resolveReady = res);
+  const init = () => {
+    if (client.isClosed) return;
+    retryTimer = void 0;
+    isReconnectPending = false;
+    const socket = new WebSocket(url);
+    socket.onclose = () => {
+      if (client.isClosed || isReconnectPending) return;
+      isReconnectPending = true;
+      if (reconnectionLockingPromise) {
+        reconnectionLockingPromise.then(init);
+        return;
+      }
+      const period = socketRetryPeriods[url] ?? (socketRetryPeriods[url] = defaultRetryMs);
+      retryTimer = setTimeout(init, Math.random() * period);
+      socketRetryPeriods[url] = min(period * 2, maxRetryMs);
+    };
+    socket.onmessage = (e) => onMessage(String(e.data));
+    client.socket = socket;
+    client.url = socket.url;
+    socket.onopen = () => {
+      const isReconnect = didOpen;
+      didOpen = true;
+      resolveReady(client);
+      socketRetryPeriods[url] = defaultRetryMs;
+      if (isReconnect) onReconnect == null ? void 0 : onReconnect();
+    };
+    client.send = (data) => {
+      if (socket.readyState === 1) socket.send(data);
+    };
   };
-  if (item.filename) asset.originalFileName = item.filename;
-  const created = (_a = item.mediaMetadata) == null ? void 0 : _a.creationTime;
-  if (created) asset.localDateTime = created;
-  return asset;
-}
-var GooglePhotosBackend = class {
-  service;
-  configured;
-  constructor(context, rawConfig) {
-    const config = readGooglePhotosConfig(rawConfig);
-    this.configured = config.clientId.trim() !== "";
-    const transport = { request: (req) => context.http(req) };
-    this.service = new GooglePhotosService(transport, config);
-  }
-  isConfigured() {
-    return this.configured;
-  }
-  poolCacheKey() {
-    return this.service.poolCacheKey();
-  }
-  async fetchAssets(count) {
-    const items = await this.service.fetchAssets(count);
-    return items.map(toPhotoAsset);
-  }
-  imageRequest(asset, size) {
-    return this.service.imageRequest(asset.id, size);
-  }
+  client.close = () => {
+    client.isClosed = true;
+    if (retryTimer !== void 0) {
+      clearTimeout(retryTimer);
+      retryTimer = void 0;
+    }
+    client.socket.close();
+  };
+  init();
+  return client;
 };
-async function loadGooglePhotosAlbums(context, rawConfig) {
-  const config = readGooglePhotosConfig(rawConfig);
-  if (!config.clientId) {
-    throw new Error("Enter the OAuth client id and connect your account first.");
-  }
-  const service = new GooglePhotosService({ request: (req) => context.http(req) }, config);
-  return service.listAlbums();
-}
-
-// src/plugins/google-photos/locales/de.json
-var de_default = {
-  manifest: {
-    "Google Photos Frame": "Google-Fotos-Bilderrahmen",
-    "Digital photo frame backed by Google Photos, with offline caching": "Digitaler Bilderrahmen f\xFCr Google Fotos mit Offline-Zwischenspeicher",
-    "Photo Frame": "Bilderrahmen",
-    "Slideshow of your Google Photos: albums or recent media, transitions, metadata": "Diashow aus Google Fotos: Alben oder neueste Medien, mit \xDCberg\xE4ngen und Metadaten",
-    Connection: "Verbindung",
-    Source: "Quelle",
-    Slideshow: "Diashow",
-    "Info overlay": "Info-Einblendung",
-    Caching: "Zwischenspeicher",
-    "OAuth client ID": "OAuth-Client-ID",
-    "Google Cloud console \u2192 Credentials \u2192 OAuth client ID (Desktop app).": "Google-Cloud-Konsole \u2192 Anmeldedaten \u2192 OAuth-Client-ID (Desktop-App).",
-    "OAuth client secret": "OAuth-Client-Schl\xFCssel",
-    "From the same OAuth client. Stored encrypted on the device, never sent to the widget.": "Vom selben OAuth-Client. Verschl\xFCsselt auf dem Ger\xE4t gespeichert, nie an das Widget gesendet.",
-    "Refresh token": "Aktualisierungstoken",
-    "Obtain once via the OAuth consent flow (scope photoslibrary.readonly) and paste it here.": "Einmalig \xFCber den OAuth-Zustimmungsablauf (Bereich photoslibrary.readonly) abrufen und hier einf\xFCgen.",
-    Album: "Album",
-    "Pick an album, or leave unset to show recent library photos.": "Album ausw\xE4hlen oder leer lassen, um neueste Fotos anzuzeigen.",
-    "Seconds per photo": "Sekunden pro Foto",
-    "Preload upcoming photos": "Kommende Fotos vorladen",
-    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
-    Layout: "Layout",
-    Single: "Einzeln",
-    "Split (two photos)": "Geteilt (zwei Fotos)",
-    Transition: "\xDCbergang",
-    Pan: "Schwenken",
-    Fade: "\xDCberblenden",
-    None: "Keiner",
-    "Transition seconds": "\xDCbergangsdauer",
-    "Image fit": "Bildanpassung",
-    "Cover (fill)": "Ausf\xFCllen",
-    "Contain (letterbox)": "Einpassen",
-    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
-    "Progress bar": "Fortschrittsbalken",
-    Bottom: "Unten",
-    Top: "Oben",
-    Hidden: "Ausgeblendet",
-    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
-    "Bottom right": "Unten rechts",
-    "Bottom left": "Unten links",
-    "Top right": "Oben rechts",
-    "Top left": "Oben links",
-    "Show location": "Ort anzeigen",
-    "Show date": "Datum anzeigen",
-    "Show people": "Personen anzeigen",
-    "Show album": "Album anzeigen",
-    "Show tags": "Schlagw\xF6rter anzeigen",
-    "Show description": "Beschreibung anzeigen",
-    "Cache photos locally": "Fotos lokal zwischenspeichern",
-    "Cache size limit (MB)": "Speicherlimit (MB)",
-    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
-    "Cache image expiration (days)": "Bildablauf (Tage)",
-    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
-    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
-  },
-  runtime: {
-    configure: "\xD6ffnen Sie die Einstellungen, um Ihr Google-Fotos-Konto zu verbinden.",
-    loading: "Fotos werden geladen\u2026",
-    next: "Weiter",
-    pause: "Pause",
-    play: "Wiedergabe",
-    previous: "Zur\xFCck",
-    title: "Google-Fotos-Bilderrahmen"
-  }
-};
-
-// src/plugins/google-photos/sandbox.ts
-var EN = {
-  title: "Google Photos Frame",
-  configure: "Open settings to connect your Google Photos account.",
-  loading: "Loading photos\u2026",
-  previous: "Previous",
-  next: "Next",
-  play: "Play",
-  pause: "Pause"
-};
-function strings(locale) {
-  if (locale.split("-")[0] === "de") {
-    const r = de_default.runtime;
+var createRelayManager = (getSocket) => {
+  const relays = {};
+  const keysByRelay = /* @__PURE__ */ new WeakMap();
+  const keyOf = (relay) => {
+    const key = keysByRelay.get(relay);
+    if (!key) throw mkErr("relay bookkeeping missing registration for relay client");
+    return key;
+  };
+  const scoped = () => {
+    const store2 = {};
+    const forKey = (key) => store2[key] ?? (store2[key] = {});
     return {
-      title: r.title,
-      configure: r.configure,
-      loading: r.loading,
-      previous: r.previous,
-      next: r.next,
-      play: r.play,
-      pause: r.pause
+      forKey,
+      forRelay: (relay) => forKey(keyOf(relay))
+    };
+  };
+  const store = (key, relay) => {
+    relays[key] = relay;
+    keysByRelay.set(relay, key);
+    return relay;
+  };
+  return {
+    register: (key, createRelay) => {
+      const relay = relays[key];
+      if (relay) return relay;
+      return store(key, createRelay());
+    },
+    keyOf,
+    scoped,
+    getSockets: () => fromEntries(entries(relays).flatMap(([key, relay]) => {
+      const socket = getSocket(relay);
+      return socket ? [[key, socket]] : [];
+    }))
+  };
+};
+var watchOnline = () => {
+  if (isBrowser) {
+    const controller = new AbortController();
+    addEventListener("online", resumeRelayReconnection, { signal: controller.signal });
+    addEventListener("offline", pauseRelayReconnection, { signal: controller.signal });
+    return () => controller.abort();
+  }
+  return noOp;
+};
+
+// node_modules/@trystero-p2p/core/dist/crypto.mjs
+var algo = "AES-GCM";
+var strToSha1 = {};
+var pack = (buff) => btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(buff))));
+var unpack = (packed) => {
+  const str2 = atob(packed);
+  return new Uint8Array(str2.length).map((_, i) => str2.charCodeAt(i)).buffer;
+};
+var hashWith = async (algorithm, str2) => new Uint8Array(await crypto.subtle.digest(algorithm, encodeBytes(str2)));
+var sha1 = async (str2) => strToSha1[str2] ?? (strToSha1[str2] = Array.from(await hashWith("SHA-1", str2)).map((b) => b.toString(36)).join(""));
+var genKey = async (secret, appId, roomId) => crypto.subtle.importKey("raw", await crypto.subtle.digest({ name: "SHA-256" }, encodeBytes(`${secret}:${appId}:${roomId}`)), { name: algo }, false, ["encrypt", "decrypt"]);
+var deriveRoomNamespace = async (appId, roomId) => toHex(await hashWith("SHA-256", `${libName}:${appId}:${roomId}`));
+var joinChar = "$";
+var ivJoinChar = ",";
+var encrypt = async (keyP, plaintext) => {
+  const iv = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
+  return iv.join(ivJoinChar) + joinChar + pack(await crypto.subtle.encrypt({
+    name: algo,
+    iv
+  }, await keyP, encodeBytes(plaintext)));
+};
+var decrypt = async (keyP, raw) => {
+  const [iv, c] = raw.split(joinChar);
+  return decodeBytes(await crypto.subtle.decrypt({
+    name: algo,
+    iv: new Uint8Array((iv == null ? void 0 : iv.split(ivJoinChar).map(Number)) ?? [])
+  }, await keyP, unpack(c ?? "")));
+};
+
+// node_modules/@trystero-p2p/core/dist/offer-manager.mjs
+var offerLeaseTtlMs = 18e4;
+var OfferManager = class {
+  makeOffer;
+  leased = /* @__PURE__ */ new Map();
+  destroyed = false;
+  constructor(makeOffer) {
+    this.makeOffer = makeOffer;
+  }
+  claimLeased(peer) {
+    const timer = this.leased.get(peer);
+    if (timer) {
+      resetTimer(timer);
+      this.leased.delete(peer);
+    }
+  }
+  reclaimLeased(peer) {
+    if (this.leased.has(peer)) {
+      this.claimLeased(peer);
+      peer.destroy();
+    }
+  }
+  checkout(n, leaseOffers, encryptOffer) {
+    const toRecord = async (didRetry = false) => {
+      if (this.destroyed) throw mkErr("room left while preparing offer");
+      const peer = this.makeOffer();
+      try {
+        const offer2 = await encryptOffer(peer);
+        if (this.destroyed) throw mkErr("room left while preparing offer");
+        if (leaseOffers) {
+          this.leased.set(peer, setTimeout(() => {
+            this.leased.delete(peer);
+            peer.destroy();
+          }, offerLeaseTtlMs));
+          return {
+            peer,
+            offer: offer2,
+            claim: () => this.claimLeased(peer),
+            reclaim: () => this.reclaimLeased(peer)
+          };
+        }
+        return {
+          peer,
+          offer: offer2
+        };
+      } catch (error) {
+        peer.destroy();
+        if (!didRetry && !this.destroyed) return toRecord(true);
+        throw error;
+      }
+    };
+    return all(alloc(n, () => toRecord()));
+  }
+  getOffers(n, encryptOffer) {
+    return this.checkout(n, true, encryptOffer);
+  }
+  destroy() {
+    this.destroyed = true;
+    this.leased.forEach((timer, peer) => {
+      resetTimer(timer);
+      peer.destroy();
+    });
+    this.leased.clear();
+  }
+};
+
+// node_modules/@trystero-p2p/core/dist/handshake.mjs
+var overlapRoomPasswordErr = mkErr("incorrect password for overlapping room");
+var createPasswordHandshake = (password, appId, roomId) => {
+  const hashChallenge = (challenge) => hashWith("SHA-256", `${challenge}:${password}:${appId}:${roomId}`).then(toHex);
+  const run = async (send, receive, isInitiator) => {
+    if (!password) return;
+    if (isInitiator) {
+      const challenge = genId(36);
+      await send({
+        __trystero_pw: "challenge",
+        c: challenge
+      });
+      const { data: data2 } = await receive();
+      if (!data2 || typeof data2 !== "object" || data2.__trystero_pw !== "response" || typeof data2.h !== "string") throw overlapRoomPasswordErr;
+      const expected = await hashChallenge(challenge);
+      if (data2.h !== expected) throw overlapRoomPasswordErr;
+      return;
+    }
+    const { data } = await receive();
+    if (!data || typeof data !== "object" || data.__trystero_pw !== "challenge" || typeof data.c !== "string") throw overlapRoomPasswordErr;
+    await send({
+      __trystero_pw: "response",
+      h: await hashChallenge(data.c)
+    });
+  };
+  const compose = (userHandshake) => password || userHandshake ? async (peerId, send, receive, isInitiator) => {
+    await run(send, receive, isInitiator);
+    await (userHandshake == null ? void 0 : userHandshake(peerId, send, receive, isInitiator));
+  } : void 0;
+  return {
+    run,
+    compose
+  };
+};
+var toHandshakeErrorMessage = (error) => {
+  const message = toErrorMessage(error, "unknown error");
+  return message.startsWith("handshake ") ? message : `handshake failed: ${message}`;
+};
+var createHandshakeManager = ({ onPeerHandshake, onHandshakeError, handshakeTimeoutMs, sendHandshakeData, sendHandshakeReady, onActivate, onFailure }) => {
+  const peerStates = {};
+  const maybeActivatePeer = (id, peer) => {
+    const state = peerStates[id];
+    if (!state || peer && state.peer !== peer || state.isActive) return;
+    if (!state.didLocalHandshakePass || !state.didReceiveRemoteReady) return;
+    state.isActive = true;
+    state.handshakeTimer = resetTimer(state.handshakeTimer);
+    onActivate(id, state.peer);
+  };
+  const failPeerHandshake = (id, peer, reason) => {
+    const state = peerStates[id];
+    if (!state || state.peer !== peer) return;
+    const error = toHandshakeErrorMessage(reason);
+    onHandshakeError == null ? void 0 : onHandshakeError(id, error);
+    onFailure(id, peer, mkErr(error));
+  };
+  const markLocalHandshakePassed = (id, peer) => {
+    const state = peerStates[id];
+    if (!state || state.peer !== peer || state.isActive) return;
+    state.didLocalHandshakePass = true;
+    sendHandshakeReady("", id).catch((err) => failPeerHandshake(id, peer, mkErr(`failed sending handshake readiness: ${toErrorMessage(err, "unknown send failure")}`)));
+    maybeActivatePeer(id, peer);
+  };
+  return {
+    addPeer: (id, peer) => {
+      peerStates[id] = {
+        peer,
+        isActive: false,
+        didLocalHandshakePass: false,
+        didReceiveRemoteReady: false,
+        handshakeTimer: null,
+        pendingHandshakePayloads: [],
+        handshakeWaiters: []
+      };
+    },
+    clearPeer: (id, error) => {
+      const state = peerStates[id];
+      if (!state) return;
+      state.handshakeTimer = resetTimer(state.handshakeTimer);
+      state.pendingHandshakePayloads.length = 0;
+      state.handshakeWaiters.splice(0).forEach((waiter) => waiter.reject(error));
+      delete peerStates[id];
+    },
+    canReceiveFromPeer: (id, receiveWhilePending) => {
+      const state = peerStates[id];
+      return Boolean(state && (state.isActive || receiveWhilePending));
+    },
+    start: (id, peer) => {
+      const state = peerStates[id];
+      if (!state || state.peer !== peer) return;
+      state.handshakeTimer = setTimeout(() => failPeerHandshake(id, peer, mkErr(`handshake timed out after ${handshakeTimeoutMs}ms`)), handshakeTimeoutMs);
+      const sendHandshake = async (data, metadata) => {
+        await sendHandshakeData(data, id, metadata);
+      };
+      const receiveHandshake = () => new Promise((resolve, reject) => {
+        const current = peerStates[id];
+        if (!current || current.peer !== peer) {
+          reject(mkErr("peer disconnected during handshake"));
+          return;
+        }
+        const payload = current.pendingHandshakePayloads.shift();
+        if (payload) {
+          resolve(payload);
+          return;
+        }
+        current.handshakeWaiters.push({
+          resolve,
+          reject: (error) => reject(error)
+        });
+      });
+      const isInitiator = selfId < id;
+      Promise.resolve(onPeerHandshake == null ? void 0 : onPeerHandshake(id, sendHandshake, receiveHandshake, isInitiator)).then(() => markLocalHandshakePassed(id, peer)).catch((err) => failPeerHandshake(id, peer, toError(err, "handshake failed")));
+    },
+    receiveHandshakeData: (data, id, metadata) => {
+      const state = peerStates[id];
+      if (!state || state.isActive) return;
+      const payload = metadata === void 0 ? { data } : {
+        data,
+        metadata
+      };
+      const pending = state.handshakeWaiters.shift();
+      if (pending) {
+        pending.resolve(payload);
+        return;
+      }
+      if (state.pendingHandshakePayloads.length >= 16) {
+        failPeerHandshake(id, state.peer, mkErr("too many pending handshake messages"));
+        return;
+      }
+      state.pendingHandshakePayloads.push(payload);
+    },
+    receiveHandshakeReady: (id) => {
+      const state = peerStates[id];
+      if (!state || state.isActive) return;
+      state.didReceiveRemoteReady = true;
+      maybeActivatePeer(id);
+    }
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/data-limits.mjs
+var maxActionFrameBytes = 16384;
+var pendingDataTimeoutMs = 1e4;
+var transferTimeoutMs = 12e4;
+
+// node_modules/@trystero-p2p/core/dist/peer.mjs
+var iceTimeout = 15e3;
+var iceCandidateSettleMs = 150;
+var disconnectedCloseDelayMs = 5e3;
+var iceCandidateEvent = "icecandidate";
+var iceStateEvent = "icegatheringstatechange";
+var iceConnectionStateEvent = "iceconnectionstatechange";
+var offerType = "offer";
+var answerType = "answer";
+var outOfRangePattern = /out of range/i;
+var maxPendingRemoteCandidates = 128;
+var maxRemoteCandidateSdpLength = 8192;
+var rewriteMdnsCandidatesToLoopback = (sdp) => sdp.replace(/ (\S+\.local) (\d+) typ host/g, " 127.0.0.1 $2 typ host");
+var peer_default = (initiator, { trickleIce, rtcConfig, rtcPolyfill, turnConfig, _test_only_mdnsHostFallbackToLoopback }) => {
+  const pc = new (rtcPolyfill ?? RTCPeerConnection)({
+    iceServers: defaultIceServers.concat(turnConfig ?? []),
+    ...rtcConfig
+  });
+  const handlers = {};
+  const pendingIceGathering = /* @__PURE__ */ new Set();
+  const pendingSignals = [];
+  const pendingData = [];
+  let pendingDataTimer = null;
+  const shouldTrickleIce = trickleIce !== false;
+  const pendingRemoteCandidates = [];
+  const pendingTracks = [];
+  let resolveInitialOffer;
+  let makingOffer = false;
+  let isSettingRemoteAnswerPending = false;
+  let dataChannel = null;
+  let disconnectedCloseTimer = null;
+  let didEmitClose = false;
+  const settleInitialOffer = (signal) => {
+    if (resolveInitialOffer) {
+      resolveInitialOffer(signal);
+      resolveInitialOffer = void 0;
+    }
+  };
+  const clearDisconnectedCloseTimer = () => disconnectedCloseTimer = resetTimer(disconnectedCloseTimer);
+  const emitClose = () => {
+    var _a;
+    if (didEmitClose) return;
+    didEmitClose = true;
+    pendingIceGathering.forEach((finish) => finish());
+    pendingDataTimer = resetTimer(pendingDataTimer);
+    pendingData.length = 0;
+    clearDisconnectedCloseTimer();
+    (_a = handlers.close) == null ? void 0 : _a.call(handlers);
+  };
+  const emitSignal = (signal) => {
+    if (signal.type === offerType) {
+      settleInitialOffer(signal);
+      if (!handlers.signal && !pc.remoteDescription) return;
+    }
+    if (handlers.signal) handlers.signal(signal);
+    else pendingSignals.push(signal);
+  };
+  const appendSignalHandler = (handler) => {
+    const previousSignalHandler = handlers.signal;
+    handlers.signal = (signal) => {
+      previousSignalHandler == null ? void 0 : previousSignalHandler(signal);
+      handler(signal);
+    };
+    if (pendingSignals.length > 0) pendingSignals.splice(0).forEach((signal) => {
+      var _a;
+      return (_a = handlers.signal) == null ? void 0 : _a.call(handlers, signal);
+    });
+  };
+  const normalizeSdp = (sdp) => _test_only_mdnsHostFallbackToLoopback ? rewriteMdnsCandidatesToLoopback(sdp) : sdp;
+  const normalizeCandidate = (candidate) => {
+    if (!_test_only_mdnsHostFallbackToLoopback || typeof candidate.candidate !== "string") return candidate;
+    const normalizedCandidate = rewriteMdnsCandidatesToLoopback(candidate.candidate);
+    return normalizedCandidate === candidate.candidate ? candidate : {
+      ...candidate,
+      candidate: normalizedCandidate
+    };
+  };
+  const localDescriptionSignal = (peerConnection) => {
+    var _a, _b;
+    return {
+      type: ((_a = peerConnection.localDescription) == null ? void 0 : _a.type) ?? offerType,
+      sdp: normalizeSdp(((_b = peerConnection.localDescription) == null ? void 0 : _b.sdp) ?? "")
+    };
+  };
+  const getRemoteUfrag = () => {
+    var _a, _b;
+    const sdp = (_a = pc.remoteDescription) == null ? void 0 : _a.sdp;
+    if (!sdp) return null;
+    return ((_b = sdp.match(/a=ice-ufrag:([^\s]+)/)) == null ? void 0 : _b[1]) ?? null;
+  };
+  const getRemoteMediaSectionCount = () => {
+    var _a, _b;
+    return (((_b = (_a = pc.remoteDescription) == null ? void 0 : _a.sdp) == null ? void 0 : _b.match(/^m=/gm)) ?? []).length;
+  };
+  const canApplyRemoteCandidate = (candidate) => {
+    if (!pc.remoteDescription) return false;
+    const remoteMLineCount = getRemoteMediaSectionCount();
+    if (typeof candidate.sdpMLineIndex === "number" && remoteMLineCount > 0 && candidate.sdpMLineIndex >= remoteMLineCount) return false;
+    const remoteUfrag = getRemoteUfrag();
+    if (remoteUfrag && candidate.usernameFragment && candidate.usernameFragment !== remoteUfrag) return false;
+    return true;
+  };
+  const addIceCandidateSafe = async (candidate) => {
+    try {
+      await pc.addIceCandidate(candidate);
+      return true;
+    } catch (err) {
+      if (err instanceof Error && outOfRangePattern.test(err.message) && typeof candidate.sdpMLineIndex === "number") return false;
+      throw err;
+    }
+  };
+  const queueRemoteCandidate = (candidate) => {
+    if (pendingRemoteCandidates.length >= maxPendingRemoteCandidates) pendingRemoteCandidates.shift();
+    pendingRemoteCandidates.push(candidate);
+  };
+  const flushPendingRemoteCandidates = async () => {
+    if (!pc.remoteDescription || pendingRemoteCandidates.length === 0) return;
+    const remoteUfrag = getRemoteUfrag();
+    const queuedCandidates = pendingRemoteCandidates.splice(0);
+    const stillPending = [];
+    for (const candidate of queuedCandidates) {
+      if (remoteUfrag && candidate.usernameFragment && candidate.usernameFragment !== remoteUfrag) continue;
+      if (!canApplyRemoteCandidate(candidate)) {
+        stillPending.push(candidate);
+        continue;
+      }
+      if (!await addIceCandidateSafe(candidate)) stillPending.push(candidate);
+    }
+    stillPending.forEach(queueRemoteCandidate);
+  };
+  const addRemoteCandidate = async (candidate) => {
+    if (canApplyRemoteCandidate(candidate)) {
+      if (!await addIceCandidateSafe(candidate)) queueRemoteCandidate(candidate);
+      return;
+    }
+    queueRemoteCandidate(candidate);
+  };
+  const setupDataChannel = (channel) => {
+    channel.binaryType = "arraybuffer";
+    channel.bufferedAmountLowThreshold = 65535;
+    const failData = () => {
+      console.warn(`${libName}: invalid or excessive data before handler registration; disconnecting peer`);
+      channel.close();
+      pc.close();
+      emitClose();
+    };
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (didEmitClose) return;
+      if (!(data instanceof ArrayBuffer) && !ArrayBuffer.isView(data) || data.byteLength > 16515) {
+        failData();
+        return;
+      }
+      if (handlers.data) handlers.data(data);
+      else {
+        if (pendingData.length >= 64) {
+          failData();
+          return;
+        }
+        if (!pendingDataTimer) pendingDataTimer = setTimeout(failData, pendingDataTimeoutMs);
+        pendingData.push(data);
+      }
+    };
+    channel.onopen = () => {
+      var _a;
+      return (_a = handlers.connect) == null ? void 0 : _a.call(handlers);
+    };
+    channel.onclose = emitClose;
+    channel.onerror = ({ error }) => {
+      var _a;
+      if (didEmitClose || (error == null ? void 0 : error.errorDetail) === "sctp-failure" && (error.sctpCauseCode === 12 || /^User-Initiated Abort\b/.test(error.message))) return;
+      (_a = handlers.error) == null ? void 0 : _a.call(handlers, toError(error, "data channel error"));
+    };
+  };
+  const configuredIceServers = (rtcConfig == null ? void 0 : rtcConfig.iceServers) ?? defaultIceServers.concat(turnConfig ?? []);
+  const hasServerUrlPattern = (pattern) => configuredIceServers.some(({ urls }) => (Array.isArray(urls) ? urls : [urls]).some((url) => pattern.test(url)));
+  const expectsTurnCandidate = hasServerUrlPattern(/^turns?:/i);
+  const expectsStunCandidate = !expectsTurnCandidate && hasServerUrlPattern(/^stuns?:/i);
+  const targetCandidatePattern = expectsTurnCandidate ? /\btyp relay\b/ : expectsStunCandidate ? /\btyp (?:srflx|relay|prflx)\b/ : /\btyp (?:host|srflx|relay|prflx)\b/;
+  const waitForIceGathering = async (peerConnection) => {
+    await new Promise((resolve) => {
+      let timeout = null;
+      let settleTimeout = null;
+      const finish = () => {
+        resetTimer(timeout);
+        resetTimer(settleTimeout);
+        peerConnection.removeEventListener(iceStateEvent, checkState);
+        peerConnection.removeEventListener(iceCandidateEvent, onCandidate);
+        pendingIceGathering.delete(finish);
+        resolve();
+      };
+      const scheduleSettle = (candidateLine = "") => {
+        var _a;
+        const sdp = `${((_a = peerConnection.localDescription) == null ? void 0 : _a.sdp) ?? ""}
+${candidateLine}`;
+        if (targetCandidatePattern.test(sdp)) {
+          resetTimer(settleTimeout);
+          settleTimeout = setTimeout(finish, iceCandidateSettleMs);
+        }
+      };
+      const checkState = () => {
+        if (peerConnection.iceGatheringState === "complete" || didEmitClose) finish();
+        else scheduleSettle();
+      };
+      const onCandidate = (event) => {
+        const { candidate } = event;
+        if (candidate) scheduleSettle(candidate.candidate);
+        else finish();
+      };
+      pendingIceGathering.add(finish);
+      timeout = setTimeout(finish, iceTimeout);
+      peerConnection.addEventListener(iceStateEvent, checkState);
+      peerConnection.addEventListener(iceCandidateEvent, onCandidate);
+      checkState();
+    });
+    return localDescriptionSignal(peerConnection);
+  };
+  const emitLocalDescriptionSignal = async () => {
+    const signal = shouldTrickleIce ? localDescriptionSignal(pc) : await waitForIceGathering(pc);
+    if (!didEmitClose) emitSignal(signal);
+    return signal;
+  };
+  if (initiator) {
+    dataChannel = pc.createDataChannel("data");
+    setupDataChannel(dataChannel);
+  } else pc.ondatachannel = ({ channel }) => {
+    dataChannel = channel;
+    setupDataChannel(channel);
+  };
+  const createOffer = async (restartIce = false) => {
+    var _a, _b;
+    if (pc.connectionState === "closed" || !restartIce && (makingOffer || pc.signalingState !== "stable")) {
+      if (pc.connectionState === "closed") settleInitialOffer();
+      return;
+    }
+    try {
+      makingOffer = true;
+      if (restartIce) {
+        if (pc.remoteDescription && pc.signalingState !== "stable" && pc.signalingState !== "closed" && ((_a = pc.localDescription) == null ? void 0 : _a.type) === offerType) await pc.setLocalDescription({ type: "rollback" });
+        if (typeof pc.restartIce === "function") pc.restartIce();
+      }
+      await pc.setLocalDescription(restartIce ? await pc.createOffer({ iceRestart: true }) : void 0);
+      return await emitLocalDescriptionSignal();
+    } catch (err) {
+      if (!restartIce) settleInitialOffer();
+      (_b = handlers.error) == null ? void 0 : _b.call(handlers, toError(err, "failed to create local offer"));
+    } finally {
+      makingOffer = false;
+    }
+  };
+  pc.onnegotiationneeded = async () => createOffer(false);
+  pc.onicecandidate = ({ candidate }) => {
+    if (!shouldTrickleIce || !candidate) return;
+    const candidatePayload = normalizeCandidate(typeof candidate.toJSON === "function" ? candidate.toJSON() : {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      usernameFragment: candidate.usernameFragment
+    });
+    emitSignal({
+      type: candidateType,
+      sdp: JSON.stringify(candidatePayload)
+    });
+  };
+  const handleConnectionStateChange = () => {
+    if (pc.connectionState === "failed" || pc.connectionState === "closed" || pc.iceConnectionState === "failed" || pc.iceConnectionState === "closed") {
+      emitClose();
+      return;
+    }
+    if (pc.connectionState === "connected" || pc.connectionState === "connecting" || pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed" || pc.iceConnectionState === "checking") {
+      clearDisconnectedCloseTimer();
+      return;
+    }
+    if (pc.connectionState === "disconnected" || pc.iceConnectionState === "disconnected") {
+      if (!disconnectedCloseTimer) disconnectedCloseTimer = setTimeout(() => {
+        disconnectedCloseTimer = null;
+        if (pc.connectionState === "disconnected" || pc.iceConnectionState === "disconnected") emitClose();
+      }, disconnectedCloseDelayMs);
+      return;
+    }
+  };
+  pc.onconnectionstatechange = handleConnectionStateChange;
+  pc.addEventListener(iceConnectionStateEvent, handleConnectionStateChange);
+  pc.ontrack = (e) => {
+    var _a, _b;
+    const stream = e.streams[0];
+    if (stream) {
+      if (!handlers.track && !handlers.stream) {
+        pendingTracks.push({
+          track: e.track,
+          stream
+        });
+        return;
+      }
+      (_a = handlers.track) == null ? void 0 : _a.call(handlers, e.track, stream);
+      (_b = handlers.stream) == null ? void 0 : _b.call(handlers, stream);
+    }
+  };
+  const offerPromise = initiator ? new Promise((res) => {
+    resolveInitialOffer = res;
+  }) : Promise.resolve();
+  if (initiator) queueMicrotask(() => {
+    var _a;
+    if (!makingOffer && pc.signalingState === "stable" && !pc.localDescription && pc.connectionState !== "closed") (_a = pc.onnegotiationneeded) == null ? void 0 : _a.call(pc, new Event("negotiationneeded"));
+  });
+  return {
+    connection: pc,
+    get channel() {
+      return dataChannel;
+    },
+    get isDead() {
+      return pc.connectionState === "closed";
+    },
+    getOffer: async (restartIce = false) => {
+      var _a;
+      if (!initiator) return;
+      if (restartIce) return createOffer(true);
+      if (resolveInitialOffer) return offerPromise;
+      if (((_a = pc.localDescription) == null ? void 0 : _a.type) === offerType) return shouldTrickleIce ? localDescriptionSignal(pc) : waitForIceGathering(pc);
+      return offerPromise;
+    },
+    async signal(sdp) {
+      var _a, _b, _c;
+      if (sdp.type === "candidate") {
+        if (sdp.sdp.length > maxRemoteCandidateSdpLength) return;
+        try {
+          const candidate = JSON.parse(sdp.sdp);
+          if (candidate && typeof candidate === "object") await addRemoteCandidate(normalizeCandidate(candidate));
+        } catch (err) {
+          (_a = handlers.error) == null ? void 0 : _a.call(handlers, toError(err, "failed to parse remote candidate"));
+        }
+        return;
+      }
+      if ((dataChannel == null ? void 0 : dataChannel.readyState) === "open" && !((_b = sdp.sdp) == null ? void 0 : _b.includes("a=rtpmap"))) return;
+      try {
+        const rtcSdp = {
+          ...sdp,
+          sdp: normalizeSdp(sdp.sdp)
+        };
+        if (sdp.type === offerType) {
+          const isCollision = makingOffer || pc.signalingState !== "stable" && !isSettingRemoteAnswerPending;
+          if (isCollision && initiator) return;
+          if (isCollision && pc.signalingState !== "stable") await all([pc.setLocalDescription({ type: "rollback" }), pc.setRemoteDescription(rtcSdp)]);
+          else await pc.setRemoteDescription(rtcSdp);
+          await flushPendingRemoteCandidates();
+          await pc.setLocalDescription();
+          return await emitLocalDescriptionSignal();
+        }
+        if (sdp.type === answerType) {
+          isSettingRemoteAnswerPending = true;
+          try {
+            await pc.setRemoteDescription(rtcSdp);
+            await flushPendingRemoteCandidates();
+          } finally {
+            isSettingRemoteAnswerPending = false;
+          }
+        }
+      } catch (err) {
+        (_c = handlers.error) == null ? void 0 : _c.call(handlers, toError(err, "failed to apply remote signal"));
+      }
+    },
+    sendData: (data) => dataChannel == null ? void 0 : dataChannel.send(data),
+    destroy: () => {
+      clearDisconnectedCloseTimer();
+      settleInitialOffer();
+      dataChannel == null ? void 0 : dataChannel.close();
+      pc.close();
+      makingOffer = false;
+      isSettingRemoteAnswerPending = false;
+      emitClose();
+    },
+    setHandlers: (newHandlers) => {
+      const { signal, ...restHandlers } = newHandlers;
+      Object.assign(handlers, restHandlers);
+      if (handlers.data && pendingData.length > 0) {
+        pendingDataTimer = resetTimer(pendingDataTimer);
+        pendingData.splice(0).forEach((data) => {
+          var _a;
+          return (_a = handlers.data) == null ? void 0 : _a.call(handlers, data);
+        });
+      }
+      if (signal) appendSignalHandler(signal);
+      if ((handlers.track || handlers.stream) && pendingTracks.length > 0) pendingTracks.splice(0).forEach(({ track, stream }) => {
+        var _a, _b;
+        (_a = handlers.track) == null ? void 0 : _a.call(handlers, track, stream);
+        (_b = handlers.stream) == null ? void 0 : _b.call(handlers, stream);
+      });
+    },
+    addStream: (stream) => stream.getTracks().forEach((track) => pc.addTrack(track, stream)),
+    removeStream: (stream) => pc.getSenders().filter((sender) => sender.track && stream.getTracks().includes(sender.track)).forEach((sender) => pc.removeTrack(sender)),
+    addTrack: (track, stream) => pc.addTrack(track, stream),
+    removeTrack: (track) => {
+      const sender = pc.getSenders().find((s) => s.track === track);
+      if (sender) pc.removeTrack(sender);
+    },
+    replaceTrack: (oldTrack, newTrack) => {
+      const sender = pc.getSenders().find((s) => s.track === oldTrack);
+      if (sender) return sender.replaceTrack(newTrack);
+    }
+  };
+};
+var defaultIceServers = [...alloc(3, (_, i) => `stun:stun${i || ""}.l.google.com:19302`), "stun:stun.cloudflare.com:3478"].map((url) => ({ urls: url }));
+
+// node_modules/@trystero-p2p/core/dist/action-receiver.mjs
+var maxPendingTransfers = 1024;
+var maxPendingPerPeer = 64;
+var maxDecisions = 128;
+var maxDecisionsPerPeer = 8;
+var emptyBytes = /* @__PURE__ */ new Uint8Array();
+var decideReceive = (decide, settle) => {
+  let result;
+  try {
+    result = decide();
+  } catch {
+    return settle(false);
+  }
+  return typeof result === "boolean" ? settle(result) : Promise.resolve(result).then((value) => settle(value === true), () => settle(false));
+};
+var decodePayload = (bytes, format, copy) => format === 2 ? copy ? bytes.slice() : bytes : format === 1 ? fromJson(decodeBytes(bytes)) : decodeBytes(bytes);
+var progress = (action, value, peerId, metadata) => {
+  try {
+    action.progress(value, peerId, metadata);
+  } catch (error) {
+    console.error(`${libName} progress handler error:`, error);
+  }
+};
+var deliverPayload = (action, data, peerId, metadata) => {
+  var _a;
+  progress(action, 1, peerId, metadata);
+  try {
+    (_a = action.receiver) == null ? void 0 : _a.call(action, data, peerId, metadata);
+  } catch (error) {
+    console.error(`${libName} action handler error:`, error);
+  }
+};
+var createActionReceiver = ({ fail, accept, refuse, maxReceiveBytes, chunkSize: chunkSize2 }) => {
+  const actions = /* @__PURE__ */ new Map();
+  const peers = /* @__PURE__ */ new Map();
+  const waiting = /* @__PURE__ */ new Set();
+  const decisions = /* @__PURE__ */ new Map();
+  let pendingCount = 0;
+  let decisionCount = 0;
+  let reservedBytes = 0;
+  let draining = false;
+  let drainAgain = false;
+  const current = (state) => state.phase !== "released";
+  const payloadLimit = (action) => Math.min(maxReceiveBytes, (action == null ? void 0 : action.maxPayloadBytes) ?? maxReceiveBytes);
+  const notifyRejected = (message, reason, scope, bulkId) => {
+    var _a, _b;
+    scope == null ? void 0 : scope.reject(reason);
+    (_b = (_a = actions.get(message.type)) == null ? void 0 : _a.reject) == null ? void 0 : _b.call(_a, message.peerId, message.metadata, reason);
+    if (bulkId !== void 0) refuse(message.peerId, bulkId, reason);
+  };
+  const rotateWaitingForPeer = (peerId) => {
+    for (const queued of Array.from(waiting)) if (queued.peerId === peerId) {
+      waiting.delete(queued);
+      waiting.add(queued);
+    }
+  };
+  const release = (state) => {
+    var _a, _b;
+    if (!current(state)) return;
+    state.phase = "released";
+    (_a = state.removeAbortListener) == null ? void 0 : _a.call(state);
+    state.timer = resetTimer(state.timer);
+    const peer = peers.get(state.peerId);
+    if (state.kind === "inline") {
+      const queue = peer.inline.get(state.key);
+      queue.splice(queue.indexOf(state), 1);
+      if (!queue.length) peer.inline.delete(state.key);
+      state.data = emptyBytes;
+    } else {
+      peer.bulk.delete(state.id);
+      waiting.delete(state);
+      state.data = null;
+      if (state.transfer === "receiving") {
+        reservedBytes -= state.size;
+        if (peer.active === state) {
+          peer.active = null;
+          rotateWaitingForPeer(state.peerId);
+        }
+        drainAgain = true;
+      }
+    }
+    peer.count--;
+    pendingCount--;
+    if (!peer.count) peers.delete(state.peerId);
+    (_b = state.controller) == null ? void 0 : _b.abort();
+  };
+  const reject = (state, reason) => {
+    if (!current(state)) return;
+    release(state);
+    notifyRejected(state, reason, state.scope, state.kind === "bulk" ? state.id : void 0);
+  };
+  const admit = (state, action) => {
+    if (state.phase !== "pending") return state.phase === "ready";
+    if (state.size > payloadLimit(action)) {
+      reject(state, "payload exceeds receiver size limit");
+      return false;
+    }
+    const receive = state.scope ? state.scope.receive : action.receive;
+    if (!receive) {
+      if (!action.receiver) return false;
+      state.phase = "ready";
+      return true;
+    }
+    if (decisionCount >= maxDecisions || (decisions.get(state.peerId) ?? 0) >= maxDecisionsPerPeer) {
+      reject(state, "too many pending receive decisions");
+      return false;
+    }
+    state.phase = "deciding";
+    const controller = new AbortController();
+    state.controller = controller;
+    decisionCount++;
+    decisions.set(state.peerId, (decisions.get(state.peerId) ?? 0) + 1);
+    const result = decideReceive(() => receive({
+      byteLength: state.size,
+      peerId: state.peerId,
+      signal: controller.signal,
+      ...state.metadata === void 0 ? {} : { metadata: state.metadata }
+    }), (allow) => {
+      decisionCount--;
+      const count = decisions.get(state.peerId) - 1;
+      if (count) decisions.set(state.peerId, count);
+      else decisions.delete(state.peerId);
+      if (!current(state)) return false;
+      if (allow) state.phase = "ready";
+      else reject(state, "payload rejected by receiver");
+      return allow;
+    });
+    if (typeof result === "boolean") return result;
+    result.then(() => drain());
+    return false;
+  };
+  const complete = (state, action, bytes) => {
+    let payload;
+    try {
+      payload = decodePayload(bytes, state.format, state.kind === "inline");
+    } catch {
+      release(state);
+      fail(state.peerId, "invalid action payload");
+      return;
+    }
+    release(state);
+    deliverPayload(action, payload, state.peerId, state.metadata);
+  };
+  const tryInline = (state) => {
+    const action = actions.get(state.type);
+    if (current(state) && action && admit(state, action) && action.receiver) complete(state, action, state.data);
+  };
+  const tryBulk = (state) => {
+    const action = actions.get(state.type);
+    if (!current(state) || !action || !admit(state, action) || !action.receiver) return;
+    if (state.transfer === "receiving") {
+      if (state.offset === state.size) complete(state, action, state.data);
+      return;
+    }
+    const peer = peers.get(state.peerId);
+    if (!peer.active && reservedBytes + state.size <= maxReceiveBytes) {
+      peer.active = state;
+      state.transfer = "receiving";
+      reservedBytes += state.size;
+      state.lastSeen = Date.now();
+      waiting.delete(state);
+      accept(state.peerId, state.id);
+    }
+  };
+  const drainInline = (peerId, key) => {
+    var _a;
+    const queue = (_a = peers.get(peerId)) == null ? void 0 : _a.inline.get(key);
+    while (queue == null ? void 0 : queue[0]) {
+      const state = queue[0];
+      tryInline(state);
+      if (current(state)) break;
+    }
+  };
+  const drain = () => {
+    if (draining) {
+      drainAgain = true;
+      return;
+    }
+    draining = true;
+    try {
+      do {
+        drainAgain = false;
+        for (const state of waiting) tryBulk(state);
+        for (const [id, peer] of peers) {
+          for (const state of peer.bulk.values()) if (state.offset === state.size) tryBulk(state);
+          for (const key of peer.inline.keys()) drainInline(id, key);
+        }
+      } while (drainAgain);
+    } finally {
+      draining = false;
+    }
+  };
+  const enqueue = (state) => {
+    let peer = peers.get(state.peerId);
+    if (pendingCount >= maxPendingTransfers || ((peer == null ? void 0 : peer.count) ?? 0) >= maxPendingPerPeer) {
+      notifyRejected(state, "too many pending transfers", state.scope, state.kind === "bulk" ? state.id : void 0);
+      return false;
+    }
+    if (!peer) {
+      peer = {
+        bulk: /* @__PURE__ */ new Map(),
+        inline: /* @__PURE__ */ new Map(),
+        active: null,
+        count: 0
+      };
+      peers.set(state.peerId, peer);
+    }
+    peer.count++;
+    pendingCount++;
+    if (state.kind === "inline") {
+      const queue = peer.inline.get(state.key) ?? [];
+      queue.push(state);
+      peer.inline.set(state.key, queue);
+    } else {
+      peer.bulk.set(state.id, state);
+      waiting.add(state);
+    }
+    const expire = () => {
+      const remaining = transferTimeoutMs - (Date.now() - state.lastSeen);
+      if (remaining > 0) state.timer = setTimeout(expire, remaining);
+      else {
+        reject(state, "action transfer timed out");
+        drain();
+      }
+    };
+    state.timer = setTimeout(expire, transferTimeoutMs);
+    if (state.scope) {
+      const { signal } = state.scope;
+      const cancel = () => {
+        reject(state, "receive cancelled");
+        drain();
+      };
+      signal.addEventListener("abort", cancel, { once: true });
+      state.removeAbortListener = () => signal.removeEventListener("abort", cancel);
+      if (signal.aborted) {
+        cancel();
+        return false;
+      }
+    }
+    return true;
+  };
+  const resolveAdmission = (message, bulkId) => {
+    var _a;
+    const action = actions.get(message.type);
+    const scope = (_a = action == null ? void 0 : action.receiveScope) == null ? void 0 : _a.call(action, message.peerId, message.metadata);
+    if (scope === null || (scope == null ? void 0 : scope.signal.aborted)) {
+      if (bulkId !== void 0) refuse(message.peerId, bulkId, "unexpected response");
+      return null;
+    }
+    if (message.size > payloadLimit(action)) {
+      notifyRejected(message, "payload exceeds receiver size limit", scope, bulkId);
+      return null;
+    }
+    return {
+      action,
+      scope
+    };
+  };
+  const admission = (message, scope) => ({
+    ...message,
+    ...scope ? { scope } : {},
+    phase: "pending",
+    controller: null,
+    lastSeen: Date.now(),
+    timer: null
+  });
+  return {
+    register: (type, options = {}) => {
+      const action = {
+        ...options,
+        receiver: null,
+        receive: null,
+        reject: null,
+        progress: noOp
+      };
+      actions.set(type, action);
+      return {
+        onMessage: (handler) => {
+          action.receiver = handler;
+          drain();
+        },
+        onReceive: (handler) => {
+          action.receive = handler;
+          drain();
+        },
+        onReject: (handler) => {
+          action.reject = handler;
+        },
+        onProgress: (handler) => {
+          action.progress = handler;
+        }
+      };
+    },
+    receiveInline: (message, data) => {
+      var _a;
+      const resolved = resolveAdmission(message);
+      if (!resolved) return;
+      const { action, scope } = resolved;
+      const key = scope ? `${message.type}\0${scope.key}` : message.type;
+      if ((action == null ? void 0 : action.receiver) && !(scope ? scope.receive : action.receive) && !((_a = peers.get(message.peerId)) == null ? void 0 : _a.inline.has(key))) {
+        let payload;
+        try {
+          payload = decodePayload(data, message.format, true);
+        } catch {
+          fail(message.peerId, "invalid action payload");
+          return;
+        }
+        deliverPayload(action, payload, message.peerId, message.metadata);
+        return;
+      }
+      const state = {
+        ...admission(message, scope),
+        kind: "inline",
+        key,
+        data
+      };
+      if (enqueue(state)) drainInline(message.peerId, key);
+    },
+    receiveOffer: (message, id) => {
+      var _a;
+      if ((_a = peers.get(message.peerId)) == null ? void 0 : _a.bulk.has(id)) {
+        fail(message.peerId, "duplicate action offer");
+        return;
+      }
+      const resolved = resolveAdmission(message, id);
+      if (!resolved) return;
+      const state = {
+        ...admission(message, resolved.scope),
+        kind: "bulk",
+        id,
+        transfer: "waiting",
+        offset: 0,
+        data: null
+      };
+      if (enqueue(state)) drain();
+    },
+    receiveChunk: (peerId, id, offset, data) => {
+      var _a;
+      const peer = peers.get(peerId);
+      const state = peer == null ? void 0 : peer.bulk.get(id);
+      if (!state) return;
+      if (state.transfer !== "receiving" || offset !== state.offset || !data.length || data.length !== Math.min(chunkSize2, state.size - state.offset)) {
+        fail(peerId, "invalid action chunk offset or length");
+        return;
+      }
+      try {
+        state.data ?? (state.data = new Uint8Array(state.size));
+      } catch {
+        reject(state, "unable to allocate receive buffer");
+        drain();
+        return;
+      }
+      state.data.set(data, state.offset);
+      state.offset += data.length;
+      const now = Date.now();
+      state.lastSeen = now;
+      for (const queued of waiting) if (queued.phase === "ready" && ((_a = actions.get(queued.type)) == null ? void 0 : _a.receiver)) queued.lastSeen = now;
+      if (state.offset === state.size) {
+        tryBulk(state);
+        if (current(state) && (peer == null ? void 0 : peer.active) === state) {
+          peer.active = null;
+          rotateWaitingForPeer(peerId);
+        }
+        drain();
+      } else progress(actions.get(state.type), state.offset / state.size, peerId, state.metadata);
+    },
+    cancel: (peerId, id) => {
+      var _a, _b;
+      const state = (_a = peers.get(peerId)) == null ? void 0 : _a.bulk.get(id);
+      if (state) {
+        release(state);
+        (_b = state.scope) == null ? void 0 : _b.reject("response cancelled by sender");
+      }
+      drain();
+    },
+    clearPeer: (peerId) => {
+      const peer = peers.get(peerId);
+      if (peer) {
+        for (const state of peer.bulk.values()) release(state);
+        for (const queue of peer.inline.values()) {
+          const queuedMessages = [...queue];
+          for (const state of queuedMessages) release(state);
+        }
+      }
+      drain();
+    }
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/action-wire.mjs
+var version = 2;
+var inline = 0;
+var offer = 1;
+var chunk = 2;
+var accepted = 3;
+var rejected = 4;
+var cancelled = 5;
+var inlineHeaderSize = 36;
+var offerHeaderSize = 48;
+var controlHeaderSize = 6;
+var chunkHeaderSize = 14;
+var chunkSize = maxActionFrameBytes - chunkHeaderSize;
+var defaultMaxReceiveBytes = 256 * 1024 ** 2;
+var maxControlBufferedBytes = 1024 ** 2;
+var buffLowEvent = "bufferedamountlow";
+var channelCloseEvent = "close";
+var channelErrorEvent = "error";
+var backpressureWaitTimeoutMs = 1e4;
+var makeActionError = (kind, message) => {
+  const error = mkErr(message);
+  error.kind = kind;
+  error.name = kind === "aborted" ? "AbortError" : error.name;
+  return error;
+};
+var throwIfAborted = (signal) => {
+  if (signal == null ? void 0 : signal.aborted) throw makeActionError("aborted", "operation aborted");
+};
+var packet = (kind, id, size = controlHeaderSize) => {
+  const bytes = new Uint8Array(size);
+  bytes[0] = version;
+  bytes[1] = kind;
+  new DataView(bytes.buffer).setUint32(2, id);
+  return bytes;
+};
+var transferError = makeActionError;
+var waitForBufferedAmountLow = (channel, signal, timeoutMs = backpressureWaitTimeoutMs) => {
+  if (channel.readyState !== "open" || channel.bufferedAmount <= channel.bufferedAmountLowThreshold) return Promise.resolve(channel.readyState === "open");
+  return new Promise((res) => {
+    let settled = false;
+    let timeout = null;
+    const finish = (didDrain) => {
+      if (settled) return;
+      settled = true;
+      channel.removeEventListener(buffLowEvent, onBufferLow);
+      channel.removeEventListener(channelCloseEvent, onCloseOrError);
+      channel.removeEventListener(channelErrorEvent, onCloseOrError);
+      signal == null ? void 0 : signal.removeEventListener("abort", onCloseOrError);
+      resetTimer(timeout);
+      res(didDrain);
+    };
+    const onBufferLow = () => finish(true);
+    const onCloseOrError = () => finish(false);
+    channel.addEventListener(buffLowEvent, onBufferLow);
+    channel.addEventListener(channelCloseEvent, onCloseOrError);
+    channel.addEventListener(channelErrorEvent, onCloseOrError);
+    signal == null ? void 0 : signal.addEventListener("abort", onCloseOrError, { once: true });
+    timeout = setTimeout(() => finish(false), timeoutMs);
+    if (channel.readyState !== "open" || (signal == null ? void 0 : signal.aborted)) {
+      finish(false);
+      return;
+    }
+    if (channel.bufferedAmount <= channel.bufferedAmountLowThreshold) finish(true);
+  });
+};
+var createActionWireManager = ({ getPeer, getPeerIds, canReceiveFromPeer, onPeerError, throwIfAborted: checkAborted = throwIfAborted, maxReceiveBytes = defaultMaxReceiveBytes }) => {
+  if (!Number.isSafeInteger(maxReceiveBytes) || maxReceiveBytes <= 0) throw mkErr("maxReceiveBytes must be a positive safe integer");
+  const actions = /* @__PURE__ */ new Map();
+  const outgoing = /* @__PURE__ */ new Map();
+  const failedPeers = /* @__PURE__ */ new WeakSet();
+  let nextId = 0;
+  const receiver = createActionReceiver({
+    fail: (peerId, reason) => failPeer(peerId, reason),
+    accept: (peerId, id) => control(peerId, id, accepted),
+    refuse: (peerId, id, reason) => control(peerId, id, rejected, reason),
+    maxReceiveBytes,
+    chunkSize
+  });
+  const clearPeer = (peerId) => {
+    var _a;
+    for (const state of ((_a = outgoing.get(peerId)) == null ? void 0 : _a.values()) ?? []) state.fail(transferError("disconnected", "peer disconnected"));
+    outgoing.delete(peerId);
+    receiver.clearPeer(peerId);
+  };
+  const failPeer = (peerId, reason) => {
+    const peer = getPeer(peerId, true);
+    if (peer && !failedPeers.has(peer)) {
+      failedPeers.add(peer);
+      console.warn(`${libName}: ${reason}; disconnecting peer ${peerId}`);
+      onPeerError(peerId, mkErr(reason));
+    }
+  };
+  const control = (peerId, id, kind, reason = "") => {
+    var _a;
+    const peer = getPeer(peerId, true);
+    if (!peer) return;
+    const text = encodeBytes(reason).subarray(0, 200);
+    const bytes = packet(kind, id, controlHeaderSize + text.length);
+    bytes.set(text, controlHeaderSize);
+    try {
+      if ((((_a = peer.channel) == null ? void 0 : _a.bufferedAmount) ?? 0) > maxControlBufferedBytes) throw mkErr("control send buffer is full");
+      peer.sendData(bytes);
+    } catch {
+      failPeer(peerId, "unable to send action control");
+    }
+  };
+  const makeInternalAction = (type, options = {}) => {
+    const normalizedOptions = {
+      sendToPending: Boolean(options.sendToPending),
+      receiveWhilePending: Boolean(options.receiveWhilePending),
+      ...options.maxPayloadBytes === void 0 ? {} : { maxPayloadBytes: options.maxPayloadBytes },
+      ...options.receiveScope ? { receiveScope: options.receiveScope } : {}
+    };
+    const cached = actions.get(type);
+    if (cached) {
+      if (cached.options.sendToPending !== normalizedOptions.sendToPending || cached.options.receiveWhilePending !== normalizedOptions.receiveWhilePending || cached.options.receiveScope !== normalizedOptions.receiveScope || cached.options.maxPayloadBytes !== normalizedOptions.maxPayloadBytes) throw mkErr(`action type "${type}" cannot be redefined`);
+      return cached.action;
+    }
+    const typeBytes = encodeBytes(type);
+    if (!type || type.includes("\0") || typeBytes.length > 32) throw mkErr("action type must contain 1\u201332 UTF-8 bytes and no null characters");
+    const action = {
+      options: normalizedOptions,
+      action: {
+        ...receiver.register(type, normalizedOptions),
+        send: async (data, targets, metadata, onProgress, signal) => {
+          checkAborted(signal);
+          if (data === void 0) throw mkErr("action data cannot be undefined");
+          const isBlob = data instanceof Blob;
+          const binary = isBlob || data instanceof ArrayBuffer || ArrayBuffer.isView(data);
+          const format = binary ? 2 : typeof data === "string" ? 0 : 1;
+          let source = isBlob ? data : data instanceof ArrayBuffer ? new Uint8Array(data) : ArrayBuffer.isView(data) ? new Uint8Array(data.buffer, data.byteOffset, data.byteLength) : encodeBytes(format === 0 ? data : toJson(data));
+          const size = source instanceof Blob ? source.size : source.byteLength;
+          const meta = metadata === void 0 ? /* @__PURE__ */ new Uint8Array() : encodeBytes(toJson(metadata));
+          if (meta.length > 16336) throw mkErr("action metadata is too large");
+          const small = inlineHeaderSize + meta.length + size <= maxActionFrameBytes;
+          if (!small && binary && !(source instanceof Blob)) source = source.slice();
+          const id = small ? 0 : nextId++ >>> 0;
+          const headerSize = small ? inlineHeaderSize : offerHeaderSize;
+          const start = new Uint8Array(headerSize + meta.length + (small ? size : 0));
+          start[0] = version;
+          start[1] = (small ? inline : offer) | format << 4;
+          start.set(typeBytes, 2);
+          const view = new DataView(start.buffer);
+          view.setUint16(34, meta.length);
+          if (!small) {
+            view.setUint32(36, id);
+            view.setFloat64(40, size);
+          }
+          start.set(meta, headerSize);
+          if (small) start.set(source instanceof Blob ? new Uint8Array(await source.arrayBuffer()) : source, headerSize + meta.length);
+          const ids = targets ? Array.isArray(targets) ? targets : [targets] : getPeerIds(normalizedOptions.sendToPending);
+          await all([...new Set(ids)].map(async (peerId) => {
+            const peer = getPeer(peerId, normalizedOptions.sendToPending);
+            if (!peer) {
+              console.warn(`${libName}: no peer with id ${peerId} found`);
+              return;
+            }
+            let failure = null;
+            const check = () => {
+              var _a;
+              if (failure) throw failure;
+              checkAborted(signal);
+              if (getPeer(peerId, normalizedOptions.sendToPending) !== peer || ((_a = peer.channel) == null ? void 0 : _a.readyState) === "closed") throw transferError("disconnected", "peer disconnected");
+            };
+            const sendFrame = async (bytes) => {
+              check();
+              const channel = peer.channel;
+              if (channel && (channel.readyState !== "open" || channel.bufferedAmount > channel.bufferedAmountLowThreshold)) {
+                if (!await waitForBufferedAmountLow(channel, signal)) {
+                  checkAborted(signal);
+                  throw transferError("disconnected", "data channel stopped draining");
+                }
+                check();
+              }
+              try {
+                peer.sendData(bytes);
+              } catch {
+                throw transferError("disconnected", "peer disconnected");
+              }
+            };
+            if (small) {
+              await sendFrame(start);
+              onProgress == null ? void 0 : onProgress(1, peerId, metadata);
+              return;
+            }
+            let didSendOffer = false;
+            let settledByReceiver = false;
+            let lastSeen = Date.now();
+            let accept;
+            let rejectOffer;
+            const permission = new Promise((resolve, rejectPromise) => {
+              accept = resolve;
+              rejectOffer = rejectPromise;
+            });
+            permission.catch(noOp);
+            const transfers = outgoing.get(peerId) ?? /* @__PURE__ */ new Map();
+            if (transfers.has(id)) throw mkErr("action transmission id is still in use");
+            outgoing.set(peerId, transfers);
+            let timer = null;
+            const state = {
+              accept: () => {
+                if (!timer || failure) return false;
+                timer = resetTimer(timer);
+                accept();
+                return true;
+              },
+              fail: (error, fromReceiver = false) => {
+                if (fromReceiver) settledByReceiver = true;
+                failure = error;
+                rejectOffer(error);
+              },
+              touch: () => {
+                if (timer) lastSeen = Date.now();
+              }
+            };
+            transfers.set(id, state);
+            const expire = () => {
+              const remaining = transferTimeoutMs - (Date.now() - lastSeen);
+              if (remaining > 0) timer = setTimeout(expire, remaining);
+              else state.fail(transferError("timeout", "action offer timed out"));
+            };
+            timer = setTimeout(expire, transferTimeoutMs);
+            const abort = () => {
+              try {
+                checkAborted(signal);
+              } catch (error) {
+                state.fail(error);
+              }
+            };
+            signal == null ? void 0 : signal.addEventListener("abort", abort, { once: true });
+            try {
+              await sendFrame(start);
+              didSendOffer = true;
+              await permission;
+              for (let offset = 0; offset < size; offset += chunkSize) {
+                check();
+                const length = Math.min(chunkSize, size - offset);
+                const bytes = packet(chunk, id, chunkHeaderSize + length);
+                new DataView(bytes.buffer).setFloat64(controlHeaderSize, offset);
+                bytes.set(source instanceof Blob ? new Uint8Array(await source.slice(offset, offset + length).arrayBuffer()) : source.subarray(offset, offset + length), chunkHeaderSize);
+                await sendFrame(bytes);
+                for (const pending of transfers.values()) pending.touch();
+                onProgress == null ? void 0 : onProgress((offset + length) / size, peerId, metadata);
+              }
+              check();
+            } catch (error) {
+              if (didSendOffer && !settledByReceiver && getPeer(peerId, true) === peer && (!peer.channel || peer.channel.readyState === "open" && (peer.channel.bufferedAmount ?? 0) <= maxControlBufferedBytes)) control(peerId, id, cancelled);
+              throw error;
+            } finally {
+              timer = resetTimer(timer);
+              signal == null ? void 0 : signal.removeEventListener("abort", abort);
+              transfers.delete(id);
+              if (!transfers.size && outgoing.get(peerId) === transfers) outgoing.delete(peerId);
+            }
+          }));
+        }
+      }
+    };
+    actions.set(type, action);
+    return action.action;
+  };
+  const handleData = (peerId, data) => {
+    var _a, _b, _c;
+    if (data.byteLength < 2 || data.byteLength > 16384) {
+      failPeer(peerId, "invalid action frame");
+      return;
+    }
+    const bytes = new Uint8Array(data);
+    if (bytes[0] !== version) {
+      failPeer(peerId, "incompatible action protocol version");
+      return;
+    }
+    const kind = bytes[1] & 15;
+    const format = bytes[1] >>> 4;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    if (kind > cancelled || format > 2 || kind > offer && format !== 0) {
+      failPeer(peerId, "invalid action frame");
+      return;
+    }
+    if (kind >= chunk) {
+      if (bytes.length < controlHeaderSize || (kind === accepted || kind === cancelled) && bytes.length !== controlHeaderSize || kind === rejected && bytes.length > 206) {
+        failPeer(peerId, "invalid action control");
+        return;
+      }
+      const id2 = view.getUint32(2);
+      if (kind === accepted) {
+        const transfers = outgoing.get(peerId);
+        if ((_a = transfers == null ? void 0 : transfers.get(id2)) == null ? void 0 : _a.accept()) for (const pending of transfers.values()) pending.touch();
+        return;
+      }
+      if (kind === rejected) {
+        (_c = (_b = outgoing.get(peerId)) == null ? void 0 : _b.get(id2)) == null ? void 0 : _c.fail(transferError("rejected", decodeBytes(bytes.subarray(controlHeaderSize))), true);
+        return;
+      }
+      if (kind === cancelled) receiver.cancel(peerId, id2);
+      else receiver.receiveChunk(peerId, id2, bytes.length >= chunkHeaderSize ? view.getFloat64(controlHeaderSize) : NaN, bytes.subarray(chunkHeaderSize));
+      return;
+    }
+    const headerSize = kind === inline ? inlineHeaderSize : offerHeaderSize;
+    if (bytes.length < headerSize) {
+      failPeer(peerId, "invalid action header");
+      return;
+    }
+    const type = decodeBytes(bytes.subarray(2, 34)).replaceAll("\0", "");
+    const action = actions.get(type);
+    if (!canReceiveFromPeer(peerId, Boolean(action == null ? void 0 : action.options.receiveWhilePending))) return;
+    const metaLength = view.getUint16(34);
+    const payloadIndex = headerSize + metaLength;
+    const size = kind === inline ? bytes.length - payloadIndex : view.getFloat64(40);
+    const id = kind === offer ? view.getUint32(36) : 0;
+    if (!type || payloadIndex > bytes.length || !Number.isSafeInteger(size) || size < 0 || kind === offer && (size === 0 || payloadIndex !== bytes.length)) {
+      failPeer(peerId, "invalid action proposal");
+      return;
+    }
+    let metadata;
+    try {
+      if (metaLength) metadata = fromJson(decodeBytes(bytes.subarray(headerSize, payloadIndex)));
+    } catch {
+      failPeer(peerId, "invalid action metadata");
+      return;
+    }
+    const message = {
+      peerId,
+      type,
+      format,
+      size,
+      ...metadata === void 0 ? {} : { metadata }
+    };
+    if (kind === inline) receiver.receiveInline(message, bytes.subarray(payloadIndex));
+    else receiver.receiveOffer(message, id);
+  };
+  return {
+    makeInternalAction,
+    handleData,
+    clearPeer
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/actions.mjs
+var getEnvelopeRecord = (metadata) => metadata && typeof metadata === "object" && !Array.isArray(metadata) && typeof metadata.r === "string" ? metadata : null;
+var getRequestMetadata = (metadata) => {
+  const record = getEnvelopeRecord(metadata);
+  return record ? {
+    r: record.r,
+    ...Object.hasOwn(record, "m") ? { m: record.m } : {}
+  } : null;
+};
+var getResponseMetadata = (metadata) => {
+  const record = getEnvelopeRecord(metadata);
+  return record ? {
+    r: record.r,
+    ...typeof record.e === "string" ? { e: record.e } : {}
+  } : null;
+};
+var withMetadata = (context, metadata) => metadata === void 0 ? context : {
+  ...context,
+  metadata
+};
+var createActionManager = ({ getPeer, getPeerIds, canReceiveFromPeer, onPeerError, maxReceiveBytes }) => {
+  const publicActions = /* @__PURE__ */ Object.create(null);
+  const pendingRequestWaiters = {};
+  const activeRequestControllers = /* @__PURE__ */ new Map();
+  const wire = createActionWireManager({
+    getPeer,
+    getPeerIds,
+    canReceiveFromPeer,
+    onPeerError,
+    ...maxReceiveBytes === void 0 ? {} : { maxReceiveBytes }
+  });
+  const makeInternalAction = wire.makeInternalAction;
+  const handleData = wire.handleData;
+  const clearPendingRequestWaiter = (requestId) => {
+    const waiter = pendingRequestWaiters[requestId];
+    if (!waiter) return;
+    resetTimer(waiter.timer);
+    if (waiter.signal && waiter.abortHandler) waiter.signal.removeEventListener("abort", waiter.abortHandler);
+    delete pendingRequestWaiters[requestId];
+    waiter.controller.abort();
+  };
+  const rejectPendingRequestsForPeer = (id, error) => {
+    entries(pendingRequestWaiters).forEach(([requestId, waiter]) => {
+      if (waiter.peerId !== id) return;
+      clearPendingRequestWaiter(requestId);
+      waiter.reject(error);
+    });
+  };
+  const clearPeer = (id, error) => {
+    wire.clearPeer(id);
+    const controllers = activeRequestControllers.get(id);
+    if (controllers) {
+      activeRequestControllers.delete(id);
+      controllers.forEach((controller) => controller.abort());
+    }
+    rejectPendingRequestsForPeer(id, makeActionError("disconnected", toErrorMessage(error, "peer disconnected")));
+  };
+  const responseAction = makeInternalAction("@_response", { receiveScope: (peerId, metadata) => {
+    const parsed = getResponseMetadata(metadata);
+    const waiter = parsed && pendingRequestWaiters[parsed.r];
+    if (!parsed || !waiter || waiter.peerId !== peerId) return null;
+    const receive = parsed.e === void 0 ? waiter.getReceive() : null;
+    return {
+      key: parsed.r,
+      signal: waiter.controller.signal,
+      receive: receive ? (context) => receive({
+        byteLength: context.byteLength,
+        peerId: context.peerId,
+        kind: "response",
+        signal: context.signal
+      }) : null,
+      reject: (reason) => {
+        if (pendingRequestWaiters[parsed.r] === waiter) {
+          clearPendingRequestWaiter(parsed.r);
+          waiter.reject(makeActionError("rejected", reason));
+        }
+      }
+    };
+  } });
+  responseAction.onProgress((progress2, id, metadata) => {
+    var _a;
+    const parsed = getResponseMetadata(metadata);
+    const waiter = parsed && pendingRequestWaiters[parsed.r];
+    if (waiter && waiter.peerId === id && (parsed == null ? void 0 : parsed.e) === void 0) (_a = waiter.getReceiveProgress()) == null ? void 0 : _a(progress2, { peerId: id });
+  });
+  responseAction.onMessage((payload, id, metadata) => {
+    const parsed = getResponseMetadata(metadata);
+    if (!parsed) return;
+    const waiter = pendingRequestWaiters[parsed.r];
+    if (!waiter || waiter.peerId !== id) return;
+    clearPendingRequestWaiter(parsed.r);
+    if (parsed.e !== void 0) {
+      waiter.reject(makeActionError("rejected", parsed.e));
+      return;
+    }
+    waiter.resolve(payload);
+  });
+  const makeActionImpl = (type, config) => {
+    if (config && "onRequest" in config && config.kind !== "request") throw mkErr('request actions must use kind: "request"');
+    const kind = (config == null ? void 0 : config.kind) ?? "message";
+    const rawAction = makeInternalAction(type);
+    const existingState = publicActions[type];
+    if (existingState) {
+      if (existingState.kind !== kind) throw mkErr(`action type "${type}" cannot be redefined`);
+      return existingState.action;
+    }
+    const state = {
+      kind,
+      action: null,
+      onReceive: (config == null ? void 0 : config.onReceive) ?? null,
+      onReceiveProgress: (config == null ? void 0 : config.onReceiveProgress) ?? null
+    };
+    const toProgressHandler = (handler, metadata) => handler ? (progress2, peerId) => handler(progress2, withMetadata({ peerId }, metadata)) : void 0;
+    const dispatchReceiveProgress = (progress2, peerId, metadata) => {
+      var _a;
+      const requestMetadata = state.kind === "request" ? getRequestMetadata(metadata) : null;
+      (_a = state.onReceiveProgress) == null ? void 0 : _a.call(state, progress2, withMetadata({ peerId }, requestMetadata ? requestMetadata.m : metadata));
+    };
+    const setReceive = (handler) => {
+      state.onReceive = handler;
+      rawAction.onReceive(handler ? (context) => {
+        const requestMetadata = kind === "request" ? getRequestMetadata(context.metadata) : null;
+        return handler(withMetadata({
+          byteLength: context.byteLength,
+          peerId: context.peerId,
+          signal: context.signal,
+          kind
+        }, requestMetadata ? requestMetadata.m : context.metadata));
+      } : null);
+    };
+    setReceive(state.onReceive);
+    rawAction.onProgress(dispatchReceiveProgress);
+    if (kind === "message") {
+      let onMessage = (config == null ? void 0 : config.onMessage) ?? null;
+      const receiveMessage = (payload, peerId, metadata) => {
+        const handler = onMessage;
+        Promise.resolve().then(() => handler(payload, withMetadata({ peerId }, metadata))).catch((err) => console.error(`${libName} action handler error:`, err));
+      };
+      const action2 = {
+        send: async (data, options = {}) => {
+          await rawAction.send(data, options.target, options.metadata, toProgressHandler(options.onProgress, options.metadata), options.signal);
+        },
+        get onMessage() {
+          return onMessage;
+        },
+        set onMessage(handler) {
+          onMessage = handler;
+          rawAction.onMessage(handler ? receiveMessage : null);
+        },
+        get onReceive() {
+          return state.onReceive;
+        },
+        set onReceive(handler) {
+          setReceive(handler);
+        },
+        get onReceiveProgress() {
+          return state.onReceiveProgress;
+        },
+        set onReceiveProgress(handler) {
+          state.onReceiveProgress = handler;
+        }
+      };
+      state.action = action2;
+      publicActions[type] = state;
+      rawAction.onMessage(onMessage ? receiveMessage : null);
+      return action2;
+    }
+    rawAction.onReject((peerId, metadata, reason) => {
+      const parsed = getRequestMetadata(metadata);
+      if (parsed) responseAction.send(null, peerId, {
+        r: parsed.r,
+        e: reason
+      }).catch(noOp);
+    });
+    let onRequest = (config == null ? void 0 : config.onRequest) ?? null;
+    const receiveRequest = (payload, peerId, metadata) => {
+      const parsed = getRequestMetadata(metadata);
+      if (!parsed) return;
+      const handler = onRequest;
+      const controller = new AbortController();
+      let peerControllers = activeRequestControllers.get(peerId);
+      if (!peerControllers) {
+        peerControllers = /* @__PURE__ */ new Set();
+        activeRequestControllers.set(peerId, peerControllers);
+      }
+      peerControllers.add(controller);
+      Promise.resolve().then(async () => {
+        const response = await handler(payload, {
+          ...withMetadata({ peerId }, parsed.m),
+          signal: controller.signal
+        });
+        if (response === void 0) throw mkErr("request handler returned undefined");
+        return response;
+      }).then((response) => responseAction.send(response, peerId, { r: parsed.r }), (error) => responseAction.send(null, peerId, {
+        r: parsed.r,
+        e: toErrorMessage(error, "request failed").slice(0, 512)
+      })).catch(noOp).finally(() => {
+        const controllers = activeRequestControllers.get(peerId);
+        controllers == null ? void 0 : controllers.delete(controller);
+        if (controllers && !controllers.size) activeRequestControllers.delete(peerId);
+        controller.abort();
+      });
+    };
+    const requestOne = async (data, options) => {
+      const { target, metadata, onProgress, signal, timeoutMs } = options;
+      throwIfAborted(signal);
+      if (!getPeer(target, false)) throw makeActionError("disconnected", `no active peer with id ${target}`);
+      const requestId = genId(20);
+      const controller = new AbortController();
+      const responsePromise = new Promise((resolve, reject) => {
+        const waiter = {
+          controller,
+          getReceive: () => state.onReceive,
+          getReceiveProgress: () => state.onReceiveProgress,
+          peerId: target,
+          resolve,
+          reject,
+          timer: null,
+          ...signal === void 0 ? {} : { signal }
+        };
+        const rejectAsAborted = () => {
+          clearPendingRequestWaiter(requestId);
+          reject(makeActionError("aborted", "operation aborted"));
+        };
+        if (signal) {
+          waiter.abortHandler = rejectAsAborted;
+          signal.addEventListener("abort", rejectAsAborted, { once: true });
+        }
+        pendingRequestWaiters[requestId] = waiter;
+        if (timeoutMs !== void 0) waiter.timer = setTimeout(() => {
+          clearPendingRequestWaiter(requestId);
+          waiter.reject(makeActionError("timeout", "request timed out"));
+        }, timeoutMs);
+      });
+      try {
+        const sending = rawAction.send(data, target, metadata === void 0 ? { r: requestId } : {
+          r: requestId,
+          m: metadata
+        }, toProgressHandler(onProgress, metadata), controller.signal);
+        return await Promise.race([responsePromise, sending.then(() => responsePromise)]);
+      } finally {
+        clearPendingRequestWaiter(requestId);
+      }
+    };
+    const action = {
+      request: requestOne,
+      requestMany: async (data, options) => {
+        const { targets, onResult, ...requestOptions } = options;
+        throwIfAborted(requestOptions.signal);
+        return await all(targets.map(async (target) => {
+          try {
+            const result = {
+              peerId: target,
+              status: "fulfilled",
+              value: await requestOne(data, {
+                ...requestOptions,
+                target
+              })
+            };
+            onResult == null ? void 0 : onResult(result);
+            return result;
+          } catch (err) {
+            const error = toError(err, "request failed");
+            if (error.kind === "aborted" || !error.kind) throw error;
+            const result = error.kind === "timeout" ? {
+              peerId: target,
+              status: "timeout"
+            } : error.kind === "disconnected" ? {
+              peerId: target,
+              status: "disconnected"
+            } : {
+              peerId: target,
+              status: "rejected",
+              error
+            };
+            onResult == null ? void 0 : onResult(result);
+            return result;
+          }
+        }));
+      },
+      get onRequest() {
+        return onRequest;
+      },
+      set onRequest(handler) {
+        onRequest = handler;
+        rawAction.onMessage(handler ? receiveRequest : null);
+      },
+      get onReceive() {
+        return state.onReceive;
+      },
+      set onReceive(handler) {
+        setReceive(handler);
+      },
+      get onReceiveProgress() {
+        return state.onReceiveProgress;
+      },
+      set onReceiveProgress(handler) {
+        state.onReceiveProgress = handler;
+      }
+    };
+    state.action = action;
+    publicActions[type] = state;
+    rawAction.onMessage(onRequest ? receiveRequest : null);
+    return action;
+  };
+  return {
+    makeAction: makeActionImpl,
+    makeInternalAction,
+    handleData,
+    clearPeer
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/media.mjs
+var toPendingMediaMeta = (value) => {
+  if (value && typeof value === "object" && !Array.isArray(value) && typeof value.k === "string") return {
+    key: value.k,
+    ...typeof value.s === "string" ? { streamId: value.s } : {},
+    ...typeof value.t === "string" ? { trackId: value.t } : {},
+    ...Object.hasOwn(value, "m") ? { metadata: value.m } : {}
+  };
+  return null;
+};
+var makeKeyGetter = (map) => (item) => {
+  let key = map.get(item);
+  if (!key) {
+    key = genId(20);
+    map.set(item, key);
+  }
+  return key;
+};
+var createMediaIdentityCache = () => {
+  const localStreamKeys = /* @__PURE__ */ new WeakMap();
+  const localTrackKeys = /* @__PURE__ */ new WeakMap();
+  const remoteStreamsByKey = /* @__PURE__ */ new Map();
+  const remoteStreamsById = /* @__PURE__ */ new Map();
+  const remoteTracksByKey = /* @__PURE__ */ new Map();
+  const remoteTracksById = /* @__PURE__ */ new Map();
+  const remoteStreamKeys = /* @__PURE__ */ new WeakMap();
+  const remoteTrackKeys = /* @__PURE__ */ new WeakMap();
+  return {
+    getStreamKey: makeKeyGetter(localStreamKeys),
+    getTrackKey: makeKeyGetter(localTrackKeys),
+    rememberRemoteStream: (key, stream, streamId) => {
+      var _a;
+      const previous = remoteStreamKeys.get(stream);
+      if (previous !== void 0 && remoteStreamsByKey.get(previous) === stream) remoteStreamsByKey.delete(previous);
+      remoteStreamKeys.set(stream, key);
+      remoteStreamsByKey.set(key, stream);
+      if (streamId) remoteStreamsById.set(streamId, stream);
+      (_a = stream.getTracks) == null ? void 0 : _a.call(stream).forEach((track) => {
+        if (typeof track.id === "string") remoteTracksById.set(track.id, {
+          track,
+          stream
+        });
+      });
+    },
+    getRemoteStream: (key, streamId) => remoteStreamsByKey.get(key) ?? (streamId ? remoteStreamsById.get(streamId) : void 0),
+    rememberRemoteTrack: (key, track, stream, trackId, streamId) => {
+      var _a;
+      const ref = {
+        track,
+        stream
+      };
+      const previous = remoteTrackKeys.get(track);
+      if (previous !== void 0 && ((_a = remoteTracksByKey.get(previous)) == null ? void 0 : _a.track) === track) remoteTracksByKey.delete(previous);
+      remoteTrackKeys.set(track, key);
+      remoteTracksByKey.set(key, ref);
+      if (trackId) remoteTracksById.set(trackId, ref);
+      if (streamId) remoteStreamsById.set(streamId, stream);
+    },
+    getRemoteTrack: (key, trackId) => remoteTracksByKey.get(key) ?? (trackId ? remoteTracksById.get(trackId) : void 0),
+    hasRemoteMedia: () => remoteStreamsByKey.size > 0 || remoteTracksByKey.size > 0,
+    clearRemote: () => {
+      remoteStreamsByKey.clear();
+      remoteStreamsById.clear();
+      remoteTracksByKey.clear();
+      remoteTracksById.clear();
+    }
+  };
+};
+var createMediaManager = ({ iterate, isActive, getSharedMediaPeer, onPeerError }) => {
+  const pendingStreamMetas = {};
+  const pendingTrackMetas = {};
+  const peerMediaCaches = {};
+  const localMedia = createMediaIdentityCache();
+  const getPeerMedia = (id) => {
+    var _a;
+    return ((_a = getSharedMediaPeer(id)) == null ? void 0 : _a.__trysteroMedia) ?? (peerMediaCaches[id] ?? (peerMediaCaches[id] = createMediaIdentityCache()));
+  };
+  const queuePendingMeta = (metas, id, parsed, kind) => {
+    const queue = metas[id] ?? (metas[id] = []);
+    if (queue.length >= 64) {
+      console.warn(`${libName}: too many pending ${kind} metadata messages`);
+      onPeerError(id, mkErr("too many pending media metadata messages"));
+      return;
+    }
+    queue.push(parsed);
+  };
+  const takePendingMeta = (queue, idValue, getMetaId) => {
+    if (!(queue == null ? void 0 : queue.length)) return;
+    const index = idValue ? queue.findIndex((meta) => {
+      const metaId = getMetaId(meta);
+      return !metaId || metaId === idValue;
+    }) : 0;
+    return index >= 0 ? queue.splice(index, 1)[0] : void 0;
+  };
+  const emitStream = (id, key, stream, metadata) => {
+    var _a;
+    if (!isActive(id)) return;
+    getPeerMedia(id).rememberRemoteStream(key, stream, typeof stream.id === "string" ? stream.id : void 0);
+    (_a = manager.onPeerStream) == null ? void 0 : _a.call(manager, stream, id, metadata);
+  };
+  const emitTrack = (id, key, track, stream, metadata) => {
+    var _a;
+    if (!isActive(id)) return;
+    getPeerMedia(id).rememberRemoteTrack(key, track, stream, typeof track.id === "string" ? track.id : void 0, typeof stream.id === "string" ? stream.id : void 0);
+    (_a = manager.onPeerTrack) == null ? void 0 : _a.call(manager, track, stream, id, metadata);
+  };
+  const applyMediaOp = (targets, key, metadata, sendMeta, op, mediaIds = {}) => {
+    const payload = {
+      k: key,
+      ...mediaIds,
+      ...metadata === void 0 ? {} : { m: metadata }
+    };
+    return iterate(targets, async (id, peer) => {
+      await sendMeta(payload, id);
+      await op(peer);
+    });
+  };
+  const manager = {
+    addStream: (stream, options, sendMeta) => applyMediaOp(options.target, localMedia.getStreamKey(stream), options.metadata, sendMeta, (peer) => peer.addStream(stream), { s: stream.id }),
+    removeStream: (stream, target) => {
+      iterate(target, (_, peer) => peer.removeStream(stream));
+    },
+    addTrack: (track, stream, options, sendMeta) => applyMediaOp(options.target, localMedia.getTrackKey(track), options.metadata, sendMeta, (peer) => peer.addTrack(track, stream), {
+      s: stream.id,
+      t: track.id
+    }),
+    removeTrack: (track, target) => {
+      iterate(target, (_, peer) => peer.removeTrack(track));
+    },
+    replaceTrack: (oldTrack, newTrack, options, sendMeta) => applyMediaOp(options.target, localMedia.getTrackKey(newTrack), options.metadata, sendMeta, (peer) => peer.replaceTrack(oldTrack, newTrack), { t: oldTrack.id }),
+    receiveStreamMeta: (meta, id) => {
+      if (!isActive(id)) return;
+      const parsed = toPendingMediaMeta(meta);
+      if (!parsed) return;
+      const cached = getPeerMedia(id).getRemoteStream(parsed.key, parsed.streamId);
+      if (cached == null ? void 0 : cached.getTracks().length) {
+        emitStream(id, parsed.key, cached, parsed.metadata);
+        return;
+      }
+      queuePendingMeta(pendingStreamMetas, id, parsed, "stream");
+    },
+    receiveTrackMeta: (meta, id) => {
+      if (!isActive(id)) return;
+      const parsed = toPendingMediaMeta(meta);
+      if (!parsed) return;
+      const cached = getPeerMedia(id).getRemoteTrack(parsed.key, parsed.trackId);
+      if (cached && cached.track.readyState !== "ended" && (!cached.stream.getTracks || cached.stream.getTracks().includes(cached.track))) {
+        emitTrack(id, parsed.key, cached.track, cached.stream, parsed.metadata);
+        return;
+      }
+      queuePendingMeta(pendingTrackMetas, id, parsed, "track");
+    },
+    receiveRemoteStream: (id, stream) => {
+      if (!isActive(id)) return;
+      const next = takePendingMeta(pendingStreamMetas[id], typeof stream.id === "string" ? stream.id : void 0, (meta) => meta.streamId);
+      if (!next) return;
+      emitStream(id, next.key, stream, next.metadata);
+    },
+    receiveRemoteTrack: (id, track, stream) => {
+      if (!isActive(id)) return;
+      const queue = pendingTrackMetas[id];
+      const trackId = typeof track.id === "string" ? track.id : void 0;
+      const streamId = typeof stream.id === "string" ? stream.id : void 0;
+      const byTrackIdx = queue && trackId ? queue.findIndex((meta) => meta.trackId === trackId) : -1;
+      const next = byTrackIdx >= 0 ? queue == null ? void 0 : queue.splice(byTrackIdx, 1)[0] : takePendingMeta(queue, streamId, (meta) => meta.streamId);
+      if (!next) return;
+      emitTrack(id, next.key, track, stream, next.metadata);
+    },
+    clearPeer: (id) => {
+      delete pendingStreamMetas[id];
+      delete pendingTrackMetas[id];
+      delete peerMediaCaches[id];
+    },
+    onPeerStream: null,
+    onPeerTrack: null
+  };
+  return manager;
+};
+
+// node_modules/@trystero-p2p/core/dist/room.mjs
+var unloadEvent = "beforeunload";
+var defaultHandshakeTimeoutMs = 1e4;
+var internalNs = (ns) => "@_" + ns;
+var beforeUnloadRoomCleanups = /* @__PURE__ */ new Set();
+var cleanupActiveRoomsOnBeforeUnload = () => beforeUnloadRoomCleanups.forEach((cleanup) => cleanup());
+var registerBeforeUnloadCleanup = (cleanup) => {
+  beforeUnloadRoomCleanups.add(cleanup);
+  if (beforeUnloadRoomCleanups.size === 1) addEventListener(unloadEvent, cleanupActiveRoomsOnBeforeUnload);
+  return () => {
+    beforeUnloadRoomCleanups.delete(cleanup);
+    if (!beforeUnloadRoomCleanups.size) removeEventListener(unloadEvent, cleanupActiveRoomsOnBeforeUnload);
+  };
+};
+var room_default = (onPeer, onPeerLeave, onSelfLeave, { onPeerHandshake, onHandshakeError, handshakeTimeoutMs = defaultHandshakeTimeoutMs, maxReceiveBytes, isPassive = false, onBeforeLeave } = {}) => {
+  const peerMap = {};
+  const activePeerMap = {};
+  const pendingPongs = {};
+  const listeners = {
+    onPeerJoin: null,
+    onPeerLeave: null
+  };
+  let unregisterBeforeUnloadCleanup = noOp;
+  let leavePromise = null;
+  const iterate = (targets, f) => (targets ? Array.isArray(targets) ? targets : [targets] : keys(activePeerMap)).flatMap((id) => {
+    const peer = activePeerMap[id];
+    if (!peer) {
+      console.warn(`${libName}: no peer with id ${id} found`);
+      return [];
+    }
+    return [Promise.resolve(f(id, peer))];
+  });
+  const kickPeer = (id, peer, reason) => {
+    const current = peerMap[id];
+    if (!current || peer && current !== peer) return;
+    leaveAction.send("", id).catch(noOp);
+    exitPeer(id, current, reason);
+  };
+  const onPeerError = (id, error) => kickPeer(id, void 0, error);
+  const mediaManager = createMediaManager({
+    onPeerError,
+    iterate: (targets, f) => iterate(targets, (id, peer) => f(id, peer)),
+    isActive: (id) => Boolean(activePeerMap[id]),
+    getSharedMediaPeer: (id) => peerMap[id] ?? null
+  });
+  const actionManager = createActionManager({
+    onPeerError,
+    ...maxReceiveBytes === void 0 ? {} : { maxReceiveBytes },
+    getPeer: (id, includePending) => (includePending ? peerMap : activePeerMap)[id],
+    getPeerIds: (includePending) => keys(includePending ? peerMap : activePeerMap),
+    canReceiveFromPeer: (id, receiveWhilePending) => handshakeManager.canReceiveFromPeer(id, receiveWhilePending)
+  });
+  const makeActionInternal = actionManager.makeInternalAction;
+  const handleData = actionManager.handleData;
+  const makeAction = actionManager.makeAction;
+  const clearPeerState = (id, reason = mkErr("peer disconnected")) => {
+    var _a;
+    const err = toError(reason, "peer disconnected");
+    handshakeManager.clearPeer(id, err);
+    delete peerMap[id];
+    delete activePeerMap[id];
+    actionManager.clearPeer(id, err);
+    (_a = pendingPongs[id]) == null ? void 0 : _a.splice(0).forEach((waiter) => waiter.reject(err));
+    delete pendingPongs[id];
+    mediaManager.clearPeer(id);
+  };
+  const exitPeer = (id, peer, reason) => {
+    var _a;
+    const current = peerMap[id];
+    if (!current) return;
+    if (peer && current !== peer) return;
+    const wasActive = Boolean(activePeerMap[id]);
+    clearPeerState(id, reason);
+    current.destroy();
+    if (wasActive) (_a = listeners.onPeerLeave) == null ? void 0 : _a.call(listeners, id);
+    onPeerLeave(id);
+  };
+  const leave = () => leavePromise ?? (leavePromise = (async () => {
+    onBeforeLeave == null ? void 0 : onBeforeLeave();
+    const controller = new AbortController();
+    leaveAction.send("", void 0, void 0, void 0, controller.signal).catch(noOp);
+    await new Promise((res) => setTimeout(res, 99));
+    controller.abort();
+    try {
+      entries(peerMap).forEach(([id, peer]) => {
+        peer.destroy();
+        clearPeerState(id, mkErr("room left"));
+      });
+    } finally {
+      try {
+        unregisterBeforeUnloadCleanup();
+      } finally {
+        onSelfLeave();
+      }
+    }
+  })());
+  const pingAction = makeActionInternal(internalNs("ping"));
+  const pongAction = makeActionInternal(internalNs("pong"));
+  const signalAction = makeActionInternal(internalNs("signal"));
+  const streamMetaAction = makeActionInternal(internalNs("stream"), { maxPayloadBytes: 65536 });
+  const trackMetaAction = makeActionInternal(internalNs("track"), { maxPayloadBytes: 65536 });
+  const leaveAction = makeActionInternal(internalNs("leave"), {
+    sendToPending: true,
+    receiveWhilePending: true
+  });
+  const handshakeDataAction = makeActionInternal(internalNs("hsdata"), {
+    sendToPending: true,
+    receiveWhilePending: true,
+    maxPayloadBytes: 65536
+  });
+  const handshakeReadyAction = makeActionInternal(internalNs("hsready"), {
+    sendToPending: true,
+    receiveWhilePending: true
+  });
+  const handshakeManager = createHandshakeManager({
+    ...onPeerHandshake === void 0 ? {} : { onPeerHandshake },
+    ...onHandshakeError === void 0 ? {} : { onHandshakeError },
+    handshakeTimeoutMs,
+    sendHandshakeData: handshakeDataAction.send,
+    sendHandshakeReady: handshakeReadyAction.send,
+    onActivate: (id, peer) => {
+      var _a;
+      activePeerMap[id] = peer;
+      peer.setHandlers({ signal: (sdp) => {
+        if (activePeerMap[id] === peer) signalAction.send(sdp, id).catch(noOp);
+      } });
+      (_a = listeners.onPeerJoin) == null ? void 0 : _a.call(listeners, id);
+    },
+    onFailure: (id, peer, reason) => kickPeer(id, peer, reason)
+  });
+  pingAction.onMessage((_, id) => {
+    pongAction.send("", id).catch(noOp);
+  });
+  pongAction.onMessage((_, id) => {
+    var _a;
+    const queue = pendingPongs[id];
+    (_a = queue == null ? void 0 : queue.shift()) == null ? void 0 : _a.resolve();
+    if (queue && !queue.length) delete pendingPongs[id];
+  });
+  signalAction.onMessage((sdp, id) => {
+    var _a;
+    (_a = activePeerMap[id]) == null ? void 0 : _a.signal(sdp);
+  });
+  streamMetaAction.onMessage((meta, id) => mediaManager.receiveStreamMeta(meta, id));
+  trackMetaAction.onMessage((meta, id) => mediaManager.receiveTrackMeta(meta, id));
+  leaveAction.onMessage((_, id) => exitPeer(id, void 0, mkErr("peer left room")));
+  handshakeDataAction.onMessage((data, id, metadata) => handshakeManager.receiveHandshakeData(data, id, metadata));
+  handshakeReadyAction.onMessage((_, id) => handshakeManager.receiveHandshakeReady(id));
+  onPeer((peer, id) => {
+    const existingPeer = peerMap[id];
+    if (existingPeer) {
+      if (existingPeer === peer) return;
+      existingPeer.destroy();
+      clearPeerState(id, mkErr("peer replaced"));
+    }
+    peerMap[id] = peer;
+    handshakeManager.addPeer(id, peer);
+    peer.setHandlers({
+      data: (d) => {
+        if (peerMap[id] === peer) handleData(id, d);
+      },
+      stream: (stream) => mediaManager.receiveRemoteStream(id, stream),
+      track: (track, stream) => mediaManager.receiveRemoteTrack(id, track, stream),
+      close: () => exitPeer(id, peer, mkErr("peer disconnected")),
+      error: (err) => {
+        console.error(`${libName} peer error:`, err);
+        exitPeer(id, peer, err);
+      }
+    });
+    handshakeManager.start(id, peer);
+  });
+  if (isBrowser) unregisterBeforeUnloadCleanup = registerBeforeUnloadCleanup(() => leave().catch(noOp));
+  return {
+    makeAction,
+    leave,
+    ping: async (id) => {
+      if (!activePeerMap[id]) throw mkErr(`no active peer with id ${id}`);
+      const start = Date.now();
+      await new Promise((resolve, reject) => {
+        const queue = pendingPongs[id] ?? (pendingPongs[id] = []);
+        const clearFromQueue = () => {
+          const currentQueue = pendingPongs[id];
+          if (!currentQueue) return;
+          const i = currentQueue.indexOf(waiter);
+          if (i > -1) currentQueue.splice(i, 1);
+          if (!currentQueue.length) delete pendingPongs[id];
+        };
+        const waiter = {
+          resolve: () => {
+            clearFromQueue();
+            resolve();
+          },
+          reject: (reason) => {
+            clearFromQueue();
+            reject(reason);
+          }
+        };
+        queue.push(waiter);
+        pingAction.send("", id).catch((err) => waiter.reject(toError(err, "peer disconnected")));
+      });
+      return Date.now() - start;
+    },
+    isPassive: () => isPassive,
+    getPeers: () => fromEntries(entries(activePeerMap).map(([id, peer]) => [id, peer.connection])),
+    addStream: (stream, options = {}) => mediaManager.addStream(stream, options, streamMetaAction.send),
+    removeStream: (stream, options = {}) => {
+      mediaManager.removeStream(stream, options.target);
+    },
+    addTrack: (track, stream, options = {}) => mediaManager.addTrack(track, stream, options, trackMetaAction.send),
+    removeTrack: (track, options = {}) => {
+      mediaManager.removeTrack(track, options.target);
+    },
+    replaceTrack: (oldTrack, newTrack, options = {}) => mediaManager.replaceTrack(oldTrack, newTrack, options, trackMetaAction.send),
+    get onPeerJoin() {
+      return listeners.onPeerJoin;
+    },
+    set onPeerJoin(handler) {
+      listeners.onPeerJoin = handler;
+      if (handler) keys(activePeerMap).forEach((peerId) => handler(peerId));
+    },
+    get onPeerLeave() {
+      return listeners.onPeerLeave;
+    },
+    set onPeerLeave(handler) {
+      listeners.onPeerLeave = handler;
+    },
+    get onPeerStream() {
+      return mediaManager.onPeerStream;
+    },
+    set onPeerStream(handler) {
+      mediaManager.onPeerStream = handler;
+    },
+    get onPeerTrack() {
+      return mediaManager.onPeerTrack;
+    },
+    set onPeerTrack(handler) {
+      mediaManager.onPeerTrack = handler;
+    }
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/shared-peer.mjs
+var roomFrameVersion = 1;
+var roomPresenceFrameVersion = 2;
+var wrapRoomFrame = (roomToken, data) => {
+  const tokenBytes = encodeBytes(roomToken);
+  const frame = new Uint8Array(3 + tokenBytes.byteLength + data.byteLength);
+  frame[0] = roomFrameVersion;
+  frame[1] = tokenBytes.byteLength >>> 8 & 255;
+  frame[2] = tokenBytes.byteLength & 255;
+  frame.set(tokenBytes, 3);
+  frame.set(data, 3 + tokenBytes.byteLength);
+  return frame;
+};
+var wrapRoomPresenceFrame = (roomToken, isPresent) => {
+  const tokenBytes = encodeBytes(roomToken);
+  const frame = new Uint8Array(4 + tokenBytes.byteLength);
+  frame[0] = roomPresenceFrameVersion;
+  frame[1] = Number(isPresent);
+  frame[2] = tokenBytes.byteLength >>> 8 & 255;
+  frame[3] = tokenBytes.byteLength & 255;
+  frame.set(tokenBytes, 4);
+  return frame;
+};
+var decodeRoomTokenHeader = (buffer, offset) => {
+  if (buffer.byteLength < offset + 2) return null;
+  const tokenSize = (buffer[offset] ?? 0) << 8 | (buffer[offset + 1] ?? 0);
+  const headerSize = offset + 2 + tokenSize;
+  if (tokenSize <= 0 || tokenSize > 128 || buffer.byteLength < headerSize) return null;
+  return {
+    roomToken: decodeBytes(buffer.subarray(offset + 2, headerSize)),
+    headerSize
+  };
+};
+var unwrapFrame = (data) => {
+  const buffer = new Uint8Array(data);
+  if (buffer.byteLength < 3 || buffer.byteLength > 16515) return null;
+  if (buffer[0] === roomFrameVersion) {
+    const header = decodeRoomTokenHeader(buffer, 1);
+    return header ? {
+      type: "room",
+      roomToken: header.roomToken,
+      payload: buffer.subarray(header.headerSize).slice().buffer
+    } : null;
+  }
+  if (buffer[0] === roomPresenceFrameVersion) {
+    const header = decodeRoomTokenHeader(buffer, 2);
+    return header ? {
+      type: "presence",
+      roomToken: header.roomToken,
+      isPresent: buffer[1] === 1
+    } : null;
+  }
+  return null;
+};
+var isPeerUnderlyingStale = (peer) => {
+  const { connection, channel } = peer;
+  return peer.isDead || connection.connectionState === "closed" || connection.connectionState === "failed" || connection.iceConnectionState === "closed" || connection.iceConnectionState === "failed" || (channel == null ? void 0 : channel.readyState) === "closing" || (channel == null ? void 0 : channel.readyState) === "closed";
+};
+var getConnectedPeerHealth = (peer) => {
+  if (isPeerUnderlyingStale(peer)) return "stale";
+  const { channel } = peer;
+  if (!channel || channel.readyState !== "open") return "transient";
+  return "live";
+};
+var SharedPeerManager = class {
+  rooms = /* @__PURE__ */ new Map();
+  unclaimedDataTimers = /* @__PURE__ */ new WeakMap();
+  pendingDataTimers = /* @__PURE__ */ new WeakMap();
+  byApp = {};
+  registerRoom(appId, roomId, tokenPromise, options) {
+    const rooms = this.rooms.get(appId) ?? /* @__PURE__ */ new Map();
+    if (rooms.has(roomId)) throw mkErr("room membership already registered");
+    const registration = {
+      token: null,
+      tokenPromise,
+      ...options
+    };
+    rooms.set(roomId, registration);
+    this.rooms.set(appId, rooms);
+    const current = () => {
+      var _a;
+      return ((_a = this.rooms.get(appId)) == null ? void 0 : _a.get(roomId)) === registration;
+    };
+    const advertise = (present) => {
+      if (!registration.token) return;
+      for (const shared of values(this.byApp[appId] ?? {})) try {
+        this.sendRoomPresence(shared, registration.token, present);
+      } catch {
+      }
+    };
+    tokenPromise.then((token) => {
+      if (!current()) return;
+      registration.token = token;
+      for (const shared of values(this.byApp[appId] ?? {})) {
+        if (shared.remoteRoomTokens.has(token)) this.attachRoom(appId, roomId, registration, shared);
+        this.discardUnboundData(shared);
+      }
+      if (current() && registration.active) advertise(true);
+    });
+    return {
+      connect: (peerId, peer, idleMs) => {
+        if (!current()) {
+          peer.destroy();
+          return;
+        }
+        const existing = this.reusable(appId, peerId);
+        if (existing && existing.peer !== peer) peer.destroy();
+        const shared = existing ?? this.register(appId, peerId, peer, idleMs);
+        this.attachRoom(appId, roomId, registration, shared);
+        if (!existing) {
+          for (const room of rooms.values()) if (room.active && room.token) this.sendRoomPresence(shared, room.token, true);
+        }
+      },
+      reuse: (peerId) => {
+        if (!current()) return false;
+        const shared = this.reusable(appId, peerId);
+        if (!shared) return false;
+        this.attachRoom(appId, roomId, registration, shared);
+        return true;
+      },
+      setActive: (active) => {
+        if (!current() || registration.active === active) return;
+        registration.active = active;
+        advertise(active);
+      },
+      leave: () => {
+        var _a, _b;
+        if (!current()) return;
+        rooms.delete(roomId);
+        if (!rooms.size) this.rooms.delete(appId);
+        advertise(false);
+        for (const shared of values(this.byApp[appId] ?? {})) {
+          const binding = shared.bindings[roomId];
+          (_b = binding == null ? void 0 : (_a = binding.handlers).close) == null ? void 0 : _b.call(_a);
+          binding == null ? void 0 : binding.detach();
+          this.discardUnboundData(shared);
+        }
+      }
     };
   }
-  return EN;
+  owns(appId, peerId, peer) {
+    var _a, _b;
+    return ((_b = (_a = this.byApp[appId]) == null ? void 0 : _a[peerId]) == null ? void 0 : _b.peer) === peer;
+  }
+  reusable(appId, peerId) {
+    var _a;
+    const shared = (_a = this.byApp[appId]) == null ? void 0 : _a[peerId];
+    if (shared && isPeerUnderlyingStale(shared.peer)) {
+      this.clear(appId, peerId, { destroyPeer: true });
+      return;
+    }
+    return shared;
+  }
+  attachRoom(appId, roomId, registration, shared) {
+    var _a;
+    if (((_a = this.rooms.get(appId)) == null ? void 0 : _a.get(roomId)) !== registration || shared.isClosing || this.get(appId, shared.peerId) !== shared) return;
+    const { proxy, isNew } = this.bind(roomId, registration.tokenPromise, shared, { onDetach: () => registration.onDetach(shared.peerId, shared.peer) });
+    if (isNew) registration.onPeer(proxy, shared.peerId, shared.peer);
+  }
+  get(appId, peerId) {
+    var _a;
+    return (_a = this.byApp[appId]) == null ? void 0 : _a[peerId];
+  }
+  sendRoomPresence(shared, roomToken, isPresent) {
+    if (shared.isClosing || isPeerUnderlyingStale(shared.peer)) return;
+    shared.peer.sendData(wrapRoomPresenceFrame(roomToken, isPresent));
+  }
+  clear(appId, peerId, { destroyPeer }) {
+    const map = this.byApp[appId];
+    const shared = map == null ? void 0 : map[peerId];
+    if (!shared || shared.isClosing) return;
+    shared.idleTimer = resetTimer(shared.idleTimer);
+    this.clearDataTimers(shared);
+    shared.isClosing = true;
+    if (destroyPeer && !shared.peer.isDead) shared.peer.destroy();
+    const bindings = values(shared.bindings);
+    shared.bindings = {};
+    shared.bindingsByToken = {};
+    shared.controlRoomId = null;
+    delete map[peerId];
+    bindings.forEach((binding) => {
+      var _a, _b;
+      (_b = (_a = binding.handlers).close) == null ? void 0 : _b.call(_a);
+      binding.pendingData.length = 0;
+      binding.pendingSendData.length = 0;
+      binding.pendingTracks.length = 0;
+    });
+    shared.media.clearRemote();
+    shared.pendingDataByToken.clear();
+    shared.remoteRoomTokens.clear();
+    if (keys(map).length === 0) delete this.byApp[appId];
+  }
+  register(appId, peerId, peer, idleMs) {
+    var _a, _b;
+    const existing = (_a = this.byApp[appId]) == null ? void 0 : _a[peerId];
+    if (existing) {
+      existing.idleTimer = resetTimer(existing.idleTimer);
+      if (existing.peer === peer) return existing;
+      this.clear(appId, peerId, { destroyPeer: true });
+    }
+    const shared = {
+      appId,
+      peerId,
+      peer,
+      bindings: {},
+      bindingsByToken: {},
+      pendingDataByToken: /* @__PURE__ */ new Map(),
+      remoteRoomTokens: /* @__PURE__ */ new Set(),
+      idleTimer: null,
+      controlRoomId: null,
+      streamOwners: /* @__PURE__ */ new Map(),
+      trackOwners: /* @__PURE__ */ new Map(),
+      media: createMediaIdentityCache(),
+      idleMs,
+      isClosing: false
+    };
+    ((_b = this.byApp)[appId] ?? (_b[appId] = {}))[peerId] = shared;
+    const clearCurrent = () => {
+      if (this.owns(appId, peerId, peer)) this.clear(appId, peerId, { destroyPeer: true });
+    };
+    peer.setHandlers({
+      data: (data) => this.dispatchData(shared, data),
+      signal: (signal) => this.dispatchSignal(shared, signal),
+      close: clearCurrent,
+      error: (err) => {
+        console.error(`${libName} peer error:`, err);
+        clearCurrent();
+      },
+      track: (track, stream) => this.dispatchTrack(shared, track, stream)
+    });
+    return shared;
+  }
+  bind(roomId, roomTokenPromise, shared, { onDetach }) {
+    const existingBinding = shared.bindings[roomId];
+    if (existingBinding) {
+      shared.idleTimer = resetTimer(shared.idleTimer);
+      return {
+        proxy: existingBinding.proxy,
+        isNew: false
+      };
+    }
+    const binding = {
+      roomId,
+      roomToken: null,
+      roomTokenPromise,
+      handlers: {},
+      pendingData: [],
+      pendingSendData: [],
+      pendingTracks: [],
+      detach: noOp,
+      proxy: {}
+    };
+    const detachBinding = () => {
+      if (shared.bindings[roomId] !== binding) return;
+      const shouldDestroy = keys(shared.bindings).length === 1 && (shared.streamOwners.size > 0 || shared.trackOwners.size > 0 || shared.media.hasRemoteMedia());
+      if (!shouldDestroy) this.pruneRoomOwnership(shared, roomId);
+      delete shared.bindings[roomId];
+      if (binding.roomToken && shared.bindingsByToken[binding.roomToken] === binding) delete shared.bindingsByToken[binding.roomToken];
+      if (shared.controlRoomId === roomId) shared.controlRoomId = keys(shared.bindings)[0] ?? null;
+      this.discardUnboundData(shared);
+      onDetach();
+      if (shouldDestroy) this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+      else this.scheduleIdleTimer(shared);
+    };
+    const proxy = {
+      get connection() {
+        return shared.peer.connection;
+      },
+      get channel() {
+        return shared.peer.channel;
+      },
+      get isDead() {
+        return shared.peer.isDead;
+      },
+      getOffer: (restartIce) => shared.peer.getOffer(restartIce),
+      signal: (sdp) => shared.peer.signal(sdp),
+      sendData: (data) => {
+        if (!binding.roomToken) {
+          binding.pendingSendData.push(data);
+          return;
+        }
+        shared.peer.sendData(wrapRoomFrame(binding.roomToken, data));
+      },
+      destroy: () => detachBinding(),
+      setHandlers: (newHandlers) => {
+        Object.assign(binding.handlers, newHandlers);
+        this.flushBindingQueues(shared, binding);
+      },
+      addStream: (stream) => {
+        const owners = shared.streamOwners.get(stream) ?? /* @__PURE__ */ new Set();
+        const shouldAttach = owners.size === 0;
+        owners.add(roomId);
+        shared.streamOwners.set(stream, owners);
+        if (shouldAttach) shared.peer.addStream(stream);
+      },
+      removeStream: (stream) => this.releaseStreamOwner(shared, stream, roomId),
+      addTrack: (track, stream) => {
+        const entry = shared.trackOwners.get(track) ?? {
+          stream,
+          rooms: /* @__PURE__ */ new Set()
+        };
+        const shouldAttach = entry.rooms.size === 0;
+        entry.stream = stream;
+        entry.rooms.add(roomId);
+        shared.trackOwners.set(track, entry);
+        if (shouldAttach) return shared.peer.addTrack(track, stream);
+        return shared.peer.connection.getSenders().find((s) => s.track === track) ?? shared.peer.addTrack(track, stream);
+      },
+      removeTrack: (track) => this.releaseTrackOwner(shared, track, roomId),
+      replaceTrack: async (oldTrack, newTrack) => {
+        const oldEntry = shared.trackOwners.get(oldTrack);
+        await shared.peer.replaceTrack(oldTrack, newTrack);
+        if (oldEntry && shared.trackOwners.get(oldTrack) === oldEntry) {
+          shared.trackOwners.delete(oldTrack);
+          const nextEntry = shared.trackOwners.get(newTrack) ?? {
+            stream: oldEntry.stream,
+            rooms: /* @__PURE__ */ new Set()
+          };
+          oldEntry.rooms.forEach((room) => nextEntry.rooms.add(room));
+          shared.trackOwners.set(newTrack, nextEntry);
+        }
+      },
+      __trysteroMedia: shared.media
+    };
+    binding.proxy = proxy;
+    binding.detach = detachBinding;
+    shared.bindings[roomId] = binding;
+    shared.controlRoomId ?? (shared.controlRoomId = roomId);
+    shared.idleTimer = resetTimer(shared.idleTimer);
+    roomTokenPromise.then((roomToken) => {
+      if (shared.isClosing || shared.bindings[roomId] !== binding) return;
+      binding.roomToken = roomToken;
+      shared.bindingsByToken[roomToken] = binding;
+      const pendingData = shared.pendingDataByToken.get(roomToken);
+      if (pendingData == null ? void 0 : pendingData.length) {
+        binding.pendingData.push(...pendingData);
+        shared.pendingDataByToken.delete(roomToken);
+      }
+      const pendingSendData = binding.pendingSendData.splice(0);
+      if (!isPeerUnderlyingStale(shared.peer)) pendingSendData.forEach((payload) => {
+        try {
+          shared.peer.sendData(wrapRoomFrame(roomToken, payload));
+        } catch {
+        }
+      });
+      this.flushBindingQueues(shared, binding);
+      this.discardUnboundData(shared);
+    });
+    return {
+      proxy,
+      isNew: true
+    };
+  }
+  releaseStreamOwner(shared, stream, roomIdToRemove) {
+    const rooms = shared.streamOwners.get(stream);
+    if (!rooms) return;
+    rooms.delete(roomIdToRemove);
+    if (rooms.size === 0) {
+      shared.streamOwners.delete(stream);
+      shared.peer.removeStream(stream);
+    }
+  }
+  releaseTrackOwner(shared, track, roomIdToRemove) {
+    const entry = shared.trackOwners.get(track);
+    if (!entry) return;
+    entry.rooms.delete(roomIdToRemove);
+    if (entry.rooms.size === 0) {
+      shared.trackOwners.delete(track);
+      shared.peer.removeTrack(track);
+    }
+  }
+  pruneRoomOwnership(shared, roomIdToRemove) {
+    shared.streamOwners.forEach((_, stream) => this.releaseStreamOwner(shared, stream, roomIdToRemove));
+    shared.trackOwners.forEach((_, track) => this.releaseTrackOwner(shared, track, roomIdToRemove));
+  }
+  scheduleIdleTimer(shared) {
+    if (shared.isClosing || keys(shared.bindings).length > 0) return;
+    shared.idleTimer = resetTimer(shared.idleTimer);
+    shared.idleTimer = setTimeout(() => {
+      var _a;
+      const current = (_a = this.byApp[shared.appId]) == null ? void 0 : _a[shared.peerId];
+      if (!current || keys(current.bindings).length > 0) return;
+      this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+    }, shared.idleMs);
+  }
+  getSignalBinding(shared) {
+    if (shared.controlRoomId) {
+      const selected = shared.bindings[shared.controlRoomId];
+      if (selected == null ? void 0 : selected.handlers.signal) return selected;
+    }
+    const fallback = values(shared.bindings).find((binding) => Boolean(binding.handlers.signal));
+    if (!fallback) return null;
+    shared.controlRoomId = fallback.roomId;
+    return fallback;
+  }
+  flushBindingQueues(shared, binding) {
+    const { handlers } = binding;
+    if (handlers.data && binding.pendingData.length > 0) {
+      const queued = binding.pendingData.splice(0);
+      this.syncDataTimers(shared);
+      queued.forEach((payload) => {
+        var _a;
+        return (_a = handlers.data) == null ? void 0 : _a.call(handlers, payload);
+      });
+    } else this.syncDataTimers(shared);
+    if ((handlers.track || handlers.stream) && binding.pendingTracks.length) binding.pendingTracks.splice(0).forEach(({ track, stream }) => {
+      var _a, _b;
+      (_a = handlers.track) == null ? void 0 : _a.call(handlers, track, stream);
+      (_b = handlers.stream) == null ? void 0 : _b.call(handlers, stream);
+    });
+  }
+  unclaimedBufferedFrameCount(shared) {
+    let count = 0;
+    for (const queue of shared.pendingDataByToken.values()) count += queue.length;
+    return count;
+  }
+  boundBufferedFrameCount(shared) {
+    let count = 0;
+    for (const binding of values(shared.bindings)) count += binding.pendingData.length;
+    return count;
+  }
+  bufferedFrameCount(shared) {
+    return this.unclaimedBufferedFrameCount(shared) + this.boundBufferedFrameCount(shared);
+  }
+  clearDataTimers(shared) {
+    resetTimer(this.unclaimedDataTimers.get(shared));
+    this.unclaimedDataTimers.delete(shared);
+    resetTimer(this.pendingDataTimers.get(shared));
+    this.pendingDataTimers.delete(shared);
+  }
+  syncDataTimers(shared) {
+    if (shared.isClosing) {
+      this.clearDataTimers(shared);
+      return;
+    }
+    if (this.unclaimedBufferedFrameCount(shared) === 0) {
+      resetTimer(this.unclaimedDataTimers.get(shared));
+      this.unclaimedDataTimers.delete(shared);
+    } else if (!this.unclaimedDataTimers.has(shared)) this.unclaimedDataTimers.set(shared, setTimeout(() => {
+      this.unclaimedDataTimers.delete(shared);
+      shared.pendingDataByToken.clear();
+    }, pendingDataTimeoutMs));
+    if (this.boundBufferedFrameCount(shared) === 0) {
+      resetTimer(this.pendingDataTimers.get(shared));
+      this.pendingDataTimers.delete(shared);
+    } else if (!this.pendingDataTimers.has(shared)) this.pendingDataTimers.set(shared, setTimeout(() => {
+      this.pendingDataTimers.delete(shared);
+      if (this.boundBufferedFrameCount(shared) > 0) this.failData(shared, "room data handler timed out");
+    }, pendingDataTimeoutMs));
+  }
+  canBindRoomToken(shared, token) {
+    var _a;
+    return values(shared.bindings).some((binding) => !binding.roomToken) || [...((_a = this.rooms.get(shared.appId)) == null ? void 0 : _a.values()) ?? []].some((room) => !room.token || room.token === token);
+  }
+  discardUnboundData(shared) {
+    for (const token of shared.pendingDataByToken.keys()) if (!this.canBindRoomToken(shared, token)) shared.pendingDataByToken.delete(token);
+    this.syncDataTimers(shared);
+  }
+  failData(shared, reason) {
+    console.warn(`${libName}: ${reason}; disconnecting peer ${shared.peerId}`);
+    this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+  }
+  dispatchData(shared, data) {
+    var _a, _b;
+    if (shared.isClosing) return;
+    const decoded = unwrapFrame(data);
+    if (!decoded) {
+      this.failData(shared, "invalid or incompatible room frame");
+      return;
+    }
+    if (decoded.type === "presence") {
+      if (decoded.isPresent) {
+        if (!shared.remoteRoomTokens.has(decoded.roomToken) && shared.remoteRoomTokens.size >= 64) {
+          this.failData(shared, "too many advertised rooms");
+          return;
+        }
+        shared.remoteRoomTokens.add(decoded.roomToken);
+        for (const [roomId, registration] of this.rooms.get(shared.appId) ?? []) if (registration.token === decoded.roomToken) this.attachRoom(shared.appId, roomId, registration, shared);
+      } else {
+        shared.remoteRoomTokens.delete(decoded.roomToken);
+        shared.pendingDataByToken.delete(decoded.roomToken);
+        const binding2 = shared.bindingsByToken[decoded.roomToken];
+        (_b = binding2 == null ? void 0 : (_a = binding2.handlers).close) == null ? void 0 : _b.call(_a);
+        binding2 == null ? void 0 : binding2.detach();
+        this.syncDataTimers(shared);
+      }
+      return;
+    }
+    const binding = shared.bindingsByToken[decoded.roomToken];
+    if (!binding) {
+      if (!this.canBindRoomToken(shared, decoded.roomToken) || this.bufferedFrameCount(shared) >= 64) return;
+      const pending = shared.pendingDataByToken.get(decoded.roomToken) ?? [];
+      pending.push(decoded.payload);
+      shared.pendingDataByToken.set(decoded.roomToken, pending);
+      this.syncDataTimers(shared);
+      return;
+    }
+    if (binding.handlers.data) binding.handlers.data(decoded.payload);
+    else {
+      if (this.bufferedFrameCount(shared) >= 64) {
+        this.failData(shared, "too much data waiting for a room handler");
+        return;
+      }
+      binding.pendingData.push(decoded.payload);
+      this.syncDataTimers(shared);
+    }
+  }
+  dispatchSignal(shared, signal) {
+    var _a, _b;
+    const binding = this.getSignalBinding(shared);
+    if (binding) (_b = (_a = binding.handlers).signal) == null ? void 0 : _b.call(_a, signal);
+    else if (signal.type === "offer") this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+  }
+  dispatchTrack(shared, track, stream) {
+    values(shared.bindings).forEach((binding) => {
+      var _a, _b, _c, _d;
+      if (binding.handlers.track || binding.handlers.stream) {
+        (_b = (_a = binding.handlers).track) == null ? void 0 : _b.call(_a, track, stream);
+        (_d = (_c = binding.handlers).stream) == null ? void 0 : _d.call(_c, stream);
+        return;
+      }
+      binding.pendingTracks.push({
+        track,
+        stream
+      });
+    });
+  }
+};
+
+// node_modules/@trystero-p2p/core/dist/signal-handler.mjs
+var offerPostAnswerTtlMs = 23333;
+var offerTtl = 57333;
+var offerIdSize = 12;
+var disconnectedPeerGraceMs = 7533;
+var answeringTtlMs = 23333;
+var offerRelayPlaceholder = "offer-placeholder";
+var signalKeys = [
+  "offer",
+  "answer",
+  "candidate"
+];
+var toPayload = (msg) => {
+  if (typeof msg === "string") try {
+    const parsed = fromJson(msg);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+  return msg && typeof msg === "object" && !Array.isArray(msg) ? msg : null;
+};
+var getString = (payload, key) => typeof payload[key] === "string" && payload[key] ? payload[key] : void 0;
+var isPeerHandle = (value) => Boolean(value && typeof value === "object" && typeof value.signal === "function" && typeof value.destroy === "function" && typeof value.setHandlers === "function");
+var hasInvalidSignalField = (payload, isStringMessage = false) => signalKeys.some((key) => key in payload && (typeof payload[key] !== "string" || payload[key] === "")) || "peer" in payload && (isStringMessage || payload["peer"] !== void 0 && !isPeerHandle(payload["peer"]));
+var shouldActivatePassiveRoom = (msg) => {
+  const payload = toPayload(msg);
+  if (!payload || hasInvalidSignalField(payload, typeof msg === "string")) return false;
+  const peerId = getString(payload, "peerId");
+  return Boolean(peerId && peerId !== selfId && payload["passive"] !== true && !getString(payload, "answer") && !getString(payload, "candidate"));
+};
+var publishCipheredSignalingMessage = (ctx, signal, peerTopic, signalPeer, buildPayload, stillValid) => {
+  ctx.toCipher(signal).then((encryptedSignal) => {
+    if (ctx.isLeaving() || !stillValid()) return;
+    signalPeer(peerTopic, toJson(buildPayload(encryptedSignal.sdp)));
+  });
+};
+var makeState = () => ({
+  offerPeer: null,
+  offerId: null,
+  offerSdp: null,
+  offerInitPromise: null,
+  offerAnswered: false,
+  offerRelays: [],
+  offerSignalRelays: [],
+  offerSignalBacklog: [],
+  offerRelayTimers: [],
+  offerExpiryTimer: null,
+  connectedPeer: null,
+  connectedPeerUnhealthySinceMs: null,
+  answeringExpiryTimer: null,
+  answeringPeer: null,
+  answerSent: false,
+  answerReplay: null,
+  connectionErrorReported: false
+});
+var hasTurnServer = (config) => {
+  var _a;
+  return [...config.turnConfig ?? [], ...((_a = config.rtcConfig) == null ? void 0 : _a.iceServers) ?? []].some(({ urls }) => {
+    return (Array.isArray(urls) ? urls : [urls]).some((url) => /^turns?:/i.test(url));
+  });
+};
+var getSdpExchangeConnectionError = (peerId, config) => `could not connect to peer ${peerId} after exchanging SDP; ${hasTurnServer(config) ? "check that your TURN server URLs and credentials are reachable by both peers" : "configure TURN servers with turnConfig or rtcConfig.iceServers"}`;
+var reportSdpExchangeConnectionFailure = (ctx, state, peerId) => {
+  var _a;
+  if (ctx.isLeaving() || state.connectedPeer || state.connectionErrorReported) return;
+  state.connectionErrorReported = true;
+  (_a = ctx.onJoinError) == null ? void 0 : _a.call(ctx, {
+    error: getSdpExchangeConnectionError(peerId, ctx.config),
+    appId: ctx.appId,
+    peerId,
+    roomId: ctx.roomId
+  });
+};
+var getState = (peerStates, peerId) => peerStates[peerId] ?? (peerStates[peerId] = makeState());
+var counterAnnounceTimestamps = /* @__PURE__ */ new WeakMap();
+var resetAnsweringState = (state) => {
+  counterAnnounceTimestamps.delete(state);
+  state.answeringExpiryTimer = resetTimer(state.answeringExpiryTimer);
+  state.answeringPeer = null;
+  state.answerSent = false;
+  state.answerReplay = null;
+};
+var clearAnswering = (state, peer) => {
+  if (state.answeringPeer === peer) {
+    resetAnsweringState(state);
+    if (state.connectedPeer !== peer && !peer.isDead) peer.destroy();
+  }
+};
+var markPeerConnected = (state, physical) => {
+  if (state.answeringPeer && state.answeringPeer !== physical && !state.answeringPeer.isDead) state.answeringPeer.destroy();
+  resetAnsweringState(state);
+  state.connectedPeer = physical;
+  state.connectedPeerUnhealthySinceMs = null;
+};
+var detachConnectedPeer = (state, physical) => {
+  if ((state == null ? void 0 : state.connectedPeer) === physical) {
+    state.connectedPeer = null;
+    state.connectedPeerUnhealthySinceMs = null;
+  }
+};
+var clearConnectedPeer = (state, peerId, _reason) => {
+  if (!state.connectedPeer) return;
+  if (!state.connectedPeer.isDead) state.connectedPeer.destroy();
+  state.connectedPeer = null;
+  state.connectedPeerUnhealthySinceMs = null;
+};
+var clearOfferRelay = (state, relayId) => {
+  state.offerRelayTimers[relayId] = resetTimer(state.offerRelayTimers[relayId]);
+  if (state.offerRelays[relayId]) state.offerRelays[relayId] = void 0;
+};
+var clearOfferRelayIfPlaceholder = (state, relayId) => {
+  if ((state == null ? void 0 : state.offerRelays[relayId]) === offerRelayPlaceholder) clearOfferRelay(state, relayId);
+};
+var resetOfferState = (state) => {
+  counterAnnounceTimestamps.delete(state);
+  state.offerExpiryTimer = resetTimer(state.offerExpiryTimer);
+  state.offerInitPromise = null;
+  state.offerRelays.forEach((_, relayId) => clearOfferRelay(state, relayId));
+  state.offerRelays = [];
+  state.offerSignalRelays = [];
+  state.offerRelayTimers = [];
+  state.offerSignalBacklog = [];
+  if (state.offerPeer && state.offerPeer !== state.connectedPeer) {
+    if (!state.offerPeer.isDead) state.offerPeer.destroy();
+  }
+  state.offerPeer = null;
+  state.offerId = null;
+  state.offerSdp = null;
+  state.offerAnswered = false;
+  state.connectionErrorReported = false;
+};
+var scheduleAnsweringExpiry = (ctx, state, peerId, peer) => {
+  resetTimer(state.answeringExpiryTimer);
+  state.answeringExpiryTimer = setTimeout(() => {
+    const current = ctx.peerStates[peerId];
+    if (!current || current.connectedPeer || current.answeringPeer !== peer) return;
+    if (current.answerSent) reportSdpExchangeConnectionFailure(ctx, current, peerId);
+    clearAnswering(current, peer);
+    ctx.checkDeactivate();
+  }, answeringTtlMs);
+};
+var scheduleOfferExpiry = (ctx, state, peerId, ttlMs = offerTtl) => {
+  resetTimer(state.offerExpiryTimer);
+  const offerId = state.offerId;
+  state.offerExpiryTimer = setTimeout(() => {
+    const current = ctx.peerStates[peerId];
+    if (!current || current.connectedPeer || current.offerId !== offerId) return;
+    if (current.offerAnswered) reportSdpExchangeConnectionFailure(ctx, current, peerId);
+    resetOfferState(current);
+    ctx.checkDeactivate();
+  }, ttlMs);
+};
+var bindOfferPeerHandlers = (ctx, state, peerId, peer, onSignal) => {
+  const onOfferPeerClosedOrError = () => {
+    if (state.offerPeer === peer && !state.connectedPeer) {
+      if (state.offerAnswered) reportSdpExchangeConnectionFailure(ctx, state, peerId);
+      resetOfferState(state);
+    }
+    ctx.disconnectPeer(peer, peerId);
+    ctx.checkDeactivate();
+  };
+  peer.setHandlers({
+    connect: () => ctx.connectPeer(peer, peerId),
+    ...onSignal ? { signal: onSignal } : {},
+    close: onOfferPeerClosedOrError,
+    error: onOfferPeerClosedOrError
+  });
+};
+var ensureOffer = (ctx, state, peerId) => {
+  if (state.offerPeer && state.offerId && state.offerSdp) return Promise.resolve({
+    peer: state.offerPeer,
+    offer: state.offerSdp,
+    offerId: state.offerId
+  });
+  if (state.offerInitPromise) return state.offerInitPromise;
+  const allocateOffer = async () => {
+    let firstOffer;
+    try {
+      firstOffer = (await ctx.offerManager.checkout(1, false, ctx.encryptOffer))[0];
+    } catch (error) {
+      if (ctx.isLeaving() || state.offerInitPromise !== pending) return null;
+      throw error;
+    }
+    if (!firstOffer) throw mkErr("failed to allocate offer peer");
+    const { peer, offer: offer2 } = firstOffer;
+    if (ctx.isLeaving() || state.offerInitPromise !== pending) {
+      peer.destroy();
+      return null;
+    }
+    state.offerPeer = peer;
+    state.offerId = genId(offerIdSize);
+    state.offerSdp = offer2;
+    state.offerAnswered = false;
+    state.connectionErrorReported = false;
+    state.offerSignalBacklog = [];
+    bindOfferPeerHandlers(ctx, state, peerId, peer, (signal) => {
+      if (state.offerPeer !== peer) return;
+      state.offerSignalBacklog.push(signal);
+      state.offerSignalRelays.forEach((sendSignal) => sendSignal == null ? void 0 : sendSignal(signal));
+    });
+    scheduleOfferExpiry(ctx, state, peerId);
+    return {
+      peer,
+      offer: offer2,
+      offerId: state.offerId
+    };
+  };
+  const pending = allocateOffer().finally(() => {
+    if (state.offerInitPromise === pending) state.offerInitPromise = null;
+  });
+  return state.offerInitPromise = pending;
+};
+var handleAnnouncement = async (ctx, relayId, peerId, signalPeer, retryAttempt = 0) => {
+  const state = ctx.peerStates[peerId];
+  if (!state || state.connectedPeer || state.answeringPeer || state.offerAnswered) {
+    clearOfferRelayIfPlaceholder(state, relayId);
+    return;
+  }
+  if (state.offerRelays[relayId] !== offerRelayPlaceholder) return;
+  const [peerTopic, offerInfo] = await all([sha1(topicPath(ctx.rootTopicPlaintext, peerId)), ensureOffer(ctx, state, peerId)]);
+  if (!offerInfo) {
+    clearOfferRelayIfPlaceholder(state, relayId);
+    return;
+  }
+  if (ctx.isLeaving()) {
+    resetOfferState(state);
+    return;
+  }
+  if (state.connectedPeer || state.answeringPeer || state.offerAnswered || state.offerRelays[relayId] !== offerRelayPlaceholder) {
+    clearOfferRelayIfPlaceholder(state, relayId);
+    return;
+  }
+  state.offerRelayTimers[relayId] = resetTimer(state.offerRelayTimers[relayId]);
+  state.offerRelays[relayId] = true;
+  state.offerRelayTimers[relayId] = setTimeout(() => {
+    if (retryAttempt >= 2 || ctx.isLeaving() || state.connectedPeer || state.answeringPeer || state.offerAnswered || state.offerPeer !== offerInfo.peer || state.offerId !== offerInfo.offerId) {
+      prunePendingOffer(ctx, peerId, relayId);
+      return;
+    }
+    state.offerRelays[relayId] = offerRelayPlaceholder;
+    handleAnnouncement(ctx, relayId, peerId, signalPeer, retryAttempt + 1);
+  }, retryAttempt === 0 && ctx.announceIntervals[relayId] === void 0 ? 2e3 : (ctx.announceIntervals[relayId] ?? ctx.announceIntervalMs) * 0.9);
+  let didSendOffer = false;
+  state.offerSignalRelays[relayId] = (signal) => {
+    if (!didSendOffer) return;
+    if (ctx.isLeaving() || state.connectedPeer || state.offerPeer !== offerInfo.peer || state.offerId !== offerInfo.offerId || signal.type !== "candidate") return;
+    publishCipheredSignalingMessage(ctx, signal, peerTopic, signalPeer, (sdp) => ({
+      peerId: selfId,
+      offerId: offerInfo.offerId,
+      candidate: sdp,
+      ...ctx.isPassive ? { passive: true } : {}
+    }), () => !state.connectedPeer && state.offerPeer === offerInfo.peer && state.offerId === offerInfo.offerId);
+  };
+  signalPeer(peerTopic, toJson({
+    peerId: selfId,
+    offerId: offerInfo.offerId,
+    offer: offerInfo.offer,
+    ...ctx.isPassive ? { passive: true } : {}
+  }));
+  didSendOffer = true;
+  state.offerSignalBacklog.forEach((signal) => {
+    var _a, _b;
+    return (_b = (_a = state.offerSignalRelays)[relayId]) == null ? void 0 : _b.call(_a, signal);
+  });
+};
+var handleOffer = async (ctx, relayId, peerId, offer2, offerId, signalPeer) => {
+  var _a;
+  const state = getState(ctx.peerStates, peerId);
+  if (state.answeringPeer || state.offerAnswered) {
+    const replay2 = state.answerReplay;
+    const lastSentAt = replay2 == null ? void 0 : replay2.lastSentAt[relayId];
+    if (state.answeringPeer && !state.answeringPeer.isDead && replay2 && replay2.offer === offer2 && replay2.offerId === offerId && (lastSentAt === void 0 || Date.now() - lastSentAt >= 1e3)) {
+      replay2.lastSentAt[relayId] = Date.now();
+      const peerTopic2 = await sha1(topicPath(ctx.rootTopicPlaintext, peerId));
+      if (!ctx.isLeaving() && state.answerReplay === replay2 && !state.connectedPeer) {
+        const send = (message) => signalPeer(peerTopic2, message);
+        replay2.relays[relayId] = send;
+        replay2.messages.forEach(send);
+      }
+    }
+    return;
+  }
+  const hasTrackedOutgoingOffer = Boolean(state.offerPeer || state.offerRelays.some(Boolean));
+  if (hasTrackedOutgoingOffer && selfId < peerId) return;
+  if (hasTrackedOutgoingOffer) resetOfferState(state);
+  const answerPeer = ctx.initPeer(false, ctx.config);
+  const replay = {
+    offer: offer2,
+    offerId,
+    messages: [],
+    lastSentAt: [],
+    relays: []
+  };
+  replay.lastSentAt[relayId] = Date.now();
+  state.answeringPeer = answerPeer;
+  state.answerSent = false;
+  state.answerReplay = replay;
+  state.connectionErrorReported = false;
+  scheduleAnsweringExpiry(ctx, state, peerId, answerPeer);
+  const onAnswerPeerClosedOrError = () => {
+    if (state.answeringPeer === answerPeer && !state.connectedPeer && state.answerSent) reportSdpExchangeConnectionFailure(ctx, state, peerId);
+    clearAnswering(state, answerPeer);
+    ctx.disconnectPeer(answerPeer, peerId);
+    ctx.checkDeactivate();
+  };
+  answerPeer.setHandlers({
+    connect: () => ctx.connectPeer(answerPeer, peerId),
+    close: onAnswerPeerClosedOrError,
+    error: onAnswerPeerClosedOrError
+  });
+  let plainOffer;
+  try {
+    plainOffer = await ctx.toPlain({
+      type: "offer",
+      sdp: offer2
+    });
+  } catch {
+    clearAnswering(state, answerPeer);
+    (_a = ctx.onJoinError) == null ? void 0 : _a.call(ctx, {
+      error: "incorrect room password when decrypting offer",
+      appId: ctx.appId,
+      peerId,
+      roomId: ctx.roomId
+    });
+    return;
+  }
+  if (answerPeer.isDead) {
+    clearAnswering(state, answerPeer);
+    return;
+  }
+  const peerTopic = await sha1(topicPath(ctx.rootTopicPlaintext, peerId));
+  if (ctx.isLeaving() || state.answerReplay !== replay) return;
+  replay.relays[relayId] = (message) => signalPeer(peerTopic, message);
+  const pendingCandidates = [];
+  let didSendAnswer = false;
+  const publishAnswerSignal = (signal) => {
+    ctx.toCipher(signal).then((encryptedSignal) => {
+      if (ctx.isLeaving() || state.answeringPeer !== answerPeer || answerPeer.isDead) return;
+      const payloadToSend = { peerId: selfId };
+      if (signal.type === "answer") {
+        state.answerSent = true;
+        payloadToSend["answer"] = encryptedSignal.sdp;
+      } else payloadToSend["candidate"] = encryptedSignal.sdp;
+      if (offerId) payloadToSend["offerId"] = offerId;
+      if (ctx.isPassive) payloadToSend["passive"] = true;
+      const message = toJson(payloadToSend);
+      const now = Date.now();
+      replay.messages.push(message);
+      replay.relays.forEach((send, id) => {
+        if (send) {
+          replay.lastSentAt[id] = now;
+          send(message);
+        }
+      });
+      if (signal.type === "answer" && !didSendAnswer) {
+        didSendAnswer = true;
+        pendingCandidates.splice(0).forEach(publishAnswerSignal);
+      }
+    });
+  };
+  answerPeer.setHandlers({ signal: (signal) => {
+    if (ctx.isLeaving() || state.answeringPeer !== answerPeer || answerPeer.isDead) return;
+    if (signal.type !== "answer" && signal.type !== "candidate") return;
+    if (signal.type === "candidate" && !didSendAnswer) {
+      pendingCandidates.push(signal);
+      return;
+    }
+    publishAnswerSignal(signal);
+  } });
+  await answerPeer.signal(plainOffer);
+};
+var handleCandidate = async (ctx, peerId, candidate, offerId, peer) => {
+  var _a;
+  let plainCandidate;
+  try {
+    plainCandidate = await ctx.toPlain({
+      type: candidateType,
+      sdp: candidate
+    });
+  } catch {
+    return;
+  }
+  const state = ctx.peerStates[peerId];
+  const offerPeerMatch = offerId && (state == null ? void 0 : state.offerPeer) && state.offerId === offerId ? state.offerPeer : null;
+  const answeringPeer = !offerId || ((_a = state == null ? void 0 : state.answerReplay) == null ? void 0 : _a.offerId) === offerId ? state == null ? void 0 : state.answeringPeer : null;
+  const fallbackOfferPeer = !offerId && (state == null ? void 0 : state.offerPeer) ? state.offerPeer : null;
+  const targetPeer = peer && !peer.isDead ? peer : offerPeerMatch ?? answeringPeer ?? fallbackOfferPeer;
+  if (targetPeer && !targetPeer.isDead) targetPeer.signal(plainCandidate);
+};
+var handleAnswer = async (ctx, peerId, answer, offerId, peer) => {
+  var _a;
+  let plainAnswer;
+  try {
+    plainAnswer = await ctx.toPlain({
+      type: "answer",
+      sdp: answer
+    });
+  } catch {
+    if (peer) {
+      ctx.offerManager.reclaimLeased(peer);
+      if (!peer.isDead) peer.destroy();
+    }
+    (_a = ctx.onJoinError) == null ? void 0 : _a.call(ctx, {
+      error: "incorrect room password when decrypting answer",
+      appId: ctx.appId,
+      peerId,
+      roomId: ctx.roomId
+    });
+    return;
+  }
+  if (peer) {
+    const state = getState(ctx.peerStates, peerId);
+    ctx.offerManager.claimLeased(peer);
+    if (state.connectedPeer || state.offerAnswered || state.answeringPeer && !state.answeringPeer.isDead && selfId > peerId) {
+      peer.destroy();
+      return;
+    }
+    if (state.answeringPeer) {
+      const answeringPeer = state.answeringPeer;
+      clearAnswering(state, answeringPeer);
+    }
+    resetOfferState(state);
+    state.offerPeer = peer;
+    state.offerId = offerId ?? null;
+    state.offerAnswered = true;
+    scheduleOfferExpiry(ctx, state, peerId, offerPostAnswerTtlMs);
+    bindOfferPeerHandlers(ctx, state, peerId, peer);
+    peer.signal(plainAnswer);
+  } else {
+    const state = ctx.peerStates[peerId];
+    if (!state || !state.offerPeer || state.offerAnswered || offerId && state.offerId && offerId !== state.offerId || state.offerPeer.isDead) return;
+    state.offerAnswered = true;
+    scheduleOfferExpiry(ctx, state, peerId, offerPostAnswerTtlMs);
+    state.offerPeer.signal(plainAnswer);
+  }
+};
+var prunePendingOffer = (ctx, peerId, relayId) => {
+  const state = ctx.peerStates[peerId];
+  if (!state || state.connectedPeer) return;
+  if (state.offerRelays[relayId]) {
+    clearOfferRelay(state, relayId);
+    ctx.checkDeactivate();
+  }
+};
+var createSignalHandler = (ctx) => (relayId) => async (topic, msg, signalPeer) => {
+  var _a;
+  if (ctx.isLeaving()) return;
+  const payload = toPayload(msg);
+  if (!payload || hasInvalidSignalField(payload, typeof msg === "string")) return;
+  const peerId = getString(payload, "peerId") ?? "";
+  const offer2 = getString(payload, "offer");
+  const answer = getString(payload, "answer");
+  const candidate = getString(payload, "candidate");
+  const offerId = getString(payload, "offerId");
+  const peer = isPeerHandle(payload["peer"]) ? payload["peer"] : void 0;
+  const remoteIsPassive = payload["passive"] === true;
+  if (!peerId || peerId === selfId) return;
+  const [rootTopic, selfTopic] = await all([ctx.rootTopicP, ctx.selfTopicP]);
+  if (ctx.isLeaving()) return;
+  if (topic !== rootTopic && topic !== selfTopic) return;
+  if (ctx.isPassive && remoteIsPassive) return;
+  if (ctx.isPassive && !ctx.isActive && !answer && !candidate) {
+    ctx.isActive = true;
+    (_a = ctx.requeueAnnounce) == null ? void 0 : _a.call(ctx);
+  }
+  if (ctx.isPassive && !ctx.isActive) return;
+  const state = ctx.peerStates[peerId];
+  const connectedPeer = state == null ? void 0 : state.connectedPeer;
+  if (connectedPeer && state) {
+    const health = getConnectedPeerHealth(connectedPeer);
+    if (health === "live") {
+      state.connectedPeerUnhealthySinceMs = null;
+      return;
+    }
+    if (health === "stale") clearConnectedPeer(state, peerId, "message-from-stale-peer");
+    else {
+      const nowMs = Date.now();
+      const unhealthySinceMs = state.connectedPeerUnhealthySinceMs ?? nowMs;
+      state.connectedPeerUnhealthySinceMs = unhealthySinceMs;
+      if (nowMs - unhealthySinceMs < disconnectedPeerGraceMs) return;
+      clearConnectedPeer(state, peerId, "message-from-prolonged-disconnect");
+    }
+  }
+  if (ctx.reusePeer(peerId)) return;
+  if (Boolean(peerId && !offer2 && !answer && !candidate)) {
+    const announcePeerState = getState(ctx.peerStates, peerId);
+    const shouldLeadOffer = selfId < peerId;
+    if (announcePeerState.answeringPeer || announcePeerState.connectedPeer || announcePeerState.offerAnswered) return;
+    if (!shouldLeadOffer && !announcePeerState.offerPeer) {
+      let lastSentByRelay = counterAnnounceTimestamps.get(announcePeerState);
+      if (!lastSentByRelay) {
+        lastSentByRelay = [];
+        counterAnnounceTimestamps.set(announcePeerState, lastSentByRelay);
+      }
+      const lastSentAt = lastSentByRelay[relayId];
+      if (lastSentAt !== void 0 && Date.now() - lastSentAt < 1e3) return;
+      lastSentByRelay[relayId] = Date.now();
+      const peerSelfTopic = await sha1(topicPath(ctx.rootTopicPlaintext, peerId));
+      if (!ctx.isLeaving() && !announcePeerState.connectedPeer && !announcePeerState.answeringPeer && !announcePeerState.offerAnswered) signalPeer(peerSelfTopic, toJson({ peerId: selfId }));
+      return;
+    }
+    if (announcePeerState.offerRelays[relayId]) return;
+    announcePeerState.offerRelays[relayId] = offerRelayPlaceholder;
+    return handleAnnouncement(ctx, relayId, peerId, signalPeer);
+  }
+  if (offer2) return handleOffer(ctx, relayId, peerId, offer2, offerId, signalPeer);
+  if (candidate) return handleCandidate(ctx, peerId, candidate, offerId, peer);
+  if (answer) return handleAnswer(ctx, peerId, answer, offerId, peer);
+};
+
+// node_modules/@trystero-p2p/core/dist/strategy.mjs
+var announceIntervalMs = 5333;
+var announceWarmupIntervalsMs = [
+  233,
+  533,
+  1333
+];
+var passiveActivationGraceMs = 7533;
+var sharedPeerIdleMsDefault = 123333;
+var strategy_default = ({ init, subscribe: subscribe2, announce, deactivate }) => {
+  const occupiedRooms = {};
+  const leavingRoomCleanups = {};
+  const sharedPeers = new SharedPeerManager();
+  const hasActiveRooms = () => values(occupiedRooms).some((rooms) => keys(rooms).length > 0);
+  let didInit = false;
+  let initPromises = [];
+  let cleanupWatchOnline = noOp;
+  return (config, roomId, callbacks) => {
+    var _a, _b, _c, _d;
+    if (!config) throw mkErr("requires a config map as the first argument");
+    if (callbacks && typeof callbacks !== "object") throw mkErr("third argument must be a callbacks object");
+    const { appId } = config;
+    const onJoinError = callbacks == null ? void 0 : callbacks.onJoinError;
+    const onPeerHandshake = callbacks == null ? void 0 : callbacks.onPeerHandshake;
+    const handshakeTimeoutMs = callbacks == null ? void 0 : callbacks.handshakeTimeoutMs;
+    if (!appId) throw mkErr("config map is missing appId field");
+    if (!roomId) throw mkErr("roomId argument required");
+    if (config.maxReceiveBytes !== void 0 && (!Number.isSafeInteger(config.maxReceiveBytes) || config.maxReceiveBytes <= 0)) throw mkErr("maxReceiveBytes must be a positive safe integer");
+    if (handshakeTimeoutMs !== void 0 && (!Number.isFinite(handshakeTimeoutMs) || handshakeTimeoutMs <= 0)) throw mkErr("handshakeTimeoutMs must be a positive number");
+    if ((_a = occupiedRooms[appId]) == null ? void 0 : _a[roomId]) return occupiedRooms[appId][roomId];
+    (_c = (_b = leavingRoomCleanups[appId]) == null ? void 0 : _b[roomId]) == null ? void 0 : _c.call(_b, true);
+    const rootTopicPlaintext = topicPath(libName, appId, roomId);
+    const rootTopicP = sha1(rootTopicPlaintext);
+    const selfTopicP = sha1(topicPath(rootTopicPlaintext, selfId));
+    const key = genKey(config.password ?? "", appId, roomId);
+    const roomNamespacePromise = deriveRoomNamespace(appId, roomId);
+    const sharedPeerIdleMs = config._test_only_sharedPeerIdleMs ?? sharedPeerIdleMsDefault;
+    let didLeaveRoom = false;
+    const withKey = (f) => async (signal) => ({
+      type: signal.type,
+      sdp: await f(key, signal.sdp)
+    });
+    const toPlain = withKey(decrypt);
+    const toCipher = withKey(encrypt);
+    const makeOffer = () => peer_default(true, config);
+    let reannounceOnDisconnect = false;
+    const offerManager = new OfferManager(makeOffer);
+    const encryptOffer = async (peer) => {
+      const plainOffer = await peer.getOffer();
+      if (!plainOffer || plainOffer.type !== "offer") throw mkErr("failed to get offer for peer");
+      return (await toCipher(plainOffer)).sdp;
+    };
+    const connectPeer = (peer, peerId) => {
+      membership.connect(peerId, peer, sharedPeerIdleMs);
+    };
+    let disconnectReannounceQueued = false;
+    const reannounceAfterDisconnect = () => {
+      if (isPassive || !reannounceOnDisconnect || disconnectReannounceQueued) return;
+      disconnectReannounceQueued = true;
+      queueMicrotask(() => {
+        var _a2;
+        disconnectReannounceQueued = false;
+        if (!didLeaveRoom) (_a2 = ctx.requeueAnnounce) == null ? void 0 : _a2.call(ctx);
+      });
+    };
+    const disconnectPeer = (peer, peerId) => {
+      if (didLeaveRoom) return;
+      const state = ctx.peerStates[peerId];
+      if ((state == null ? void 0 : state.connectedPeer) === peer) {
+        clearConnectedPeer(state, peerId, "close-event");
+        checkDeactivate();
+        reannounceAfterDisconnect();
+      }
+    };
+    const isPassive = Boolean(config.passive);
+    let passiveActivationTimeout;
+    let deactivateRelayAnnouncements = noOp;
+    const checkDeactivate = () => {
+      if (!isPassive || !ctx.isActive) return;
+      let hasActiveWork = false;
+      entries(ctx.peerStates).forEach(([peerId, state]) => {
+        if (state.connectedPeer || state.answeringPeer || state.offerInitPromise || state.offerPeer || state.offerRelays.some(Boolean)) hasActiveWork = true;
+        else delete ctx.peerStates[peerId];
+      });
+      if (!hasActiveWork) {
+        ctx.isActive = false;
+        passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+        announceTimeouts.forEach(resetTimer);
+        announceTimeouts.length = 0;
+        deactivateRelayAnnouncements();
+        membership.setActive(false);
+      }
+    };
+    const ctx = {
+      appId,
+      roomId,
+      config,
+      peerStates: {},
+      rootTopicPlaintext,
+      rootTopicP,
+      selfTopicP,
+      toPlain,
+      toCipher,
+      isLeaving: () => didLeaveRoom,
+      isPassive,
+      isActive: !isPassive,
+      onJoinError,
+      offerManager,
+      encryptOffer,
+      initPeer: peer_default,
+      connectPeer,
+      disconnectPeer,
+      reusePeer: (peerId) => membership.reuse(peerId),
+      checkDeactivate,
+      announceIntervals: [],
+      announceIntervalMs
+    };
+    const strategyContext = {
+      config,
+      appId,
+      roomId,
+      isPassive
+    };
+    const handleMessage = createSignalHandler(ctx);
+    if (!didInit) {
+      const initRes = init(config);
+      initPromises = (Array.isArray(initRes) ? initRes : [initRes]).map((value) => Promise.resolve(value));
+      didInit = true;
+      cleanupWatchOnline = ((_d = config.relayConfig) == null ? void 0 : _d.manualReconnection) ? noOp : watchOnline();
+    }
+    const announceScheduleIntervals = initPromises.map(() => announceIntervalMs);
+    const announceAttemptCounts = initPromises.map(() => 0);
+    const announceErrorStreaks = initPromises.map(() => 0);
+    const announceTimeouts = [];
+    const unsubFns = initPromises.map(async (relayP, i) => subscribe2(await relayP, await rootTopicP, await selfTopicP, handleMessage(i), (n) => offerManager.getOffers(n, encryptOffer), strategyContext));
+    all([rootTopicP, selfTopicP]).then(([rootTopic, selfTopic]) => {
+      if (didLeaveRoom) return;
+      const queueAnnounce = async (relay, i) => {
+        var _a2;
+        if (didLeaveRoom) return;
+        if (isPassive && !ctx.isActive) return;
+        const extra = isPassive ? { passive: true } : void 0;
+        let announceResult = void 0;
+        try {
+          announceResult = await announce(relay, rootTopic, selfTopic, extra, strategyContext);
+          announceErrorStreaks[i] = 0;
+        } catch (error) {
+          if (didLeaveRoom) return;
+          const errorStreak = announceErrorStreaks[i] ?? 0;
+          if (errorStreak === 0 && ((_a2 = config.relayConfig) == null ? void 0 : _a2.warnOnRelayFailure) !== false) console.warn(`${libName}: announce failed - ${toErrorMessage(error, "")}`);
+          announceErrorStreaks[i] = errorStreak + 1;
+        }
+        if (didLeaveRoom || isPassive && !ctx.isActive) return;
+        if (announceResult && typeof announceResult !== "number" && "stopAnnouncing" in announceResult) return;
+        if (typeof announceResult === "number") {
+          ctx.announceIntervals[i] = announceResult;
+          announceScheduleIntervals[i] = announceResult;
+        } else if (announceResult) {
+          announceScheduleIntervals[i] = announceResult.nextAnnounceMs;
+          reannounceOnDisconnect || (reannounceOnDisconnect = announceResult.reannounceOnDisconnect === true);
+        }
+        const announceAttempt = announceAttemptCounts[i] ?? 0;
+        announceAttemptCounts[i] = announceAttempt + 1;
+        const currentInterval = announceScheduleIntervals[i] ?? announceIntervalMs;
+        const warmupDelay = announceWarmupIntervalsMs[announceAttempt] ?? (announceAttempt === 3 && typeof announceResult === "object" ? announceIntervalMs : void 0);
+        announceTimeouts[i] = setTimeout(() => {
+          queueAnnounce(relay, i);
+        }, typeof warmupDelay === "number" ? Math.min(currentInterval, warmupDelay) : currentInterval);
+      };
+      deactivateRelayAnnouncements = () => {
+        if (!deactivate) return;
+        initPromises.forEach(async (relayP) => {
+          const relay = await relayP;
+          if (!didLeaveRoom) deactivate(relay, rootTopic, selfTopic, strategyContext);
+        });
+      };
+      ctx.requeueAnnounce = () => {
+        announceTimeouts.forEach(resetTimer);
+        announceTimeouts.length = 0;
+        passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+        membership.setActive(true);
+        passiveActivationTimeout = setTimeout(checkDeactivate, passiveActivationGraceMs);
+        initPromises.forEach(async (relayP, i) => {
+          const relay = await relayP;
+          if (relay && !didLeaveRoom) {
+            announceAttemptCounts[i] = 0;
+            queueAnnounce(relay, i);
+          }
+        });
+      };
+      unsubFns.forEach(async (didSub, i) => {
+        await didSub;
+        if (didLeaveRoom) return;
+        const relay = await initPromises[i];
+        if (relay && !didLeaveRoom && (!isPassive || ctx.isActive)) queueAnnounce(relay, i);
+      });
+    });
+    let onPeerConnect = noOp;
+    const sharedPassword = config.password ?? "";
+    const { compose } = createPasswordHandshake(sharedPassword, appId, roomId);
+    const composedPeerHandshake = compose(onPeerHandshake);
+    const releaseOccupiedRoom = () => {
+      var _a2;
+      if (((_a2 = occupiedRooms[appId]) == null ? void 0 : _a2[roomId]) === joinedRoom) {
+        delete occupiedRooms[appId][roomId];
+        if (keys(occupiedRooms[appId]).length === 0) delete occupiedRooms[appId];
+      }
+    };
+    const clearLeavingCleanup = () => {
+      var _a2;
+      if (((_a2 = leavingRoomCleanups[appId]) == null ? void 0 : _a2[roomId]) === cleanupRoom) {
+        delete leavingRoomCleanups[appId][roomId];
+        if (keys(leavingRoomCleanups[appId]).length === 0) delete leavingRoomCleanups[appId];
+      }
+    };
+    const cleanupRoom = (rejoining = false) => {
+      if (didLeaveRoom) return;
+      didLeaveRoom = true;
+      onPeerConnect = noOp;
+      releaseOccupiedRoom();
+      clearLeavingCleanup();
+      membership.leave();
+      entries(ctx.peerStates).forEach(([peerId, state]) => {
+        if (state.connectedPeer && !state.connectedPeer.isDead) {
+          if (!sharedPeers.owns(appId, peerId, state.connectedPeer)) state.connectedPeer.destroy();
+        }
+        if (state.answeringPeer && !state.answeringPeer.isDead) state.answeringPeer.destroy();
+        resetOfferState(state);
+        resetAnsweringState(state);
+        state.connectedPeer = null;
+        state.connectedPeerUnhealthySinceMs = null;
+      });
+      announceTimeouts.forEach(resetTimer);
+      passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+      unsubFns.forEach(async (f) => {
+        (await f)();
+      });
+      offerManager.destroy();
+      if (rejoining || hasActiveRooms()) return;
+      didInit = false;
+      cleanupWatchOnline();
+    };
+    const roomOptions = {
+      ...config.maxReceiveBytes === void 0 ? {} : { maxReceiveBytes: config.maxReceiveBytes },
+      ...composedPeerHandshake ? { onPeerHandshake: composedPeerHandshake } : {},
+      ...handshakeTimeoutMs === void 0 ? {} : { handshakeTimeoutMs },
+      isPassive,
+      onBeforeLeave: () => {
+        releaseOccupiedRoom();
+        (leavingRoomCleanups[appId] ?? (leavingRoomCleanups[appId] = {}))[roomId] = cleanupRoom;
+      },
+      onHandshakeError: (peerId, error) => onJoinError == null ? void 0 : onJoinError({
+        error: error.replace(/^handshake failed: /, ""),
+        appId,
+        peerId,
+        roomId
+      })
+    };
+    occupiedRooms[appId] ?? (occupiedRooms[appId] = {});
+    const joinedRoom = room_default((f) => onPeerConnect = f, (id) => {
+      if (didLeaveRoom) return;
+      const state = ctx.peerStates[id];
+      if (state == null ? void 0 : state.connectedPeer) detachConnectedPeer(state, state.connectedPeer);
+      checkDeactivate();
+      reannounceAfterDisconnect();
+    }, () => cleanupRoom(false), roomOptions);
+    const membership = sharedPeers.registerRoom(appId, roomId, roomNamespacePromise, {
+      active: !isPassive || ctx.isActive,
+      onPeer: (proxy, peerId, physical) => {
+        const state = getState(ctx.peerStates, peerId);
+        markPeerConnected(state, physical);
+        if (isPassive && !ctx.isActive) {
+          ctx.isActive = true;
+          membership.setActive(true);
+          if (ctx.requeueAnnounce) ctx.requeueAnnounce();
+          else {
+            passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+            passiveActivationTimeout = setTimeout(checkDeactivate, passiveActivationGraceMs);
+          }
+        }
+        onPeerConnect(proxy, peerId);
+        resetOfferState(state);
+      },
+      onDetach: (peerId, physical) => {
+        detachConnectedPeer(ctx.peerStates[peerId], physical);
+        checkDeactivate();
+      }
+    });
+    return occupiedRooms[appId][roomId] = joinedRoom;
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/topic-strategy.mjs
+var defaultSteadyAnnounceIntervalMs = 6e4;
+var requireContext = (context) => {
+  if (!context) throw mkErr("topic strategy missing room context");
+  return context;
+};
+var makeTopicContext = (context, kind, rootTopic, selfTopic) => ({
+  kind,
+  appId: context.appId,
+  roomId: context.roomId,
+  rootTopic,
+  selfTopic
+});
+var topic_strategy_default = ({ steadyAnnounceIntervalMs = defaultSteadyAnnounceIntervalMs, reannounceOnDisconnect = true, init, subscribeTopic, publishTopic, unpublishTopic }) => strategy_default({
+  init,
+  subscribe: async (relay, rootTopic, selfTopic, onMessage, _getOffers, rawContext) => {
+    const context = requireContext(rawContext);
+    const signalPeer = (peerTopic, signal) => void publishTopic(relay, peerTopic, signal, makeTopicContext(context, "signal", rootTopic, selfTopic));
+    let selfCleanup = null;
+    let selfCleanupDone = false;
+    let selfSubscriptionP = null;
+    let didCleanup = false;
+    const cleanupSelf = (cleanup) => {
+      if (selfCleanupDone) return;
+      selfCleanupDone = true;
+      cleanup();
+    };
+    const ensureSelfSubscription = () => {
+      if (!selfSubscriptionP) selfSubscriptionP = Promise.resolve(subscribeTopic(relay, selfTopic, (topic, msg) => {
+        if (!didCleanup) onMessage(topic, msg, signalPeer);
+      }, makeTopicContext(context, "self", rootTopic, selfTopic))).then((cleanup) => {
+        selfCleanup = cleanup;
+        if (didCleanup) cleanupSelf(cleanup);
+      });
+      return selfSubscriptionP;
+    };
+    if (!context.isPassive) await ensureSelfSubscription();
+    const rootCleanup = await subscribeTopic(relay, rootTopic, async (topic, msg) => {
+      if (didCleanup) return;
+      if (context.isPassive && shouldActivatePassiveRoom(msg)) await ensureSelfSubscription();
+      if (!didCleanup) await onMessage(topic, msg, signalPeer);
+    }, makeTopicContext(context, "root", rootTopic, selfTopic));
+    return () => {
+      didCleanup = true;
+      if (selfCleanup) cleanupSelf(selfCleanup);
+      rootCleanup();
+    };
+  },
+  announce: async (relay, rootTopic, selfTopic, extraPayload, rawContext) => {
+    const context = requireContext(rawContext);
+    const result = await publishTopic(relay, rootTopic, toJson({
+      peerId: selfId,
+      ...extraPayload
+    }), makeTopicContext(context, "announce", rootTopic, selfTopic));
+    return typeof result === "number" || result !== void 0 && "stopAnnouncing" in result ? result : {
+      nextAnnounceMs: (result == null ? void 0 : result.nextAnnounceMs) ?? steadyAnnounceIntervalMs,
+      reannounceOnDisconnect: (result == null ? void 0 : result.reannounceOnDisconnect) ?? reannounceOnDisconnect
+    };
+  },
+  ...unpublishTopic ? { deactivate: (relay, rootTopic, selfTopic, rawContext) => {
+    const context = requireContext(rawContext);
+    return unpublishTopic(relay, rootTopic, makeTopicContext(context, "announce", rootTopic, selfTopic));
+  } } : {}
+});
+
+// node_modules/@trystero-p2p/ws-relay/dist/index.mjs
+var relayManager = createRelayManager((client) => client.socket);
+var msgHandlers = relayManager.scoped();
+var announcementMessages = relayManager.scoped();
+var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+var isStrategyMessage = (value) => typeof value === "string" || isRecord(value);
+var parseServerMessage = (data) => {
+  try {
+    const msg = JSON.parse(data);
+    return typeof msg.topic === "string" && isStrategyMessage(msg.payload) ? {
+      topic: msg.topic,
+      payload: msg.payload
+    } : null;
+  } catch {
+    return null;
+  }
+};
+var publish = (topic, payload) => ({
+  type: "publish",
+  topic,
+  payload
+});
+var subscribe = (topic) => ({
+  type: "subscribe",
+  topic
+});
+var unsubscribe = (topic) => ({
+  type: "unsubscribe",
+  topic
+});
+var joinRoom = topic_strategy_default({
+  init: (config) => config.relayConfig.urls.map((url) => {
+    const client = relayManager.register(url, () => makeSocket(url, (data) => {
+      var _a;
+      const msg = parseServerMessage(data);
+      if (!msg) return;
+      (_a = msgHandlers.forRelay(client)[msg.topic]) == null ? void 0 : _a.forEach((handler) => handler(msg.topic, msg.payload));
+    }, () => {
+      Object.keys(msgHandlers.forKey(url)).forEach((topic) => client.send(toJson(subscribe(topic))));
+      Object.entries(announcementMessages.forKey(url)).forEach(([topic, msg]) => client.send(toJson(publish(topic, msg))));
+    }));
+    return client.ready;
+  }),
+  subscribeTopic: (client, topic, onMessage) => {
+    const handlers = msgHandlers.forRelay(client);
+    const topicHandler = (topic2, data) => void onMessage(topic2, data);
+    const wasEmpty = !handlers[topic];
+    (handlers[topic] ?? (handlers[topic] = /* @__PURE__ */ new Set())).add(topicHandler);
+    if (wasEmpty) client.send(toJson(subscribe(topic)));
+    return () => {
+      const topicHandlers = handlers[topic];
+      if (!topicHandlers) return;
+      topicHandlers.delete(topicHandler);
+      if (topicHandlers.size === 0) {
+        delete handlers[topic];
+        delete announcementMessages.forRelay(client)[topic];
+        client.send(toJson(unsubscribe(topic)));
+      }
+    };
+  },
+  publishTopic: (client, topic, msg, { kind }) => {
+    client.send(toJson(publish(topic, msg)));
+    if (kind === "announce") announcementMessages.forRelay(client)[topic] = msg;
+  }
+});
+var getRelaySockets = relayManager.getSockets;
+
+// src/cast-protocol/index.ts
+var CAST_APP_ID = "dash-widgeter-cast-v1";
+var MAX_CAST_MESSAGE_BYTES = 16 * 1024;
+function parseCastCommand(value) {
+  const sourceKind = value.sourceKind;
+  if (sourceKind !== "idle" && sourceKind !== "website" && sourceKind !== "media" && sourceKind !== "youtube" && sourceKind !== "spotify") return null;
+  const sourceUrl = String(value.sourceUrl ?? "");
+  if (sourceUrl.length > 8192) return null;
+  return { sourceKind, sourceUrl, muted: value.muted === true };
 }
-var sandbox_default = definePhotoFrameWidget({
-  widgetId: "google-photos.photoframe",
-  styleId: "google-photos-style",
-  strings,
-  createBackend: (context, config) => new GooglePhotosBackend(context, config),
-  loadOptions: (context, _fieldKey, config) => loadGooglePhotosAlbums(context, config)
+function roleHandshake(role) {
+  return async (_peerId, send, receive) => {
+    await send(role);
+    const remote = await receive();
+    if (remote.data === role || remote.data !== "receiver" && remote.data !== "sender") {
+      throw new Error("Invalid cast peer role");
+    }
+  };
+}
+
+// src/plugins/cast-receiver/receiver.ts
+function createPluginReceiver(options, onState) {
+  const state = { status: "connecting", command: null, stream: null, peerCount: 0, error: null };
+  let closed = false;
+  let senderId = null;
+  const emit = () => {
+    if (!closed) onState({ ...state });
+  };
+  const iceServers = options.turnUrl ? [{
+    urls: options.turnUrl,
+    ...options.turnUsername ? { username: options.turnUsername } : {},
+    ...options.turnCredential ? { credential: options.turnCredential } : {}
+  }] : [];
+  const config = {
+    appId: CAST_APP_ID,
+    password: options.password,
+    maxReceiveBytes: MAX_CAST_MESSAGE_BYTES,
+    relayConfig: { urls: [options.relayUrl] },
+    rtcConfig: { iceServers }
+  };
+  const room = joinRoom(config, options.roomCode, {
+    onPeerHandshake: roleHandshake("receiver"),
+    onJoinError: ({ error }) => {
+      state.status = "error";
+      state.error = error;
+      emit();
+    }
+  });
+  const action = room.makeAction("cast-command");
+  action.onMessage = (value, { peerId }) => {
+    const command = parseCastCommand(value);
+    if (!command || peerId !== senderId) return;
+    state.command = command;
+    state.stream = null;
+    state.status = command.sourceKind === "idle" ? "paired" : "casting";
+    emit();
+  };
+  room.onPeerJoin = (peerId) => {
+    if (senderId) return;
+    senderId = peerId;
+    state.peerCount = 1;
+    state.status = "paired";
+    emit();
+  };
+  room.onPeerLeave = (peerId) => {
+    if (peerId !== senderId) return;
+    senderId = null;
+    state.peerCount = 0;
+    state.status = "disconnected";
+    state.command = null;
+    state.stream = null;
+    emit();
+  };
+  room.onPeerStream = (stream, peerId) => {
+    if (peerId !== senderId) return;
+    state.stream = stream;
+    state.command = null;
+    state.status = "casting";
+    emit();
+  };
+  emit();
+  return () => {
+    var _a;
+    closed = true;
+    for (const track of ((_a = state.stream) == null ? void 0 : _a.getTracks()) ?? []) track.stop();
+    senderId = null;
+    void room.leave();
+  };
+}
+
+// src/plugins/cast-receiver/useReceiver.ts
+var INITIAL = {
+  status: "connecting",
+  command: null,
+  stream: null,
+  peerCount: 0,
+  error: null,
+  roomCode: ""
+};
+var RENEW_EARLY_MS = 3e4;
+function useReceiver(context) {
+  const config = readCastConfig(context.config);
+  const [state, setState] = (0, import_react2.useState)(INITIAL);
+  (0, import_react2.useEffect)(() => {
+    if (!config.relayUrl) {
+      const error = "Configure and approve a signaling origin.";
+      setState({ ...INITIAL, status: "error", error });
+      context.reportStatus("error", error);
+      return;
+    }
+    const abort = new AbortController();
+    let stop = null;
+    let close = null;
+    let renewal;
+    const open = async () => {
+      const session = await createPairingSession(config.relayUrl, abort.signal);
+      if (abort.signal.aborted) {
+        await session.close();
+        return;
+      }
+      stop == null ? void 0 : stop();
+      if (close) await close().catch(() => void 0);
+      close = () => session.close();
+      setState((current) => ({ ...current, roomCode: session.roomCode }));
+      stop = createPluginReceiver(session.options, (next) => {
+        setState({ ...next, roomCode: session.roomCode });
+        if (next.error) context.reportStatus("error", next.error);
+        else context.reportStatus("ok", "");
+      });
+      renewal = window.setTimeout(
+        () => void open().catch(reportError2),
+        Math.max(1e3, session.expiresAt - Date.now() - RENEW_EARLY_MS)
+      );
+    };
+    const reportError2 = (cause) => {
+      if (abort.signal.aborted) return;
+      const error = cause instanceof Error ? cause.message : String(cause);
+      setState({ ...INITIAL, status: "error", error });
+      context.reportStatus("error", error);
+    };
+    void open().catch(reportError2);
+    return () => {
+      abort.abort();
+      clearTimeout(renewal);
+      stop == null ? void 0 : stop();
+      if (close) void close().catch(() => void 0);
+    };
+  }, [config.relayUrl, context]);
+  return state;
+}
+
+// src/plugins/cast-receiver/locales/de.json
+var de_default = {
+  manifest: {
+    "Cast Receiver": "Cast-Empf\xE4nger",
+    "Mostly-invisible screen receiver: cast a website, media stream, or YouTube video to this display": "Fast unsichtbarer Bildschirm-Empf\xE4nger: Website, Medienstream oder YouTube-Video auf dieses Display casten",
+    "Full-bleed receiver that shows cast content and a pairing code when idle": "Vollfl\xE4chiger Empf\xE4nger, der Cast-Inhalte und im Leerlauf einen Kopplungscode anzeigt",
+    Cast: "Cast",
+    Presentation: "Darstellung",
+    "What to cast": "Was gecastet wird",
+    "Nothing (show pairing code)": "Nichts (Kopplungscode anzeigen)",
+    Website: "Website",
+    "Media stream (video/audio URL)": "Medienstream (Video-/Audio-URL)",
+    "YouTube video": "YouTube-Video",
+    "Cast target": "Cast-Ziel",
+    "An https website or media URL, or a YouTube link/id (per the type above).": "Eine https-Website oder Medien-URL oder ein YouTube-Link/-ID (gem\xE4\xDF Typ oben).",
+    "Pairing code": "Kopplungscode",
+    "Shown while idle so a sender knows which screen it controls.": "Wird im Leerlauf angezeigt, damit ein Sender wei\xDF, welchen Bildschirm er steuert.",
+    "Overlay style": "\xDCberlagerungsstil",
+    "Cover (opaque)": "Deckend",
+    "Dim backdrop": "Hintergrund abdunkeln",
+    "Inline (transparent)": "Inline (transparent)",
+    "Show pairing code when idle": "Kopplungscode im Leerlauf anzeigen",
+    "Start muted": "Stummgeschaltet starten"
+  },
+  runtime: {
+    idleTitle: "Bereit zum Casten",
+    idleHint: "Lege ein Cast-Ziel in den Einstellungen fest oder sende eines von einem gekoppelten Ger\xE4t.",
+    pairingLabel: "Kopplungscode"
+  }
+};
+
+// src/plugins/cast-receiver/CastWidget.tsx
+var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+var EN = { idleTitle: "Ready to cast", idleHint: "Open the sender and enter this pairing code." };
+function castStrings(locale) {
+  return locale.split("-")[0] === "de" ? { idleTitle: de_default.runtime.idleTitle, idleHint: de_default.runtime.idleHint } : EN;
+}
+function CastWidget({ context }) {
+  const config = (0, import_react3.useMemo)(() => readCastConfig(context.config), [context.config]);
+  const strings = (0, import_react3.useMemo)(() => castStrings(context.locale), [context.locale]);
+  const receiver = useReceiver(context);
+  const videoRef = (0, import_react3.useRef)(null);
+  (0, import_react3.useEffect)(() => {
+    const video = videoRef.current;
+    if (video) video.srcObject = receiver.stream;
+    return () => {
+      if (video) video.srcObject = null;
+    };
+  }, [receiver.stream]);
+  if (receiver.stream) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: true, playsInline: true });
+  const target = resolveCastTarget(receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" });
+  if (target.kind === "idle") {
+    if (!config.showPairingWhenIdle) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle-blank" });
+    const senderUrl = config.senderUrl && receiver.roomCode ? `${config.senderUrl}?relay=${encodeURIComponent(config.relayUrl)}&code=${receiver.roomCode}` : "";
+    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cast-idle-card", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "cast-idle-title", children: strings.idleTitle }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("strong", { children: receiver.roomCode || receiver.status }),
+      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { className: "cast-idle-hint", children: receiver.error ?? strings.idleHint }),
+      senderUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("a", { href: senderUrl, target: "_blank", rel: "noreferrer", children: senderUrl })
+    ] }) });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: target.kind === "media" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: config.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+    "iframe",
+    {
+      className: "cast-frame",
+      src: target.kind === "website" ? target.url : target.embedUrl,
+      title: target.kind === "spotify" ? "Spotify" : "Cast",
+      allow: "autoplay; fullscreen; encrypted-media; picture-in-picture",
+      referrerPolicy: "no-referrer"
+    }
+  ) });
+}
+
+// src/plugins/cast-receiver/styles.ts
+var CAST_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body { width: 100%; height: 100%; }
+  .wg-plugin-root { width: 100%; height: 100%; }
+  .cast-root { position: relative; width: 100%; height: 100%; overflow: hidden;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #fff; }
+  .cast-active[data-overlay='cover'] { background: #000; }
+  .cast-active[data-overlay='dim'] { background: rgba(0,0,0,0.6); }
+  .cast-active[data-overlay='inline'] { background: transparent; }
+  .cast-frame, .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .cast-media { object-fit: contain; background: #000; }
+  .cast-idle-blank { background: transparent; }
+  .cast-idle { display: grid; place-items: center; background: radial-gradient(120% 120% at 50% 0, #1b2b40, #0b1420 70%); }
+  .cast-idle-card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px 28px; text-align: center; }
+  .cast-idle-title { font-size: clamp(16px, 3cqw, 26px); font-weight: 600; }
+  .cast-idle-hint { margin: 0; max-width: 32ch; font-size: clamp(12px, 1.8cqw, 15px); font-weight: 300; opacity: 0.78; line-height: 1.4; }
+  .cast-pairing { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 6px; padding: 12px 20px; border-radius: 14px; background: rgba(255,255,255,0.08); }
+  .cast-pairing-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
+  .cast-pairing-code { font-size: clamp(26px, 6cqw, 48px); font-weight: 700; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
+`;
+
+// src/plugins/cast-receiver/sandbox.ts
+injectStyle("cast-receiver-style", CAST_SANDBOX_CSS);
+var sandbox_default = definePlugin({
+  widgets: {
+    "cast-receiver.screen": defineReactWidget(CastWidget)
+  }
 });
 export {
   sandbox_default as default

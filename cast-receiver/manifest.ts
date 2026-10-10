@@ -10,6 +10,8 @@ import de from './locales/de.json';
  */
 
 const settings: WidgetSettingField[] = [
+  { key: 'relayUrl', label: 'Signaling URL', type: 'text', placeholder: 'https://signal.example', help: 'Must match the signaling origin approved in plugin permissions.', section: 'Connection' },
+  { key: 'senderUrl', label: 'Sender URL', type: 'text', placeholder: 'https://signal.example/cast', section: 'Connection' },
   {
     key: 'sourceKind',
     label: 'What to cast',
@@ -49,12 +51,13 @@ const settings: WidgetSettingField[] = [
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '2.0.0',
+  version: '3.0.0',
   description: 'Remote receiver for YouTube, Spotify, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
-  permissions: [],
+  nativeNetwork: [{ id: 'signaling', label: 'Cast signaling', purpose: 'Pair peers and exchange WebRTC connection details', surface: 'connect', origins: [], allowCustomOrigins: true }],
+  webRtc: { label: 'Direct peer connection', purpose: 'Receive commands and media directly from one paired sender' },
   widgets: [
     {
       id: 'cast-receiver.screen',
@@ -67,8 +70,8 @@ export const castManifest: PluginManifest = {
       defaultZIndex: OVERLAY_Z,
       defaultConfig: { ...CAST_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 1 },
-      // Declares the sandbox softening a receiver needs; inert until the user
-      // grants these (default-off) in the permission review.
+      nativeNetwork: ['signaling'],
+      webRtc: true,
       sandboxPolicy: ['embed-sites', 'remote-media'],
       settings,
     },

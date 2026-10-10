@@ -59,11 +59,16 @@ const settings: WidgetSettingField[] = [
 export const googlePhotosManifest: PluginManifest = {
   id: 'google-photos',
   name: 'Google Photos Frame',
-  version: '1.0.0',
+  version: '1.1.0',
   description: 'Digital photo frame backed by Google Photos, with offline caching',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
+  secrets: [
+    { key: 'clientSecret', access: 'injected-only', origins: ['https://oauth2.googleapis.com'], placements: ['body'] },
+    { key: 'refreshToken', access: 'injected-only', origins: ['https://oauth2.googleapis.com'], placements: ['body'] },
+  ],
+  storage: { blobBytes: 500 * 1024 * 1024, blobEntryBytes: 50 * 1024 * 1024 },
   permissions: [
     {
       name: 'Google Photos',

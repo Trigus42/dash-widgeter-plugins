@@ -50,11 +50,18 @@ const settings: WidgetSettingField[] = [
 export const immichManifest: PluginManifest = {
   id: 'immich',
   name: 'Immich Photo Frame',
-  version: '1.10.0',
+  version: '1.11.0',
   description: 'Digital photo frame backed by an Immich server, with offline caching and video playback',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
+  secrets: [{
+    key: 'apiKey',
+    access: 'injected-only',
+    allowProxyPermissionOrigins: true,
+    placements: ['header'],
+  }],
+  storage: { blobBytes: 500 * 1024 * 1024, blobEntryBytes: 50 * 1024 * 1024 },
   permissions: [
     {
       name: 'Internet',

@@ -24478,14 +24478,16 @@ function loadsFor(context) {
 }
 async function fetchImageBlob(context, backend, config, asset, size, cacheKey) {
   if (config.cacheEnabled) {
-    const cached = await context.cacheGet(cacheKey);
-    if (cached) return cached;
+    const result = await context.blobs.fetch({
+      key: cacheKey,
+      request: { ...backend.imageRequest(asset, size), responseType: "binary" },
+      policy: cachePolicyFromConfig(config)
+    });
+    return result.blob;
   }
   const response = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
   if (!response.ok) throw new Error(`Asset fetch failed (${response.status})`);
-  const blob = response.data;
-  if (config.cacheEnabled) await context.cachePut(cacheKey, blob, cachePolicyFromConfig(config));
-  return blob;
+  return response.data;
 }
 async function loadImageBlob(context, backend, config, asset, size = "preview") {
   const cacheKey = `${asset.id}:${size}`;
