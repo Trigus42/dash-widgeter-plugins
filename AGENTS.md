@@ -68,34 +68,17 @@ half:
   surface) + `sandbox.ts` (`definePlugin({...})`, the code that runs in the
   **null-origin sandbox iframe**). See an existing plugin (`clock/`) for the
   canonical shape.
-- **Never import `@tauri-apps/api` or any host singleton.** Plugins receive all
-  capabilities through the injected sandbox context (`context.http`,
-  `context.cacheGet/cachePut`, `useWidgetData`, `context.log`, etc.). Reaching
-  around the context defeats the capability model and won't work in the frame.
-- **Ordinary API network uses `context.http`**, pinned to the plugin's declared
-  `permissions` groups (each `{ name, domains?, publicIps?, privateIps?,
-  properties: { defaultOn } }`; the host enforces the union of enabled groups).
-  Direct `fetch`/XHR/WebSocket is blocked by `connect-src 'none'`. A widget may
-  separately declare and receive user grants for remote-content profiles such as
-  `remote-images`, `remote-media`, or `embed-sites`; matching DOM elements then
-  load HTTPS resources directly, outside proxy hostname/IP rules, telemetry, and
-  credential injection. Use direct media for native streaming/range behavior and
-  `context.http` for APIs, credentials, caching, and brokered binary files.
-- **Host-managed secrets are a convenience and exposure reduction, not proof
-  against hostile plugin code.** Mark credential fields `secret: true`; brokered
-  requests reference `{{secret:<key>}}` placeholders and the host substitutes
-  them at egress. Direct remote-content loads cannot receive injected headers or
-  bodies; use scoped short-lived URLs when authenticated direct media is needed.
-  Never put durable tokens in `config`.
-- **Data fetching + caching + stale/offline** is the host's shared TanStack
-  Query layer via `useWidgetData` — do not hand-roll fetch-then-cache-then-stale
-  per plugin. Report offline/stale/error through the host status API, not a
-  bespoke badge.
-- **Settings fields** are declared in the manifest and rendered by the *host*.
-  If a field needs a control the host doesn't have (e.g. the tri-state
-  `multiselect3`), that control must be added to the host repo
-  (`src/shell/SettingField.tsx`, `src/types/widget.ts`, shell CSS) — it cannot
-  be rendered from inside the plugin.
+- **Never import `@tauri-apps/api` or a host singleton.** Plugins receive capabilities through the scoped sandbox context. Reaching around it defeats permission review and cannot work in the null-origin frame.
+- **Use native browser networking when the destination supports CORS.** Declare complete exact origins on the real CSP surface: `connect-src` jointly covers fetch/XHR/WebSocket/EventSource; `img-src`, `media-src`, `frame-src`, and `worker-src` cover their browser resources. Never submit raw CSP, wildcard hosts, credentials, paths, queries, or fragments as origins.
+- **WebRTC requires its own broad permission.** CSP does not constrain ICE peers. Its declaration must explain the direct peer authority and may not imply host filtering or request telemetry.
+- **Custom origins require host preflight approval.** A URL setting alone cannot widen permission. The host reviews the exact origin before creating/remounting the iframe; privileged plugin code never runs first to request it.
+- **Use `context.http` only for declared CORS compatibility or injected-only credentials.** There is no silent native-to-proxy fallback. Proxy requests remain restricted by the plugin's enabled domain and IP permission groups.
+- **Declare every secret's access mode.** `readable` permits explicit plaintext retrieval and therefore exfiltration; `injected-only` denies retrieval and permits placeholders only in declared proxy destination/placement/operation combinations. Never place durable tokens in config, storage, cache keys, logs, or errors.
+- **Data fetching and stale/offline state use `useWidgetData`.** Its fetcher may use native networking or the proxy; caching never dictates transport. Report status through the host API, not a private badge.
+- **Binary caching uses `context.blobs`.** Prefer `context.blobs.fetch` for proxy-fetched assets so the host writes a miss before transferring bytes once. Native-fetched/generated blobs use `get`/`put`. Runtime policy can narrow but never exceed reviewed manifest quotas.
+- **Durable state uses host storage.** Direct IndexedDB in the opaque frame is not a supported portable contract. Choose plugin or instance scope deliberately and stay within declared reviewed byte limits.
+- **Permission grants are plugin capability/entry-point scoped, not widget-instance prompts.** Instance namespaces still isolate data, secrets, config, and status.
+- **Settings fields** are declared in the manifest and rendered by the host. A missing control belongs in host UI, not plugin code.
 
 ---
 
