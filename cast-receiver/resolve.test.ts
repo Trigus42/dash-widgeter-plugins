@@ -100,4 +100,9 @@ describe('resolveCastTarget', () => {
     const target = resolveCastTarget({ ...base, sourceKind: 'spotify', sourceUrl: 'spotify:album:abc123' });
     expect(target).toEqual({ kind: 'spotify', spotifyKind: 'album', spotifyId: 'abc123', embedUrl: 'https://open.spotify.com/embed/album/abc123?utm_source=generator' });
   });
+
+  it('preserves an HTTPS website URL exactly', () => {
+    expect(resolveCastTarget({ ...base, sourceKind: 'website', sourceUrl: 'https://jellyfin.arr.taube.ovh/web/' }))
+      .toEqual({ kind: 'website', url: 'https://jellyfin.arr.taube.ovh/web/' });
+  });
 });

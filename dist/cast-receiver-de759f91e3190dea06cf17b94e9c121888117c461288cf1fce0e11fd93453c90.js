@@ -28269,6 +28269,11 @@ function CastWidget({ context }) {
   const effectiveConfig = (0, import_react3.useMemo)(() => receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" }, [config, receiver.command]);
   const target = (0, import_react3.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   (0, import_react3.useEffect)(() => {
+    if (target.kind === "website" || target.kind === "media") {
+      context.log("info", "Resolved Cast target", { kind: target.kind, url: target.url });
+    }
+  }, [context, target]);
+  (0, import_react3.useEffect)(() => {
     const video = videoRef.current;
     if (!video) return;
     video.srcObject = receiver.stream;
@@ -28277,14 +28282,14 @@ function CastWidget({ context }) {
     };
   }, [receiver.stream]);
   (0, import_react3.useEffect)(() => {
-    const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted } : target.kind === "spotify" ? { provider: "spotify", kind: target.spotifyKind, id: target.spotifyId } : null;
+    const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted } : target.kind === "spotify" ? { provider: "spotify", kind: target.spotifyKind, id: target.spotifyId } : target.kind === "website" ? { provider: "website", url: target.url } : null;
     void context.setPresentation(next).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
     return () => {
       void context.setPresentation(null).catch(() => void 0);
     };
   }, [context, target, effectiveConfig.muted, receiver.stream]);
   if (receiver.stream) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted, playsInline: true, controls: true });
-  if (target.kind === "youtube" || target.kind === "spotify") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
+  if (target.kind === "youtube" || target.kind === "spotify" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
   if (target.kind === "idle") {
     if (!config.showPairingWhenIdle) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle-blank" });
     const senderUrl = config.senderUrl && receiver.roomCode ? `${config.senderUrl}?relay=${encodeURIComponent(config.relayUrl)}&code=${receiver.roomCode}` : "";
@@ -28298,16 +28303,7 @@ function CastWidget({ context }) {
       senderUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("a", { className: "cast-sender-link", href: senderUrl, target: "_blank", rel: "noreferrer", children: strings.openSender })
     ] }) });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: target.kind === "media" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: effectiveConfig.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-    "iframe",
-    {
-      className: "cast-frame",
-      src: target.url,
-      title: "Cast",
-      allow: "autoplay; fullscreen; picture-in-picture",
-      referrerPolicy: "no-referrer"
-    }
-  ) });
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: effectiveConfig.muted, playsInline: true, controls: true }) });
 }
 
 // src/plugins/cast-receiver/styles.ts
