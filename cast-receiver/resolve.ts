@@ -84,8 +84,8 @@ export type CastTarget =
   | { kind: 'idle' }
   | { kind: 'website'; url: string }
   | { kind: 'media'; url: string }
-  | { kind: 'youtube'; embedUrl: string }
-  | { kind: 'spotify'; embedUrl: string }
+  | { kind: 'youtube'; videoId: string; embedUrl: string }
+  | { kind: 'spotify'; spotifyKind: 'track' | 'album' | 'playlist' | 'episode' | 'show'; spotifyId: string; embedUrl: string }
 
 /** Privacy-friendly YouTube embed (nocookie) with autoplay/mute flags. */
 export function youTubeEmbedUrl(videoId: string, muted: boolean): string {
@@ -103,11 +103,16 @@ export function resolveCastTarget(config: CastConfig): CastTarget {
   if (config.sourceKind === 'idle') return { kind: 'idle' };
   if (config.sourceKind === 'youtube') {
     const videoId = youTubeVideoId(config.sourceUrl);
-    return videoId ? { kind: 'youtube', embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: 'idle' };
+    return videoId ? { kind: 'youtube', videoId, embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: 'idle' };
   }
   if (config.sourceKind === 'spotify') {
     const embedUrl = spotifyEmbedUrl(config.sourceUrl);
-    return embedUrl ? { kind: 'spotify', embedUrl } : { kind: 'idle' };
+    if (!embedUrl) return { kind: 'idle' };
+    const parsed = new URL(embedUrl);
+    const match = /^\/embed\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)$/.exec(parsed.pathname);
+    return match?.[1] && match[2]
+      ? { kind: 'spotify', spotifyKind: match[1] as 'track' | 'album' | 'playlist' | 'episode' | 'show', spotifyId: match[2], embedUrl }
+      : { kind: 'idle' };
   }
   if (!isHttpsUrl(config.sourceUrl)) return { kind: 'idle' };
   return config.sourceKind === 'media'

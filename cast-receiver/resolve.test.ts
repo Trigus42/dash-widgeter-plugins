@@ -98,6 +98,6 @@ describe('resolveCastTarget', () => {
 
   it('spotify resolves to the official embed', () => {
     const target = resolveCastTarget({ ...base, sourceKind: 'spotify', sourceUrl: 'spotify:album:abc123' });
-    expect(target).toEqual({ kind: 'spotify', embedUrl: 'https://open.spotify.com/embed/album/abc123?utm_source=generator' });
+    expect(target).toEqual({ kind: 'spotify', spotifyKind: 'album', spotifyId: 'abc123', embedUrl: 'https://open.spotify.com/embed/album/abc123?utm_source=generator' });
   });
 });

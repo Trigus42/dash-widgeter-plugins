@@ -24298,11 +24298,14 @@ function resolveCastTarget(config) {
   if (config.sourceKind === "idle") return { kind: "idle" };
   if (config.sourceKind === "youtube") {
     const videoId = youTubeVideoId(config.sourceUrl);
-    return videoId ? { kind: "youtube", embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: "idle" };
+    return videoId ? { kind: "youtube", videoId, embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: "idle" };
   }
   if (config.sourceKind === "spotify") {
     const embedUrl = spotifyEmbedUrl(config.sourceUrl);
-    return embedUrl ? { kind: "spotify", embedUrl } : { kind: "idle" };
+    if (!embedUrl) return { kind: "idle" };
+    const parsed = new URL(embedUrl);
+    const match = /^\/embed\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)$/.exec(parsed.pathname);
+    return (match == null ? void 0 : match[1]) && match[2] ? { kind: "spotify", spotifyKind: match[1], spotifyId: match[2], embedUrl } : { kind: "idle" };
   }
   if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
   return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
@@ -28263,6 +28266,8 @@ function CastWidget({ context }) {
   const strings = (0, import_react3.useMemo)(() => castStrings(context.locale), [context.locale]);
   const receiver = useReceiver(context);
   const videoRef = (0, import_react3.useRef)(null);
+  const effectiveConfig = (0, import_react3.useMemo)(() => receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" }, [config, receiver.command]);
+  const target = (0, import_react3.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   (0, import_react3.useEffect)(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -28271,8 +28276,15 @@ function CastWidget({ context }) {
       video.srcObject = null;
     };
   }, [receiver.stream]);
-  if (receiver.stream) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: true, playsInline: true });
-  const target = resolveCastTarget(receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" });
+  (0, import_react3.useEffect)(() => {
+    const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted } : target.kind === "spotify" ? { provider: "spotify", kind: target.spotifyKind, id: target.spotifyId } : null;
+    void context.setPresentation(next).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    return () => {
+      void context.setPresentation(null).catch(() => void 0);
+    };
+  }, [context, target, effectiveConfig.muted, receiver.stream]);
+  if (receiver.stream) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted, playsInline: true, controls: true });
+  if (target.kind === "youtube" || target.kind === "spotify") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
   if (target.kind === "idle") {
     if (!config.showPairingWhenIdle) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle-blank" });
     const senderUrl = config.senderUrl && receiver.roomCode ? `${config.senderUrl}?relay=${encodeURIComponent(config.relayUrl)}&code=${receiver.roomCode}` : "";
@@ -28286,13 +28298,13 @@ function CastWidget({ context }) {
       senderUrl && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("a", { className: "cast-sender-link", href: senderUrl, target: "_blank", rel: "noreferrer", children: strings.openSender })
     ] }) });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: target.kind === "media" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: config.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode, children: target.kind === "media" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { className: "cast-media", src: target.url, autoPlay: true, loop: true, muted: effectiveConfig.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
     "iframe",
     {
       className: "cast-frame",
-      src: target.kind === "website" ? target.url : target.embedUrl,
-      title: target.kind === "spotify" ? "Spotify" : "Cast",
-      allow: "autoplay; fullscreen; encrypted-media; picture-in-picture",
+      src: target.url,
+      title: "Cast",
+      allow: "autoplay; fullscreen; picture-in-picture",
       referrerPolicy: "no-referrer"
     }
   ) });
