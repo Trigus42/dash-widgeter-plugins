@@ -49,7 +49,7 @@ const settings: WidgetSettingField[] = [
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '4.1.0',
+  version: '4.2.0',
   description: 'Remote receiver for YouTube, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
@@ -65,7 +65,7 @@ export const castManifest: PluginManifest = {
       minH: 3,
       defaultW: 30,
       defaultH: 25,
-      defaultZIndex: OVERLAY_Z,
+      defaultZIndex: 10,
       defaultConfig: { ...CAST_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 0 },
       nativeNetwork: ['signaling'],

@@ -20,6 +20,13 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const target = useMemo(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   const paused = effectiveConfig.paused ?? false;
   const volume = effectiveConfig.volume ?? 1;
+  const hasVisiblePresentation = effectiveConfig.outputMode !== 'audio-only' && (
+    receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== 'idle'
+  );
+  useEffect(() => {
+    void context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');
+    return () => { void context.setPresentationMode('normal').catch(() => undefined); };
+  }, [context, hasVisiblePresentation]);
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !receiver.stream) return;

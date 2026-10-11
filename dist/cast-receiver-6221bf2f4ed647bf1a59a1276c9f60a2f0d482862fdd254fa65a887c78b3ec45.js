@@ -28225,7 +28225,7 @@ function createEntry(context, key) {
       });
     }
     publish2({ roomCode: session.roomCode, error: null });
-    if (previousClose) await previousClose().catch(() => void 0);
+    if (previousClose && !hadPeer) await previousClose().catch(() => void 0);
     rotationScheduled = false;
     renewal = window.setTimeout(
       () => void open().catch(fail),
@@ -28303,6 +28303,13 @@ function CastWidget({ context }) {
   const target = (0, import_react3.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   const paused = effectiveConfig.paused ?? false;
   const volume = effectiveConfig.volume ?? 1;
+  const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
+  (0, import_react3.useEffect)(() => {
+    void context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
+    return () => {
+      void context.setPresentationMode("normal").catch(() => void 0);
+    };
+  }, [context, hasVisiblePresentation]);
   (0, import_react3.useEffect)(() => {
     const video = videoRef.current;
     if (!video || !receiver.stream) return;

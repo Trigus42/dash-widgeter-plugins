@@ -72,7 +72,7 @@ function createEntry(context: GuestWidgetContext, key: string): Entry {
       });
     }
     publish({ roomCode: session.roomCode, error: null });
-    if (previousClose) await previousClose().catch(() => undefined);
+    if (previousClose && !hadPeer) await previousClose().catch(() => undefined);
     rotationScheduled = false;
     renewal = window.setTimeout(() => void open().catch(fail),
       Math.max(1_000, session.expiresAt - Date.now() - RENEW_EARLY_MS));
