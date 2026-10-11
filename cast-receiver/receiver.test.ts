@@ -10,7 +10,7 @@ const { joinRoom, room, command, stopAction } = vi.hoisted(() => {
 });
 vi.mock('@trystero-p2p/ws-relay', () => ({ joinRoom }));
 
-import { createPluginReceiver } from './receiver';
+import { createPluginReceiver, type ReceiverState } from './receiver';
 
 const options = { relayUrl: 'wss://relay.test', roomCode: '123456', password: 'x'.repeat(43) };
 
@@ -28,5 +28,17 @@ describe('plugin Cast receiver', () => {
     command.onMessage?.({ sourceKind: 'website', sourceUrl: 'https://example.com', muted: false }, { peerId: 'sender-2' });
     expect(stopAction.send).toHaveBeenCalledWith({}, { target: 'sender-1' });
     expect(states.at(-1)?.command).toMatchObject({ sourceKind: 'website' });
+  });
+
+  it('keeps URL playback after its sender disconnects', () => {
+    const states: ReceiverState[] = [];
+    const stop = createPluginReceiver(options, (state) => states.push(state));
+    room.onPeerJoin?.('sender');
+    command.onMessage?.({ sourceKind: 'youtube', sourceUrl: 'dQw4w9WgXcQ', muted: false,
+      outputMode: 'audio-video' }, { peerId: 'sender' });
+    room.onPeerLeave?.('sender');
+    expect(states.at(-1)?.command?.sourceKind).toBe('youtube');
+    expect(states.at(-1)?.status).toBe('casting');
+    stop();
   });
 });

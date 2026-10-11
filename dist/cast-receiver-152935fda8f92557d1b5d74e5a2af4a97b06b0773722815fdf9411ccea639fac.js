@@ -28130,10 +28130,12 @@ function createPluginReceiver(options, onState) {
     state.peerCount = peers.size;
     if (peerId === activePeerId) {
       activePeerId = null;
-      stopActiveStream();
-      state.command = null;
+      if (state.stream) {
+        stopActiveStream();
+        state.command = null;
+      }
     }
-    state.status = peers.size === 0 ? "disconnected" : state.command || state.stream ? "casting" : "paired";
+    state.status = state.command || state.stream ? "casting" : peers.size === 0 ? "disconnected" : "paired";
     emit();
   };
   room.onPeerStream = (stream, peerId) => {

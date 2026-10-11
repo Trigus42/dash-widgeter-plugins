@@ -51,8 +51,11 @@ export function createPluginReceiver(options: CastSessionOptions, onState: (stat
   };
   room.onPeerLeave = (peerId) => {
     peers.delete(peerId); state.peerCount = peers.size;
-    if (peerId === activePeerId) { activePeerId = null; stopActiveStream(); state.command = null; }
-    state.status = peers.size === 0 ? 'disconnected' : state.command || state.stream ? 'casting' : 'paired'; emit();
+    if (peerId === activePeerId) {
+      activePeerId = null;
+      if (state.stream) { stopActiveStream(); state.command = null; }
+    }
+    state.status = state.command || state.stream ? 'casting' : peers.size === 0 ? 'disconnected' : 'paired'; emit();
   };
   room.onPeerStream = (stream, peerId) => {
     if (!peers.has(peerId)) return;
