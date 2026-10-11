@@ -28375,10 +28375,17 @@ function PairingWidget({ context }) {
     () => senderLink(config.senderUrl, config.relayUrl, roomCode),
     [config.relayUrl, config.senderUrl, roomCode]
   );
+  (0, import_react4.useEffect)(() => {
+    if (!open) return;
+    void context.setPairingDetails(roomCode && url ? { code: roomCode, url } : null);
+    return () => {
+      void context.setPairingDetails(null).catch(() => void 0);
+    };
+  }, [context, open, roomCode, url]);
   const toggleDetails = () => {
     const next = !open;
     setOpen(next);
-    void context.setPairingDetails(next && roomCode && url ? { code: roomCode, url } : null);
+    if (!next) void context.setPairingDetails(null);
   };
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
     "button",

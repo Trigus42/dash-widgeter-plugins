@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
 import { useCastPlayback } from './session-store';
 import { readCastConfig } from './resolve';
@@ -22,8 +22,13 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const roomCode = receiver.roomCode;
   const url = useMemo(() => senderLink(config.senderUrl, config.relayUrl, roomCode),
     [config.relayUrl, config.senderUrl, roomCode]);
+  useEffect(() => {
+    if (!open) return;
+    void context.setPairingDetails(roomCode && url ? { code: roomCode, url } : null);
+    return () => { void context.setPairingDetails(null).catch(() => undefined); };
+  }, [context, open, roomCode, url]);
   const toggleDetails = (): void => {
-    const next = !open; setOpen(next); void context.setPairingDetails(next && roomCode && url ? { code: roomCode, url } : null);
+    const next = !open; setOpen(next); if (!next) void context.setPairingDetails(null);
   };
   return <button type="button" className="cast-pairing-icon" onClick={toggleDetails} disabled={!roomCode}
     aria-label={strings.title} title={`${strings.title} · ${roomCode} · ${strings.devices}: ${receiver.peerCount}`}>
