@@ -540,7 +540,7 @@
       "manifest": {
         "id": "immich",
         "name": "Immich Photo Frame",
-        "version": "1.11.0",
+        "version": "1.11.1",
         "description": "Digital photo frame backed by an Immich server, with offline caching and video playback",
         "translations": {
           "de": {
@@ -1755,8 +1755,8 @@
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "3.2.0",
-        "description": "Remote receiver for YouTube, Spotify, screen sharing, websites, and media",
+        "version": "4.0.0",
+        "description": "Remote receiver for YouTube, screen sharing, websites, and media",
         "translations": {
           "de": {
             "Cast Receiver": "Cast-Empfänger",
@@ -1795,13 +1795,13 @@
         ],
         "webRtc": {
           "label": "Direct peer connection",
-          "purpose": "Receive commands and media directly from one paired sender"
+          "purpose": "Receive commands and media directly from paired senders"
         },
         "widgets": [
           {
             "id": "cast-receiver.screen",
             "name": "Cast Receiver",
-            "description": "Movable overlay receiver for links, media, and live screen sharing",
+            "description": "Transparent presentation surface for links, media, and live screen sharing",
             "minW": 3,
             "minH": 3,
             "defaultW": 30,
@@ -1812,13 +1812,12 @@
               "sourceUrl": "",
               "relayUrl": "",
               "senderUrl": "",
-              "overlayMode": "cover",
-              "showPairingWhenIdle": true,
-              "muted": true
+              "overlayMode": "inline",
+              "muted": false
             },
             "defaultAppearance": {
               "background": "none",
-              "backgroundOpacity": 1
+              "backgroundOpacity": 0
             },
             "nativeNetwork": [
               "signaling"
@@ -1865,10 +1864,6 @@
                   {
                     "label": "YouTube video",
                     "value": "youtube"
-                  },
-                  {
-                    "label": "Spotify",
-                    "value": "spotify"
                   }
                 ]
               },
@@ -1876,8 +1871,8 @@
                 "key": "sourceUrl",
                 "label": "Cast target",
                 "type": "text",
-                "placeholder": "https://… or a YouTube/Spotify link",
-                "help": "An HTTPS website/media URL, YouTube link/id, or Spotify share URL/URI.",
+                "placeholder": "https://… or a YouTube link",
+                "help": "An HTTPS website/media URL or YouTube link/id.",
                 "section": "Cast"
               },
               {
@@ -1901,23 +1896,56 @@
                 ]
               },
               {
-                "key": "showPairingWhenIdle",
-                "label": "Show pairing code when idle",
-                "type": "boolean",
-                "section": "Presentation"
-              },
-              {
                 "key": "muted",
                 "label": "Start muted",
                 "type": "boolean",
                 "section": "Presentation"
               }
             ]
+          },
+          {
+            "id": "cast-receiver.pairing",
+            "name": "Cast Pairing",
+            "description": "Pair devices and open Cast sender details",
+            "minW": 2,
+            "minH": 2,
+            "defaultW": 12,
+            "defaultH": 7,
+            "defaultZIndex": 100,
+            "defaultConfig": {
+              "relayUrl": "",
+              "senderUrl": ""
+            },
+            "defaultAppearance": {
+              "background": "glass",
+              "backgroundOpacity": 0.55
+            },
+            "nativeNetwork": [
+              "signaling"
+            ],
+            "webRtc": true,
+            "settings": [
+              {
+                "key": "relayUrl",
+                "label": "Signaling URL",
+                "type": "text",
+                "placeholder": "https://signal.example",
+                "help": "Must match the signaling origin approved in plugin permissions.",
+                "section": "Connection"
+              },
+              {
+                "key": "senderUrl",
+                "label": "Sender URL",
+                "type": "text",
+                "placeholder": "https://signal.example/cast",
+                "section": "Connection"
+              }
+            ]
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-84af6da06cbee8520ea942ee0f17cebf2708be091f3645eddf06fa9cd9565381.js",
-      "sha256": "84af6da06cbee8520ea942ee0f17cebf2708be091f3645eddf06fa9cd9565381"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-72dc942f8d1544af73965fd71ea4b335f58ff32ea1c603eab37d359cfef14ded.js",
+      "sha256": "72dc942f8d1544af73965fd71ea4b335f58ff32ea1c603eab37d359cfef14ded"
     }
   ]
 }

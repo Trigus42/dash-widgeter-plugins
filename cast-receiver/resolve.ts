@@ -7,7 +7,7 @@ function bool(raw: unknown, fallback: boolean): boolean {
   return typeof raw === 'boolean' ? raw : fallback;
 }
 
-const SOURCE_KINDS: CastSourceKind[] = ['idle', 'website', 'media', 'youtube', 'spotify'];
+const SOURCE_KINDS: CastSourceKind[] = ['idle', 'website', 'media', 'youtube'];
 const OVERLAY_MODES = ['inline', 'cover', 'dim'] as const;
 
 /** Coerce persisted (unknown JSON) config into a validated CastConfig. */
@@ -25,7 +25,6 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
     relayUrl: str(raw.relayUrl, d.relayUrl),
     senderUrl: str(raw.senderUrl, d.senderUrl),
     overlayMode,
-    showPairingWhenIdle: bool(raw.showPairingWhenIdle, d.showPairingWhenIdle),
     muted: bool(raw.muted, d.muted),
   };
 }
@@ -58,22 +57,6 @@ export function isHttpsUrl(value: string): boolean {
   }
 }
 
-/** Convert a Spotify share URL/URI to its official embed URL. */
-export function spotifyEmbedUrl(input: string): string | null {
-  const trimmed = input.trim();
-  const uri = /^spotify:(track|album|playlist|episode|show):([A-Za-z0-9]+)$/.exec(trimmed);
-  if (uri?.[1] && uri[2]) return `https://open.spotify.com/embed/${uri[1]}/${uri[2]}?utm_source=generator`;
-  try {
-    const url = new URL(trimmed);
-    if (url.protocol !== 'https:' || url.hostname !== 'open.spotify.com') return null;
-    const match = /^\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)\/?$/.exec(url.pathname);
-    return match?.[1] && match[2]
-      ? `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator`
-      : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * What the receiver should render, derived purely from config. Returns a
@@ -84,8 +67,7 @@ export type CastTarget =
   | { kind: 'idle' }
   | { kind: 'website'; url: string }
   | { kind: 'media'; url: string }
-  | { kind: 'youtube'; videoId: string; embedUrl: string }
-  | { kind: 'spotify'; spotifyKind: 'track' | 'album' | 'playlist' | 'episode' | 'show'; spotifyId: string; embedUrl: string }
+  | { kind: 'youtube'; videoId: string; embedUrl: string };
 
 /** Privacy-friendly YouTube embed (nocookie) with autoplay/mute flags. */
 export function youTubeEmbedUrl(videoId: string, muted: boolean): string {
@@ -104,15 +86,6 @@ export function resolveCastTarget(config: CastConfig): CastTarget {
   if (config.sourceKind === 'youtube') {
     const videoId = youTubeVideoId(config.sourceUrl);
     return videoId ? { kind: 'youtube', videoId, embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: 'idle' };
-  }
-  if (config.sourceKind === 'spotify') {
-    const embedUrl = spotifyEmbedUrl(config.sourceUrl);
-    if (!embedUrl) return { kind: 'idle' };
-    const parsed = new URL(embedUrl);
-    const match = /^\/embed\/(track|album|playlist|episode|show)\/([A-Za-z0-9]+)$/.exec(parsed.pathname);
-    return match?.[1] && match[2]
-      ? { kind: 'spotify', spotifyKind: match[1] as 'track' | 'album' | 'playlist' | 'episode' | 'show', spotifyId: match[2], embedUrl }
-      : { kind: 'idle' };
   }
   if (!isHttpsUrl(config.sourceUrl)) return { kind: 'idle' };
   return config.sourceKind === 'media'

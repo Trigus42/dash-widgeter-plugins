@@ -3,7 +3,6 @@ import {
   isHttpsUrl,
   readCastConfig,
   resolveCastTarget,
-  spotifyEmbedUrl,
   youTubeEmbedUrl,
   youTubeVideoId,
 } from './resolve';
@@ -13,7 +12,7 @@ describe('readCastConfig', () => {
   it('defaults to idle and coerces unknown enums', () => {
     expect(readCastConfig({}).sourceKind).toBe('idle');
     expect(readCastConfig({ sourceKind: 'bogus' }).sourceKind).toBe('idle');
-    expect(readCastConfig({ overlayMode: 'bogus' }).overlayMode).toBe('cover');
+    expect(readCastConfig({ sourceKind: 'spotify' }).sourceKind).toBe('idle');
     expect(readCastConfig({ sourceKind: 'youtube' }).sourceKind).toBe('youtube');
   });
 });
@@ -43,17 +42,6 @@ describe('youTubeEmbedUrl', () => {
   });
 });
 
-describe('spotifyEmbedUrl', () => {
-  it('accepts official share URLs and URIs', () => {
-    expect(spotifyEmbedUrl('https://open.spotify.com/track/abc123')).toContain('/embed/track/abc123');
-    expect(spotifyEmbedUrl('spotify:playlist:xyz789')).toContain('/embed/playlist/xyz789');
-  });
-
-  it('rejects spoofed hosts and unsupported paths', () => {
-    expect(spotifyEmbedUrl('https://open.spotify.com.evil.test/track/abc')).toBeNull();
-    expect(spotifyEmbedUrl('https://open.spotify.com/user/abc')).toBeNull();
-  });
-});
 
 describe('isHttpsUrl', () => {
   it('accepts only https', () => {
@@ -96,10 +84,6 @@ describe('resolveCastTarget', () => {
     expect(resolveCastTarget({ ...base, sourceKind: 'youtube', sourceUrl: 'garbage' })).toEqual({ kind: 'idle' });
   });
 
-  it('spotify resolves to the official embed', () => {
-    const target = resolveCastTarget({ ...base, sourceKind: 'spotify', sourceUrl: 'spotify:album:abc123' });
-    expect(target).toEqual({ kind: 'spotify', spotifyKind: 'album', spotifyId: 'abc123', embedUrl: 'https://open.spotify.com/embed/album/abc123?utm_source=generator' });
-  });
 
   it('preserves an HTTPS website URL exactly', () => {
     expect(resolveCastTarget({ ...base, sourceKind: 'website', sourceUrl: 'https://jellyfin.arr.taube.ovh/web/' }))

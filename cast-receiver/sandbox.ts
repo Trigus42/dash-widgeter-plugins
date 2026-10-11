@@ -1,6 +1,7 @@
 import { definePlugin, injectStyle } from '@/sandbox/sdk';
 import { defineReactWidget } from '@/sandbox/react';
 import { CastWidget } from './CastWidget';
+import { PairingWidget } from './PairingWidget';
 import { CAST_SANDBOX_CSS } from './styles';
 
 /**
@@ -14,5 +15,6 @@ injectStyle('cast-receiver-style', CAST_SANDBOX_CSS);
 export default definePlugin({
   widgets: {
     'cast-receiver.screen': defineReactWidget(CastWidget),
+    'cast-receiver.pairing': defineReactWidget(PairingWidget),
   },
 });
