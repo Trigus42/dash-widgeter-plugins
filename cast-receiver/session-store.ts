@@ -41,6 +41,7 @@ function createEntry(context: GuestWidgetContext, key: string): Entry {
   let close: (() => Promise<void>) | null = null;
   let renewal: number | undefined;
   let hadPeer = false;
+  let rotationScheduled = false;
   const publish = (patch: Partial<CastSessionState>): void => {
     entry.state = { ...entry.state, ...patch };
     entry.listeners.forEach((listener) => listener(entry.state));
@@ -57,18 +58,22 @@ function createEntry(context: GuestWidgetContext, key: string): Entry {
     const session = await createPairingSession(config.relayUrl, abort.signal,
       (url) => context.validateNativeOrigin('signaling', url));
     if (abort.signal.aborted) { await session.close(); return; }
-    stop?.();
-    if (close) await close().catch(() => undefined);
+    const previousClose = close;
     close = () => session.close();
-    stop = createPluginReceiver(session.options, (next) => {
-      if (next.peerCount > 0) hadPeer = true;
-      publish({ ...next, roomCode: session.roomCode });
-      if (next.error) context.reportStatus('error', next.error); else context.reportStatus('ok', '');
-      if (hadPeer && next.status === 'disconnected' && next.peerCount === 0) {
-        hadPeer = false; clearTimeout(renewal); renewal = window.setTimeout(() => void open().catch(fail), 0);
-      }
-    });
-    publish({ roomCode: session.roomCode, status: 'connecting', error: null });
+    if (!stop) {
+      stop = createPluginReceiver(session.options, (next) => {
+        const firstPeerConnected = !hadPeer && next.peerCount > 0;
+        if (next.peerCount > 0) hadPeer = true;
+        publish({ ...next, roomCode: entry.state.roomCode });
+        if (next.error) context.reportStatus('error', next.error); else context.reportStatus('ok', '');
+        if (firstPeerConnected && !rotationScheduled) {
+          rotationScheduled = true; clearTimeout(renewal); renewal = window.setTimeout(() => void open().catch(fail), 0);
+        }
+      });
+    }
+    publish({ roomCode: session.roomCode, error: null });
+    if (previousClose) await previousClose().catch(() => undefined);
+    rotationScheduled = false;
     renewal = window.setTimeout(() => void open().catch(fail),
       Math.max(1_000, session.expiresAt - Date.now() - RENEW_EARLY_MS));
   };

@@ -1,4 +1,5 @@
 
+import type { CastOutputMode } from '@/cast-protocol';
 export type CastSourceKind = 'idle' | 'website' | 'media' | 'youtube';
 
 export interface CastCommand {
@@ -7,6 +8,7 @@ export interface CastCommand {
   muted: boolean;
   paused?: boolean;
   volume?: number;
+  outputMode: CastOutputMode;
 }
 
 export type CastOverlayMode = 'inline' | 'cover' | 'dim';
@@ -23,6 +25,7 @@ export const CAST_DEFAULT_CONFIG: CastConfig = {
   sourceUrl: '',
   relayUrl: '',
   senderUrl: '',
+  outputMode: 'audio-video',
   overlayMode: 'inline',
   muted: false,
 };

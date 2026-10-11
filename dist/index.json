@@ -1755,7 +1755,7 @@
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "4.0.0",
+        "version": "4.1.0",
         "description": "Remote receiver for YouTube, screen sharing, websites, and media",
         "translations": {
           "de": {
@@ -1812,6 +1812,7 @@
               "sourceUrl": "",
               "relayUrl": "",
               "senderUrl": "",
+              "outputMode": "audio-video",
               "overlayMode": "inline",
               "muted": false
             },
@@ -1907,10 +1908,10 @@
             "id": "cast-receiver.pairing",
             "name": "Cast Pairing",
             "description": "Pair devices and open Cast sender details",
-            "minW": 2,
-            "minH": 2,
-            "defaultW": 12,
-            "defaultH": 7,
+            "minW": 1,
+            "minH": 1,
+            "defaultW": 2,
+            "defaultH": 2,
             "defaultZIndex": 100,
             "defaultConfig": {
               "relayUrl": "",
@@ -1944,8 +1945,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-72dc942f8d1544af73965fd71ea4b335f58ff32ea1c603eab37d359cfef14ded.js",
-      "sha256": "72dc942f8d1544af73965fd71ea4b335f58ff32ea1c603eab37d359cfef14ded"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-b3298b53e654dbacaba01a51b44a24ae22fade5ec89b216217dbc6054142a934.js",
+      "sha256": "b3298b53e654dbacaba01a51b44a24ae22fade5ec89b216217dbc6054142a934"
     }
   ]
 }

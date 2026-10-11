@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
 import { useCastPlayback } from './session-store';
 import { readCastConfig } from './resolve';
+const EN = { title: 'Cast pairing', devices: 'Connected devices' };
+const DE = { title: 'Cast-Kopplung', devices: 'Verbundene Geräte' };
 
-interface Strings { title: string; pairingCode: string; devices: string; details: string; senderUrl: string; close: string }
-const EN: Strings = { title: 'Cast pairing', pairingCode: 'Pairing code', devices: 'Connected devices', details: 'Pairing details', senderUrl: 'Cast URL', close: 'Close' };
-const DE: Strings = { title: 'Cast-Kopplung', pairingCode: 'Kopplungscode', devices: 'Verbundene Geräte', details: 'Kopplungsdetails', senderUrl: 'Cast-URL', close: 'Schließen' };
 
 function senderLink(senderUrl: string, relayUrl: string, roomCode: string): string {
   if (!senderUrl || !relayUrl || !roomCode) return '';
@@ -20,34 +19,14 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const config = useMemo(() => readCastConfig(context.config), [context.config]);
   const strings = context.locale.startsWith('de') ? DE : EN;
   const [open, setOpen] = useState(false);
-  const [qrCode, setQrCode] = useState('');
   const roomCode = receiver.roomCode;
   const url = useMemo(() => senderLink(config.senderUrl, config.relayUrl, roomCode),
     [config.relayUrl, config.senderUrl, roomCode]);
-  useEffect(() => {
-    let cancelled = false;
-    if (!open || !url) { setQrCode(''); return; }
-    void import('qrcode').then(({ default: QRCode }) => QRCode.toDataURL(url, { width: 320, margin: 1, errorCorrectionLevel: 'M' }))
-      .then((dataUrl) => { if (!cancelled) setQrCode(dataUrl); })
-      .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
-    return () => { cancelled = true; };
-  }, [context, open, url]);
-  return <div className="cast-pairing-root">
-    <button type="button" className="cast-pairing-card" onClick={() => setOpen(true)} disabled={!roomCode}>
-      <span className="cast-idle-title">{strings.title}</span>
-      <span className="cast-pairing-label">{strings.pairingCode}</span>
-      <strong className="cast-pairing-code">{roomCode || receiver.status}</strong>
-      <span className="cast-peer-count">{strings.devices}: {receiver.peerCount}</span>
-    </button>
-    {open && <div className="cast-dialog-backdrop" role="presentation" onClick={() => setOpen(false)}>
-      <section className="cast-dialog" role="dialog" aria-modal="true" aria-label={strings.details} onClick={(event) => event.stopPropagation()}>
-        <h2>{strings.details}</h2>
-        {qrCode && <img src={qrCode} alt={`${strings.pairingCode} ${roomCode}`} />}
-        <strong className="cast-pairing-code">{roomCode}</strong>
-        <label>{strings.senderUrl}<output>{url}</output></label>
-        {url && <a href={url} target="_blank" rel="noreferrer">{url}</a>}
-        <button type="button" onClick={() => setOpen(false)}>{strings.close}</button>
-      </section>
-    </div>}
-  </div>;
+  const toggleDetails = (): void => {
+    const next = !open; setOpen(next); void context.setPairingDetails(next && roomCode && url ? { code: roomCode, url } : null);
+  };
+  return <button type="button" className="cast-pairing-icon" onClick={toggleDetails} disabled={!roomCode}
+    aria-label={strings.title} title={`${strings.title} · ${roomCode} · ${strings.devices}: ${receiver.peerCount}`}>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" /></svg>
+  </button>;
 }

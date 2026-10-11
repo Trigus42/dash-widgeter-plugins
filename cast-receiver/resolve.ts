@@ -9,6 +9,7 @@ function bool(raw: unknown, fallback: boolean): boolean {
 
 const SOURCE_KINDS: CastSourceKind[] = ['idle', 'website', 'media', 'youtube'];
 const OVERLAY_MODES = ['inline', 'cover', 'dim'] as const;
+const OUTPUT_MODES = ['audio-video', 'audio-only', 'video-only'] as const;
 
 /** Coerce persisted (unknown JSON) config into a validated CastConfig. */
 export function readCastConfig(raw: Record<string, unknown>): CastConfig {
@@ -19,6 +20,8 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
   const overlayMode = (OVERLAY_MODES as readonly string[]).includes(raw.overlayMode as string)
     ? (raw.overlayMode as CastConfig['overlayMode'])
     : d.overlayMode;
+  const outputMode = (OUTPUT_MODES as readonly string[]).includes(raw.outputMode as string)
+    ? raw.outputMode as CastConfig['outputMode'] : d.outputMode;
   return {
     sourceKind,
     sourceUrl: str(raw.sourceUrl, d.sourceUrl),
@@ -26,6 +29,7 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
     senderUrl: str(raw.senderUrl, d.senderUrl),
     overlayMode,
     muted: bool(raw.muted, d.muted),
+    outputMode,
   };
 }
 
