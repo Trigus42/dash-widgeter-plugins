@@ -1755,7 +1755,7 @@
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "4.3.0",
+        "version": "4.4.0",
         "description": "Remote receiver for YouTube, screen sharing, websites, and media",
         "translations": {
           "de": {
@@ -1945,8 +1945,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-6221bf2f4ed647bf1a59a1276c9f60a2f0d482862fdd254fa65a887c78b3ec45.js",
-      "sha256": "6221bf2f4ed647bf1a59a1276c9f60a2f0d482862fdd254fa65a887c78b3ec45"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-3bab86de21e4dc1007b46e176f3a9dcb9fe0a19de975bd932fc646b649c0163e.js",
+      "sha256": "3bab86de21e4dc1007b46e176f3a9dcb9fe0a19de975bd932fc646b649c0163e"
     }
   ]
 }

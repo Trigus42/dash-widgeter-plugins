@@ -28305,12 +28305,6 @@ function CastWidget({ context }) {
   const volume = effectiveConfig.volume ?? 1;
   const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
   (0, import_react3.useEffect)(() => {
-    void context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
-    return () => {
-      void context.setPresentationMode("normal").catch(() => void 0);
-    };
-  }, [context, hasVisiblePresentation]);
-  (0, import_react3.useEffect)(() => {
     const video = videoRef.current;
     if (!video || !receiver.stream) return;
     video.srcObject = receiver.stream;
@@ -28334,11 +28328,16 @@ function CastWidget({ context }) {
   }, [context, receiver.stream]);
   (0, import_react3.useEffect)(() => {
     const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode } : target.kind === "website" ? { provider: "website", url: target.url } : null;
-    void context.setPresentation(next).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    const updatePresentation = async () => {
+      await context.setPresentation(next);
+      await context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
+    };
+    void updatePresentation().catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
     return () => {
       void context.setPresentation(null).catch(() => void 0);
+      void context.setPresentationMode("normal").catch(() => void 0);
     };
-  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, paused, receiver.stream, target, volume]);
+  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
   (0, import_react3.useEffect)(() => {
     const video = videoRef.current;
     if (video && target.kind === "media") applyPlayback(
@@ -28348,7 +28347,7 @@ function CastWidget({ context }) {
       effectiveConfig.muted || effectiveConfig.outputMode === "video-only"
     );
   }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
-  if (receiver.stream) return effectiveConfig.outputMode !== "audio-only" && receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty", "aria-label": "Audio casting active" });
+  if (receiver.stream) return effectiveConfig.outputMode !== "audio-only" && receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty", "aria-label": context.locale.startsWith("de") ? "Audio\xFCbertragung aktiv" : "Audio casting active" });
   if (target.kind === "youtube" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
   if (target.kind === "media") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `cast-root cast-active ${effectiveConfig.outputMode === "audio-only" ? "cast-audio-only" : ""}`, "data-overlay": config.overlayMode, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", src: target.url, autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) });
   return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty" });

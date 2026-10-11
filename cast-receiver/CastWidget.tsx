@@ -24,10 +24,6 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== 'idle'
   );
   useEffect(() => {
-    void context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');
-    return () => { void context.setPresentationMode('normal').catch(() => undefined); };
-  }, [context, hasVisiblePresentation]);
-  useEffect(() => {
     const video = videoRef.current;
     if (!video || !receiver.stream) return;
     video.srcObject = receiver.stream;
@@ -50,10 +46,17 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     const next = receiver.stream ? null : target.kind === 'youtube'
       ? { provider: 'youtube' as const, videoId: target.videoId, muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode }
       : target.kind === 'website' ? { provider: 'website' as const, url: target.url } : null;
-    void context.setPresentation(next).catch((error: unknown) =>
+    const updatePresentation = async (): Promise<void> => {
+      await context.setPresentation(next);
+      await context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');
+    };
+    void updatePresentation().catch((error: unknown) =>
       context.reportStatus('error', error instanceof Error ? error.message : String(error)));
-    return () => { void context.setPresentation(null).catch(() => undefined); };
-  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, paused, receiver.stream, target, volume]);
+    return () => {
+      void context.setPresentation(null).catch(() => undefined);
+      void context.setPresentationMode('normal').catch(() => undefined);
+    };
+  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
   useEffect(() => {
     const video = videoRef.current;
     if (video && target.kind === 'media') applyPlayback(video, paused, volume,
@@ -61,7 +64,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
   if (receiver.stream) return effectiveConfig.outputMode !== 'audio-only' && receiver.stream.getVideoTracks().length > 0
     ? <video ref={videoRef} className="cast-media" autoPlay muted={effectiveConfig.muted || effectiveConfig.outputMode === 'video-only'} playsInline controls />
-    : <div className="cast-root cast-empty" aria-label="Audio casting active" />;
+    : <div className="cast-root cast-empty" aria-label={context.locale.startsWith('de') ? 'Audioübertragung aktiv' : 'Audio casting active'} />;
   if (target.kind === 'youtube' || target.kind === 'website') return <div className="cast-root cast-active" data-overlay={config.overlayMode} />;
   if (target.kind === 'media') return <div className={`cast-root cast-active ${effectiveConfig.outputMode === 'audio-only' ? 'cast-audio-only' : ''}`} data-overlay={config.overlayMode}>
     <video ref={videoRef} className="cast-media" src={target.url} autoPlay muted={effectiveConfig.muted || effectiveConfig.outputMode === 'video-only'} playsInline controls />
