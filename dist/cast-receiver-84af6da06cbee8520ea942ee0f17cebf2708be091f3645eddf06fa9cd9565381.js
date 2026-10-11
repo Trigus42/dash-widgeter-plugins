@@ -28266,6 +28266,7 @@ function CastWidget({ context }) {
   const strings = (0, import_react3.useMemo)(() => castStrings(context.locale), [context.locale]);
   const receiver = useReceiver(context);
   const videoRef = (0, import_react3.useRef)(null);
+  const audioRef = (0, import_react3.useRef)(null);
   const effectiveConfig = (0, import_react3.useMemo)(() => receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" }, [config, receiver.command]);
   const target = (0, import_react3.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   (0, import_react3.useEffect)(() => {
@@ -28274,13 +28275,46 @@ function CastWidget({ context }) {
     }
   }, [context, target]);
   (0, import_react3.useEffect)(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.srcObject = receiver.stream;
+    var _a;
+    const media = ((_a = receiver.stream) == null ? void 0 : _a.getVideoTracks().length) ? videoRef.current : audioRef.current;
+    if (!media) return;
+    media.srcObject = receiver.stream;
+    void media.play().catch((error) => {
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        context.reportStatus("error", "Press Play to enable shared audio.");
+      }
+    });
     return () => {
-      video.srcObject = null;
+      media.srcObject = null;
     };
-  }, [receiver.stream]);
+  }, [context, receiver.stream]);
+  (0, import_react3.useEffect)(() => {
+    const stream = receiver.stream;
+    if (!stream) return;
+    const describe = () => {
+      const audio = stream.getAudioTracks();
+      const video = stream.getVideoTracks();
+      if (stream.getTracks().every((track) => track.readyState === "ended")) {
+        context.reportStatus("error", "The shared stream ended.");
+      } else if (audio.length === 0) {
+        context.reportStatus("error", "This shared stream has no audio.");
+      } else {
+        context.reportStatus("ok", `${video.length ? "Screen and audio" : "Audio"} sharing active`);
+      }
+    };
+    const tracks = stream.getTracks();
+    tracks.forEach((track) => {
+      track.addEventListener("ended", describe);
+      track.addEventListener("mute", describe);
+      track.addEventListener("unmute", describe);
+    });
+    describe();
+    return () => tracks.forEach((track) => {
+      track.removeEventListener("ended", describe);
+      track.removeEventListener("mute", describe);
+      track.removeEventListener("unmute", describe);
+    });
+  }, [context, receiver.stream]);
   (0, import_react3.useEffect)(() => {
     const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted } : target.kind === "spotify" ? { provider: "spotify", kind: target.spotifyKind, id: target.spotifyId } : target.kind === "website" ? { provider: "website", url: target.url } : null;
     void context.setPresentation(next).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
@@ -28288,7 +28322,10 @@ function CastWidget({ context }) {
       void context.setPresentation(null).catch(() => void 0);
     };
   }, [context, target, effectiveConfig.muted, receiver.stream]);
-  if (receiver.stream) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted, playsInline: true, controls: true });
+  if (receiver.stream) return receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted, playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "cast-root cast-audio", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { children: "Shared audio" }),
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("audio", { ref: audioRef, autoPlay: true, muted: effectiveConfig.muted, controls: true })
+  ] });
   if (target.kind === "youtube" || target.kind === "spotify" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
   if (target.kind === "idle") {
     if (!config.showPairingWhenIdle) return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-idle-blank" });
@@ -28327,6 +28364,9 @@ var CAST_SANDBOX_CSS = `
   .cast-pairing-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
   .cast-pairing-code { font-size: clamp(26px, 6cqw, 48px); font-weight: 700; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
   .cast-sender-link { max-width: min(70cqw, 24rem); color: inherit; font-size: 13px; font-weight: 600; text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .cast-audio { display: grid; place-content: center; justify-items: center; gap: 18px; padding: 24px; background: #0b1420; }
+  .cast-audio > span { font-size: clamp(18px, 4cqw, 32px); font-weight: 600; }
+  .cast-audio audio { width: min(80cqw, 520px); }
 `;
 
 // src/plugins/cast-receiver/sandbox.ts

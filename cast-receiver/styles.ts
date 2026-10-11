@@ -25,4 +25,7 @@ export const CAST_SANDBOX_CSS = `
   .cast-pairing-label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.6; }
   .cast-pairing-code { font-size: clamp(26px, 6cqw, 48px); font-weight: 700; letter-spacing: 0.18em; font-variant-numeric: tabular-nums; }
   .cast-sender-link { max-width: min(70cqw, 24rem); color: inherit; font-size: 13px; font-weight: 600; text-underline-offset: 3px; overflow-wrap: anywhere; }
+  .cast-audio { display: grid; place-content: center; justify-items: center; gap: 18px; padding: 24px; background: #0b1420; }
+  .cast-audio > span { font-size: clamp(18px, 4cqw, 32px); font-weight: 600; }
+  .cast-audio audio { width: min(80cqw, 520px); }
 `;

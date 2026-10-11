@@ -22,6 +22,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const strings = useMemo(() => castStrings(context.locale), [context.locale]);
   const receiver = useReceiver(context);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const effectiveConfig = useMemo(() => receiver.command
     ? { ...config, ...receiver.command }
     : { ...config, sourceKind: 'idle' as const }, [config, receiver.command]);
@@ -32,11 +33,35 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     }
   }, [context, target]);
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.srcObject = receiver.stream;
-    return () => { video.srcObject = null; };
-  }, [receiver.stream]);
+    const media = receiver.stream?.getVideoTracks().length ? videoRef.current : audioRef.current;
+    if (!media) return;
+    media.srcObject = receiver.stream;
+    void media.play().catch((error: unknown) => {
+      if (error instanceof DOMException && error.name === 'NotAllowedError') {
+        context.reportStatus('error', 'Press Play to enable shared audio.');
+      }
+    });
+    return () => { media.srcObject = null; };
+  }, [context, receiver.stream]);
+  useEffect(() => {
+    const stream = receiver.stream;
+    if (!stream) return;
+    const describe = (): void => {
+      const audio = stream.getAudioTracks();
+      const video = stream.getVideoTracks();
+      if (stream.getTracks().every((track) => track.readyState === 'ended')) {
+        context.reportStatus('error', 'The shared stream ended.');
+      } else if (audio.length === 0) {
+        context.reportStatus('error', 'This shared stream has no audio.');
+      } else {
+        context.reportStatus('ok', `${video.length ? 'Screen and audio' : 'Audio'} sharing active`);
+      }
+    };
+    const tracks = stream.getTracks();
+    tracks.forEach((track) => { track.addEventListener('ended', describe); track.addEventListener('mute', describe); track.addEventListener('unmute', describe); });
+    describe();
+    return () => tracks.forEach((track) => { track.removeEventListener('ended', describe); track.removeEventListener('mute', describe); track.removeEventListener('unmute', describe); });
+  }, [context, receiver.stream]);
   useEffect(() => {
     const next = receiver.stream ? null : target.kind === 'youtube'
       ? { provider: 'youtube' as const, videoId: target.videoId, muted: effectiveConfig.muted }
@@ -49,7 +74,9 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
       context.reportStatus('error', error instanceof Error ? error.message : String(error)));
     return () => { void context.setPresentation(null).catch(() => undefined); };
   }, [context, target, effectiveConfig.muted, receiver.stream]);
-  if (receiver.stream) return <video ref={videoRef} className="cast-media" autoPlay muted={effectiveConfig.muted} playsInline controls />;
+  if (receiver.stream) return receiver.stream.getVideoTracks().length > 0
+    ? <video ref={videoRef} className="cast-media" autoPlay muted={effectiveConfig.muted} playsInline controls />
+    : <div className="cast-root cast-audio"><span>Shared audio</span><audio ref={audioRef} autoPlay muted={effectiveConfig.muted} controls /></div>;
   if (target.kind === 'youtube' || target.kind === 'spotify' || target.kind === 'website') return <div className="cast-root cast-active" data-overlay={config.overlayMode} />;
   if (target.kind === 'idle') {
     if (!config.showPairingWhenIdle) return <div className="cast-root cast-idle-blank" />;
