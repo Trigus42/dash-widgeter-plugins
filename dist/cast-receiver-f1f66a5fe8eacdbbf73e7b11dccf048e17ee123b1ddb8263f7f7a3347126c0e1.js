@@ -30,7 +30,7 @@ var require_react_development = __commonJS({
     "use strict";
     (function() {
       function defineDeprecationWarning(methodName, info) {
-        Object.defineProperty(Component2.prototype, methodName, {
+        Object.defineProperty(Component.prototype, methodName, {
           get: function() {
             console.warn(
               "%s(...) is deprecated in plain JavaScript React classes. %s",
@@ -55,7 +55,7 @@ var require_react_development = __commonJS({
           publicInstance
         ), didWarnStateUpdateForUnmountedComponent[warningKey] = true);
       }
-      function Component2(props, context, updater) {
+      function Component(props, context, updater) {
         this.props = props;
         this.context = context;
         this.refs = emptyObject;
@@ -547,15 +547,15 @@ var require_react_development = __commonJS({
         }
       }, assign = Object.assign, emptyObject = {};
       Object.freeze(emptyObject);
-      Component2.prototype.isReactComponent = {};
-      Component2.prototype.setState = function(partialState, callback) {
+      Component.prototype.isReactComponent = {};
+      Component.prototype.setState = function(partialState, callback) {
         if ("object" !== typeof partialState && "function" !== typeof partialState && null != partialState)
           throw Error(
             "takes an object of state variables to update or a function which returns an object of state variables."
           );
         this.updater.enqueueSetState(this, partialState, callback, "setState");
       };
-      Component2.prototype.forceUpdate = function(callback) {
+      Component.prototype.forceUpdate = function(callback) {
         this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
       };
       var deprecatedAPIs = {
@@ -570,10 +570,10 @@ var require_react_development = __commonJS({
       };
       for (fnName in deprecatedAPIs)
         deprecatedAPIs.hasOwnProperty(fnName) && defineDeprecationWarning(fnName, deprecatedAPIs[fnName]);
-      ComponentDummy.prototype = Component2.prototype;
+      ComponentDummy.prototype = Component.prototype;
       deprecatedAPIs = PureComponent.prototype = new ComponentDummy();
       deprecatedAPIs.constructor = PureComponent;
-      assign(deprecatedAPIs, Component2.prototype);
+      assign(deprecatedAPIs, Component.prototype);
       deprecatedAPIs.isPureReactComponent = true;
       var isArrayImpl = Array.isArray, REACT_CLIENT_REFERENCE = Symbol.for("react.client.reference"), ReactSharedInternals = {
         H: null,
@@ -661,7 +661,7 @@ var require_react_development = __commonJS({
       };
       exports.Activity = REACT_ACTIVITY_TYPE;
       exports.Children = fnName;
-      exports.Component = Component2;
+      exports.Component = Component;
       exports.Fragment = REACT_FRAGMENT_TYPE;
       exports.Profiler = REACT_PROFILER_TYPE;
       exports.PureComponent = PureComponent;
@@ -1005,9 +1005,9 @@ var require_react_development = __commonJS({
       exports.useState = function(initialState) {
         return resolveDispatcher().useState(initialState);
       };
-      exports.useSyncExternalStore = function(subscribe, getSnapshot, getServerSnapshot) {
+      exports.useSyncExternalStore = function(subscribe2, getSnapshot, getServerSnapshot) {
         return resolveDispatcher().useSyncExternalStore(
-          subscribe,
+          subscribe2,
           getSnapshot,
           getServerSnapshot
         );
@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text2) {
-        if (text2) {
+      function setTextContent(node, text) {
+        if (text) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text2;
+            firstChild.nodeValue = text;
             return;
           }
         }
-        node.textContent = text2;
+        node.textContent = text;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -5076,28 +5076,28 @@ var require_react_dom_client_development = __commonJS({
       }
       function scheduleFibersWithFamiliesRecursively(fiber, updatedFamilies, staleFamilies) {
         do {
-          var _fiber = fiber, alternate = _fiber.alternate, child = _fiber.child, sibling = _fiber.sibling, tag = _fiber.tag, type = _fiber.type, elementType = _fiber.elementType, candidateType = null;
+          var _fiber = fiber, alternate = _fiber.alternate, child = _fiber.child, sibling = _fiber.sibling, tag = _fiber.tag, type = _fiber.type, elementType = _fiber.elementType, candidateType2 = null;
           _fiber = null;
           switch (tag) {
             case 0:
             case 1:
-              candidateType = type;
+              candidateType2 = type;
               break;
             case 15:
-              candidateType = type;
+              candidateType2 = type;
               _fiber = elementType;
               break;
             case 14:
               _fiber = elementType;
               break;
             case 11:
-              candidateType = type.render, _fiber = elementType;
+              candidateType2 = type.render, _fiber = elementType;
           }
           if (null === resolveFamily)
             throw Error("Expected resolveFamily to be set during hot reload.");
           var resolve = resolveFamily;
           type = elementType = false;
-          null !== candidateType && (candidateType = resolve(candidateType), void 0 !== candidateType && (staleFamilies.has(candidateType) ? type = true : updatedFamilies.has(candidateType) && (1 === tag ? type = true : elementType = true)));
+          null !== candidateType2 && (candidateType2 = resolve(candidateType2), void 0 !== candidateType2 && (staleFamilies.has(candidateType2) ? type = true : updatedFamilies.has(candidateType2) && (1 === tag ? type = true : elementType = true)));
           type || null === _fiber || (tag = resolve(_fiber), void 0 !== tag && staleFamilies.has(tag) ? type = true : "object" === typeof _fiber && _fiber.$$typeof === REACT_LAZY_TYPE && (tag = _fiber._payload, 1 === tag._status && (tag = resolve(tag._result.default), void 0 !== tag && staleFamilies.has(tag) && (type = true))));
           null !== failedBoundaries && (failedBoundaries.has(fiber) || null !== alternate && failedBoundaries.has(alternate)) && (type = true);
           type && (fiber._debugNeedsRemount = true);
@@ -5133,9 +5133,9 @@ var require_react_dom_client_development = __commonJS({
         this._debugHookTypes = null;
         hasBadMapPolyfill || "function" !== typeof Object.preventExtensions || Object.preventExtensions(this);
       }
-      function shouldConstruct(Component2) {
-        Component2 = Component2.prototype;
-        return !(!Component2 || !Component2.isReactComponent);
+      function shouldConstruct(Component) {
+        Component = Component.prototype;
+        return !(!Component || !Component.isReactComponent);
       }
       function createWorkInProgress(current2, pendingProps) {
         var workInProgress2 = current2.alternate;
@@ -6108,8 +6108,8 @@ var require_react_dom_client_development = __commonJS({
         return null;
       }
       function validateFragmentProps(element, fiber, returnFiber) {
-        for (var keys = Object.keys(element.props), i = 0; i < keys.length; i++) {
-          var key = keys[i];
+        for (var keys2 = Object.keys(element.props), i = 0; i < keys2.length; i++) {
+          var key = keys2[i];
           if ("children" !== key && "key" !== key && "ref" !== key) {
             null === fiber && (fiber = createFiberFromElement(element, returnFiber.mode, 0), fiber._debugInfo = currentDebugInfo, fiber.return = returnFiber);
             runWithFiberInDEV(
@@ -6880,14 +6880,14 @@ var require_react_dom_client_development = __commonJS({
           queue = queue.firstBaseUpdate;
           if (null !== queue) {
             do {
-              var clone2 = {
+              var clone = {
                 lane: queue.lane,
                 tag: queue.tag,
                 payload: queue.payload,
                 callback: null,
                 next: null
               };
-              null === newLast ? newFirst = newLast = clone2 : newLast = newLast.next = clone2;
+              null === newLast ? newFirst = newLast = clone : newLast = newLast.next = clone;
               queue = queue.next;
             } while (null !== queue);
             null === newLast ? newFirst = newLast = capturedUpdate : newLast = newLast.next = capturedUpdate;
@@ -7192,13 +7192,13 @@ var require_react_dom_client_development = __commonJS({
           if (!objectIs(nextDeps[i], prevDeps[i])) return false;
         return true;
       }
-      function renderWithHooks(current2, workInProgress2, Component2, props, secondArg, nextRenderLanes) {
+      function renderWithHooks(current2, workInProgress2, Component, props, secondArg, nextRenderLanes) {
         renderLanes = nextRenderLanes;
         currentlyRenderingFiber = workInProgress2;
         hookTypesDev = null !== current2 ? current2._debugHookTypes : null;
         hookTypesUpdateIndexDev = -1;
         ignorePreviousDependencies = null !== current2 && current2.type !== workInProgress2.type;
-        if ("[object AsyncFunction]" === Object.prototype.toString.call(Component2) || "[object AsyncGeneratorFunction]" === Object.prototype.toString.call(Component2))
+        if ("[object AsyncFunction]" === Object.prototype.toString.call(Component) || "[object AsyncGeneratorFunction]" === Object.prototype.toString.call(Component))
           nextRenderLanes = getComponentNameFromFiber(currentlyRenderingFiber), didWarnAboutAsyncClientComponent.has(nextRenderLanes) || (didWarnAboutAsyncClientComponent.add(nextRenderLanes), console.error(
             "%s is an async Client Component. Only Server Components can be async at the moment. This error is often caused by accidentally adding `'use client'` to a module that was originally written for the server.",
             null === nextRenderLanes ? "An unknown Component" : "<" + nextRenderLanes + ">"
@@ -7208,11 +7208,11 @@ var require_react_dom_client_development = __commonJS({
         workInProgress2.lanes = 0;
         ReactSharedInternals.H = null !== current2 && null !== current2.memoizedState ? HooksDispatcherOnUpdateInDEV : null !== hookTypesDev ? HooksDispatcherOnMountWithHookTypesInDEV : HooksDispatcherOnMountInDEV;
         shouldDoubleInvokeUserFnsInHooksDEV = nextRenderLanes = (workInProgress2.mode & StrictLegacyMode) !== NoMode;
-        var children = callComponentInDEV(Component2, props, secondArg);
+        var children = callComponentInDEV(Component, props, secondArg);
         shouldDoubleInvokeUserFnsInHooksDEV = false;
         didScheduleRenderPhaseUpdateDuringThisPass && (children = renderWithHooksAgain(
           workInProgress2,
-          Component2,
+          Component,
           props,
           secondArg
         ));
@@ -7221,7 +7221,7 @@ var require_react_dom_client_development = __commonJS({
           try {
             children = renderWithHooksAgain(
               workInProgress2,
-              Component2,
+              Component,
               props,
               secondArg
             );
@@ -7262,7 +7262,7 @@ var require_react_dom_client_development = __commonJS({
           "`use` was called from inside a try/catch block. This is not allowed and can lead to unexpected behavior. To handle errors triggered by `use`, wrap your component in a error boundary."
         )));
       }
-      function renderWithHooksAgain(workInProgress2, Component2, props, secondArg) {
+      function renderWithHooksAgain(workInProgress2, Component, props, secondArg) {
         currentlyRenderingFiber = workInProgress2;
         var numberOfReRenders = 0;
         do {
@@ -7285,7 +7285,7 @@ var require_react_dom_client_development = __commonJS({
           }
           hookTypesUpdateIndexDev = -1;
           ReactSharedInternals.H = HooksDispatcherOnRerenderInDEV;
-          children = callComponentInDEV(Component2, props, secondArg);
+          children = callComponentInDEV(Component, props, secondArg);
         } while (didScheduleRenderPhaseUpdateDuringThisPass);
         return children;
       }
@@ -7551,7 +7551,7 @@ var require_react_dom_client_development = __commonJS({
         }
         return [newState, dispatch];
       }
-      function mountSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) {
+      function mountSyncExternalStore(subscribe2, getSnapshot, getServerSnapshot) {
         var fiber = currentlyRenderingFiber, hook = mountWorkInProgressHook();
         if (isHydrating) {
           if (void 0 === getServerSnapshot)
@@ -7577,8 +7577,8 @@ var require_react_dom_client_development = __commonJS({
         getServerSnapshot = { value: nextSnapshot, getSnapshot };
         hook.queue = getServerSnapshot;
         mountEffect(
-          subscribeToStore.bind(null, fiber, getServerSnapshot, subscribe),
-          [subscribe]
+          subscribeToStore.bind(null, fiber, getServerSnapshot, subscribe2),
+          [subscribe2]
         );
         fiber.flags |= 2048;
         pushSimpleEffect(
@@ -7595,7 +7595,7 @@ var require_react_dom_client_development = __commonJS({
         );
         return nextSnapshot;
       }
-      function updateSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) {
+      function updateSyncExternalStore(subscribe2, getSnapshot, getServerSnapshot) {
         var fiber = currentlyRenderingFiber, hook = updateWorkInProgressHook(), isHydrating$jscomp$0 = isHydrating;
         if (isHydrating$jscomp$0) {
           if (void 0 === getServerSnapshot)
@@ -7615,11 +7615,11 @@ var require_react_dom_client_development = __commonJS({
         ))
           hook.memoizedState = getServerSnapshot, didReceiveUpdate = true;
         hook = hook.queue;
-        var create = subscribeToStore.bind(null, fiber, hook, subscribe);
-        updateEffectImpl(2048, Passive, create, [subscribe]);
-        subscribe = hook.getSnapshot !== getSnapshot || cachedSnapshot || null !== workInProgressHook && (workInProgressHook.memoizedState.tag & HasEffect) !== NoFlags;
+        var create = subscribeToStore.bind(null, fiber, hook, subscribe2);
+        updateEffectImpl(2048, Passive, create, [subscribe2]);
+        subscribe2 = hook.getSnapshot !== getSnapshot || cachedSnapshot || null !== workInProgressHook && (workInProgressHook.memoizedState.tag & HasEffect) !== NoFlags;
         pushSimpleEffect(
-          subscribe ? HasEffect | Passive : Passive,
+          subscribe2 ? HasEffect | Passive : Passive,
           { destroy: void 0 },
           updateStoreInstance.bind(
             null,
@@ -7630,7 +7630,7 @@ var require_react_dom_client_development = __commonJS({
           ),
           null
         );
-        if (subscribe) {
+        if (subscribe2) {
           fiber.flags |= 2048;
           if (null === workInProgressRoot)
             throw Error(
@@ -7651,8 +7651,8 @@ var require_react_dom_client_development = __commonJS({
         inst.getSnapshot = getSnapshot;
         checkIfSnapshotChanged(inst) && forceStoreRerender(fiber);
       }
-      function subscribeToStore(fiber, inst, subscribe) {
-        return subscribe(function() {
+      function subscribeToStore(fiber, inst, subscribe2) {
+        return subscribe2(function() {
           checkIfSnapshotChanged(inst) && (startUpdateTimerByLane(2, "updateSyncExternalStore()", fiber), forceStoreRerender(fiber));
         });
       }
@@ -8515,17 +8515,17 @@ var require_react_dom_client_development = __commonJS({
           null
         ));
       }
-      function resolveClassComponentProps(Component2, baseProps) {
+      function resolveClassComponentProps(Component, baseProps) {
         var newProps = baseProps;
         if ("ref" in baseProps) {
           newProps = {};
           for (var propName in baseProps)
             "ref" !== propName && (newProps[propName] = baseProps[propName]);
         }
-        if (Component2 = Component2.defaultProps) {
+        if (Component = Component.defaultProps) {
           newProps === baseProps && (newProps = assign({}, newProps));
-          for (var _propName in Component2)
-            void 0 === newProps[_propName] && (newProps[_propName] = Component2[_propName]);
+          for (var _propName in Component)
+            void 0 === newProps[_propName] && (newProps[_propName] = Component[_propName]);
         }
         return newProps;
       }
@@ -8763,10 +8763,10 @@ var require_react_dom_client_development = __commonJS({
           renderLanes2
         );
       }
-      function updateForwardRef(current2, workInProgress2, Component2, nextProps, renderLanes2) {
-        Component2 = Component2.render;
-        var resolvedRender = resolveTypeForHotReloading(Component2);
-        resolvedRender !== Component2 && (Component2 = resolvedRender, null !== current2 && (didReceiveUpdate = true));
+      function updateForwardRef(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        Component = Component.render;
+        var resolvedRender = resolveTypeForHotReloading(Component);
+        resolvedRender !== Component && (Component = resolvedRender, null !== current2 && (didReceiveUpdate = true));
         resolvedRender = workInProgress2.ref;
         if ("ref" in nextProps) {
           var propsWithoutRef = {};
@@ -8777,7 +8777,7 @@ var require_react_dom_client_development = __commonJS({
         nextProps = renderWithHooks(
           current2,
           workInProgress2,
-          Component2,
+          Component,
           propsWithoutRef,
           resolvedRender,
           renderLanes2
@@ -8790,19 +8790,19 @@ var require_react_dom_client_development = __commonJS({
         reconcileChildren(current2, workInProgress2, nextProps, renderLanes2);
         return workInProgress2.child;
       }
-      function updateMemoComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
+      function updateMemoComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
         if (null === current2) {
-          var type = Component2.type;
-          if ("function" === typeof type && !shouldConstruct(type) && void 0 === type.defaultProps && null === Component2.compare)
-            return Component2 = resolveTypeForHotReloading(type), workInProgress2.tag = 15, workInProgress2.type = Component2, validateFunctionComponentInDev(workInProgress2, type), updateSimpleMemoComponent(
+          var type = Component.type;
+          if ("function" === typeof type && !shouldConstruct(type) && void 0 === type.defaultProps && null === Component.compare)
+            return Component = resolveTypeForHotReloading(type), workInProgress2.tag = 15, workInProgress2.type = Component, validateFunctionComponentInDev(workInProgress2, type), updateSimpleMemoComponent(
               current2,
               workInProgress2,
-              Component2,
+              Component,
               nextProps,
               renderLanes2
             );
           current2 = createFiberFromTypeAndProps(
-            Component2.type,
+            Component.type,
             null,
             nextProps,
             workInProgress2,
@@ -8816,9 +8816,9 @@ var require_react_dom_client_development = __commonJS({
         type = current2.child;
         if (!checkScheduledUpdateOrContext(current2, renderLanes2)) {
           var prevProps = type.memoizedProps;
-          Component2 = Component2.compare;
-          Component2 = null !== Component2 ? Component2 : shallowEqual;
-          if (Component2(prevProps, nextProps) && current2.ref === workInProgress2.ref)
+          Component = Component.compare;
+          Component = null !== Component ? Component : shallowEqual;
+          if (Component(prevProps, nextProps) && current2.ref === workInProgress2.ref)
             return bailoutOnAlreadyFinishedWork(
               current2,
               workInProgress2,
@@ -8831,7 +8831,7 @@ var require_react_dom_client_development = __commonJS({
         current2.return = workInProgress2;
         return workInProgress2.child = current2;
       }
-      function updateSimpleMemoComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
+      function updateSimpleMemoComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
         if (null !== current2) {
           var prevProps = current2.memoizedProps;
           if (shallowEqual(prevProps, nextProps) && current2.ref === workInProgress2.ref && workInProgress2.type === current2.type)
@@ -8843,7 +8843,7 @@ var require_react_dom_client_development = __commonJS({
         return updateFunctionComponent(
           current2,
           workInProgress2,
-          Component2,
+          Component,
           nextProps,
           renderLanes2
         );
@@ -9035,9 +9035,9 @@ var require_react_dom_client_development = __commonJS({
             workInProgress2.flags |= 4194816;
         }
       }
-      function updateFunctionComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
-        if (Component2.prototype && "function" === typeof Component2.prototype.render) {
-          var componentName2 = getComponentNameFromType(Component2) || "Unknown";
+      function updateFunctionComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        if (Component.prototype && "function" === typeof Component.prototype.render) {
+          var componentName2 = getComponentNameFromType(Component) || "Unknown";
           didWarnAboutBadClass[componentName2] || (console.error(
             "The <%s /> component appears to have a render method, but doesn't extend React.Component. This is likely to cause errors. Change %s to extend React.Component instead.",
             componentName2,
@@ -9048,15 +9048,15 @@ var require_react_dom_client_development = __commonJS({
           workInProgress2,
           null
         );
-        null === current2 && (validateFunctionComponentInDev(workInProgress2, workInProgress2.type), Component2.contextTypes && (componentName2 = getComponentNameFromType(Component2) || "Unknown", didWarnAboutContextTypes[componentName2] || (didWarnAboutContextTypes[componentName2] = true, console.error(
+        null === current2 && (validateFunctionComponentInDev(workInProgress2, workInProgress2.type), Component.contextTypes && (componentName2 = getComponentNameFromType(Component) || "Unknown", didWarnAboutContextTypes[componentName2] || (didWarnAboutContextTypes[componentName2] = true, console.error(
           "%s uses the legacy contextTypes API which was removed in React 19. Use React.createContext() with React.useContext() instead. (https://react.dev/link/legacy-context)",
           componentName2
         ))));
         prepareToReadContext(workInProgress2);
-        Component2 = renderWithHooks(
+        Component = renderWithHooks(
           current2,
           workInProgress2,
-          Component2,
+          Component,
           nextProps,
           void 0,
           renderLanes2
@@ -9066,30 +9066,30 @@ var require_react_dom_client_development = __commonJS({
           return bailoutHooks(current2, workInProgress2, renderLanes2), bailoutOnAlreadyFinishedWork(current2, workInProgress2, renderLanes2);
         isHydrating && nextProps && pushMaterializedTreeId(workInProgress2);
         workInProgress2.flags |= 1;
-        reconcileChildren(current2, workInProgress2, Component2, renderLanes2);
+        reconcileChildren(current2, workInProgress2, Component, renderLanes2);
         return workInProgress2.child;
       }
-      function replayFunctionComponent(current2, workInProgress2, nextProps, Component2, secondArg, renderLanes2) {
+      function replayFunctionComponent(current2, workInProgress2, nextProps, Component, secondArg, renderLanes2) {
         prepareToReadContext(workInProgress2);
         hookTypesUpdateIndexDev = -1;
         ignorePreviousDependencies = null !== current2 && current2.type !== workInProgress2.type;
         workInProgress2.updateQueue = null;
         nextProps = renderWithHooksAgain(
           workInProgress2,
-          Component2,
+          Component,
           nextProps,
           secondArg
         );
         finishRenderingHooks(current2, workInProgress2);
-        Component2 = checkDidRenderIdHook();
+        Component = checkDidRenderIdHook();
         if (null !== current2 && !didReceiveUpdate)
           return bailoutHooks(current2, workInProgress2, renderLanes2), bailoutOnAlreadyFinishedWork(current2, workInProgress2, renderLanes2);
-        isHydrating && Component2 && pushMaterializedTreeId(workInProgress2);
+        isHydrating && Component && pushMaterializedTreeId(workInProgress2);
         workInProgress2.flags |= 1;
         reconcileChildren(current2, workInProgress2, nextProps, renderLanes2);
         return workInProgress2.child;
       }
-      function updateClassComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
+      function updateClassComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
         switch (shouldErrorImpl(workInProgress2)) {
           case false:
             var _instance = workInProgress2.stateNode, state = new workInProgress2.type(
@@ -9121,18 +9121,18 @@ var require_react_dom_client_development = __commonJS({
         prepareToReadContext(workInProgress2);
         if (null === workInProgress2.stateNode) {
           state = emptyContextObject;
-          _instance = Component2.contextType;
-          "contextType" in Component2 && null !== _instance && (void 0 === _instance || _instance.$$typeof !== REACT_CONTEXT_TYPE) && !didWarnAboutInvalidateContextType.has(Component2) && (didWarnAboutInvalidateContextType.add(Component2), lane = void 0 === _instance ? " However, it is set to undefined. This can be caused by a typo or by mixing up named and default imports. This can also happen due to a circular dependency, so try moving the createContext() call to a separate file." : "object" !== typeof _instance ? " However, it is set to a " + typeof _instance + "." : _instance.$$typeof === REACT_CONSUMER_TYPE ? " Did you accidentally pass the Context.Consumer instead?" : " However, it is set to an object with keys {" + Object.keys(_instance).join(", ") + "}.", console.error(
+          _instance = Component.contextType;
+          "contextType" in Component && null !== _instance && (void 0 === _instance || _instance.$$typeof !== REACT_CONTEXT_TYPE) && !didWarnAboutInvalidateContextType.has(Component) && (didWarnAboutInvalidateContextType.add(Component), lane = void 0 === _instance ? " However, it is set to undefined. This can be caused by a typo or by mixing up named and default imports. This can also happen due to a circular dependency, so try moving the createContext() call to a separate file." : "object" !== typeof _instance ? " However, it is set to a " + typeof _instance + "." : _instance.$$typeof === REACT_CONSUMER_TYPE ? " Did you accidentally pass the Context.Consumer instead?" : " However, it is set to an object with keys {" + Object.keys(_instance).join(", ") + "}.", console.error(
             "%s defines an invalid contextType. contextType should point to the Context object returned by React.createContext().%s",
-            getComponentNameFromType(Component2) || "Component",
+            getComponentNameFromType(Component) || "Component",
             lane
           ));
           "object" === typeof _instance && null !== _instance && (state = readContext(_instance));
-          _instance = new Component2(nextProps, state);
+          _instance = new Component(nextProps, state);
           if (workInProgress2.mode & StrictLegacyMode) {
             setIsStrictModeForDevtools(true);
             try {
-              _instance = new Component2(nextProps, state);
+              _instance = new Component(nextProps, state);
             } finally {
               setIsStrictModeForDevtools(false);
             }
@@ -9142,20 +9142,20 @@ var require_react_dom_client_development = __commonJS({
           workInProgress2.stateNode = _instance;
           _instance._reactInternals = workInProgress2;
           _instance._reactInternalInstance = fakeInternalInstance;
-          "function" === typeof Component2.getDerivedStateFromProps && null === state && (state = getComponentNameFromType(Component2) || "Component", didWarnAboutUninitializedState.has(state) || (didWarnAboutUninitializedState.add(state), console.error(
+          "function" === typeof Component.getDerivedStateFromProps && null === state && (state = getComponentNameFromType(Component) || "Component", didWarnAboutUninitializedState.has(state) || (didWarnAboutUninitializedState.add(state), console.error(
             "`%s` uses `getDerivedStateFromProps` but its initial state is %s. This is not recommended. Instead, define the initial state by assigning an object to `this.state` in the constructor of `%s`. This ensures that `getDerivedStateFromProps` arguments have a consistent shape.",
             state,
             null === _instance.state ? "null" : "undefined",
             state
           )));
-          if ("function" === typeof Component2.getDerivedStateFromProps || "function" === typeof _instance.getSnapshotBeforeUpdate) {
+          if ("function" === typeof Component.getDerivedStateFromProps || "function" === typeof _instance.getSnapshotBeforeUpdate) {
             var foundWillUpdateName = lane = state = null;
             "function" === typeof _instance.componentWillMount && true !== _instance.componentWillMount.__suppressDeprecationWarning ? state = "componentWillMount" : "function" === typeof _instance.UNSAFE_componentWillMount && (state = "UNSAFE_componentWillMount");
             "function" === typeof _instance.componentWillReceiveProps && true !== _instance.componentWillReceiveProps.__suppressDeprecationWarning ? lane = "componentWillReceiveProps" : "function" === typeof _instance.UNSAFE_componentWillReceiveProps && (lane = "UNSAFE_componentWillReceiveProps");
             "function" === typeof _instance.componentWillUpdate && true !== _instance.componentWillUpdate.__suppressDeprecationWarning ? foundWillUpdateName = "componentWillUpdate" : "function" === typeof _instance.UNSAFE_componentWillUpdate && (foundWillUpdateName = "UNSAFE_componentWillUpdate");
             if (null !== state || null !== lane || null !== foundWillUpdateName) {
-              _instance = getComponentNameFromType(Component2) || "Component";
-              var newApiName = "function" === typeof Component2.getDerivedStateFromProps ? "getDerivedStateFromProps()" : "getSnapshotBeforeUpdate()";
+              _instance = getComponentNameFromType(Component) || "Component";
+              var newApiName = "function" === typeof Component.getDerivedStateFromProps ? "getDerivedStateFromProps()" : "getSnapshotBeforeUpdate()";
               didWarnAboutLegacyLifecyclesAndDerivedState.has(_instance) || (didWarnAboutLegacyLifecyclesAndDerivedState.add(_instance), console.error(
                 "Unsafe legacy lifecycles will not be called for components using new component APIs.\n\n%s uses %s but also contains the following legacy lifecycles:%s%s%s\n\nThe above lifecycles should be removed. Learn more about this warning here:\nhttps://react.dev/link/unsafe-component-lifecycles",
                 _instance,
@@ -9167,8 +9167,8 @@ var require_react_dom_client_development = __commonJS({
             }
           }
           _instance = workInProgress2.stateNode;
-          state = getComponentNameFromType(Component2) || "Component";
-          _instance.render || (Component2.prototype && "function" === typeof Component2.prototype.render ? console.error(
+          state = getComponentNameFromType(Component) || "Component";
+          _instance.render || (Component.prototype && "function" === typeof Component.prototype.render ? console.error(
             "No `render` method found on the %s instance: did you accidentally return an object from the constructor?",
             state
           ) : console.error(
@@ -9187,11 +9187,11 @@ var require_react_dom_client_development = __commonJS({
             "contextType was defined as an instance property on %s. Use a static property to define contextType instead.",
             state
           );
-          Component2.childContextTypes && !didWarnAboutChildContextTypes.has(Component2) && (didWarnAboutChildContextTypes.add(Component2), console.error(
+          Component.childContextTypes && !didWarnAboutChildContextTypes.has(Component) && (didWarnAboutChildContextTypes.add(Component), console.error(
             "%s uses the legacy childContextTypes API which was removed in React 19. Use React.createContext() instead. (https://react.dev/link/legacy-context)",
             state
           ));
-          Component2.contextTypes && !didWarnAboutContextTypes$1.has(Component2) && (didWarnAboutContextTypes$1.add(Component2), console.error(
+          Component.contextTypes && !didWarnAboutContextTypes$1.has(Component) && (didWarnAboutContextTypes$1.add(Component), console.error(
             "%s uses the legacy contextTypes API which was removed in React 19. Use React.createContext() with static contextType instead. (https://react.dev/link/legacy-context)",
             state
           ));
@@ -9199,9 +9199,9 @@ var require_react_dom_client_development = __commonJS({
             "%s has a method called componentShouldUpdate(). Did you mean shouldComponentUpdate()? The name is phrased as a question because the function is expected to return a value.",
             state
           );
-          Component2.prototype && Component2.prototype.isPureReactComponent && "undefined" !== typeof _instance.shouldComponentUpdate && console.error(
+          Component.prototype && Component.prototype.isPureReactComponent && "undefined" !== typeof _instance.shouldComponentUpdate && console.error(
             "%s has a method called shouldComponentUpdate(). shouldComponentUpdate should not be used when extending React.PureComponent. Please extend React.Component if shouldComponentUpdate is used.",
-            getComponentNameFromType(Component2) || "A pure component"
+            getComponentNameFromType(Component) || "A pure component"
           );
           "function" === typeof _instance.componentDidUnmount && console.error(
             "%s has a method called componentDidUnmount(). But there is no such lifecycle method. Did you mean componentWillUnmount()?",
@@ -9229,9 +9229,9 @@ var require_react_dom_client_development = __commonJS({
             state,
             state
           );
-          "function" !== typeof _instance.getSnapshotBeforeUpdate || "function" === typeof _instance.componentDidUpdate || didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate.has(Component2) || (didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate.add(Component2), console.error(
+          "function" !== typeof _instance.getSnapshotBeforeUpdate || "function" === typeof _instance.componentDidUpdate || didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate.has(Component) || (didWarnAboutGetSnapshotBeforeUpdateWithoutDidUpdate.add(Component), console.error(
             "%s: getSnapshotBeforeUpdate() should be used with componentDidUpdate(). This component defines getSnapshotBeforeUpdate() only.",
-            getComponentNameFromType(Component2)
+            getComponentNameFromType(Component)
           ));
           "function" === typeof _instance.getDerivedStateFromProps && console.error(
             "%s: getDerivedStateFromProps() is defined as an instance method and will be ignored. Instead, declare it as a static method.",
@@ -9241,12 +9241,12 @@ var require_react_dom_client_development = __commonJS({
             "%s: getDerivedStateFromError() is defined as an instance method and will be ignored. Instead, declare it as a static method.",
             state
           );
-          "function" === typeof Component2.getSnapshotBeforeUpdate && console.error(
+          "function" === typeof Component.getSnapshotBeforeUpdate && console.error(
             "%s: getSnapshotBeforeUpdate() is defined as a static method and will be ignored. Instead, declare it as an instance method.",
             state
           );
           (lane = _instance.state) && ("object" !== typeof lane || isArrayImpl(lane)) && console.error("%s.state: must be set to an object or null", state);
-          "function" === typeof _instance.getChildContext && "object" !== typeof Component2.childContextTypes && console.error(
+          "function" === typeof _instance.getChildContext && "object" !== typeof Component.childContextTypes && console.error(
             "%s.getChildContext(): childContextTypes must be defined in order to use getChildContext().",
             state
           );
@@ -9255,9 +9255,9 @@ var require_react_dom_client_development = __commonJS({
           _instance.state = workInProgress2.memoizedState;
           _instance.refs = {};
           initializeUpdateQueue(workInProgress2);
-          state = Component2.contextType;
+          state = Component.contextType;
           _instance.context = "object" === typeof state && null !== state ? readContext(state) : emptyContextObject;
-          _instance.state === nextProps && (state = getComponentNameFromType(Component2) || "Component", didWarnAboutDirectlyAssigningPropsToState.has(state) || (didWarnAboutDirectlyAssigningPropsToState.add(state), console.error(
+          _instance.state === nextProps && (state = getComponentNameFromType(Component) || "Component", didWarnAboutDirectlyAssigningPropsToState.has(state) || (didWarnAboutDirectlyAssigningPropsToState.add(state), console.error(
             "%s: It is not recommended to assign props directly to state because updates to props won't be reflected in state. In most cases, it is better to use props directly.",
             state
           )));
@@ -9270,14 +9270,14 @@ var require_react_dom_client_development = __commonJS({
             _instance
           );
           _instance.state = workInProgress2.memoizedState;
-          state = Component2.getDerivedStateFromProps;
+          state = Component.getDerivedStateFromProps;
           "function" === typeof state && (applyDerivedStateFromProps(
             workInProgress2,
-            Component2,
+            Component,
             state,
             nextProps
           ), _instance.state = workInProgress2.memoizedState);
-          "function" === typeof Component2.getDerivedStateFromProps || "function" === typeof _instance.getSnapshotBeforeUpdate || "function" !== typeof _instance.UNSAFE_componentWillMount && "function" !== typeof _instance.componentWillMount || (state = _instance.state, "function" === typeof _instance.componentWillMount && _instance.componentWillMount(), "function" === typeof _instance.UNSAFE_componentWillMount && _instance.UNSAFE_componentWillMount(), state !== _instance.state && (console.error(
+          "function" === typeof Component.getDerivedStateFromProps || "function" === typeof _instance.getSnapshotBeforeUpdate || "function" !== typeof _instance.UNSAFE_componentWillMount && "function" !== typeof _instance.componentWillMount || (state = _instance.state, "function" === typeof _instance.componentWillMount && _instance.componentWillMount(), "function" === typeof _instance.UNSAFE_componentWillMount && _instance.UNSAFE_componentWillMount(), state !== _instance.state && (console.error(
             "%s.componentWillMount(): Assigning directly to this.state is deprecated (except inside a component's constructor). Use setState instead.",
             getComponentNameFromFiber(workInProgress2) || "Component"
           ), classComponentUpdater.enqueueReplaceState(
@@ -9291,13 +9291,13 @@ var require_react_dom_client_development = __commonJS({
         } else if (null === current2) {
           _instance = workInProgress2.stateNode;
           var unresolvedOldProps = workInProgress2.memoizedProps;
-          lane = resolveClassComponentProps(Component2, unresolvedOldProps);
+          lane = resolveClassComponentProps(Component, unresolvedOldProps);
           _instance.props = lane;
           var oldContext = _instance.context;
-          foundWillUpdateName = Component2.contextType;
+          foundWillUpdateName = Component.contextType;
           state = emptyContextObject;
           "object" === typeof foundWillUpdateName && null !== foundWillUpdateName && (state = readContext(foundWillUpdateName));
-          newApiName = Component2.getDerivedStateFromProps;
+          newApiName = Component.getDerivedStateFromProps;
           foundWillUpdateName = "function" === typeof newApiName || "function" === typeof _instance.getSnapshotBeforeUpdate;
           unresolvedOldProps = workInProgress2.pendingProps !== unresolvedOldProps;
           foundWillUpdateName || "function" !== typeof _instance.UNSAFE_componentWillReceiveProps && "function" !== typeof _instance.componentWillReceiveProps || (unresolvedOldProps || oldContext !== state) && callComponentWillReceiveProps(
@@ -9314,12 +9314,12 @@ var require_react_dom_client_development = __commonJS({
           oldContext = workInProgress2.memoizedState;
           unresolvedOldProps || oldState !== oldContext || hasForceUpdate ? ("function" === typeof newApiName && (applyDerivedStateFromProps(
             workInProgress2,
-            Component2,
+            Component,
             newApiName,
             nextProps
           ), oldContext = workInProgress2.memoizedState), (lane = hasForceUpdate || checkShouldComponentUpdate(
             workInProgress2,
-            Component2,
+            Component,
             lane,
             nextProps,
             oldState,
@@ -9330,14 +9330,14 @@ var require_react_dom_client_development = __commonJS({
           _instance = workInProgress2.stateNode;
           cloneUpdateQueue(current2, workInProgress2);
           state = workInProgress2.memoizedProps;
-          foundWillUpdateName = resolveClassComponentProps(Component2, state);
+          foundWillUpdateName = resolveClassComponentProps(Component, state);
           _instance.props = foundWillUpdateName;
           newApiName = workInProgress2.pendingProps;
           oldState = _instance.context;
-          oldContext = Component2.contextType;
+          oldContext = Component.contextType;
           lane = emptyContextObject;
           "object" === typeof oldContext && null !== oldContext && (lane = readContext(oldContext));
-          unresolvedOldProps = Component2.getDerivedStateFromProps;
+          unresolvedOldProps = Component.getDerivedStateFromProps;
           (oldContext = "function" === typeof unresolvedOldProps || "function" === typeof _instance.getSnapshotBeforeUpdate) || "function" !== typeof _instance.UNSAFE_componentWillReceiveProps && "function" !== typeof _instance.componentWillReceiveProps || (state !== newApiName || oldState !== lane) && callComponentWillReceiveProps(
             workInProgress2,
             _instance,
@@ -9352,12 +9352,12 @@ var require_react_dom_client_development = __commonJS({
           var newState = workInProgress2.memoizedState;
           state !== newApiName || oldState !== newState || hasForceUpdate || null !== current2 && null !== current2.dependencies && checkIfContextChanged(current2.dependencies) ? ("function" === typeof unresolvedOldProps && (applyDerivedStateFromProps(
             workInProgress2,
-            Component2,
+            Component,
             unresolvedOldProps,
             nextProps
           ), newState = workInProgress2.memoizedState), (foundWillUpdateName = hasForceUpdate || checkShouldComponentUpdate(
             workInProgress2,
-            Component2,
+            Component,
             foundWillUpdateName,
             nextProps,
             oldState,
@@ -9375,9 +9375,9 @@ var require_react_dom_client_development = __commonJS({
         if (lane || state) {
           lane = workInProgress2.stateNode;
           setCurrentFiber(workInProgress2);
-          if (state && "function" !== typeof Component2.getDerivedStateFromError)
-            Component2 = null, profilerStartTime = -1;
-          else if (Component2 = callRenderInDEV(lane), workInProgress2.mode & StrictLegacyMode) {
+          if (state && "function" !== typeof Component.getDerivedStateFromError)
+            Component = null, profilerStartTime = -1;
+          else if (Component = callRenderInDEV(lane), workInProgress2.mode & StrictLegacyMode) {
             setIsStrictModeForDevtools(true);
             try {
               callRenderInDEV(lane);
@@ -9394,9 +9394,9 @@ var require_react_dom_client_development = __commonJS({
           ), workInProgress2.child = reconcileChildFibers(
             workInProgress2,
             null,
-            Component2,
+            Component,
             renderLanes2
-          )) : reconcileChildren(current2, workInProgress2, Component2, renderLanes2);
+          )) : reconcileChildren(current2, workInProgress2, Component, renderLanes2);
           workInProgress2.memoizedState = lane.state;
           current2 = workInProgress2.child;
         } else
@@ -9418,19 +9418,19 @@ var require_react_dom_client_development = __commonJS({
         reconcileChildren(current2, workInProgress2, nextChildren, renderLanes2);
         return workInProgress2.child;
       }
-      function validateFunctionComponentInDev(workInProgress2, Component2) {
-        Component2 && Component2.childContextTypes && console.error(
+      function validateFunctionComponentInDev(workInProgress2, Component) {
+        Component && Component.childContextTypes && console.error(
           "childContextTypes cannot be defined on a function component.\n  %s.childContextTypes = ...",
-          Component2.displayName || Component2.name || "Component"
+          Component.displayName || Component.name || "Component"
         );
-        "function" === typeof Component2.getDerivedStateFromProps && (workInProgress2 = getComponentNameFromType(Component2) || "Unknown", didWarnAboutGetDerivedStateOnFunctionComponent[workInProgress2] || (console.error(
+        "function" === typeof Component.getDerivedStateFromProps && (workInProgress2 = getComponentNameFromType(Component) || "Unknown", didWarnAboutGetDerivedStateOnFunctionComponent[workInProgress2] || (console.error(
           "%s: Function components do not support getDerivedStateFromProps.",
           workInProgress2
         ), didWarnAboutGetDerivedStateOnFunctionComponent[workInProgress2] = true));
-        "object" === typeof Component2.contextType && null !== Component2.contextType && (Component2 = getComponentNameFromType(Component2) || "Unknown", didWarnAboutContextTypeOnFunctionComponent[Component2] || (console.error(
+        "object" === typeof Component.contextType && null !== Component.contextType && (Component = getComponentNameFromType(Component) || "Unknown", didWarnAboutContextTypeOnFunctionComponent[Component] || (console.error(
           "%s: Function components do not support contextType.",
-          Component2
-        ), didWarnAboutContextTypeOnFunctionComponent[Component2] = true));
+          Component
+        ), didWarnAboutContextTypeOnFunctionComponent[Component] = true));
       }
       function mountSuspenseOffscreenState(renderLanes2) {
         return { baseLanes: renderLanes2, cachePool: getSuspendedCache() };
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text2) {
-        textInstance.nodeValue = text2;
+      function unhideTextInstance(textInstance, text) {
+        textInstance.nodeValue = text;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
-        if ("" === text2) return null;
+      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
+        if ("" === text) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -21545,11 +21545,11 @@ var require_react_dom_client_development = __commonJS({
         pendingLegacyContextWarning = /* @__PURE__ */ new Map();
       };
       var REACT_RECOVERABLE_DIGEST = "", callComponent = {
-        react_stack_bottom_frame: function(Component2, props, secondArg) {
+        react_stack_bottom_frame: function(Component, props, secondArg) {
           var wasRendering = isRendering;
           isRendering = true;
           try {
-            return Component2(props, secondArg);
+            return Component(props, secondArg);
           } finally {
             isRendering = wasRendering;
           }
@@ -21794,11 +21794,11 @@ var require_react_dom_client_development = __commonJS({
           mountHookTypesDev();
           return mountTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           mountHookTypesDev();
           return mountSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -21924,11 +21924,11 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return mountTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           updateHookTypesDev();
           return mountSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22054,11 +22054,11 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return updateTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22184,11 +22184,11 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return rerenderTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22331,12 +22331,12 @@ var require_react_dom_client_development = __commonJS({
           mountHookTypesDev();
           return mountTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           warnInvalidHookAccess();
           mountHookTypesDev();
           return mountSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22486,12 +22486,12 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return updateTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           warnInvalidHookAccess();
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -22641,12 +22641,12 @@ var require_react_dom_client_development = __commonJS({
           updateHookTypesDev();
           return rerenderTransition();
         },
-        useSyncExternalStore: function(subscribe, getSnapshot, getServerSnapshot) {
+        useSyncExternalStore: function(subscribe2, getSnapshot, getServerSnapshot) {
           currentHookNameInDev = "useSyncExternalStore";
           warnInvalidHookAccess();
           updateHookTypesDev();
           return updateSyncExternalStore(
-            subscribe,
+            subscribe2,
             getSnapshot,
             getServerSnapshot
           );
@@ -24057,15 +24057,15 @@ var require_react_jsx_runtime_development = __commonJS({
           else validateChildKeys(children);
         if (hasOwnProperty.call(config, "key")) {
           children = getComponentNameFromType(type);
-          var keys = Object.keys(config).filter(function(k) {
+          var keys2 = Object.keys(config).filter(function(k) {
             return "key" !== k;
           });
-          isStaticChildren = 0 < keys.length ? "{key: someKey, " + keys.join(": ..., ") + ": ...}" : "{key: someKey}";
-          didWarnAboutKeySpread[children + isStaticChildren] || (keys = 0 < keys.length ? "{" + keys.join(": ..., ") + ": ...}" : "{}", console.error(
+          isStaticChildren = 0 < keys2.length ? "{key: someKey, " + keys2.join(": ..., ") + ": ...}" : "{key: someKey}";
+          didWarnAboutKeySpread[children + isStaticChildren] || (keys2 = 0 < keys2.length ? "{" + keys2.join(": ..., ") + ": ...}" : "{}", console.error(
             'A props object containing a "key" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />',
             isStaticChildren,
             children,
-            keys,
+            keys2,
             children
           ), didWarnAboutKeySpread[children + isStaticChildren] = true);
         }
@@ -24180,13 +24180,13 @@ var import_react = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var import_pulltorefreshjs = __toESM(require_index_umd(), 1);
 var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
-function defineReactWidget(Component2) {
+function defineReactWidget(Component) {
   let root = null;
   let context = null;
   const draw = () => {
     if (!root || !context) return;
     root.render(
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component2, { context }) })
+      /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Component, { context }) })
     );
   };
   return {
@@ -24195,8 +24195,9 @@ function defineReactWidget(Component2) {
       root = (0, import_client.createRoot)(el);
       draw();
     },
-    update(ctx) {
-      context = ctx;
+    update(next) {
+      if (context) Object.assign(context, next);
+      else context = next;
       draw();
     },
     unmount() {
@@ -24206,7652 +24207,4221 @@ function defineReactWidget(Component2) {
     }
   };
 }
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
+
+// src/plugins/cast-receiver/CastWidget.tsx
+var import_react3 = __toESM(require_react(), 1);
+
+// src/plugins/cast-receiver/types.ts
+var CAST_DEFAULT_CONFIG = {
+  sourceKind: "idle",
+  sourceUrl: "",
+  relayUrl: "",
+  senderUrl: "",
+  outputMode: "audio-video",
+  overlayMode: "inline",
+  muted: false
+};
+
+// src/plugins/cast-receiver/resolve.ts
+function str(raw, fallback) {
+  return typeof raw === "string" ? raw : fallback;
 }
-function usePullToRefresh(onRefresh) {
-  const containerRef = (0, import_react.useRef)(null);
-  (0, import_react.useEffect)(() => {
-    const el = containerRef.current;
-    if (!el || typeof window === "undefined") return;
-    let style = document.getElementById("wg-pull-to-refresh-style");
-    if (!style) {
-      style = document.createElement("style");
-      style.id = "wg-pull-to-refresh-style";
-      style.textContent = ".ptr--text,.ptr--icon{color:rgba(255,255,255,.72)!important}";
-      document.head.appendChild(style);
-    }
-    const ptr = import_pulltorefreshjs.default.init({
-      mainElement: el,
-      triggerElement: el,
-      shouldPullToRefresh: () => el.scrollTop <= 0,
-      onRefresh() {
-        return Promise.resolve(onRefresh());
-      },
-      distThreshold: 45,
-      distMax: 65,
-      distReload: 35
-    });
-    return () => {
-      ptr.destroy();
-    };
-  }, [onRefresh]);
-  return containerRef;
+function bool(raw, fallback) {
+  return typeof raw === "boolean" ? raw : fallback;
+}
+var SOURCE_KINDS = ["idle", "website", "media", "youtube"];
+var OVERLAY_MODES = ["inline", "cover", "dim"];
+var OUTPUT_MODES = ["audio-video", "audio-only", "video-only"];
+function readCastConfig(raw) {
+  const d = CAST_DEFAULT_CONFIG;
+  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind) ? raw.sourceKind : d.sourceKind;
+  const overlayMode = OVERLAY_MODES.includes(raw.overlayMode) ? raw.overlayMode : d.overlayMode;
+  const outputMode = OUTPUT_MODES.includes(raw.outputMode) ? raw.outputMode : d.outputMode;
+  return {
+    sourceKind,
+    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
+    relayUrl: str(raw.relayUrl, d.relayUrl),
+    senderUrl: str(raw.senderUrl, d.senderUrl),
+    overlayMode,
+    muted: bool(raw.muted, d.muted),
+    outputMode
+  };
+}
+function youTubeVideoId(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  const patterns = [
+    /[?&]v=([A-Za-z0-9_-]{11})/,
+    // watch?v=ID
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+    // youtu.be/ID
+    /\/embed\/([A-Za-z0-9_-]{11})/,
+    // /embed/ID
+    /\/shorts\/([A-Za-z0-9_-]{11})/
+    // /shorts/ID
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(trimmed);
+    if (match == null ? void 0 : match[1]) return match[1];
+  }
+  return null;
+}
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+function youTubeEmbedUrl(videoId, muted) {
+  const params = new URLSearchParams({
+    autoplay: "1",
+    mute: muted ? "1" : "0",
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1"
+  });
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+}
+function resolveCastTarget(config) {
+  if (config.sourceKind === "idle") return { kind: "idle" };
+  if (config.sourceKind === "youtube") {
+    const videoId = youTubeVideoId(config.sourceUrl);
+    return videoId ? { kind: "youtube", videoId, embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: "idle" };
+  }
+  if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
+  return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
 }
 
-// src/plugins/calendar/CalendarWidget.tsx
+// src/plugins/cast-receiver/session-store.ts
 var import_react2 = __toESM(require_react(), 1);
 
-// node_modules/ical.js/dist/ical.js
-var Binary = class _Binary {
-  /**
-   * Creates a binary value from the given string.
-   *
-   * @param {String} aString        The binary value string
-   * @return {Binary}               The binary value instance
-   */
-  static fromString(aString) {
-    return new _Binary(aString);
+// src/plugins/cast-receiver/pairing.ts
+function parseSession(value) {
+  if (!value || typeof value !== "object") throw new Error("Cast signaling service returned an invalid session");
+  const session = value;
+  if (typeof session.roomCode !== "string" || !/^\d{6}$/.test(session.roomCode) || typeof session.password !== "string" || session.password.length < 32 || typeof session.managementToken !== "string" || session.managementToken.length < 32 || typeof session.expiresAt !== "number" || session.expiresAt <= Date.now() || typeof session.websocketUrl !== "string" || !/^wss?:\/\//.test(session.websocketUrl)) {
+    throw new Error("Cast signaling service returned an invalid session");
   }
-  /**
-   * Creates a new ICAL.Binary instance
-   *
-   * @param {String} aValue     The binary data for this value
-   */
-  constructor(aValue) {
-    this.value = aValue;
-  }
-  /**
-   * The type name, to be used in the jCal object.
-   * @default "binary"
-   * @constant
-   */
-  icaltype = "binary";
-  /**
-   * Base64 decode the current value
-   *
-   * @return {String}         The base64-decoded value
-   */
-  decodeValue() {
-    return this._b64_decode(this.value);
-  }
-  /**
-   * Encodes the passed parameter with base64 and sets the internal
-   * value to the result.
-   *
-   * @param {String} aValue      The raw binary value to encode
-   */
-  setEncodedValue(aValue) {
-    this.value = this._b64_encode(aValue);
-  }
-  _b64_encode(data) {
-    let b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    let o1, o2, o3, h1, h2, h3, h4, bits, i = 0, ac = 0, enc = "", tmp_arr = [];
-    if (!data) {
-      return data;
-    }
-    do {
-      o1 = data.charCodeAt(i++);
-      o2 = data.charCodeAt(i++);
-      o3 = data.charCodeAt(i++);
-      bits = o1 << 16 | o2 << 8 | o3;
-      h1 = bits >> 18 & 63;
-      h2 = bits >> 12 & 63;
-      h3 = bits >> 6 & 63;
-      h4 = bits & 63;
-      tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-    } while (i < data.length);
-    enc = tmp_arr.join("");
-    let r = data.length % 3;
-    return (r ? enc.slice(0, r - 3) : enc) + "===".slice(r || 3);
-  }
-  _b64_decode(data) {
-    let b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    let o1, o2, o3, h1, h2, h3, h4, bits, i = 0, ac = 0, dec = "", tmp_arr = [];
-    if (!data) {
-      return data;
-    }
-    data += "";
-    do {
-      h1 = b64.indexOf(data.charAt(i++));
-      h2 = b64.indexOf(data.charAt(i++));
-      h3 = b64.indexOf(data.charAt(i++));
-      h4 = b64.indexOf(data.charAt(i++));
-      bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
-      o1 = bits >> 16 & 255;
-      o2 = bits >> 8 & 255;
-      o3 = bits & 255;
-      if (h3 == 64) {
-        tmp_arr[ac++] = String.fromCharCode(o1);
-      } else if (h4 == 64) {
-        tmp_arr[ac++] = String.fromCharCode(o1, o2);
-      } else {
-        tmp_arr[ac++] = String.fromCharCode(o1, o2, o3);
-      }
-    } while (i < data.length);
-    dec = tmp_arr.join("");
-    return dec;
-  }
-  /**
-   * The string representation of this value
-   * @return {String}
-   */
-  toString() {
-    return this.value;
-  }
-};
-var DURATION_LETTERS = /([PDWHMTS]{1,1})/;
-var DATA_PROPS_TO_COPY = ["weeks", "days", "hours", "minutes", "seconds", "isNegative"];
-var Duration = class _Duration {
-  /**
-   * Returns a new ICAL.Duration instance from the passed seconds value.
-   *
-   * @param {Number} aSeconds       The seconds to create the instance from
-   * @return {Duration}             The newly created duration instance
-   */
-  static fromSeconds(aSeconds) {
-    return new _Duration().fromSeconds(aSeconds);
-  }
-  /**
-   * Checks if the given string is an iCalendar duration value.
-   *
-   * @param {String} value      The raw ical value
-   * @return {Boolean}          True, if the given value is of the
-   *                              duration ical type
-   */
-  static isValueString(string) {
-    return string[0] === "P" || string[1] === "P";
-  }
-  /**
-   * Creates a new {@link ICAL.Duration} instance from the passed string.
-   *
-   * @param {String} aStr       The string to parse
-   * @return {Duration}         The created duration instance
-   */
-  static fromString(aStr) {
-    let pos = 0;
-    let dict = /* @__PURE__ */ Object.create(null);
-    let chunks = 0;
-    while ((pos = aStr.search(DURATION_LETTERS)) !== -1) {
-      let type = aStr[pos];
-      let numeric = aStr.slice(0, Math.max(0, pos));
-      aStr = aStr.slice(pos + 1);
-      chunks += parseDurationChunk(type, numeric, dict);
-    }
-    if (chunks < 2) {
-      throw new Error(
-        'invalid duration value: Not enough duration components in "' + aStr + '"'
-      );
-    }
-    return new _Duration(dict);
-  }
-  /**
-   * Creates a new ICAL.Duration instance from the given data object.
-   *
-   * @param {Object} aData                An object with members of the duration
-   * @param {Number=} aData.weeks         Duration in weeks
-   * @param {Number=} aData.days          Duration in days
-   * @param {Number=} aData.hours         Duration in hours
-   * @param {Number=} aData.minutes       Duration in minutes
-   * @param {Number=} aData.seconds       Duration in seconds
-   * @param {Boolean=} aData.isNegative   If true, the duration is negative
-   * @return {Duration}                   The createad duration instance
-   */
-  static fromData(aData) {
-    return new _Duration(aData);
-  }
-  /**
-   * Creates a new ICAL.Duration instance.
-   *
-   * @param {Object} data                 An object with members of the duration
-   * @param {Number=} data.weeks          Duration in weeks
-   * @param {Number=} data.days           Duration in days
-   * @param {Number=} data.hours          Duration in hours
-   * @param {Number=} data.minutes        Duration in minutes
-   * @param {Number=} data.seconds        Duration in seconds
-   * @param {Boolean=} data.isNegative    If true, the duration is negative
-   */
-  constructor(data) {
-    this.wrappedJSObject = this;
-    this.fromData(data);
-  }
-  /**
-   * The weeks in this duration
-   * @type {Number}
-   * @default 0
-   */
-  weeks = 0;
-  /**
-   * The days in this duration
-   * @type {Number}
-   * @default 0
-   */
-  days = 0;
-  /**
-   * The days in this duration
-   * @type {Number}
-   * @default 0
-   */
-  hours = 0;
-  /**
-   * The minutes in this duration
-   * @type {Number}
-   * @default 0
-   */
-  minutes = 0;
-  /**
-   * The seconds in this duration
-   * @type {Number}
-   * @default 0
-   */
-  seconds = 0;
-  /**
-   * The seconds in this duration
-   * @type {Boolean}
-   * @default false
-   */
-  isNegative = false;
-  /**
-   * The class identifier.
-   * @constant
-   * @type {String}
-   * @default "icalduration"
-   */
-  icalclass = "icalduration";
-  /**
-   * The type name, to be used in the jCal object.
-   * @constant
-   * @type {String}
-   * @default "duration"
-   */
-  icaltype = "duration";
-  /**
-   * Returns a clone of the duration object.
-   *
-   * @return {Duration}      The cloned object
-   */
-  clone() {
-    return _Duration.fromData(this);
-  }
-  /**
-   * The duration value expressed as a number of seconds.
-   *
-   * @return {Number}             The duration value in seconds
-   */
-  toSeconds() {
-    let seconds = this.seconds + 60 * this.minutes + 3600 * this.hours + 86400 * this.days + 7 * 86400 * this.weeks;
-    return this.isNegative ? -seconds : seconds;
-  }
-  /**
-   * Reads the passed seconds value into this duration object. Afterwards,
-   * members like {@link ICAL.Duration#days days} and {@link ICAL.Duration#weeks weeks} will be set up
-   * accordingly.
-   *
-   * @param {Number} aSeconds     The duration value in seconds
-   * @return {Duration}           Returns this instance
-   */
-  fromSeconds(aSeconds) {
-    let secs = Math.abs(aSeconds);
-    this.isNegative = aSeconds < 0;
-    this.days = trunc(secs / 86400);
-    if (this.days % 7 == 0) {
-      this.weeks = this.days / 7;
-      this.days = 0;
-    } else {
-      this.weeks = 0;
-    }
-    secs -= (this.days + 7 * this.weeks) * 86400;
-    this.hours = trunc(secs / 3600);
-    secs -= this.hours * 3600;
-    this.minutes = trunc(secs / 60);
-    secs -= this.minutes * 60;
-    this.seconds = secs;
-    return this;
-  }
-  /**
-   * Sets up the current instance using members from the passed data object.
-   *
-   * @param {Object} aData                An object with members of the duration
-   * @param {Number=} aData.weeks         Duration in weeks
-   * @param {Number=} aData.days          Duration in days
-   * @param {Number=} aData.hours         Duration in hours
-   * @param {Number=} aData.minutes       Duration in minutes
-   * @param {Number=} aData.seconds       Duration in seconds
-   * @param {Boolean=} aData.isNegative   If true, the duration is negative
-   */
-  fromData(aData) {
-    for (let prop of DATA_PROPS_TO_COPY) {
-      if (aData && prop in aData) {
-        this[prop] = aData[prop];
-      } else {
-        this[prop] = 0;
-      }
-    }
-  }
-  /**
-   * Resets the duration instance to the default values, i.e. PT0S
-   */
-  reset() {
-    this.isNegative = false;
-    this.weeks = 0;
-    this.days = 0;
-    this.hours = 0;
-    this.minutes = 0;
-    this.seconds = 0;
-  }
-  /**
-   * Compares the duration instance with another one.
-   *
-   * @param {Duration} aOther             The instance to compare with
-   * @return {Number}                     -1, 0 or 1 for less/equal/greater
-   */
-  compare(aOther) {
-    let thisSeconds = this.toSeconds();
-    let otherSeconds = aOther.toSeconds();
-    return (thisSeconds > otherSeconds) - (thisSeconds < otherSeconds);
-  }
-  /**
-   * Normalizes the duration instance. For example, a duration with a value
-   * of 61 seconds will be normalized to 1 minute and 1 second.
-   */
-  normalize() {
-    this.fromSeconds(this.toSeconds());
-  }
-  /**
-   * The string representation of this duration.
-   * @return {String}
-   */
-  toString() {
-    if (this.toSeconds() == 0) {
-      return "PT0S";
-    } else {
-      let str = "";
-      if (this.isNegative) str += "-";
-      str += "P";
-      let hasWeeks = false;
-      if (this.weeks) {
-        if (this.days || this.hours || this.minutes || this.seconds) {
-          str += this.weeks * 7 + this.days + "D";
-        } else {
-          str += this.weeks + "W";
-          hasWeeks = true;
-        }
-      } else if (this.days) {
-        str += this.days + "D";
-      }
-      if (!hasWeeks) {
-        if (this.hours || this.minutes || this.seconds) {
-          str += "T";
-          if (this.hours) {
-            str += this.hours + "H";
-          }
-          if (this.minutes) {
-            str += this.minutes + "M";
-          }
-          if (this.seconds) {
-            str += this.seconds + "S";
-          }
-        }
-      }
-      return str;
-    }
-  }
-  /**
-   * The iCalendar string representation of this duration.
-   * @return {String}
-   */
-  toICALString() {
-    return this.toString();
-  }
-};
-function parseDurationChunk(letter, number, object) {
-  let type;
-  switch (letter) {
-    case "P":
-      if (number && number === "-") {
-        object.isNegative = true;
-      } else {
-        object.isNegative = false;
-      }
-      break;
-    case "D":
-      type = "days";
-      break;
-    case "W":
-      type = "weeks";
-      break;
-    case "H":
-      type = "hours";
-      break;
-    case "M":
-      type = "minutes";
-      break;
-    case "S":
-      type = "seconds";
-      break;
-    default:
-      return 0;
-  }
-  if (type) {
-    if (!number && number !== 0) {
-      throw new Error(
-        'invalid duration value: Missing number before "' + letter + '"'
-      );
-    }
-    let num = parseInt(number, 10);
-    if (isStrictlyNaN(num)) {
-      throw new Error(
-        'invalid duration value: Invalid number "' + number + '" before "' + letter + '"'
-      );
-    }
-    object[type] = num;
-  }
-  return 1;
+  return session;
 }
-var Period = class _Period {
-  /**
-   * Creates a new {@link ICAL.Period} instance from the passed string.
-   *
-   * @param {String} str            The string to parse
-   * @param {Property} prop         The property this period will be on
-   * @return {Period}               The created period instance
-   */
-  static fromString(str, prop) {
-    let parts = str.split("/");
-    if (parts.length !== 2) {
-      throw new Error(
-        'Invalid string value: "' + str + '" must contain a "/" char.'
-      );
-    }
-    let options = {
-      start: Time.fromDateTimeString(parts[0], prop)
-    };
-    let end = parts[1];
-    if (Duration.isValueString(end)) {
-      options.duration = Duration.fromString(end);
-    } else {
-      options.end = Time.fromDateTimeString(end, prop);
-    }
-    return new _Period(options);
-  }
-  /**
-   * Creates a new {@link ICAL.Period} instance from the given data object.
-   * The passed data object cannot contain both and end date and a duration.
-   *
-   * @param {Object} aData                  An object with members of the period
-   * @param {Time=} aData.start             The start of the period
-   * @param {Time=} aData.end               The end of the period
-   * @param {Duration=} aData.duration      The duration of the period
-   * @return {Period}                       The period instance
-   */
-  static fromData(aData) {
-    return new _Period(aData);
-  }
-  /**
-   * Returns a new period instance from the given jCal data array. The first
-   * member is always the start date string, the second member is either a
-   * duration or end date string.
-   *
-   * @param {jCalComponent} aData           The jCal data array
-   * @param {Property} aProp                The property this jCal data is on
-   * @param {Boolean} aLenient              If true, data value can be both date and date-time
-   * @return {Period}                       The period instance
-   */
-  static fromJSON(aData, aProp, aLenient) {
-    function fromDateOrDateTimeString(aValue, dateProp) {
-      if (aLenient) {
-        return Time.fromString(aValue, dateProp);
-      } else {
-        return Time.fromDateTimeString(aValue, dateProp);
-      }
-    }
-    if (Duration.isValueString(aData[1])) {
-      return _Period.fromData({
-        start: fromDateOrDateTimeString(aData[0], aProp),
-        duration: Duration.fromString(aData[1])
+async function createPairingSession(baseUrl, signal, validateOrigin) {
+  const base = new URL(baseUrl);
+  if (base.username || base.password || base.search || base.hash) throw new Error("Invalid signaling URL");
+  const response = await fetch(new URL("/session", base), { method: "POST", signal });
+  if (!response.ok) throw new Error(`Signaling service rejected session (${response.status})`);
+  const session = parseSession(await response.json());
+  const websocket = new URL(session.websocketUrl);
+  await validateOrigin(websocket.href);
+  return {
+    options: { relayUrl: websocket.href, roomCode: session.roomCode, password: session.password },
+    roomCode: session.roomCode,
+    expiresAt: session.expiresAt,
+    async close() {
+      const cleanup = await fetch(new URL(`/session/${session.roomCode}`, base), {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${session.managementToken}` }
       });
-    } else {
-      return _Period.fromData({
-        start: fromDateOrDateTimeString(aData[0], aProp),
-        end: fromDateOrDateTimeString(aData[1], aProp)
-      });
+      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
     }
-  }
-  /**
-   * Creates a new ICAL.Period instance. The passed data object cannot contain both and end date and
-   * a duration.
-   *
-   * @param {Object} aData                  An object with members of the period
-   * @param {Time=} aData.start             The start of the period
-   * @param {Time=} aData.end               The end of the period
-   * @param {Duration=} aData.duration      The duration of the period
-   */
-  constructor(aData) {
-    this.wrappedJSObject = this;
-    if (aData && "start" in aData) {
-      if (aData.start && !(aData.start instanceof Time)) {
-        throw new TypeError(".start must be an instance of ICAL.Time");
-      }
-      this.start = aData.start;
-    }
-    if (aData && aData.end && aData.duration) {
-      throw new Error("cannot accept both end and duration");
-    }
-    if (aData && "end" in aData) {
-      if (aData.end && !(aData.end instanceof Time)) {
-        throw new TypeError(".end must be an instance of ICAL.Time");
-      }
-      this.end = aData.end;
-    }
-    if (aData && "duration" in aData) {
-      if (aData.duration && !(aData.duration instanceof Duration)) {
-        throw new TypeError(".duration must be an instance of ICAL.Duration");
-      }
-      this.duration = aData.duration;
-    }
-  }
-  /**
-   * The start of the period
-   * @type {Time}
-   */
-  start = null;
-  /**
-   * The end of the period
-   * @type {Time}
-   */
-  end = null;
-  /**
-   * The duration of the period
-   * @type {Duration}
-   */
-  duration = null;
-  /**
-   * The class identifier.
-   * @constant
-   * @type {String}
-   * @default "icalperiod"
-   */
-  icalclass = "icalperiod";
-  /**
-   * The type name, to be used in the jCal object.
-   * @constant
-   * @type {String}
-   * @default "period"
-   */
-  icaltype = "period";
-  /**
-   * Returns a clone of the duration object.
-   *
-   * @return {Period}      The cloned object
-   */
-  clone() {
-    return _Period.fromData({
-      start: this.start ? this.start.clone() : null,
-      end: this.end ? this.end.clone() : null,
-      duration: this.duration ? this.duration.clone() : null
-    });
-  }
-  /**
-   * Calculates the duration of the period, either directly or by subtracting
-   * start from end date.
-   *
-   * @return {Duration}      The calculated duration
-   */
-  getDuration() {
-    if (this.duration) {
-      return this.duration;
-    } else {
-      return this.end.subtractDate(this.start);
-    }
-  }
-  /**
-   * Calculates the end date of the period, either directly or by adding
-   * duration to start date.
-   *
-   * @return {Time}          The calculated end date
-   */
-  getEnd() {
-    if (this.end) {
-      return this.end;
-    } else {
-      let end = this.start.clone();
-      end.addDuration(this.duration);
-      return end;
-    }
-  }
-  /**
-   * Compare this period with a date or other period. To maintain the logic where a.compare(b)
-   * returns 1 when a > b, this function will return 1 when the period is after the date, 0 when the
-   * date is within the period, and -1 when the period is before the date. When comparing two
-   * periods, as soon as they overlap in any way this will return 0.
-   *
-   * @param {Time|Period} dt    The date or other period to compare with
-   */
-  compare(dt) {
-    if (dt.compare(this.start) < 0) {
-      return 1;
-    } else if (dt.compare(this.getEnd()) > 0) {
-      return -1;
-    } else {
-      return 0;
-    }
-  }
-  /**
-   * The string representation of this period.
-   * @return {String}
-   */
-  toString() {
-    return this.start + "/" + (this.end || this.duration);
-  }
-  /**
-   * The jCal representation of this period type.
-   * @return {Object}
-   */
-  toJSON() {
-    return [this.start.toString(), (this.end || this.duration).toString()];
-  }
-  /**
-   * The iCalendar string representation of this period.
-   * @return {String}
-   */
-  toICALString() {
-    return this.start.toICALString() + "/" + (this.end || this.duration).toICALString();
-  }
-};
-var Time = class _Time {
-  static _dowCache = {};
-  static _wnCache = {};
-  /**
-   * Returns the days in the given month
-   *
-   * @param {Number} month      The month to check
-   * @param {Number} year       The year to check
-   * @return {Number}           The number of days in the month
-   */
-  static daysInMonth(month, year) {
-    let _daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    let days = 30;
-    if (month < 1 || month > 12) return days;
-    days = _daysInMonth[month];
-    if (month == 2) {
-      days += _Time.isLeapYear(year);
-    }
-    return days;
-  }
-  /**
-   * Checks if the year is a leap year
-   *
-   * @param {Number} year       The year to check
-   * @return {Boolean}          True, if the year is a leap year
-   */
-  static isLeapYear(year) {
-    if (year <= 1752) {
-      return year % 4 == 0;
-    } else {
-      return year % 4 == 0 && year % 100 != 0 || year % 400 == 0;
-    }
-  }
-  /**
-   * Create a new ICAL.Time from the day of year and year. The date is returned
-   * in floating timezone.
-   *
-   * @param {Number} aDayOfYear     The day of year
-   * @param {Number} aYear          The year to create the instance in
-   * @return {Time}                 The created instance with the calculated date
-   */
-  static fromDayOfYear(aDayOfYear, aYear) {
-    let year = aYear;
-    let doy = aDayOfYear;
-    let tt = new _Time();
-    tt.auto_normalize = false;
-    let is_leap = _Time.isLeapYear(year) ? 1 : 0;
-    if (doy < 1) {
-      year--;
-      is_leap = _Time.isLeapYear(year) ? 1 : 0;
-      doy += _Time.daysInYearPassedMonth[is_leap][12];
-      return _Time.fromDayOfYear(doy, year);
-    } else if (doy > _Time.daysInYearPassedMonth[is_leap][12]) {
-      is_leap = _Time.isLeapYear(year) ? 1 : 0;
-      doy -= _Time.daysInYearPassedMonth[is_leap][12];
-      year++;
-      return _Time.fromDayOfYear(doy, year);
-    }
-    tt.year = year;
-    tt.isDate = true;
-    for (let month = 11; month >= 0; month--) {
-      if (doy > _Time.daysInYearPassedMonth[is_leap][month]) {
-        tt.month = month + 1;
-        tt.day = doy - _Time.daysInYearPassedMonth[is_leap][month];
-        break;
-      }
-    }
-    tt.auto_normalize = true;
-    return tt;
-  }
-  /**
-   * Returns a new ICAL.Time instance from a date string, e.g 2015-01-02.
-   *
-   * @deprecated                Use {@link ICAL.Time.fromDateString} instead
-   * @param {String} str        The string to create from
-   * @return {Time}             The date/time instance
-   */
-  static fromStringv2(str) {
-    return new _Time({
-      year: parseInt(str.slice(0, 4), 10),
-      month: parseInt(str.slice(5, 7), 10),
-      day: parseInt(str.slice(8, 10), 10),
-      isDate: true
-    });
-  }
-  /**
-   * Returns a new ICAL.Time instance from a date string, e.g 2015-01-02.
-   *
-   * @param {String} aValue     The string to create from
-   * @return {Time}             The date/time instance
-   */
-  static fromDateString(aValue) {
-    return new _Time({
-      year: strictParseInt(aValue.slice(0, 4)),
-      month: strictParseInt(aValue.slice(5, 7)),
-      day: strictParseInt(aValue.slice(8, 10)),
-      isDate: true
-    });
-  }
-  /**
-   * Returns a new ICAL.Time instance from a date-time string, e.g
-   * 2015-01-02T03:04:05. If a property is specified, the timezone is set up
-   * from the property's TZID parameter.
-   *
-   * @param {String} aValue         The string to create from
-   * @param {Property=} prop        The property the date belongs to
-   * @return {Time}                 The date/time instance
-   */
-  static fromDateTimeString(aValue, prop) {
-    if (aValue.length < 19) {
-      throw new Error(
-        'invalid date-time value: "' + aValue + '"'
-      );
-    }
-    let zone;
-    let zoneId;
-    if (aValue.slice(-1) === "Z") {
-      zone = Timezone.utcTimezone;
-    } else if (prop) {
-      zoneId = prop.getParameter("tzid");
-      if (prop.parent) {
-        if (prop.parent.name === "standard" || prop.parent.name === "daylight") {
-          zone = Timezone.localTimezone;
-        } else if (zoneId) {
-          zone = prop.parent.getTimeZoneByID(zoneId);
-        }
-      }
-    }
-    const timeData = {
-      year: strictParseInt(aValue.slice(0, 4)),
-      month: strictParseInt(aValue.slice(5, 7)),
-      day: strictParseInt(aValue.slice(8, 10)),
-      hour: strictParseInt(aValue.slice(11, 13)),
-      minute: strictParseInt(aValue.slice(14, 16)),
-      second: strictParseInt(aValue.slice(17, 19))
-    };
-    if (zoneId && !zone) {
-      timeData.timezone = zoneId;
-    }
-    return new _Time(timeData, zone);
-  }
-  /**
-   * Returns a new ICAL.Time instance from a date or date-time string,
-   *
-   * @param {String} aValue         The string to create from
-   * @param {Property=} prop        The property the date belongs to
-   * @return {Time}                 The date/time instance
-   */
-  static fromString(aValue, aProperty) {
-    if (aValue.length > 10) {
-      return _Time.fromDateTimeString(aValue, aProperty);
-    } else {
-      return _Time.fromDateString(aValue);
-    }
-  }
-  /**
-   * Creates a new ICAL.Time instance from the given Javascript Date.
-   *
-   * @param {?Date} aDate             The Javascript Date to read, or null to reset
-   * @param {Boolean} [useUTC=false]  If true, the UTC values of the date will be used
-   */
-  static fromJSDate(aDate, useUTC) {
-    let tt = new _Time();
-    return tt.fromJSDate(aDate, useUTC);
-  }
-  /**
-   * Creates a new ICAL.Time instance from the the passed data object.
-   *
-   * @param {timeInit} aData          Time initialization
-   * @param {Timezone=} aZone         Timezone this position occurs in
-   */
-  static fromData = function fromData(aData, aZone) {
-    let t = new _Time();
-    return t.fromData(aData, aZone);
   };
-  /**
-   * Creates a new ICAL.Time instance from the current moment.
-   * The instance is “floating” - has no timezone relation.
-   * To create an instance considering the time zone, call
-   * ICAL.Time.fromJSDate(new Date(), true)
-   * @return {Time}
-   */
-  static now() {
-    return _Time.fromJSDate(/* @__PURE__ */ new Date(), false);
-  }
-  /**
-   * Returns the date on which ISO week number 1 starts.
-   *
-   * @see Time#weekNumber
-   * @param {Number} aYear                  The year to search in
-   * @param {weekDay=} aWeekStart           The week start weekday, used for calculation.
-   * @return {Time}                         The date on which week number 1 starts
-   */
-  static weekOneStarts(aYear, aWeekStart) {
-    let t = _Time.fromData({
-      year: aYear,
-      month: 1,
-      day: 1,
-      isDate: true
-    });
-    let dow = t.dayOfWeek();
-    let wkst = aWeekStart || _Time.DEFAULT_WEEK_START;
-    if (dow > _Time.THURSDAY) {
-      t.day += 7;
-    }
-    if (wkst > _Time.THURSDAY) {
-      t.day -= 7;
-    }
-    t.day -= dow - wkst;
-    return t;
-  }
-  /**
-   * Get the dominical letter for the given year. Letters range from A - G for
-   * common years, and AG to GF for leap years.
-   *
-   * @param {Number} yr           The year to retrieve the letter for
-   * @return {String}             The dominical letter.
-   */
-  static getDominicalLetter(yr) {
-    let LTRS = "GFEDCBA";
-    let dom = (yr + (yr / 4 | 0) + (yr / 400 | 0) - (yr / 100 | 0) - 1) % 7;
-    let isLeap = _Time.isLeapYear(yr);
-    if (isLeap) {
-      return LTRS[(dom + 6) % 7] + LTRS[dom];
-    } else {
-      return LTRS[dom];
-    }
-  }
-  static #epochTime = null;
-  /**
-   * January 1st, 1970 as an ICAL.Time.
-   * @type {Time}
-   * @constant
-   * @instance
-   */
-  static get epochTime() {
-    if (!this.#epochTime) {
-      this.#epochTime = _Time.fromData({
-        year: 1970,
-        month: 1,
-        day: 1,
-        hour: 0,
-        minute: 0,
-        second: 0,
-        isDate: false,
-        timezone: "Z"
-      });
-    }
-    return this.#epochTime;
-  }
-  static _cmp_attr(a, b, attr) {
-    if (a[attr] > b[attr]) return 1;
-    if (a[attr] < b[attr]) return -1;
-    return 0;
-  }
-  /**
-   * The days that have passed in the year after a given month. The array has
-   * two members, one being an array of passed days for non-leap years, the
-   * other analog for leap years.
-   * @example
-   * var isLeapYear = ICAL.Time.isLeapYear(year);
-   * var passedDays = ICAL.Time.daysInYearPassedMonth[isLeapYear][month];
-   * @type {Array.<Array.<Number>>}
-   */
-  static daysInYearPassedMonth = [
-    [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365],
-    [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366]
-  ];
-  static SUNDAY = 1;
-  static MONDAY = 2;
-  static TUESDAY = 3;
-  static WEDNESDAY = 4;
-  static THURSDAY = 5;
-  static FRIDAY = 6;
-  static SATURDAY = 7;
-  /**
-   * The default weekday for the WKST part.
-   * @constant
-   * @default ICAL.Time.MONDAY
-   */
-  static DEFAULT_WEEK_START = 2;
-  // MONDAY
-  /**
-   * Creates a new ICAL.Time instance.
-   *
-   * @param {timeInit} data           Time initialization
-   * @param {Timezone} zone           timezone this position occurs in
-   */
-  constructor(data, zone) {
-    this.wrappedJSObject = this;
-    this._time = /* @__PURE__ */ Object.create(null);
-    this._time.year = 0;
-    this._time.month = 1;
-    this._time.day = 1;
-    this._time.hour = 0;
-    this._time.minute = 0;
-    this._time.second = 0;
-    this._time.isDate = false;
-    this.fromData(data, zone);
-  }
-  /**
-   * The class identifier.
-   * @constant
-   * @type {String}
-   * @default "icaltime"
-   */
-  icalclass = "icaltime";
-  _cachedUnixTime = null;
-  /**
-   * The type name, to be used in the jCal object. This value may change and
-   * is strictly defined by the {@link ICAL.Time#isDate isDate} member.
-   * @type {String}
-   * @default "date-time"
-   */
-  get icaltype() {
-    return this.isDate ? "date" : "date-time";
-  }
-  /**
-   * The timezone for this time.
-   * @type {Timezone}
-   */
-  zone = null;
-  /**
-   * Internal uses to indicate that a change has been made and the next read
-   * operation must attempt to normalize the value (for example changing the
-   * day to 33).
-   *
-   * @type {Boolean}
-   * @private
-   */
-  _pendingNormalization = false;
-  /**
-   * The year of this date.
-   * @type {Number}
-   */
-  get year() {
-    return this._getTimeAttr("year");
-  }
-  set year(val) {
-    this._setTimeAttr("year", val);
-  }
-  /**
-   * The month of this date.
-   * @type {Number}
-   */
-  get month() {
-    return this._getTimeAttr("month");
-  }
-  set month(val) {
-    this._setTimeAttr("month", val);
-  }
-  /**
-   * The day of this date.
-   * @type {Number}
-   */
-  get day() {
-    return this._getTimeAttr("day");
-  }
-  set day(val) {
-    this._setTimeAttr("day", val);
-  }
-  /**
-   * The hour of this date-time.
-   * @type {Number}
-   */
-  get hour() {
-    return this._getTimeAttr("hour");
-  }
-  set hour(val) {
-    this._setTimeAttr("hour", val);
-  }
-  /**
-   * The minute of this date-time.
-   * @type {Number}
-   */
-  get minute() {
-    return this._getTimeAttr("minute");
-  }
-  set minute(val) {
-    this._setTimeAttr("minute", val);
-  }
-  /**
-   * The second of this date-time.
-   * @type {Number}
-   */
-  get second() {
-    return this._getTimeAttr("second");
-  }
-  set second(val) {
-    this._setTimeAttr("second", val);
-  }
-  /**
-   * If true, the instance represents a date (as opposed to a date-time)
-   * @type {Boolean}
-   */
-  get isDate() {
-    return this._getTimeAttr("isDate");
-  }
-  set isDate(val) {
-    this._setTimeAttr("isDate", val);
-  }
-  /**
-   * @private
-   * @param {String} attr             Attribute to get (one of: year, month,
-   *                                  day, hour, minute, second, isDate)
-   * @return {Number|Boolean}         Current value for the attribute
-   */
-  _getTimeAttr(attr) {
-    if (this._pendingNormalization) {
-      this._normalize();
-      this._pendingNormalization = false;
-    }
-    return this._time[attr];
-  }
-  /**
-   * @private
-   * @param {String} attr             Attribute to set (one of: year, month,
-   *                                  day, hour, minute, second, isDate)
-   * @param {Number|Boolean} val      New value for the attribute
-   */
-  _setTimeAttr(attr, val) {
-    if (attr === "isDate" && val && !this._time.isDate) {
-      this.adjust(0, 0, 0, 0);
-    }
-    this._cachedUnixTime = null;
-    this._pendingNormalization = true;
-    this._time[attr] = val;
-  }
-  /**
-   * Returns a clone of the time object.
-   *
-   * @return {Time}              The cloned object
-   */
-  clone() {
-    return new _Time(this._time, this.zone);
-  }
-  /**
-   * Reset the time instance to epoch time
-   */
-  reset() {
-    this.fromData(_Time.epochTime);
-    this.zone = Timezone.utcTimezone;
-  }
-  /**
-   * Reset the time instance to the given date/time values.
-   *
-   * @param {Number} year             The year to set
-   * @param {Number} month            The month to set
-   * @param {Number} day              The day to set
-   * @param {Number} hour             The hour to set
-   * @param {Number} minute           The minute to set
-   * @param {Number} second           The second to set
-   * @param {Timezone} timezone       The timezone to set
-   */
-  resetTo(year, month, day, hour, minute, second, timezone) {
-    this.fromData({
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      second,
-      zone: timezone
-    });
-  }
-  /**
-   * Set up the current instance from the Javascript date value.
-   *
-   * @param {?Date} aDate             The Javascript Date to read, or null to reset
-   * @param {Boolean} [useUTC=false]  If true, the UTC values of the date will be used
-   */
-  fromJSDate(aDate, useUTC) {
-    if (!aDate) {
-      this.reset();
-    } else {
-      if (useUTC) {
-        this.zone = Timezone.utcTimezone;
-        this.year = aDate.getUTCFullYear();
-        this.month = aDate.getUTCMonth() + 1;
-        this.day = aDate.getUTCDate();
-        this.hour = aDate.getUTCHours();
-        this.minute = aDate.getUTCMinutes();
-        this.second = aDate.getUTCSeconds();
-      } else {
-        this.zone = Timezone.localTimezone;
-        this.year = aDate.getFullYear();
-        this.month = aDate.getMonth() + 1;
-        this.day = aDate.getDate();
-        this.hour = aDate.getHours();
-        this.minute = aDate.getMinutes();
-        this.second = aDate.getSeconds();
-      }
-    }
-    this._cachedUnixTime = null;
-    return this;
-  }
-  /**
-   * Sets up the current instance using members from the passed data object.
-   *
-   * @param {timeInit} aData          Time initialization
-   * @param {Timezone=} aZone         Timezone this position occurs in
-   */
-  fromData(aData, aZone) {
-    if (aData) {
-      for (let [key, value] of Object.entries(aData)) {
-        if (key === "icaltype") continue;
-        this[key] = value;
-      }
-    }
-    if (aZone) {
-      this.zone = aZone;
-    }
-    if (aData && !("isDate" in aData)) {
-      this.isDate = !("hour" in aData);
-    } else if (aData && "isDate" in aData) {
-      this.isDate = aData.isDate;
-    }
-    if (aData && "timezone" in aData) {
-      let zone = TimezoneService.get(
-        aData.timezone
-      );
-      this.zone = zone || Timezone.localTimezone;
-    }
-    if (aData && "zone" in aData) {
-      this.zone = aData.zone;
-    }
-    if (!this.zone) {
-      this.zone = Timezone.localTimezone;
-    }
-    this._cachedUnixTime = null;
-    return this;
-  }
-  /**
-   * Calculate the day of week.
-   * @param {weekDay=} aWeekStart
-   *        The week start weekday, defaults to SUNDAY
-   * @return {weekDay}
-   */
-  dayOfWeek(aWeekStart) {
-    let firstDow = aWeekStart || _Time.SUNDAY;
-    let dowCacheKey = (this.year << 12) + (this.month << 8) + (this.day << 3) + firstDow;
-    if (dowCacheKey in _Time._dowCache) {
-      return _Time._dowCache[dowCacheKey];
-    }
-    let q = this.day;
-    let m = this.month + (this.month < 3 ? 12 : 0);
-    let Y = this.year - (this.month < 3 ? 1 : 0);
-    let h = q + Y + trunc((m + 1) * 26 / 10) + trunc(Y / 4);
-    {
-      h += trunc(Y / 100) * 6 + trunc(Y / 400);
-    }
-    h = (h + 7 - firstDow) % 7 + 1;
-    _Time._dowCache[dowCacheKey] = h;
-    return h;
-  }
-  /**
-   * Calculate the day of year.
-   * @return {Number}
-   */
-  dayOfYear() {
-    let is_leap = _Time.isLeapYear(this.year) ? 1 : 0;
-    let diypm = _Time.daysInYearPassedMonth;
-    return diypm[is_leap][this.month - 1] + this.day;
-  }
-  /**
-   * Returns a copy of the current date/time, rewound to the start of the
-   * week. The resulting ICAL.Time instance is of icaltype date, even if this
-   * is a date-time.
-   *
-   * @param {weekDay=} aWeekStart
-   *        The week start weekday, defaults to SUNDAY
-   * @return {Time}      The start of the week (cloned)
-   */
-  startOfWeek(aWeekStart) {
-    let firstDow = aWeekStart || _Time.SUNDAY;
-    let result = this.clone();
-    result.day -= (this.dayOfWeek() + 7 - firstDow) % 7;
-    result.isDate = true;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    return result;
-  }
-  /**
-   * Returns a copy of the current date/time, shifted to the end of the week.
-   * The resulting ICAL.Time instance is of icaltype date, even if this is a
-   * date-time.
-   *
-   * @param {weekDay=} aWeekStart
-   *        The week start weekday, defaults to SUNDAY
-   * @return {Time}      The end of the week (cloned)
-   */
-  endOfWeek(aWeekStart) {
-    let firstDow = aWeekStart || _Time.SUNDAY;
-    let result = this.clone();
-    result.day += (7 - this.dayOfWeek() + firstDow - _Time.SUNDAY) % 7;
-    result.isDate = true;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    return result;
-  }
-  /**
-   * Returns a copy of the current date/time, rewound to the start of the
-   * month. The resulting ICAL.Time instance is of icaltype date, even if
-   * this is a date-time.
-   *
-   * @return {Time}      The start of the month (cloned)
-   */
-  startOfMonth() {
-    let result = this.clone();
-    result.day = 1;
-    result.isDate = true;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    return result;
-  }
-  /**
-   * Returns a copy of the current date/time, shifted to the end of the
-   * month.  The resulting ICAL.Time instance is of icaltype date, even if
-   * this is a date-time.
-   *
-   * @return {Time}      The end of the month (cloned)
-   */
-  endOfMonth() {
-    let result = this.clone();
-    result.day = _Time.daysInMonth(result.month, result.year);
-    result.isDate = true;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    return result;
-  }
-  /**
-   * Returns a copy of the current date/time, rewound to the start of the
-   * year. The resulting ICAL.Time instance is of icaltype date, even if
-   * this is a date-time.
-   *
-   * @return {Time}      The start of the year (cloned)
-   */
-  startOfYear() {
-    let result = this.clone();
-    result.day = 1;
-    result.month = 1;
-    result.isDate = true;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    return result;
-  }
-  /**
-   * Returns a copy of the current date/time, shifted to the end of the
-   * year.  The resulting ICAL.Time instance is of icaltype date, even if
-   * this is a date-time.
-   *
-   * @return {Time}      The end of the year (cloned)
-   */
-  endOfYear() {
-    let result = this.clone();
-    result.day = 31;
-    result.month = 12;
-    result.isDate = true;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    return result;
-  }
-  /**
-   * First calculates the start of the week, then returns the day of year for
-   * this date. If the day falls into the previous year, the day is zero or negative.
-   *
-   * @param {weekDay=} aFirstDayOfWeek
-   *        The week start weekday, defaults to SUNDAY
-   * @return {Number}     The calculated day of year
-   */
-  startDoyWeek(aFirstDayOfWeek) {
-    let firstDow = aFirstDayOfWeek || _Time.SUNDAY;
-    let delta = this.dayOfWeek() - firstDow;
-    if (delta < 0) delta += 7;
-    return this.dayOfYear() - delta;
-  }
-  /**
-   * Get the dominical letter for the current year. Letters range from A - G
-   * for common years, and AG to GF for leap years.
-   *
-   * @param {Number} yr           The year to retrieve the letter for
-   * @return {String}             The dominical letter.
-   */
-  getDominicalLetter() {
-    return _Time.getDominicalLetter(this.year);
-  }
-  /**
-   * Finds the nthWeekDay relative to the current month (not day).  The
-   * returned value is a day relative the month that this month belongs to so
-   * 1 would indicate the first of the month and 40 would indicate a day in
-   * the following month.
-   *
-   * @param {Number} aDayOfWeek   Day of the week see the day name constants
-   * @param {Number} aPos         Nth occurrence of a given week day values
-   *        of 1 and 0 both indicate the first weekday of that type. aPos may
-   *        be either positive or negative
-   *
-   * @return {Number} numeric value indicating a day relative
-   *                   to the current month of this time object
-   */
-  nthWeekDay(aDayOfWeek, aPos) {
-    let daysInMonth = _Time.daysInMonth(this.month, this.year);
-    let weekday;
-    let pos = aPos;
-    let start = 0;
-    let otherDay = this.clone();
-    if (pos >= 0) {
-      otherDay.day = 1;
-      if (pos != 0) {
-        pos--;
-      }
-      start = otherDay.day;
-      let startDow = otherDay.dayOfWeek();
-      let offset = aDayOfWeek - startDow;
-      if (offset < 0)
-        offset += 7;
-      start += offset;
-      start -= aDayOfWeek;
-      weekday = aDayOfWeek;
-    } else {
-      otherDay.day = daysInMonth;
-      let endDow = otherDay.dayOfWeek();
-      pos++;
-      weekday = endDow - aDayOfWeek;
-      if (weekday < 0) {
-        weekday += 7;
-      }
-      weekday = daysInMonth - weekday;
-    }
-    weekday += pos * 7;
-    return start + weekday;
-  }
-  /**
-   * Checks if current time is the nth weekday, relative to the current
-   * month.  Will always return false when rule resolves outside of current
-   * month.
-   *
-   * @param {weekDay} aDayOfWeek                 Day of week to check
-   * @param {Number} aPos                        Relative position
-   * @return {Boolean}                           True, if it is the nth weekday
-   */
-  isNthWeekDay(aDayOfWeek, aPos) {
-    let dow = this.dayOfWeek();
-    if (aPos === 0 && dow === aDayOfWeek) {
-      return true;
-    }
-    let day = this.nthWeekDay(aDayOfWeek, aPos);
-    if (day === this.day) {
-      return true;
-    }
-    return false;
-  }
-  /**
-   * Calculates the ISO 8601 week number. The first week of a year is the
-   * week that contains the first Thursday. The year can have 53 weeks, if
-   * January 1st is a Friday.
-   *
-   * Note there are regions where the first week of the year is the one that
-   * starts on January 1st, which may offset the week number. Also, if a
-   * different week start is specified, this will also affect the week
-   * number.
-   *
-   * @see Time.weekOneStarts
-   * @param {weekDay} aWeekStart                  The weekday the week starts with
-   * @return {Number}                             The ISO week number
-   */
-  weekNumber(aWeekStart) {
-    let wnCacheKey = (this.year << 12) + (this.month << 8) + (this.day << 3) + aWeekStart;
-    if (wnCacheKey in _Time._wnCache) {
-      return _Time._wnCache[wnCacheKey];
-    }
-    let week1;
-    let dt = this.clone();
-    dt.isDate = true;
-    let isoyear = this.year;
-    if (dt.month == 12 && dt.day > 25) {
-      week1 = _Time.weekOneStarts(isoyear + 1, aWeekStart);
-      if (dt.compare(week1) < 0) {
-        week1 = _Time.weekOneStarts(isoyear, aWeekStart);
-      } else {
-        isoyear++;
-      }
-    } else {
-      week1 = _Time.weekOneStarts(isoyear, aWeekStart);
-      if (dt.compare(week1) < 0) {
-        week1 = _Time.weekOneStarts(--isoyear, aWeekStart);
-      }
-    }
-    let daysBetween = dt.subtractDate(week1).toSeconds() / 86400;
-    let answer = trunc(daysBetween / 7) + 1;
-    _Time._wnCache[wnCacheKey] = answer;
-    return answer;
-  }
-  /**
-   * Adds the duration to the current time. The instance is modified in
-   * place.
-   *
-   * @param {Duration} aDuration         The duration to add
-   */
-  addDuration(aDuration) {
-    let mult = aDuration.isNegative ? -1 : 1;
-    let second = this.second;
-    let minute = this.minute;
-    let hour = this.hour;
-    let day = this.day;
-    second += mult * aDuration.seconds;
-    minute += mult * aDuration.minutes;
-    hour += mult * aDuration.hours;
-    day += mult * aDuration.days;
-    day += mult * 7 * aDuration.weeks;
-    this.second = second;
-    this.minute = minute;
-    this.hour = hour;
-    this.day = day;
-    this._cachedUnixTime = null;
-  }
-  /**
-   * Subtract the date details (_excluding_ timezone).  Useful for finding
-   * the relative difference between two time objects excluding their
-   * timezone differences.
-   *
-   * @param {Time} aDate     The date to subtract
-   * @return {Duration}      The difference as a duration
-   */
-  subtractDate(aDate) {
-    let unixTime = this.toUnixTime() + this.utcOffset();
-    let other = aDate.toUnixTime() + aDate.utcOffset();
-    return Duration.fromSeconds(unixTime - other);
-  }
-  /**
-   * Subtract the date details, taking timezones into account.
-   *
-   * @param {Time} aDate  The date to subtract
-   * @return {Duration}   The difference in duration
-   */
-  subtractDateTz(aDate) {
-    let unixTime = this.toUnixTime();
-    let other = aDate.toUnixTime();
-    return Duration.fromSeconds(unixTime - other);
-  }
-  /**
-   * Compares the ICAL.Time instance with another one, or a period.
-   *
-   * @param {Time|Period} aOther                  The instance to compare with
-   * @return {Number}                             -1, 0 or 1 for less/equal/greater
-   */
-  compare(other) {
-    if (other instanceof Period) {
-      return -1 * other.compare(this);
-    } else {
-      let a = this.toUnixTime();
-      let b = other.toUnixTime();
-      if (a > b) return 1;
-      if (b > a) return -1;
-      return 0;
-    }
-  }
-  /**
-   * Compares only the date part of this instance with another one.
-   *
-   * @param {Time} other                  The instance to compare with
-   * @param {Timezone} tz                 The timezone to compare in
-   * @return {Number}                     -1, 0 or 1 for less/equal/greater
-   */
-  compareDateOnlyTz(other, tz) {
-    let a = this.convertToZone(tz);
-    let b = other.convertToZone(tz);
-    let rc = 0;
-    if ((rc = _Time._cmp_attr(a, b, "year")) != 0) return rc;
-    if ((rc = _Time._cmp_attr(a, b, "month")) != 0) return rc;
-    if ((rc = _Time._cmp_attr(a, b, "day")) != 0) return rc;
-    return rc;
-  }
-  /**
-   * Convert the instance into another timezone. The returned ICAL.Time
-   * instance is always a copy.
-   *
-   * @param {Timezone} zone      The zone to convert to
-   * @return {Time}              The copy, converted to the zone
-   */
-  convertToZone(zone) {
-    let copy = this.clone();
-    let zone_equals = this.zone.tzid == zone.tzid;
-    if (!this.isDate && !zone_equals) {
-      Timezone.convert_time(copy, this.zone, zone);
-    }
-    copy.zone = zone;
-    return copy;
-  }
-  /**
-   * Calculates the UTC offset of the current date/time in the timezone it is
-   * in.
-   *
-   * @return {Number}     UTC offset in seconds
-   */
-  utcOffset() {
-    if (this.zone == Timezone.localTimezone || this.zone == Timezone.utcTimezone) {
-      return 0;
-    } else {
-      return this.zone.utcOffset(this);
-    }
-  }
-  /**
-   * Returns an RFC 5545 compliant ical representation of this object.
-   *
-   * @return {String} ical date/date-time
-   */
-  toICALString() {
-    let string = this.toString();
-    if (string.length > 10) {
-      return design.icalendar.value["date-time"].toICAL(string);
-    } else {
-      return design.icalendar.value.date.toICAL(string);
-    }
-  }
-  /**
-   * The string representation of this date/time, in jCal form
-   * (including : and - separators).
-   * @return {String}
-   */
-  toString() {
-    let result = this.year + "-" + pad2(this.month) + "-" + pad2(this.day);
-    if (!this.isDate) {
-      result += "T" + pad2(this.hour) + ":" + pad2(this.minute) + ":" + pad2(this.second);
-      if (this.zone === Timezone.utcTimezone) {
-        result += "Z";
-      }
-    }
-    return result;
-  }
-  /**
-   * Converts the current instance to a Javascript date
-   * @return {Date}
-   */
-  toJSDate() {
-    if (this.zone == Timezone.localTimezone) {
-      if (this.isDate) {
-        return new Date(this.year, this.month - 1, this.day);
-      } else {
-        return new Date(
-          this.year,
-          this.month - 1,
-          this.day,
-          this.hour,
-          this.minute,
-          this.second,
-          0
-        );
-      }
-    } else {
-      return new Date(this.toUnixTime() * 1e3);
-    }
-  }
-  _normalize() {
-    if (this._time.isDate) {
-      this._time.hour = 0;
-      this._time.minute = 0;
-      this._time.second = 0;
-    }
-    this.adjust(0, 0, 0, 0);
-    return this;
-  }
-  /**
-   * Adjust the date/time by the given offset
-   *
-   * @param {Number} aExtraDays       The extra amount of days
-   * @param {Number} aExtraHours      The extra amount of hours
-   * @param {Number} aExtraMinutes    The extra amount of minutes
-   * @param {Number} aExtraSeconds    The extra amount of seconds
-   * @param {Number=} aTime           The time to adjust, defaults to the
-   *                                    current instance.
-   */
-  adjust(aExtraDays, aExtraHours, aExtraMinutes, aExtraSeconds, aTime) {
-    let minutesOverflow, hoursOverflow, daysOverflow = 0, yearsOverflow = 0;
-    let second, minute, hour, day;
-    let daysInMonth;
-    let time = aTime || this._time;
-    if (!time.isDate) {
-      second = time.second + aExtraSeconds;
-      time.second = second % 60;
-      minutesOverflow = trunc(second / 60);
-      if (time.second < 0) {
-        time.second += 60;
-        minutesOverflow--;
-      }
-      minute = time.minute + aExtraMinutes + minutesOverflow;
-      time.minute = minute % 60;
-      hoursOverflow = trunc(minute / 60);
-      if (time.minute < 0) {
-        time.minute += 60;
-        hoursOverflow--;
-      }
-      hour = time.hour + aExtraHours + hoursOverflow;
-      time.hour = hour % 24;
-      daysOverflow = trunc(hour / 24);
-      if (time.hour < 0) {
-        time.hour += 24;
-        daysOverflow--;
-      }
-    }
-    if (time.month > 12) {
-      yearsOverflow = trunc((time.month - 1) / 12);
-    } else if (time.month < 1) {
-      yearsOverflow = trunc(time.month / 12) - 1;
-    }
-    time.year += yearsOverflow;
-    time.month -= 12 * yearsOverflow;
-    day = time.day + aExtraDays + daysOverflow;
-    if (day > 0) {
-      for (; ; ) {
-        daysInMonth = _Time.daysInMonth(time.month, time.year);
-        if (day <= daysInMonth) {
-          break;
-        }
-        time.month++;
-        if (time.month > 12) {
-          time.year++;
-          time.month = 1;
-        }
-        day -= daysInMonth;
-      }
-    } else {
-      while (day <= 0) {
-        if (time.month == 1) {
-          time.year--;
-          time.month = 12;
-        } else {
-          time.month--;
-        }
-        day += _Time.daysInMonth(time.month, time.year);
-      }
-    }
-    time.day = day;
-    this._cachedUnixTime = null;
-    return this;
-  }
-  /**
-   * Sets up the current instance from unix time, the number of seconds since
-   * January 1st, 1970.
-   *
-   * @param {Number} seconds      The seconds to set up with
-   */
-  fromUnixTime(seconds) {
-    this.zone = Timezone.utcTimezone;
-    let date = new Date(seconds * 1e3);
-    this.year = date.getUTCFullYear();
-    this.month = date.getUTCMonth() + 1;
-    this.day = date.getUTCDate();
-    if (this._time.isDate) {
-      this.hour = 0;
-      this.minute = 0;
-      this.second = 0;
-    } else {
-      this.hour = date.getUTCHours();
-      this.minute = date.getUTCMinutes();
-      this.second = date.getUTCSeconds();
-    }
-    this._cachedUnixTime = null;
-  }
-  /**
-   * Converts the current instance to seconds since January 1st 1970.
-   *
-   * @return {Number}         Seconds since 1970
-   */
-  toUnixTime() {
-    if (this._cachedUnixTime !== null) {
-      return this._cachedUnixTime;
-    }
-    let offset = this.utcOffset();
-    let ms = Date.UTC(
-      this.year,
-      this.month - 1,
-      this.day,
-      this.hour,
-      this.minute,
-      this.second - offset
-    );
-    this._cachedUnixTime = ms / 1e3;
-    return this._cachedUnixTime;
-  }
-  /**
-   * Converts time to into Object which can be serialized then re-created
-   * using the constructor.
-   *
-   * @example
-   * // toJSON will automatically be called
-   * var json = JSON.stringify(mytime);
-   *
-   * var deserialized = JSON.parse(json);
-   *
-   * var time = new ICAL.Time(deserialized);
-   *
-   * @return {Object}
-   */
-  toJSON() {
-    let copy = [
-      "year",
-      "month",
-      "day",
-      "hour",
-      "minute",
-      "second",
-      "isDate"
-    ];
-    let result = /* @__PURE__ */ Object.create(null);
-    let i = 0;
-    let len = copy.length;
-    let prop;
-    for (; i < len; i++) {
-      prop = copy[i];
-      result[prop] = this[prop];
-    }
-    if (this.zone) {
-      result.timezone = this.zone.tzid;
-    }
-    return result;
+}
+
+// node_modules/@trystero-p2p/core/dist/utils.mjs
+var { floor, min, sin } = Math;
+var libName = "Trystero";
+var alloc = (n, f) => Array(n).fill(void 0).map(f);
+var charSet = "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+var genId = (n) => alloc(n, () => charSet[floor(Math.random() * 62)] ?? "").join("");
+var selfId = genId(20);
+var all = Promise.all.bind(Promise);
+var isBrowser = typeof window !== "undefined";
+var { entries, fromEntries, keys, values } = Object;
+var noOp = () => {
+};
+var candidateType = "candidate";
+var resetTimer = (timer) => {
+  if (timer !== null) clearTimeout(timer);
+  return null;
+};
+var mkErr = (msg) => /* @__PURE__ */ new Error(`${libName}: ${msg}`);
+var toErrorMessage = (reason, fallback) => {
+  if (reason instanceof Error && reason.message) return reason.message;
+  if (typeof reason === "string" && reason) return reason;
+  return toJson(reason ?? fallback);
+};
+var toError = (reason, fallback) => reason instanceof Error ? reason : mkErr(toErrorMessage(reason, fallback));
+var encoder = new TextEncoder();
+var decoder = new TextDecoder();
+var encodeBytes = (txt) => encoder.encode(txt);
+var decodeBytes = (buffer) => decoder.decode(buffer);
+var toHex = (buffer) => buffer.reduce((a, c) => a + c.toString(16).padStart(2, "0"), "");
+var topicPath = (...parts) => parts.join("@");
+var toJson = JSON.stringify;
+var fromJson = (s) => {
+  try {
+    return JSON.parse(s);
+  } catch {
+    throw mkErr(`failed to parse JSON: ${s}`);
   }
 };
-var CHAR = /[^ \t]/;
-var VALUE_DELIMITER = ":";
-var PARAM_DELIMITER = ";";
-var PARAM_NAME_DELIMITER = "=";
-var DEFAULT_VALUE_TYPE$1 = "unknown";
-var DEFAULT_PARAM_TYPE = "text";
-var RFC6868_REPLACE_MAP$1 = { "^'": '"', "^n": "\n", "^^": "^" };
-function parse(input) {
-  let state = {};
-  let root = state.component = [];
-  state.stack = [root];
-  parse._eachLine(input, function(err, line) {
-    parse._handleContentLine(line, state);
+var defaultRetryMs = 3333;
+var maxRetryMs = 6e4;
+var socketRetryPeriods = {};
+var reconnectionLockingPromise = null;
+var resolver = null;
+var pauseRelayReconnection = () => {
+  if (!reconnectionLockingPromise) reconnectionLockingPromise = new Promise((resolve) => {
+    resolver = resolve;
+  }).finally(() => {
+    resolver = null;
+    reconnectionLockingPromise = null;
   });
-  if (state.stack.length > 1) {
-    throw new ParserError(
-      "invalid ical body. component began but did not end"
-    );
-  }
-  state = null;
-  return root.length == 1 ? root[0] : root;
-}
-parse.property = function(str, designSet) {
-  let state = {
-    component: [[], []],
-    designSet: designSet || design.defaultSet
+};
+var resumeRelayReconnection = () => {
+  resolver == null ? void 0 : resolver();
+};
+var makeSocket = (url, onMessage, onReconnect) => {
+  const client = {};
+  let didOpen = false;
+  let isReconnectPending = false;
+  let retryTimer;
+  let resolveReady = noOp;
+  client.isClosed = false;
+  client.ready = new Promise((res) => resolveReady = res);
+  const init = () => {
+    if (client.isClosed) return;
+    retryTimer = void 0;
+    isReconnectPending = false;
+    const socket = new WebSocket(url);
+    socket.onclose = () => {
+      if (client.isClosed || isReconnectPending) return;
+      isReconnectPending = true;
+      if (reconnectionLockingPromise) {
+        reconnectionLockingPromise.then(init);
+        return;
+      }
+      const period = socketRetryPeriods[url] ?? (socketRetryPeriods[url] = defaultRetryMs);
+      retryTimer = setTimeout(init, Math.random() * period);
+      socketRetryPeriods[url] = min(period * 2, maxRetryMs);
+    };
+    socket.onmessage = (e) => onMessage(String(e.data));
+    client.socket = socket;
+    client.url = socket.url;
+    socket.onopen = () => {
+      const isReconnect = didOpen;
+      didOpen = true;
+      resolveReady(client);
+      socketRetryPeriods[url] = defaultRetryMs;
+      if (isReconnect) onReconnect == null ? void 0 : onReconnect();
+    };
+    client.send = (data) => {
+      if (socket.readyState === 1) socket.send(data);
+    };
   };
-  parse._handleContentLine(str, state);
-  return state.component[1][0];
+  client.close = () => {
+    client.isClosed = true;
+    if (retryTimer !== void 0) {
+      clearTimeout(retryTimer);
+      retryTimer = void 0;
+    }
+    client.socket.close();
+  };
+  init();
+  return client;
 };
-parse.component = function(str) {
-  return parse(str);
+var createRelayManager = (getSocket) => {
+  const relays = {};
+  const keysByRelay = /* @__PURE__ */ new WeakMap();
+  const keyOf = (relay) => {
+    const key = keysByRelay.get(relay);
+    if (!key) throw mkErr("relay bookkeeping missing registration for relay client");
+    return key;
+  };
+  const scoped = () => {
+    const store2 = {};
+    const forKey = (key) => store2[key] ?? (store2[key] = {});
+    return {
+      forKey,
+      forRelay: (relay) => forKey(keyOf(relay))
+    };
+  };
+  const store = (key, relay) => {
+    relays[key] = relay;
+    keysByRelay.set(relay, key);
+    return relay;
+  };
+  return {
+    register: (key, createRelay) => {
+      const relay = relays[key];
+      if (relay) return relay;
+      return store(key, createRelay());
+    },
+    keyOf,
+    scoped,
+    getSockets: () => fromEntries(entries(relays).flatMap(([key, relay]) => {
+      const socket = getSocket(relay);
+      return socket ? [[key, socket]] : [];
+    }))
+  };
 };
-var ParserError = class extends Error {
-  name = this.constructor.name;
+var watchOnline = () => {
+  if (isBrowser) {
+    const controller = new AbortController();
+    addEventListener("online", resumeRelayReconnection, { signal: controller.signal });
+    addEventListener("offline", pauseRelayReconnection, { signal: controller.signal });
+    return () => controller.abort();
+  }
+  return noOp;
 };
-parse.ParserError = ParserError;
-parse._handleContentLine = function(line, state) {
-  let valuePos = line.indexOf(VALUE_DELIMITER);
-  let paramPos = line.indexOf(PARAM_DELIMITER);
-  let lastParamIndex;
-  let lastValuePos;
-  let name;
-  let value;
-  let params = {};
-  if (paramPos !== -1 && valuePos !== -1) {
-    if (paramPos > valuePos) {
-      paramPos = -1;
+
+// node_modules/@trystero-p2p/core/dist/crypto.mjs
+var algo = "AES-GCM";
+var strToSha1 = {};
+var pack = (buff) => btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(buff))));
+var unpack = (packed) => {
+  const str2 = atob(packed);
+  return new Uint8Array(str2.length).map((_, i) => str2.charCodeAt(i)).buffer;
+};
+var hashWith = async (algorithm, str2) => new Uint8Array(await crypto.subtle.digest(algorithm, encodeBytes(str2)));
+var sha1 = async (str2) => strToSha1[str2] ?? (strToSha1[str2] = Array.from(await hashWith("SHA-1", str2)).map((b) => b.toString(36)).join(""));
+var genKey = async (secret, appId, roomId) => crypto.subtle.importKey("raw", await crypto.subtle.digest({ name: "SHA-256" }, encodeBytes(`${secret}:${appId}:${roomId}`)), { name: algo }, false, ["encrypt", "decrypt"]);
+var deriveRoomNamespace = async (appId, roomId) => toHex(await hashWith("SHA-256", `${libName}:${appId}:${roomId}`));
+var joinChar = "$";
+var ivJoinChar = ",";
+var encrypt = async (keyP, plaintext) => {
+  const iv = crypto.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
+  return iv.join(ivJoinChar) + joinChar + pack(await crypto.subtle.encrypt({
+    name: algo,
+    iv
+  }, await keyP, encodeBytes(plaintext)));
+};
+var decrypt = async (keyP, raw) => {
+  const [iv, c] = raw.split(joinChar);
+  return decodeBytes(await crypto.subtle.decrypt({
+    name: algo,
+    iv: new Uint8Array((iv == null ? void 0 : iv.split(ivJoinChar).map(Number)) ?? [])
+  }, await keyP, unpack(c ?? "")));
+};
+
+// node_modules/@trystero-p2p/core/dist/offer-manager.mjs
+var offerLeaseTtlMs = 18e4;
+var OfferManager = class {
+  makeOffer;
+  leased = /* @__PURE__ */ new Map();
+  destroyed = false;
+  constructor(makeOffer) {
+    this.makeOffer = makeOffer;
+  }
+  claimLeased(peer) {
+    const timer = this.leased.get(peer);
+    if (timer) {
+      resetTimer(timer);
+      this.leased.delete(peer);
     }
   }
-  let parsedParams;
-  if (paramPos !== -1) {
-    name = line.slice(0, Math.max(0, paramPos)).toLowerCase();
-    parsedParams = parse._parseParameters(line.slice(Math.max(0, paramPos)), 0, state.designSet);
-    if (parsedParams[2] == -1) {
-      throw new ParserError("Invalid parameters in '" + line + "'");
+  reclaimLeased(peer) {
+    if (this.leased.has(peer)) {
+      this.claimLeased(peer);
+      peer.destroy();
     }
-    params = parsedParams[0];
-    let parsedParamLength;
-    if (typeof parsedParams[1] === "string") {
-      parsedParamLength = parsedParams[1].length;
-    } else {
-      parsedParamLength = parsedParams[1].reduce((accumulator, currentValue) => {
-        return accumulator + currentValue.length;
-      }, 0);
-    }
-    lastParamIndex = parsedParamLength + parsedParams[2] + paramPos;
-    if ((lastValuePos = line.slice(Math.max(0, lastParamIndex)).indexOf(VALUE_DELIMITER)) !== -1) {
-      value = line.slice(Math.max(0, lastParamIndex + lastValuePos + 1));
-    } else {
-      throw new ParserError("Missing parameter value in '" + line + "'");
-    }
-  } else if (valuePos !== -1) {
-    name = line.slice(0, Math.max(0, valuePos)).toLowerCase();
-    value = line.slice(Math.max(0, valuePos + 1));
-    if (name === "begin") {
-      let newComponent = [value.toLowerCase(), [], []];
-      if (state.stack.length === 1) {
-        state.component.push(newComponent);
-      } else {
-        state.component[2].push(newComponent);
+  }
+  checkout(n, leaseOffers, encryptOffer) {
+    const toRecord = async (didRetry = false) => {
+      if (this.destroyed) throw mkErr("room left while preparing offer");
+      const peer = this.makeOffer();
+      try {
+        const offer2 = await encryptOffer(peer);
+        if (this.destroyed) throw mkErr("room left while preparing offer");
+        if (leaseOffers) {
+          this.leased.set(peer, setTimeout(() => {
+            this.leased.delete(peer);
+            peer.destroy();
+          }, offerLeaseTtlMs));
+          return {
+            peer,
+            offer: offer2,
+            claim: () => this.claimLeased(peer),
+            reclaim: () => this.reclaimLeased(peer)
+          };
+        }
+        return {
+          peer,
+          offer: offer2
+        };
+      } catch (error) {
+        peer.destroy();
+        if (!didRetry && !this.destroyed) return toRecord(true);
+        throw error;
       }
-      state.stack.push(state.component);
-      state.component = newComponent;
-      if (!state.designSet) {
-        state.designSet = design.getDesignSet(state.component[0]);
-      }
+    };
+    return all(alloc(n, () => toRecord()));
+  }
+  getOffers(n, encryptOffer) {
+    return this.checkout(n, true, encryptOffer);
+  }
+  destroy() {
+    this.destroyed = true;
+    this.leased.forEach((timer, peer) => {
+      resetTimer(timer);
+      peer.destroy();
+    });
+    this.leased.clear();
+  }
+};
+
+// node_modules/@trystero-p2p/core/dist/handshake.mjs
+var overlapRoomPasswordErr = mkErr("incorrect password for overlapping room");
+var createPasswordHandshake = (password, appId, roomId) => {
+  const hashChallenge = (challenge) => hashWith("SHA-256", `${challenge}:${password}:${appId}:${roomId}`).then(toHex);
+  const run = async (send, receive, isInitiator) => {
+    if (!password) return;
+    if (isInitiator) {
+      const challenge = genId(36);
+      await send({
+        __trystero_pw: "challenge",
+        c: challenge
+      });
+      const { data: data2 } = await receive();
+      if (!data2 || typeof data2 !== "object" || data2.__trystero_pw !== "response" || typeof data2.h !== "string") throw overlapRoomPasswordErr;
+      const expected = await hashChallenge(challenge);
+      if (data2.h !== expected) throw overlapRoomPasswordErr;
       return;
-    } else if (name === "end") {
-      state.component = state.stack.pop();
+    }
+    const { data } = await receive();
+    if (!data || typeof data !== "object" || data.__trystero_pw !== "challenge" || typeof data.c !== "string") throw overlapRoomPasswordErr;
+    await send({
+      __trystero_pw: "response",
+      h: await hashChallenge(data.c)
+    });
+  };
+  const compose = (userHandshake) => password || userHandshake ? async (peerId, send, receive, isInitiator) => {
+    await run(send, receive, isInitiator);
+    await (userHandshake == null ? void 0 : userHandshake(peerId, send, receive, isInitiator));
+  } : void 0;
+  return {
+    run,
+    compose
+  };
+};
+var toHandshakeErrorMessage = (error) => {
+  const message = toErrorMessage(error, "unknown error");
+  return message.startsWith("handshake ") ? message : `handshake failed: ${message}`;
+};
+var createHandshakeManager = ({ onPeerHandshake, onHandshakeError, handshakeTimeoutMs, sendHandshakeData, sendHandshakeReady, onActivate, onFailure }) => {
+  const peerStates = {};
+  const maybeActivatePeer = (id, peer) => {
+    const state = peerStates[id];
+    if (!state || peer && state.peer !== peer || state.isActive) return;
+    if (!state.didLocalHandshakePass || !state.didReceiveRemoteReady) return;
+    state.isActive = true;
+    state.handshakeTimer = resetTimer(state.handshakeTimer);
+    onActivate(id, state.peer);
+  };
+  const failPeerHandshake = (id, peer, reason) => {
+    const state = peerStates[id];
+    if (!state || state.peer !== peer) return;
+    const error = toHandshakeErrorMessage(reason);
+    onHandshakeError == null ? void 0 : onHandshakeError(id, error);
+    onFailure(id, peer, mkErr(error));
+  };
+  const markLocalHandshakePassed = (id, peer) => {
+    const state = peerStates[id];
+    if (!state || state.peer !== peer || state.isActive) return;
+    state.didLocalHandshakePass = true;
+    sendHandshakeReady("", id).catch((err) => failPeerHandshake(id, peer, mkErr(`failed sending handshake readiness: ${toErrorMessage(err, "unknown send failure")}`)));
+    maybeActivatePeer(id, peer);
+  };
+  return {
+    addPeer: (id, peer) => {
+      peerStates[id] = {
+        peer,
+        isActive: false,
+        didLocalHandshakePass: false,
+        didReceiveRemoteReady: false,
+        handshakeTimer: null,
+        pendingHandshakePayloads: [],
+        handshakeWaiters: []
+      };
+    },
+    clearPeer: (id, error) => {
+      const state = peerStates[id];
+      if (!state) return;
+      state.handshakeTimer = resetTimer(state.handshakeTimer);
+      state.pendingHandshakePayloads.length = 0;
+      state.handshakeWaiters.splice(0).forEach((waiter) => waiter.reject(error));
+      delete peerStates[id];
+    },
+    canReceiveFromPeer: (id, receiveWhilePending) => {
+      const state = peerStates[id];
+      return Boolean(state && (state.isActive || receiveWhilePending));
+    },
+    start: (id, peer) => {
+      const state = peerStates[id];
+      if (!state || state.peer !== peer) return;
+      state.handshakeTimer = setTimeout(() => failPeerHandshake(id, peer, mkErr(`handshake timed out after ${handshakeTimeoutMs}ms`)), handshakeTimeoutMs);
+      const sendHandshake = async (data, metadata) => {
+        await sendHandshakeData(data, id, metadata);
+      };
+      const receiveHandshake = () => new Promise((resolve, reject) => {
+        const current = peerStates[id];
+        if (!current || current.peer !== peer) {
+          reject(mkErr("peer disconnected during handshake"));
+          return;
+        }
+        const payload = current.pendingHandshakePayloads.shift();
+        if (payload) {
+          resolve(payload);
+          return;
+        }
+        current.handshakeWaiters.push({
+          resolve,
+          reject: (error) => reject(error)
+        });
+      });
+      const isInitiator = selfId < id;
+      Promise.resolve(onPeerHandshake == null ? void 0 : onPeerHandshake(id, sendHandshake, receiveHandshake, isInitiator)).then(() => markLocalHandshakePassed(id, peer)).catch((err) => failPeerHandshake(id, peer, toError(err, "handshake failed")));
+    },
+    receiveHandshakeData: (data, id, metadata) => {
+      const state = peerStates[id];
+      if (!state || state.isActive) return;
+      const payload = metadata === void 0 ? { data } : {
+        data,
+        metadata
+      };
+      const pending = state.handshakeWaiters.shift();
+      if (pending) {
+        pending.resolve(payload);
+        return;
+      }
+      if (state.pendingHandshakePayloads.length >= 16) {
+        failPeerHandshake(id, state.peer, mkErr("too many pending handshake messages"));
+        return;
+      }
+      state.pendingHandshakePayloads.push(payload);
+    },
+    receiveHandshakeReady: (id) => {
+      const state = peerStates[id];
+      if (!state || state.isActive) return;
+      state.didReceiveRemoteReady = true;
+      maybeActivatePeer(id);
+    }
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/data-limits.mjs
+var maxActionFrameBytes = 16384;
+var pendingDataTimeoutMs = 1e4;
+var transferTimeoutMs = 12e4;
+
+// node_modules/@trystero-p2p/core/dist/peer.mjs
+var iceTimeout = 15e3;
+var iceCandidateSettleMs = 150;
+var disconnectedCloseDelayMs = 5e3;
+var iceCandidateEvent = "icecandidate";
+var iceStateEvent = "icegatheringstatechange";
+var iceConnectionStateEvent = "iceconnectionstatechange";
+var offerType = "offer";
+var answerType = "answer";
+var outOfRangePattern = /out of range/i;
+var maxPendingRemoteCandidates = 128;
+var maxRemoteCandidateSdpLength = 8192;
+var rewriteMdnsCandidatesToLoopback = (sdp) => sdp.replace(/ (\S+\.local) (\d+) typ host/g, " 127.0.0.1 $2 typ host");
+var peer_default = (initiator, { trickleIce, rtcConfig, rtcPolyfill, turnConfig, _test_only_mdnsHostFallbackToLoopback }) => {
+  const pc = new (rtcPolyfill ?? RTCPeerConnection)({
+    iceServers: defaultIceServers.concat(turnConfig ?? []),
+    ...rtcConfig
+  });
+  const handlers = {};
+  const pendingIceGathering = /* @__PURE__ */ new Set();
+  const pendingSignals = [];
+  const pendingData = [];
+  let pendingDataTimer = null;
+  const shouldTrickleIce = trickleIce !== false;
+  const pendingRemoteCandidates = [];
+  const pendingTracks = [];
+  let resolveInitialOffer;
+  let makingOffer = false;
+  let isSettingRemoteAnswerPending = false;
+  let dataChannel = null;
+  let disconnectedCloseTimer = null;
+  let didEmitClose = false;
+  const settleInitialOffer = (signal) => {
+    if (resolveInitialOffer) {
+      resolveInitialOffer(signal);
+      resolveInitialOffer = void 0;
+    }
+  };
+  const clearDisconnectedCloseTimer = () => disconnectedCloseTimer = resetTimer(disconnectedCloseTimer);
+  const emitClose = () => {
+    var _a;
+    if (didEmitClose) return;
+    didEmitClose = true;
+    pendingIceGathering.forEach((finish) => finish());
+    pendingDataTimer = resetTimer(pendingDataTimer);
+    pendingData.length = 0;
+    clearDisconnectedCloseTimer();
+    (_a = handlers.close) == null ? void 0 : _a.call(handlers);
+  };
+  const emitSignal = (signal) => {
+    if (signal.type === offerType) {
+      settleInitialOffer(signal);
+      if (!handlers.signal && !pc.remoteDescription) return;
+    }
+    if (handlers.signal) handlers.signal(signal);
+    else pendingSignals.push(signal);
+  };
+  const appendSignalHandler = (handler) => {
+    const previousSignalHandler = handlers.signal;
+    handlers.signal = (signal) => {
+      previousSignalHandler == null ? void 0 : previousSignalHandler(signal);
+      handler(signal);
+    };
+    if (pendingSignals.length > 0) pendingSignals.splice(0).forEach((signal) => {
+      var _a;
+      return (_a = handlers.signal) == null ? void 0 : _a.call(handlers, signal);
+    });
+  };
+  const normalizeSdp = (sdp) => _test_only_mdnsHostFallbackToLoopback ? rewriteMdnsCandidatesToLoopback(sdp) : sdp;
+  const normalizeCandidate = (candidate) => {
+    if (!_test_only_mdnsHostFallbackToLoopback || typeof candidate.candidate !== "string") return candidate;
+    const normalizedCandidate = rewriteMdnsCandidatesToLoopback(candidate.candidate);
+    return normalizedCandidate === candidate.candidate ? candidate : {
+      ...candidate,
+      candidate: normalizedCandidate
+    };
+  };
+  const localDescriptionSignal = (peerConnection) => {
+    var _a, _b;
+    return {
+      type: ((_a = peerConnection.localDescription) == null ? void 0 : _a.type) ?? offerType,
+      sdp: normalizeSdp(((_b = peerConnection.localDescription) == null ? void 0 : _b.sdp) ?? "")
+    };
+  };
+  const getRemoteUfrag = () => {
+    var _a, _b;
+    const sdp = (_a = pc.remoteDescription) == null ? void 0 : _a.sdp;
+    if (!sdp) return null;
+    return ((_b = sdp.match(/a=ice-ufrag:([^\s]+)/)) == null ? void 0 : _b[1]) ?? null;
+  };
+  const getRemoteMediaSectionCount = () => {
+    var _a, _b;
+    return (((_b = (_a = pc.remoteDescription) == null ? void 0 : _a.sdp) == null ? void 0 : _b.match(/^m=/gm)) ?? []).length;
+  };
+  const canApplyRemoteCandidate = (candidate) => {
+    if (!pc.remoteDescription) return false;
+    const remoteMLineCount = getRemoteMediaSectionCount();
+    if (typeof candidate.sdpMLineIndex === "number" && remoteMLineCount > 0 && candidate.sdpMLineIndex >= remoteMLineCount) return false;
+    const remoteUfrag = getRemoteUfrag();
+    if (remoteUfrag && candidate.usernameFragment && candidate.usernameFragment !== remoteUfrag) return false;
+    return true;
+  };
+  const addIceCandidateSafe = async (candidate) => {
+    try {
+      await pc.addIceCandidate(candidate);
+      return true;
+    } catch (err) {
+      if (err instanceof Error && outOfRangePattern.test(err.message) && typeof candidate.sdpMLineIndex === "number") return false;
+      throw err;
+    }
+  };
+  const queueRemoteCandidate = (candidate) => {
+    if (pendingRemoteCandidates.length >= maxPendingRemoteCandidates) pendingRemoteCandidates.shift();
+    pendingRemoteCandidates.push(candidate);
+  };
+  const flushPendingRemoteCandidates = async () => {
+    if (!pc.remoteDescription || pendingRemoteCandidates.length === 0) return;
+    const remoteUfrag = getRemoteUfrag();
+    const queuedCandidates = pendingRemoteCandidates.splice(0);
+    const stillPending = [];
+    for (const candidate of queuedCandidates) {
+      if (remoteUfrag && candidate.usernameFragment && candidate.usernameFragment !== remoteUfrag) continue;
+      if (!canApplyRemoteCandidate(candidate)) {
+        stillPending.push(candidate);
+        continue;
+      }
+      if (!await addIceCandidateSafe(candidate)) stillPending.push(candidate);
+    }
+    stillPending.forEach(queueRemoteCandidate);
+  };
+  const addRemoteCandidate = async (candidate) => {
+    if (canApplyRemoteCandidate(candidate)) {
+      if (!await addIceCandidateSafe(candidate)) queueRemoteCandidate(candidate);
       return;
     }
-  } else {
-    throw new ParserError(
-      'invalid line (no token ";" or ":") "' + line + '"'
-    );
-  }
-  let valueType;
-  let multiValue = false;
-  let structuredValue = false;
-  let propertyDetails;
-  let splitName;
-  let ungroupedName;
-  if (state.designSet.propertyGroups && name.indexOf(".") !== -1) {
-    splitName = name.split(".");
-    params.group = splitName[0];
-    ungroupedName = splitName[1];
-  } else {
-    ungroupedName = name;
-  }
-  if (ungroupedName in state.designSet.property) {
-    propertyDetails = state.designSet.property[ungroupedName];
-    if ("multiValue" in propertyDetails) {
-      multiValue = propertyDetails.multiValue;
-    }
-    if ("structuredValue" in propertyDetails) {
-      structuredValue = propertyDetails.structuredValue;
-    }
-    if (value && "detectType" in propertyDetails) {
-      valueType = propertyDetails.detectType(value);
-    }
-  }
-  if (!valueType) {
-    if (!("value" in params)) {
-      if (propertyDetails) {
-        valueType = propertyDetails.defaultType;
-      } else {
-        valueType = DEFAULT_VALUE_TYPE$1;
+    queueRemoteCandidate(candidate);
+  };
+  const setupDataChannel = (channel) => {
+    channel.binaryType = "arraybuffer";
+    channel.bufferedAmountLowThreshold = 65535;
+    const failData = () => {
+      console.warn(`${libName}: invalid or excessive data before handler registration; disconnecting peer`);
+      channel.close();
+      pc.close();
+      emitClose();
+    };
+    channel.onmessage = (e) => {
+      const data = e.data;
+      if (didEmitClose) return;
+      if (!(data instanceof ArrayBuffer) && !ArrayBuffer.isView(data) || data.byteLength > 16515) {
+        failData();
+        return;
       }
-    } else {
-      valueType = params.value.toLowerCase();
+      if (handlers.data) handlers.data(data);
+      else {
+        if (pendingData.length >= 64) {
+          failData();
+          return;
+        }
+        if (!pendingDataTimer) pendingDataTimer = setTimeout(failData, pendingDataTimeoutMs);
+        pendingData.push(data);
+      }
+    };
+    channel.onopen = () => {
+      var _a;
+      return (_a = handlers.connect) == null ? void 0 : _a.call(handlers);
+    };
+    channel.onclose = emitClose;
+    channel.onerror = ({ error }) => {
+      var _a;
+      if (didEmitClose || (error == null ? void 0 : error.errorDetail) === "sctp-failure" && (error.sctpCauseCode === 12 || /^User-Initiated Abort\b/.test(error.message))) return;
+      (_a = handlers.error) == null ? void 0 : _a.call(handlers, toError(error, "data channel error"));
+    };
+  };
+  const configuredIceServers = (rtcConfig == null ? void 0 : rtcConfig.iceServers) ?? defaultIceServers.concat(turnConfig ?? []);
+  const hasServerUrlPattern = (pattern) => configuredIceServers.some(({ urls }) => (Array.isArray(urls) ? urls : [urls]).some((url) => pattern.test(url)));
+  const expectsTurnCandidate = hasServerUrlPattern(/^turns?:/i);
+  const expectsStunCandidate = !expectsTurnCandidate && hasServerUrlPattern(/^stuns?:/i);
+  const targetCandidatePattern = expectsTurnCandidate ? /\btyp relay\b/ : expectsStunCandidate ? /\btyp (?:srflx|relay|prflx)\b/ : /\btyp (?:host|srflx|relay|prflx)\b/;
+  const waitForIceGathering = async (peerConnection) => {
+    await new Promise((resolve) => {
+      let timeout = null;
+      let settleTimeout = null;
+      const finish = () => {
+        resetTimer(timeout);
+        resetTimer(settleTimeout);
+        peerConnection.removeEventListener(iceStateEvent, checkState);
+        peerConnection.removeEventListener(iceCandidateEvent, onCandidate);
+        pendingIceGathering.delete(finish);
+        resolve();
+      };
+      const scheduleSettle = (candidateLine = "") => {
+        var _a;
+        const sdp = `${((_a = peerConnection.localDescription) == null ? void 0 : _a.sdp) ?? ""}
+${candidateLine}`;
+        if (targetCandidatePattern.test(sdp)) {
+          resetTimer(settleTimeout);
+          settleTimeout = setTimeout(finish, iceCandidateSettleMs);
+        }
+      };
+      const checkState = () => {
+        if (peerConnection.iceGatheringState === "complete" || didEmitClose) finish();
+        else scheduleSettle();
+      };
+      const onCandidate = (event) => {
+        const { candidate } = event;
+        if (candidate) scheduleSettle(candidate.candidate);
+        else finish();
+      };
+      pendingIceGathering.add(finish);
+      timeout = setTimeout(finish, iceTimeout);
+      peerConnection.addEventListener(iceStateEvent, checkState);
+      peerConnection.addEventListener(iceCandidateEvent, onCandidate);
+      checkState();
+    });
+    return localDescriptionSignal(peerConnection);
+  };
+  const emitLocalDescriptionSignal = async () => {
+    const signal = shouldTrickleIce ? localDescriptionSignal(pc) : await waitForIceGathering(pc);
+    if (!didEmitClose) emitSignal(signal);
+    return signal;
+  };
+  if (initiator) {
+    dataChannel = pc.createDataChannel("data");
+    setupDataChannel(dataChannel);
+  } else pc.ondatachannel = ({ channel }) => {
+    dataChannel = channel;
+    setupDataChannel(channel);
+  };
+  const createOffer = async (restartIce = false) => {
+    var _a, _b;
+    if (pc.connectionState === "closed" || !restartIce && (makingOffer || pc.signalingState !== "stable")) {
+      if (pc.connectionState === "closed") settleInitialOffer();
+      return;
     }
-  }
-  delete params.value;
+    try {
+      makingOffer = true;
+      if (restartIce) {
+        if (pc.remoteDescription && pc.signalingState !== "stable" && pc.signalingState !== "closed" && ((_a = pc.localDescription) == null ? void 0 : _a.type) === offerType) await pc.setLocalDescription({ type: "rollback" });
+        if (typeof pc.restartIce === "function") pc.restartIce();
+      }
+      await pc.setLocalDescription(restartIce ? await pc.createOffer({ iceRestart: true }) : void 0);
+      return await emitLocalDescriptionSignal();
+    } catch (err) {
+      if (!restartIce) settleInitialOffer();
+      (_b = handlers.error) == null ? void 0 : _b.call(handlers, toError(err, "failed to create local offer"));
+    } finally {
+      makingOffer = false;
+    }
+  };
+  pc.onnegotiationneeded = async () => createOffer(false);
+  pc.onicecandidate = ({ candidate }) => {
+    if (!shouldTrickleIce || !candidate) return;
+    const candidatePayload = normalizeCandidate(typeof candidate.toJSON === "function" ? candidate.toJSON() : {
+      candidate: candidate.candidate,
+      sdpMid: candidate.sdpMid,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      usernameFragment: candidate.usernameFragment
+    });
+    emitSignal({
+      type: candidateType,
+      sdp: JSON.stringify(candidatePayload)
+    });
+  };
+  const handleConnectionStateChange = () => {
+    if (pc.connectionState === "failed" || pc.connectionState === "closed" || pc.iceConnectionState === "failed" || pc.iceConnectionState === "closed") {
+      emitClose();
+      return;
+    }
+    if (pc.connectionState === "connected" || pc.connectionState === "connecting" || pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed" || pc.iceConnectionState === "checking") {
+      clearDisconnectedCloseTimer();
+      return;
+    }
+    if (pc.connectionState === "disconnected" || pc.iceConnectionState === "disconnected") {
+      if (!disconnectedCloseTimer) disconnectedCloseTimer = setTimeout(() => {
+        disconnectedCloseTimer = null;
+        if (pc.connectionState === "disconnected" || pc.iceConnectionState === "disconnected") emitClose();
+      }, disconnectedCloseDelayMs);
+      return;
+    }
+  };
+  pc.onconnectionstatechange = handleConnectionStateChange;
+  pc.addEventListener(iceConnectionStateEvent, handleConnectionStateChange);
+  pc.ontrack = (e) => {
+    var _a, _b;
+    const stream = e.streams[0];
+    if (stream) {
+      if (!handlers.track && !handlers.stream) {
+        pendingTracks.push({
+          track: e.track,
+          stream
+        });
+        return;
+      }
+      (_a = handlers.track) == null ? void 0 : _a.call(handlers, e.track, stream);
+      (_b = handlers.stream) == null ? void 0 : _b.call(handlers, stream);
+    }
+  };
+  const offerPromise = initiator ? new Promise((res) => {
+    resolveInitialOffer = res;
+  }) : Promise.resolve();
+  if (initiator) queueMicrotask(() => {
+    var _a;
+    if (!makingOffer && pc.signalingState === "stable" && !pc.localDescription && pc.connectionState !== "closed") (_a = pc.onnegotiationneeded) == null ? void 0 : _a.call(pc, new Event("negotiationneeded"));
+  });
+  return {
+    connection: pc,
+    get channel() {
+      return dataChannel;
+    },
+    get isDead() {
+      return pc.connectionState === "closed";
+    },
+    getOffer: async (restartIce = false) => {
+      var _a;
+      if (!initiator) return;
+      if (restartIce) return createOffer(true);
+      if (resolveInitialOffer) return offerPromise;
+      if (((_a = pc.localDescription) == null ? void 0 : _a.type) === offerType) return shouldTrickleIce ? localDescriptionSignal(pc) : waitForIceGathering(pc);
+      return offerPromise;
+    },
+    async signal(sdp) {
+      var _a, _b, _c;
+      if (sdp.type === "candidate") {
+        if (sdp.sdp.length > maxRemoteCandidateSdpLength) return;
+        try {
+          const candidate = JSON.parse(sdp.sdp);
+          if (candidate && typeof candidate === "object") await addRemoteCandidate(normalizeCandidate(candidate));
+        } catch (err) {
+          (_a = handlers.error) == null ? void 0 : _a.call(handlers, toError(err, "failed to parse remote candidate"));
+        }
+        return;
+      }
+      if ((dataChannel == null ? void 0 : dataChannel.readyState) === "open" && !((_b = sdp.sdp) == null ? void 0 : _b.includes("a=rtpmap"))) return;
+      try {
+        const rtcSdp = {
+          ...sdp,
+          sdp: normalizeSdp(sdp.sdp)
+        };
+        if (sdp.type === offerType) {
+          const isCollision = makingOffer || pc.signalingState !== "stable" && !isSettingRemoteAnswerPending;
+          if (isCollision && initiator) return;
+          if (isCollision && pc.signalingState !== "stable") await all([pc.setLocalDescription({ type: "rollback" }), pc.setRemoteDescription(rtcSdp)]);
+          else await pc.setRemoteDescription(rtcSdp);
+          await flushPendingRemoteCandidates();
+          await pc.setLocalDescription();
+          return await emitLocalDescriptionSignal();
+        }
+        if (sdp.type === answerType) {
+          isSettingRemoteAnswerPending = true;
+          try {
+            await pc.setRemoteDescription(rtcSdp);
+            await flushPendingRemoteCandidates();
+          } finally {
+            isSettingRemoteAnswerPending = false;
+          }
+        }
+      } catch (err) {
+        (_c = handlers.error) == null ? void 0 : _c.call(handlers, toError(err, "failed to apply remote signal"));
+      }
+    },
+    sendData: (data) => dataChannel == null ? void 0 : dataChannel.send(data),
+    destroy: () => {
+      clearDisconnectedCloseTimer();
+      settleInitialOffer();
+      dataChannel == null ? void 0 : dataChannel.close();
+      pc.close();
+      makingOffer = false;
+      isSettingRemoteAnswerPending = false;
+      emitClose();
+    },
+    setHandlers: (newHandlers) => {
+      const { signal, ...restHandlers } = newHandlers;
+      Object.assign(handlers, restHandlers);
+      if (handlers.data && pendingData.length > 0) {
+        pendingDataTimer = resetTimer(pendingDataTimer);
+        pendingData.splice(0).forEach((data) => {
+          var _a;
+          return (_a = handlers.data) == null ? void 0 : _a.call(handlers, data);
+        });
+      }
+      if (signal) appendSignalHandler(signal);
+      if ((handlers.track || handlers.stream) && pendingTracks.length > 0) pendingTracks.splice(0).forEach(({ track, stream }) => {
+        var _a, _b;
+        (_a = handlers.track) == null ? void 0 : _a.call(handlers, track, stream);
+        (_b = handlers.stream) == null ? void 0 : _b.call(handlers, stream);
+      });
+    },
+    addStream: (stream) => stream.getTracks().forEach((track) => pc.addTrack(track, stream)),
+    removeStream: (stream) => pc.getSenders().filter((sender) => sender.track && stream.getTracks().includes(sender.track)).forEach((sender) => pc.removeTrack(sender)),
+    addTrack: (track, stream) => pc.addTrack(track, stream),
+    removeTrack: (track) => {
+      const sender = pc.getSenders().find((s) => s.track === track);
+      if (sender) pc.removeTrack(sender);
+    },
+    replaceTrack: (oldTrack, newTrack) => {
+      const sender = pc.getSenders().find((s) => s.track === oldTrack);
+      if (sender) return sender.replaceTrack(newTrack);
+    }
+  };
+};
+var defaultIceServers = [...alloc(3, (_, i) => `stun:stun${i || ""}.l.google.com:19302`), "stun:stun.cloudflare.com:3478"].map((url) => ({ urls: url }));
+
+// node_modules/@trystero-p2p/core/dist/action-receiver.mjs
+var maxPendingTransfers = 1024;
+var maxPendingPerPeer = 64;
+var maxDecisions = 128;
+var maxDecisionsPerPeer = 8;
+var emptyBytes = /* @__PURE__ */ new Uint8Array();
+var decideReceive = (decide, settle) => {
   let result;
-  if (multiValue && structuredValue) {
-    value = parse._parseMultiValue(value, structuredValue, valueType, [], multiValue, state.designSet, structuredValue);
-    result = [ungroupedName, params, valueType, value];
-  } else if (multiValue) {
-    result = [ungroupedName, params, valueType];
-    parse._parseMultiValue(value, multiValue, valueType, result, null, state.designSet, false);
-  } else if (structuredValue) {
-    value = parse._parseMultiValue(value, structuredValue, valueType, [], null, state.designSet, structuredValue);
-    result = [ungroupedName, params, valueType, value];
-  } else {
-    value = parse._parseValue(value, valueType, state.designSet, false);
-    result = [ungroupedName, params, valueType, value];
+  try {
+    result = decide();
+  } catch {
+    return settle(false);
   }
-  if (state.component[0] === "vcard" && state.component[1].length === 0 && !(name === "version" && value === "4.0")) {
-    state.designSet = design.getDesignSet("vcard3");
-  }
-  state.component[1].push(result);
+  return typeof result === "boolean" ? settle(result) : Promise.resolve(result).then((value) => settle(value === true), () => settle(false));
 };
-parse._parseValue = function(value, type, designSet, structuredValue) {
-  if (type in designSet.value && "fromICAL" in designSet.value[type]) {
-    return designSet.value[type].fromICAL(value, structuredValue);
-  }
-  return value;
-};
-parse._parseParameters = function(line, start, designSet) {
-  let lastParam = start;
-  let pos = 0;
-  let delim = PARAM_NAME_DELIMITER;
-  let result = {};
-  let name, lcname;
-  let value, valuePos = -1;
-  let type, multiValue, mvdelim;
-  while (pos !== false && (pos = line.indexOf(delim, pos + 1)) !== -1) {
-    name = line.slice(lastParam + 1, pos);
-    if (name.length == 0) {
-      throw new ParserError("Empty parameter name in '" + line + "'");
-    }
-    lcname = name.toLowerCase();
-    mvdelim = false;
-    multiValue = false;
-    if (lcname in designSet.param && designSet.param[lcname].valueType) {
-      type = designSet.param[lcname].valueType;
-    } else {
-      type = DEFAULT_PARAM_TYPE;
-    }
-    if (lcname in designSet.param) {
-      multiValue = designSet.param[lcname].multiValue;
-      if (designSet.param[lcname].multiValueSeparateDQuote) {
-        mvdelim = parse._rfc6868Escape('"' + multiValue + '"');
-      }
-    }
-    let nextChar = line[pos + 1];
-    if (nextChar === '"') {
-      valuePos = pos + 2;
-      pos = line.indexOf('"', valuePos);
-      if (multiValue && pos != -1) {
-        let extendedValue = true;
-        while (extendedValue) {
-          if (line[pos + 1] == multiValue && line[pos + 2] == '"') {
-            pos = line.indexOf('"', pos + 3);
-          } else {
-            extendedValue = false;
-          }
-        }
-      }
-      if (pos === -1) {
-        throw new ParserError(
-          'invalid line (no matching double quote) "' + line + '"'
-        );
-      }
-      value = line.slice(valuePos, pos);
-      lastParam = line.indexOf(PARAM_DELIMITER, pos);
-      let propValuePos = line.indexOf(VALUE_DELIMITER, pos);
-      if (lastParam === -1 || propValuePos !== -1 && lastParam > propValuePos) {
-        pos = false;
-      }
-    } else {
-      valuePos = pos + 1;
-      let nextPos = line.indexOf(PARAM_DELIMITER, valuePos);
-      let propValuePos = line.indexOf(VALUE_DELIMITER, valuePos);
-      if (propValuePos !== -1 && nextPos > propValuePos) {
-        nextPos = propValuePos;
-        pos = false;
-      } else if (nextPos === -1) {
-        if (propValuePos === -1) {
-          nextPos = line.length;
-        } else {
-          nextPos = propValuePos;
-        }
-        pos = false;
-      } else {
-        lastParam = nextPos;
-        pos = nextPos;
-      }
-      value = line.slice(valuePos, nextPos);
-    }
-    const length_before = value.length;
-    value = parse._rfc6868Escape(value);
-    valuePos += length_before - value.length;
-    if (multiValue) {
-      let delimiter = mvdelim || multiValue;
-      value = parse._parseMultiValue(value, delimiter, type, [], null, designSet);
-    } else {
-      value = parse._parseValue(value, type, designSet);
-    }
-    if (multiValue && lcname in result) {
-      if (Array.isArray(result[lcname])) {
-        result[lcname].push(value);
-      } else {
-        result[lcname] = [
-          result[lcname],
-          value
-        ];
-      }
-    } else {
-      result[lcname] = value;
-    }
-  }
-  return [result, value, valuePos];
-};
-parse._rfc6868Escape = function(val) {
-  return val.replace(/\^['n^]/g, function(x) {
-    return RFC6868_REPLACE_MAP$1[x];
-  });
-};
-parse._parseMultiValue = function(buffer, delim, type, result, innerMulti, designSet, structuredValue) {
-  let pos = 0;
-  let lastPos = 0;
-  let value;
-  if (delim.length === 0) {
-    return buffer;
-  }
-  while ((pos = unescapedIndexOf(buffer, delim, lastPos)) !== -1) {
-    value = buffer.slice(lastPos, pos);
-    if (innerMulti) {
-      value = parse._parseMultiValue(value, innerMulti, type, [], null, designSet, structuredValue);
-    } else {
-      value = parse._parseValue(value, type, designSet, structuredValue);
-    }
-    result.push(value);
-    lastPos = pos + delim.length;
-  }
-  value = buffer.slice(lastPos);
-  if (innerMulti) {
-    value = parse._parseMultiValue(value, innerMulti, type, [], null, designSet, structuredValue);
-  } else {
-    value = parse._parseValue(value, type, designSet, structuredValue);
-  }
-  result.push(value);
-  return result.length == 1 ? result[0] : result;
-};
-parse._eachLine = function(buffer, callback) {
-  let len = buffer.length;
-  let lastPos = buffer.search(CHAR);
-  let pos = lastPos;
-  let line;
-  let firstChar;
-  let newlineOffset;
-  do {
-    pos = buffer.indexOf("\n", lastPos) + 1;
-    if (pos > 1 && buffer[pos - 2] === "\r") {
-      newlineOffset = 2;
-    } else {
-      newlineOffset = 1;
-    }
-    if (pos === 0) {
-      pos = len;
-      newlineOffset = 0;
-    }
-    firstChar = buffer[lastPos];
-    if (firstChar === " " || firstChar === "	") {
-      line += buffer.slice(lastPos + 1, pos - newlineOffset);
-    } else {
-      if (line)
-        callback(null, line);
-      line = buffer.slice(lastPos, pos - newlineOffset);
-    }
-    lastPos = pos;
-  } while (pos !== len);
-  line = line.trim();
-  if (line.length)
-    callback(null, line);
-};
-var OPTIONS = ["tzid", "location", "tznames", "latitude", "longitude"];
-var Timezone = class _Timezone {
-  static _compare_change_fn(a, b) {
-    if (a.year < b.year) return -1;
-    else if (a.year > b.year) return 1;
-    if (a.month < b.month) return -1;
-    else if (a.month > b.month) return 1;
-    if (a.day < b.day) return -1;
-    else if (a.day > b.day) return 1;
-    if (a.hour < b.hour) return -1;
-    else if (a.hour > b.hour) return 1;
-    if (a.minute < b.minute) return -1;
-    else if (a.minute > b.minute) return 1;
-    if (a.second < b.second) return -1;
-    else if (a.second > b.second) return 1;
-    return 0;
-  }
-  /**
-   * Convert the date/time from one zone to the next.
-   *
-   * @param {Time} tt                  The time to convert
-   * @param {Timezone} from_zone       The source zone to convert from
-   * @param {Timezone} to_zone         The target zone to convert to
-   * @return {Time}                    The converted date/time object
-   */
-  static convert_time(tt, from_zone, to_zone) {
-    if (tt.isDate || from_zone.tzid == to_zone.tzid || from_zone == _Timezone.localTimezone || to_zone == _Timezone.localTimezone) {
-      tt.zone = to_zone;
-      return tt;
-    }
-    let utcOffset = from_zone.utcOffset(tt);
-    tt.adjust(0, 0, 0, -utcOffset);
-    utcOffset = to_zone.utcOffset(tt);
-    tt.adjust(0, 0, 0, utcOffset);
-    return null;
-  }
-  /**
-   * Creates a new ICAL.Timezone instance from the passed data object.
-   *
-   * @param {Component|Object} aData options for class
-   * @param {String|Component} aData.component
-   *        If aData is a simple object, then this member can be set to either a
-   *        string containing the component data, or an already parsed
-   *        ICAL.Component
-   * @param {String} aData.tzid      The timezone identifier
-   * @param {String} aData.location  The timezone locationw
-   * @param {String} aData.tznames   An alternative string representation of the
-   *                                  timezone
-   * @param {Number} aData.latitude  The latitude of the timezone
-   * @param {Number} aData.longitude The longitude of the timezone
-   */
-  static fromData(aData) {
-    let tt = new _Timezone();
-    return tt.fromData(aData);
-  }
-  /**
-   * The instance describing the UTC timezone
-   * @type {Timezone}
-   * @constant
-   * @instance
-   */
-  static #utcTimezone = null;
-  static get utcTimezone() {
-    if (!this.#utcTimezone) {
-      this.#utcTimezone = _Timezone.fromData({
-        tzid: "UTC"
-      });
-    }
-    return this.#utcTimezone;
-  }
-  /**
-   * The instance describing the local timezone
-   * @type {Timezone}
-   * @constant
-   * @instance
-   */
-  static #localTimezone = null;
-  static get localTimezone() {
-    if (!this.#localTimezone) {
-      this.#localTimezone = _Timezone.fromData({
-        tzid: "floating"
-      });
-    }
-    return this.#localTimezone;
-  }
-  /**
-   * Adjust a timezone change object.
-   * @private
-   * @param {Object} change     The timezone change object
-   * @param {Number} days       The extra amount of days
-   * @param {Number} hours      The extra amount of hours
-   * @param {Number} minutes    The extra amount of minutes
-   * @param {Number} seconds    The extra amount of seconds
-   */
-  static adjust_change(change, days, hours, minutes, seconds) {
-    return Time.prototype.adjust.call(
-      change,
-      days,
-      hours,
-      minutes,
-      seconds,
-      change
-    );
-  }
-  static _minimumExpansionYear = -1;
-  static EXTRA_COVERAGE = 5;
-  /**
-   * Creates a new ICAL.Timezone instance, by passing in a tzid and component.
-   *
-   * @param {Component|Object} data options for class
-   * @param {String|Component} data.component
-   *        If data is a simple object, then this member can be set to either a
-   *        string containing the component data, or an already parsed
-   *        ICAL.Component
-   * @param {String} data.tzid      The timezone identifier
-   * @param {String} data.location  The timezone locationw
-   * @param {String} data.tznames   An alternative string representation of the
-   *                                  timezone
-   * @param {Number} data.latitude  The latitude of the timezone
-   * @param {Number} data.longitude The longitude of the timezone
-   */
-  constructor(data) {
-    this.wrappedJSObject = this;
-    this.fromData(data);
-  }
-  /**
-   * Timezone identifier
-   * @type {String}
-   */
-  tzid = "";
-  /**
-   * Timezone location
-   * @type {String}
-   */
-  location = "";
-  /**
-   * Alternative timezone name, for the string representation
-   * @type {String}
-   */
-  tznames = "";
-  /**
-   * The primary latitude for the timezone.
-   * @type {Number}
-   */
-  latitude = 0;
-  /**
-   * The primary longitude for the timezone.
-   * @type {Number}
-   */
-  longitude = 0;
-  /**
-   * The vtimezone component for this timezone.
-   * @type {Component}
-   */
-  component = null;
-  /**
-   * The year this timezone has been expanded to. All timezone transition
-   * dates until this year are known and can be used for calculation
-   *
-   * @private
-   * @type {Number}
-   */
-  expandedUntilYear = 0;
-  /**
-   * The class identifier.
-   * @constant
-   * @type {String}
-   * @default "icaltimezone"
-   */
-  icalclass = "icaltimezone";
-  /**
-   * Sets up the current instance using members from the passed data object.
-   *
-   * @param {Component|Object} aData options for class
-   * @param {String|Component} aData.component
-   *        If aData is a simple object, then this member can be set to either a
-   *        string containing the component data, or an already parsed
-   *        ICAL.Component
-   * @param {String} aData.tzid      The timezone identifier
-   * @param {String} aData.location  The timezone locationw
-   * @param {String} aData.tznames   An alternative string representation of the
-   *                                  timezone
-   * @param {Number} aData.latitude  The latitude of the timezone
-   * @param {Number} aData.longitude The longitude of the timezone
-   */
-  fromData(aData) {
-    this.expandedUntilYear = 0;
-    this.changes = [];
-    if (aData instanceof Component) {
-      this.component = aData;
-    } else {
-      if (aData && "component" in aData) {
-        if (typeof aData.component == "string") {
-          let jCal = parse(aData.component);
-          this.component = new Component(jCal);
-        } else if (aData.component instanceof Component) {
-          this.component = aData.component;
-        } else {
-          this.component = null;
-        }
-      }
-      for (let prop of OPTIONS) {
-        if (aData && prop in aData) {
-          this[prop] = aData[prop];
-        }
-      }
-    }
-    if (this.component instanceof Component && !this.tzid) {
-      this.tzid = this.component.getFirstPropertyValue("tzid");
-    }
-    return this;
-  }
-  /**
-   * Finds the utcOffset the given time would occur in this timezone.
-   *
-   * @param {Time} tt         The time to check for
-   * @return {Number}         utc offset in seconds
-   */
-  utcOffset(tt) {
-    if (this == _Timezone.utcTimezone || this == _Timezone.localTimezone) {
-      return 0;
-    }
-    this._ensureCoverage(tt.year);
-    if (!this.changes.length) {
-      return 0;
-    }
-    let tt_change = {
-      year: tt.year,
-      month: tt.month,
-      day: tt.day,
-      hour: tt.hour,
-      minute: tt.minute,
-      second: tt.second
-    };
-    let change_num = this._findNearbyChange(tt_change);
-    let change_num_to_use = -1;
-    let step = 1;
-    for (; ; ) {
-      let change = clone(this.changes[change_num], true);
-      if (change.utcOffset < change.prevUtcOffset) {
-        _Timezone.adjust_change(change, 0, 0, 0, change.utcOffset);
-      } else {
-        _Timezone.adjust_change(
-          change,
-          0,
-          0,
-          0,
-          change.prevUtcOffset
-        );
-      }
-      let cmp = _Timezone._compare_change_fn(tt_change, change);
-      if (cmp >= 0) {
-        change_num_to_use = change_num;
-      } else {
-        step = -1;
-      }
-      if (step == -1 && change_num_to_use != -1) {
-        break;
-      }
-      change_num += step;
-      if (change_num < 0) {
-        return 0;
-      }
-      if (change_num >= this.changes.length) {
-        break;
-      }
-    }
-    let zone_change = this.changes[change_num_to_use];
-    let utcOffset_change = zone_change.utcOffset - zone_change.prevUtcOffset;
-    if (utcOffset_change < 0 && change_num_to_use > 0) {
-      let tmp_change = clone(zone_change, true);
-      _Timezone.adjust_change(tmp_change, 0, 0, 0, tmp_change.prevUtcOffset);
-      if (_Timezone._compare_change_fn(tt_change, tmp_change) < 0) {
-        let prev_zone_change = this.changes[change_num_to_use - 1];
-        let want_daylight = false;
-        if (zone_change.is_daylight != want_daylight && prev_zone_change.is_daylight == want_daylight) {
-          zone_change = prev_zone_change;
-        }
-      }
-    }
-    return zone_change.utcOffset;
-  }
-  _findNearbyChange(change) {
-    let idx = binsearchInsert(
-      this.changes,
-      change,
-      _Timezone._compare_change_fn
-    );
-    if (idx >= this.changes.length) {
-      return this.changes.length - 1;
-    }
-    return idx;
-  }
-  _ensureCoverage(aYear) {
-    if (_Timezone._minimumExpansionYear == -1) {
-      let today = Time.now();
-      _Timezone._minimumExpansionYear = today.year;
-    }
-    let changesEndYear = aYear;
-    if (changesEndYear < _Timezone._minimumExpansionYear) {
-      changesEndYear = _Timezone._minimumExpansionYear;
-    }
-    changesEndYear += _Timezone.EXTRA_COVERAGE;
-    if (!this.changes.length || this.expandedUntilYear < aYear) {
-      let subcomps = this.component.getAllSubcomponents();
-      let compLen = subcomps.length;
-      let compIdx = 0;
-      for (; compIdx < compLen; compIdx++) {
-        this._expandComponent(
-          subcomps[compIdx],
-          changesEndYear,
-          this.changes
-        );
-      }
-      this.changes.sort(_Timezone._compare_change_fn);
-      this.expandedUntilYear = changesEndYear;
-    }
-  }
-  _expandComponent(aComponent, aYear, changes) {
-    if (!aComponent.hasProperty("dtstart") || !aComponent.hasProperty("tzoffsetto") || !aComponent.hasProperty("tzoffsetfrom")) {
-      return null;
-    }
-    let dtstart = aComponent.getFirstProperty("dtstart").getFirstValue();
-    let change;
-    function convert_tzoffset(offset) {
-      return offset.factor * (offset.hours * 3600 + offset.minutes * 60);
-    }
-    function init_changes() {
-      let changebase = {};
-      changebase.is_daylight = aComponent.name == "daylight";
-      changebase.utcOffset = convert_tzoffset(
-        aComponent.getFirstProperty("tzoffsetto").getFirstValue()
-      );
-      changebase.prevUtcOffset = convert_tzoffset(
-        aComponent.getFirstProperty("tzoffsetfrom").getFirstValue()
-      );
-      return changebase;
-    }
-    if (!aComponent.hasProperty("rrule") && !aComponent.hasProperty("rdate")) {
-      change = init_changes();
-      change.year = dtstart.year;
-      change.month = dtstart.month;
-      change.day = dtstart.day;
-      change.hour = dtstart.hour;
-      change.minute = dtstart.minute;
-      change.second = dtstart.second;
-      _Timezone.adjust_change(change, 0, 0, 0, -change.prevUtcOffset);
-      changes.push(change);
-    } else {
-      let props = aComponent.getAllProperties("rdate");
-      for (let rdate of props) {
-        let time = rdate.getFirstValue();
-        change = init_changes();
-        change.year = time.year;
-        change.month = time.month;
-        change.day = time.day;
-        if (time.isDate) {
-          change.hour = dtstart.hour;
-          change.minute = dtstart.minute;
-          change.second = dtstart.second;
-          if (dtstart.zone != _Timezone.utcTimezone) {
-            _Timezone.adjust_change(change, 0, 0, 0, -change.prevUtcOffset);
-          }
-        } else {
-          change.hour = time.hour;
-          change.minute = time.minute;
-          change.second = time.second;
-          if (time.zone != _Timezone.utcTimezone) {
-            _Timezone.adjust_change(change, 0, 0, 0, -change.prevUtcOffset);
-          }
-        }
-        changes.push(change);
-      }
-      let rrule = aComponent.getFirstProperty("rrule");
-      if (rrule) {
-        rrule = rrule.getFirstValue();
-        change = init_changes();
-        if (rrule.until && rrule.until.zone == _Timezone.utcTimezone) {
-          rrule.until.adjust(0, 0, 0, change.prevUtcOffset);
-          rrule.until.zone = _Timezone.localTimezone;
-        }
-        let iterator = rrule.iterator(dtstart);
-        let occ;
-        while (occ = iterator.next()) {
-          change = init_changes();
-          if (occ.year > aYear || !occ) {
-            break;
-          }
-          change.year = occ.year;
-          change.month = occ.month;
-          change.day = occ.day;
-          change.hour = occ.hour;
-          change.minute = occ.minute;
-          change.second = occ.second;
-          change.isDate = occ.isDate;
-          _Timezone.adjust_change(change, 0, 0, 0, -change.prevUtcOffset);
-          changes.push(change);
-        }
-      }
-    }
-    return changes;
-  }
-  /**
-   * The string representation of this timezone.
-   * @return {String}
-   */
-  toString() {
-    return this.tznames ? this.tznames : this.tzid;
+var decodePayload = (bytes, format, copy) => format === 2 ? copy ? bytes.slice() : bytes : format === 1 ? fromJson(decodeBytes(bytes)) : decodeBytes(bytes);
+var progress = (action, value, peerId, metadata) => {
+  try {
+    action.progress(value, peerId, metadata);
+  } catch (error) {
+    console.error(`${libName} progress handler error:`, error);
   }
 };
-var zones = null;
-var TimezoneService = {
-  get count() {
-    if (zones === null) {
-      return 0;
+var deliverPayload = (action, data, peerId, metadata) => {
+  var _a;
+  progress(action, 1, peerId, metadata);
+  try {
+    (_a = action.receiver) == null ? void 0 : _a.call(action, data, peerId, metadata);
+  } catch (error) {
+    console.error(`${libName} action handler error:`, error);
+  }
+};
+var createActionReceiver = ({ fail, accept, refuse, maxReceiveBytes, chunkSize: chunkSize2 }) => {
+  const actions = /* @__PURE__ */ new Map();
+  const peers = /* @__PURE__ */ new Map();
+  const waiting = /* @__PURE__ */ new Set();
+  const decisions = /* @__PURE__ */ new Map();
+  let pendingCount = 0;
+  let decisionCount = 0;
+  let reservedBytes = 0;
+  let draining = false;
+  let drainAgain = false;
+  const current = (state) => state.phase !== "released";
+  const payloadLimit = (action) => Math.min(maxReceiveBytes, (action == null ? void 0 : action.maxPayloadBytes) ?? maxReceiveBytes);
+  const notifyRejected = (message, reason, scope, bulkId) => {
+    var _a, _b;
+    scope == null ? void 0 : scope.reject(reason);
+    (_b = (_a = actions.get(message.type)) == null ? void 0 : _a.reject) == null ? void 0 : _b.call(_a, message.peerId, message.metadata, reason);
+    if (bulkId !== void 0) refuse(message.peerId, bulkId, reason);
+  };
+  const rotateWaitingForPeer = (peerId) => {
+    for (const queued of Array.from(waiting)) if (queued.peerId === peerId) {
+      waiting.delete(queued);
+      waiting.add(queued);
     }
-    return Object.keys(zones).length;
-  },
-  reset: function() {
-    zones = /* @__PURE__ */ Object.create(null);
-    let utc = Timezone.utcTimezone;
-    zones.Z = utc;
-    zones.UTC = utc;
-    zones.GMT = utc;
-  },
-  _hard_reset: function() {
-    zones = null;
-  },
-  /**
-   * Checks if timezone id has been registered.
-   *
-   * @param {String} tzid     Timezone identifier (e.g. America/Los_Angeles)
-   * @return {Boolean}        False, when not present
-   */
-  has: function(tzid) {
-    if (zones === null) {
+  };
+  const release = (state) => {
+    var _a, _b;
+    if (!current(state)) return;
+    state.phase = "released";
+    (_a = state.removeAbortListener) == null ? void 0 : _a.call(state);
+    state.timer = resetTimer(state.timer);
+    const peer = peers.get(state.peerId);
+    if (state.kind === "inline") {
+      const queue = peer.inline.get(state.key);
+      queue.splice(queue.indexOf(state), 1);
+      if (!queue.length) peer.inline.delete(state.key);
+      state.data = emptyBytes;
+    } else {
+      peer.bulk.delete(state.id);
+      waiting.delete(state);
+      state.data = null;
+      if (state.transfer === "receiving") {
+        reservedBytes -= state.size;
+        if (peer.active === state) {
+          peer.active = null;
+          rotateWaitingForPeer(state.peerId);
+        }
+        drainAgain = true;
+      }
+    }
+    peer.count--;
+    pendingCount--;
+    if (!peer.count) peers.delete(state.peerId);
+    (_b = state.controller) == null ? void 0 : _b.abort();
+  };
+  const reject = (state, reason) => {
+    if (!current(state)) return;
+    release(state);
+    notifyRejected(state, reason, state.scope, state.kind === "bulk" ? state.id : void 0);
+  };
+  const admit = (state, action) => {
+    if (state.phase !== "pending") return state.phase === "ready";
+    if (state.size > payloadLimit(action)) {
+      reject(state, "payload exceeds receiver size limit");
       return false;
     }
-    return !!zones[tzid];
-  },
-  /**
-   * Returns a timezone by its tzid if present.
-   *
-   * @param {String} tzid               Timezone identifier (e.g. America/Los_Angeles)
-   * @return {Timezone | undefined}     The timezone, or undefined if not found
-   */
-  get: function(tzid) {
-    if (zones === null) {
-      this.reset();
+    const receive = state.scope ? state.scope.receive : action.receive;
+    if (!receive) {
+      if (!action.receiver) return false;
+      state.phase = "ready";
+      return true;
     }
-    return zones[tzid];
-  },
-  /**
-   * Registers a timezone object or component.
-   *
-   * @param {Component|Timezone} timezone
-   *        The initialized zone or vtimezone.
-   *
-   * @param {String=} name
-   *        The name of the timezone. Defaults to the component's TZID if not
-   *        passed.
-   */
-  register: function(timezone, name) {
-    if (zones === null) {
-      this.reset();
+    if (decisionCount >= maxDecisions || (decisions.get(state.peerId) ?? 0) >= maxDecisionsPerPeer) {
+      reject(state, "too many pending receive decisions");
+      return false;
     }
-    if (typeof timezone === "string" && name instanceof Timezone) {
-      [timezone, name] = [name, timezone];
-    }
-    if (!name) {
-      if (timezone instanceof Timezone) {
-        name = timezone.tzid;
-      } else {
-        if (timezone.name === "vtimezone") {
-          timezone = new Timezone(timezone);
-          name = timezone.tzid;
-        }
-      }
-    }
-    if (!name) {
-      throw new TypeError("Neither a timezone nor a name was passed");
-    }
-    if (timezone instanceof Timezone) {
-      zones[name] = timezone;
-    } else {
-      throw new TypeError("timezone must be ICAL.Timezone or ICAL.Component");
-    }
-  },
-  /**
-   * Removes a timezone by its tzid from the list.
-   *
-   * @param {String} tzid     Timezone identifier (e.g. America/Los_Angeles)
-   * @return {?Timezone}      The removed timezone, or null if not registered
-   */
-  remove: function(tzid) {
-    if (zones === null) {
-      return null;
-    }
-    return delete zones[tzid];
-  }
-};
-function updateTimezones(vcal) {
-  let allsubs, properties, vtimezones, reqTzid, i;
-  if (!vcal || vcal.name !== "vcalendar") {
-    return vcal;
-  }
-  allsubs = vcal.getAllSubcomponents();
-  properties = [];
-  vtimezones = {};
-  for (i = 0; i < allsubs.length; i++) {
-    if (allsubs[i].name === "vtimezone") {
-      let tzid = allsubs[i].getFirstProperty("tzid").getFirstValue();
-      vtimezones[tzid] = allsubs[i];
-    } else {
-      properties = properties.concat(allsubs[i].getAllProperties());
-    }
-  }
-  reqTzid = {};
-  for (i = 0; i < properties.length; i++) {
-    let tzid = properties[i].getParameter("tzid");
-    if (tzid) {
-      reqTzid[tzid] = true;
-    }
-  }
-  for (let [tzid, comp] of Object.entries(vtimezones)) {
-    if (!reqTzid[tzid]) {
-      vcal.removeSubcomponent(comp);
-    }
-  }
-  for (let tzid of Object.keys(reqTzid)) {
-    if (!vtimezones[tzid] && TimezoneService.has(tzid)) {
-      vcal.addSubcomponent(TimezoneService.get(tzid).component);
-    }
-  }
-  return vcal;
-}
-function isStrictlyNaN(number) {
-  return typeof number === "number" && isNaN(number);
-}
-function strictParseInt(string) {
-  let result = parseInt(string, 10);
-  if (isStrictlyNaN(result)) {
-    throw new Error(
-      'Could not extract integer from "' + string + '"'
-    );
-  }
-  return result;
-}
-function formatClassType(data, type) {
-  if (typeof data === "undefined") {
-    return void 0;
-  }
-  if (data instanceof type) {
-    return data;
-  }
-  return new type(data);
-}
-function unescapedIndexOf(buffer, search, pos) {
-  while ((pos = buffer.indexOf(search, pos)) !== -1) {
-    if (pos > 0 && buffer[pos - 1] === "\\") {
-      pos += 1;
-    } else {
-      return pos;
-    }
-  }
-  return -1;
-}
-function binsearchInsert(list, seekVal, cmpfunc) {
-  if (!list.length)
-    return 0;
-  let low = 0, high = list.length - 1, mid, cmpval;
-  while (low <= high) {
-    mid = low + Math.floor((high - low) / 2);
-    cmpval = cmpfunc(seekVal, list[mid]);
-    if (cmpval < 0)
-      high = mid - 1;
-    else if (cmpval > 0)
-      low = mid + 1;
-    else
-      break;
-  }
-  if (cmpval < 0)
-    return mid;
-  else if (cmpval > 0)
-    return mid + 1;
-  else
-    return mid;
-}
-function clone(aSrc, aDeep) {
-  if (!aSrc || typeof aSrc != "object") {
-    return aSrc;
-  } else if (aSrc instanceof Date) {
-    return new Date(aSrc.getTime());
-  } else if ("clone" in aSrc) {
-    return aSrc.clone();
-  } else if (Array.isArray(aSrc)) {
-    let arr = [];
-    for (let i = 0; i < aSrc.length; i++) {
-      arr.push(aDeep ? clone(aSrc[i], true) : aSrc[i]);
-    }
-    return arr;
-  } else {
-    let obj = {};
-    for (let [name, value] of Object.entries(aSrc)) {
-      if (aDeep) {
-        obj[name] = clone(value, true);
-      } else {
-        obj[name] = value;
-      }
-    }
-    return obj;
-  }
-}
-function foldline(aLine) {
-  let result = "";
-  let line = aLine || "", pos = 0, line_length = 0;
-  while (line.length) {
-    let cp = line.codePointAt(pos);
-    if (cp < 128) ++line_length;
-    else if (cp < 2048) line_length += 2;
-    else if (cp < 65536) line_length += 3;
-    else line_length += 4;
-    if (line_length < ICALmodule.foldLength + 1)
-      pos += cp > 65535 ? 2 : 1;
-    else {
-      result += ICALmodule.newLineChar + " " + line.slice(0, Math.max(0, pos));
-      line = line.slice(Math.max(0, pos));
-      pos = line_length = 0;
-    }
-  }
-  return result.slice(ICALmodule.newLineChar.length + 1);
-}
-function pad2(data) {
-  if (typeof data !== "string") {
-    if (typeof data === "number") {
-      data = parseInt(data);
-    }
-    data = String(data);
-  }
-  let len = data.length;
-  switch (len) {
-    case 0:
-      return "00";
-    case 1:
-      return "0" + data;
-    default:
-      return data;
-  }
-}
-function trunc(number) {
-  return number < 0 ? Math.ceil(number) : Math.floor(number);
-}
-function extend(source, target) {
-  for (let key in source) {
-    let descr = Object.getOwnPropertyDescriptor(source, key);
-    if (descr && !Object.getOwnPropertyDescriptor(target, key)) {
-      Object.defineProperty(target, key, descr);
-    }
-  }
-  return target;
-}
-var helpers = /* @__PURE__ */ Object.freeze({
-  __proto__: null,
-  binsearchInsert,
-  clone,
-  extend,
-  foldline,
-  formatClassType,
-  isStrictlyNaN,
-  pad2,
-  strictParseInt,
-  trunc,
-  unescapedIndexOf,
-  updateTimezones
-});
-var UtcOffset = class _UtcOffset {
-  /**
-   * Creates a new {@link ICAL.UtcOffset} instance from the passed string.
-   *
-   * @param {String} aString    The string to parse
-   * @return {Duration}         The created utc-offset instance
-   */
-  static fromString(aString) {
-    let options = {};
-    options.factor = aString[0] === "+" ? 1 : -1;
-    options.hours = strictParseInt(aString.slice(1, 3));
-    options.minutes = strictParseInt(aString.slice(4, 6));
-    return new _UtcOffset(options);
-  }
-  /**
-   * Creates a new {@link ICAL.UtcOffset} instance from the passed seconds
-   * value.
-   *
-   * @param {Number} aSeconds       The number of seconds to convert
-   */
-  static fromSeconds(aSeconds) {
-    let instance = new _UtcOffset();
-    instance.fromSeconds(aSeconds);
-    return instance;
-  }
-  /**
-   * Creates a new ICAL.UtcOffset instance.
-   *
-   * @param {Object} aData          An object with members of the utc offset
-   * @param {Number=} aData.hours   The hours for the utc offset
-   * @param {Number=} aData.minutes The minutes in the utc offset
-   * @param {Number=} aData.factor  The factor for the utc-offset, either -1 or 1
-   */
-  constructor(aData) {
-    this.fromData(aData);
-  }
-  /**
-   * The hours in the utc-offset
-   * @type {Number}
-   */
-  hours = 0;
-  /**
-   * The minutes in the utc-offset
-   * @type {Number}
-   */
-  minutes = 0;
-  /**
-   * The sign of the utc offset, 1 for positive offset, -1 for negative
-   * offsets.
-   * @type {Number}
-   */
-  factor = 1;
-  /**
-   * The type name, to be used in the jCal object.
-   * @constant
-   * @type {String}
-   * @default "utc-offset"
-   */
-  icaltype = "utc-offset";
-  /**
-   * Returns a clone of the utc offset object.
-   *
-   * @return {UtcOffset}     The cloned object
-   */
-  clone() {
-    return _UtcOffset.fromSeconds(this.toSeconds());
-  }
-  /**
-   * Sets up the current instance using members from the passed data object.
-   *
-   * @param {Object} aData          An object with members of the utc offset
-   * @param {Number=} aData.hours   The hours for the utc offset
-   * @param {Number=} aData.minutes The minutes in the utc offset
-   * @param {Number=} aData.factor  The factor for the utc-offset, either -1 or 1
-   */
-  fromData(aData) {
-    if (aData) {
-      for (let [key, value] of Object.entries(aData)) {
-        this[key] = value;
-      }
-    }
-    this._normalize();
-  }
-  /**
-   * Sets up the current instance from the given seconds value. The seconds
-   * value is truncated to the minute. Offsets are wrapped when the world
-   * ends, the hour after UTC+14:00 is UTC-12:00.
-   *
-   * @param {Number} aSeconds         The seconds to convert into an offset
-   */
-  fromSeconds(aSeconds) {
-    let secs = Math.abs(aSeconds);
-    this.factor = aSeconds < 0 ? -1 : 1;
-    this.hours = trunc(secs / 3600);
-    secs -= this.hours * 3600;
-    this.minutes = trunc(secs / 60);
-    return this;
-  }
-  /**
-   * Convert the current offset to a value in seconds
-   *
-   * @return {Number}                 The offset in seconds
-   */
-  toSeconds() {
-    return this.factor * (60 * this.minutes + 3600 * this.hours);
-  }
-  /**
-   * Compare this utc offset with another one.
-   *
-   * @param {UtcOffset} other             The other offset to compare with
-   * @return {Number}                     -1, 0 or 1 for less/equal/greater
-   */
-  compare(other) {
-    let a = this.toSeconds();
-    let b = other.toSeconds();
-    return (a > b) - (b > a);
-  }
-  _normalize() {
-    let secs = this.toSeconds();
-    let factor = this.factor;
-    while (secs < -43200) {
-      secs += 97200;
-    }
-    while (secs > 50400) {
-      secs -= 97200;
-    }
-    this.fromSeconds(secs);
-    if (secs == 0) {
-      this.factor = factor;
-    }
-  }
-  /**
-   * The iCalendar string representation of this utc-offset.
-   * @return {String}
-   */
-  toICALString() {
-    return design.icalendar.value["utc-offset"].toICAL(this.toString());
-  }
-  /**
-   * The string representation of this utc-offset.
-   * @return {String}
-   */
-  toString() {
-    return (this.factor == 1 ? "+" : "-") + pad2(this.hours) + ":" + pad2(this.minutes);
-  }
-};
-var VCardTime = class _VCardTime extends Time {
-  /**
-   * Returns a new ICAL.VCardTime instance from a date and/or time string.
-   *
-   * @param {String} aValue     The string to create from
-   * @param {String} aIcalType  The type for this instance, e.g. date-and-or-time
-   * @return {VCardTime}        The date/time instance
-   */
-  static fromDateAndOrTimeString(aValue, aIcalType) {
-    function part(v, s, e) {
-      return v ? strictParseInt(v.slice(s, s + e)) : null;
-    }
-    let parts = aValue.split("T");
-    let dt = parts[0], tmz = parts[1];
-    let splitzone = tmz ? design.vcard.value.time._splitZone(tmz) : [];
-    let zone = splitzone[0], tm = splitzone[1];
-    let dtlen = dt ? dt.length : 0;
-    let tmlen = tm ? tm.length : 0;
-    let hasDashDate = dt && dt[0] == "-" && dt[1] == "-";
-    let hasDashTime = tm && tm[0] == "-";
-    let o = {
-      year: hasDashDate ? null : part(dt, 0, 4),
-      month: hasDashDate && (dtlen == 4 || dtlen == 7) ? part(dt, 2, 2) : dtlen == 7 ? part(dt, 5, 2) : dtlen == 10 ? part(dt, 5, 2) : null,
-      day: dtlen == 5 ? part(dt, 3, 2) : dtlen == 7 && hasDashDate ? part(dt, 5, 2) : dtlen == 10 ? part(dt, 8, 2) : null,
-      hour: hasDashTime ? null : part(tm, 0, 2),
-      minute: hasDashTime && tmlen == 3 ? part(tm, 1, 2) : tmlen > 4 ? hasDashTime ? part(tm, 1, 2) : part(tm, 3, 2) : null,
-      second: tmlen == 4 ? part(tm, 2, 2) : tmlen == 6 ? part(tm, 4, 2) : tmlen == 8 ? part(tm, 6, 2) : null
-    };
-    if (zone == "Z") {
-      zone = Timezone.utcTimezone;
-    } else if (zone && zone[3] == ":") {
-      zone = UtcOffset.fromString(zone);
-    } else {
-      zone = null;
-    }
-    return new _VCardTime(o, zone, aIcalType);
-  }
-  /**
-   * Creates a new ICAL.VCardTime instance.
-   *
-   * @param {Object} data                           The data for the time instance
-   * @param {Number=} data.year                     The year for this date
-   * @param {Number=} data.month                    The month for this date
-   * @param {Number=} data.day                      The day for this date
-   * @param {Number=} data.hour                     The hour for this date
-   * @param {Number=} data.minute                   The minute for this date
-   * @param {Number=} data.second                   The second for this date
-   * @param {Timezone|UtcOffset} zone               The timezone to use
-   * @param {String} icaltype                       The type for this date/time object
-   */
-  constructor(data, zone, icaltype) {
-    super(data, zone);
-    this.icaltype = icaltype || "date-and-or-time";
-  }
-  /**
-   * The class identifier.
-   * @constant
-   * @type {String}
-   * @default "vcardtime"
-   */
-  icalclass = "vcardtime";
-  /**
-   * The type name, to be used in the jCal object.
-   * @type {String}
-   * @default "date-and-or-time"
-   */
-  icaltype = "date-and-or-time";
-  /**
-   * Returns a clone of the vcard date/time object.
-   *
-   * @return {VCardTime}     The cloned object
-   */
-  clone() {
-    return new _VCardTime(this._time, this.zone, this.icaltype);
-  }
-  _normalize() {
-    return this;
-  }
-  /**
-   * @inheritdoc
-   */
-  utcOffset() {
-    if (this.zone instanceof UtcOffset) {
-      return this.zone.toSeconds();
-    } else {
-      return Time.prototype.utcOffset.apply(this, arguments);
-    }
-  }
-  /**
-   * Returns an RFC 6350 compliant representation of this object.
-   *
-   * @return {String}         vcard date/time string
-   */
-  toICALString() {
-    return design.vcard.value[this.icaltype].toICAL(this.toString());
-  }
-  /**
-   * The string representation of this date/time, in jCard form
-   * (including : and - separators).
-   * @return {String}
-   */
-  toString() {
-    let y = this.year, m = this.month, d = this.day;
-    let h = this.hour, mm = this.minute, s = this.second;
-    let hasYear = y !== null, hasMonth = m !== null, hasDay = d !== null;
-    let hasHour = h !== null, hasMinute = mm !== null, hasSecond = s !== null;
-    let datepart = (hasYear ? pad2(y) + (hasMonth || hasDay ? "-" : "") : hasMonth || hasDay ? "--" : "") + (hasMonth ? pad2(m) : "") + (hasDay ? "-" + pad2(d) : "");
-    let timepart = (hasHour ? pad2(h) : "-") + (hasHour && hasMinute ? ":" : "") + (hasMinute ? pad2(mm) : "") + (!hasHour && !hasMinute ? "-" : "") + (hasMinute && hasSecond ? ":" : "") + (hasSecond ? pad2(s) : "");
-    let zone;
-    if (this.zone === Timezone.utcTimezone) {
-      zone = "Z";
-    } else if (this.zone instanceof UtcOffset) {
-      zone = this.zone.toString();
-    } else if (this.zone === Timezone.localTimezone) {
-      zone = "";
-    } else if (this.zone instanceof Timezone) {
-      let offset = UtcOffset.fromSeconds(this.zone.utcOffset(this));
-      zone = offset.toString();
-    } else {
-      zone = "";
-    }
-    switch (this.icaltype) {
-      case "time":
-        return timepart + zone;
-      case "date-and-or-time":
-      case "date-time":
-        return datepart + (timepart == "--" ? "" : "T" + timepart + zone);
-      case "date":
-        return datepart;
-    }
-    return null;
-  }
-};
-var RecurIterator = class _RecurIterator {
-  static _indexMap = {
-    "BYSECOND": 0,
-    "BYMINUTE": 1,
-    "BYHOUR": 2,
-    "BYDAY": 3,
-    "BYMONTHDAY": 4,
-    "BYYEARDAY": 5,
-    "BYWEEKNO": 6,
-    "BYMONTH": 7,
-    "BYSETPOS": 8
-  };
-  static _expandMap = {
-    "SECONDLY": [1, 1, 1, 1, 1, 1, 1, 1],
-    "MINUTELY": [2, 1, 1, 1, 1, 1, 1, 1],
-    "HOURLY": [2, 2, 1, 1, 1, 1, 1, 1],
-    "DAILY": [2, 2, 2, 1, 1, 1, 1, 1],
-    "WEEKLY": [2, 2, 2, 2, 3, 3, 1, 1],
-    "MONTHLY": [2, 2, 2, 2, 2, 3, 3, 1],
-    "YEARLY": [2, 2, 2, 2, 2, 2, 2, 2]
-  };
-  static UNKNOWN = 0;
-  static CONTRACT = 1;
-  static EXPAND = 2;
-  static ILLEGAL = 3;
-  /**
-   * Creates a new ICAL.RecurIterator instance. The options object may contain additional members
-   * when resuming iteration from a previous run.
-   *
-   * @param {Object} options                The iterator options
-   * @param {Recur} options.rule            The rule to iterate.
-   * @param {Time} options.dtstart          The start date of the event.
-   * @param {Boolean=} options.initialized  When true, assume that options are
-   *        from a previously constructed iterator. Initialization will not be
-   *        repeated.
-   */
-  constructor(options) {
-    this.fromData(options);
-  }
-  /**
-   * True when iteration is finished.
-   * @type {Boolean}
-   */
-  completed = false;
-  /**
-   * The rule that is being iterated
-   * @type {Recur}
-   */
-  rule = null;
-  /**
-   * The start date of the event being iterated.
-   * @type {Time}
-   */
-  dtstart = null;
-  /**
-   * The last occurrence that was returned from the
-   * {@link RecurIterator#next} method.
-   * @type {Time}
-   */
-  last = null;
-  /**
-   * The sequence number from the occurrence
-   * @type {Number}
-   */
-  occurrence_number = 0;
-  /**
-   * The indices used for the {@link ICAL.RecurIterator#by_data} object.
-   * @type {Object}
-   * @private
-   */
-  by_indices = null;
-  /**
-   * If true, the iterator has already been initialized
-   * @type {Boolean}
-   * @private
-   */
-  initialized = false;
-  /**
-   * The initializd by-data.
-   * @type {Object}
-   * @private
-   */
-  by_data = null;
-  /**
-   * The expanded yeardays
-   * @type {Array}
-   * @private
-   */
-  days = null;
-  /**
-   * The index in the {@link ICAL.RecurIterator#days} array.
-   * @type {Number}
-   * @private
-   */
-  days_index = 0;
-  /**
-   * Initialize the recurrence iterator from the passed data object. This
-   * method is usually not called directly, you can initialize the iterator
-   * through the constructor.
-   *
-   * @param {Object} options                The iterator options
-   * @param {Recur} options.rule            The rule to iterate.
-   * @param {Time} options.dtstart          The start date of the event.
-   * @param {Boolean=} options.initialized  When true, assume that options are
-   *        from a previously constructed iterator. Initialization will not be
-   *        repeated.
-   */
-  fromData(options) {
-    this.rule = formatClassType(options.rule, Recur);
-    if (!this.rule) {
-      throw new Error("iterator requires a (ICAL.Recur) rule");
-    }
-    this.dtstart = formatClassType(options.dtstart, Time);
-    if (!this.dtstart) {
-      throw new Error("iterator requires a (ICAL.Time) dtstart");
-    }
-    if (options.by_data) {
-      this.by_data = options.by_data;
-    } else {
-      this.by_data = clone(this.rule.parts, true);
-    }
-    if (options.occurrence_number)
-      this.occurrence_number = options.occurrence_number;
-    this.days = options.days || [];
-    if (options.last) {
-      this.last = formatClassType(options.last, Time);
-    }
-    this.by_indices = options.by_indices;
-    if (!this.by_indices) {
-      this.by_indices = {
-        "BYSECOND": 0,
-        "BYMINUTE": 0,
-        "BYHOUR": 0,
-        "BYDAY": 0,
-        "BYMONTH": 0,
-        "BYWEEKNO": 0,
-        "BYMONTHDAY": 0
-      };
-    }
-    this.initialized = options.initialized || false;
-    if (!this.initialized) {
-      try {
-        this.init();
-      } catch (e) {
-        if (e instanceof InvalidRecurrenceRuleError) {
-          this.completed = true;
-        } else {
-          throw e;
-        }
-      }
-    }
-  }
-  /**
-   * Initialize the iterator
-   * @private
-   */
-  init() {
-    this.initialized = true;
-    this.last = this.dtstart.clone();
-    let parts = this.by_data;
-    if ("BYDAY" in parts) {
-      this.sort_byday_rules(parts.BYDAY);
-    }
-    if ("BYYEARDAY" in parts) {
-      if ("BYMONTH" in parts || "BYWEEKNO" in parts || "BYMONTHDAY" in parts) {
-        throw new Error("Invalid BYYEARDAY rule");
-      }
-    }
-    if ("BYWEEKNO" in parts && "BYMONTHDAY" in parts) {
-      throw new Error("BYWEEKNO does not fit to BYMONTHDAY");
-    }
-    if (this.rule.freq == "MONTHLY" && ("BYYEARDAY" in parts || "BYWEEKNO" in parts)) {
-      throw new Error("For MONTHLY recurrences neither BYYEARDAY nor BYWEEKNO may appear");
-    }
-    if (this.rule.freq == "WEEKLY" && ("BYYEARDAY" in parts || "BYMONTHDAY" in parts)) {
-      throw new Error("For WEEKLY recurrences neither BYMONTHDAY nor BYYEARDAY may appear");
-    }
-    if (this.rule.freq != "YEARLY" && "BYYEARDAY" in parts) {
-      throw new Error("BYYEARDAY may only appear in YEARLY rules");
-    }
-    this.last.second = this.setup_defaults("BYSECOND", "SECONDLY", this.dtstart.second);
-    this.last.minute = this.setup_defaults("BYMINUTE", "MINUTELY", this.dtstart.minute);
-    this.last.hour = this.setup_defaults("BYHOUR", "HOURLY", this.dtstart.hour);
-    this.last.day = this.setup_defaults("BYMONTHDAY", "DAILY", this.dtstart.day);
-    this.last.month = this.setup_defaults("BYMONTH", "MONTHLY", this.dtstart.month);
-    if (this.rule.freq == "WEEKLY") {
-      if ("BYDAY" in parts) {
-        let [, dow] = this.ruleDayOfWeek(parts.BYDAY[0], this.rule.wkst);
-        let wkdy = dow - this.last.dayOfWeek(this.rule.wkst);
-        if (this.last.dayOfWeek(this.rule.wkst) < dow && wkdy >= 0 || wkdy < 0) {
-          this.last.day += wkdy;
-        }
-      } else {
-        let dayName = Recur.numericDayToIcalDay(this.dtstart.dayOfWeek());
-        parts.BYDAY = [dayName];
-      }
-    }
-    if (this.rule.freq == "YEARLY") {
-      const untilYear = this.rule.until ? this.rule.until.year : 2e4;
-      while (this.last.year <= untilYear) {
-        this.expand_year_days(this.last.year);
-        if (this.days.length > 0) {
-          break;
-        }
-        this.increment_year(this.rule.interval);
-      }
-      if (this.days.length == 0) {
-        throw new InvalidRecurrenceRuleError();
-      }
-      if (!this._nextByYearDay() && !this.next_year() && !this.next_year() && !this.next_year()) {
-        throw new InvalidRecurrenceRuleError();
-      }
-    }
-    if (this.rule.freq == "MONTHLY") {
-      if (this.has_by_data("BYDAY")) {
-        let tempLast = null;
-        let initLast = this.last.clone();
-        let daysInMonth = Time.daysInMonth(this.last.month, this.last.year);
-        for (let bydow of this.by_data.BYDAY) {
-          this.last = initLast.clone();
-          let [pos, dow] = this.ruleDayOfWeek(bydow);
-          let dayOfMonth = this.last.nthWeekDay(dow, pos);
-          if (pos >= 6 || pos <= -6) {
-            throw new Error("Malformed values in BYDAY part");
-          }
-          if (dayOfMonth > daysInMonth || dayOfMonth <= 0) {
-            if (tempLast && tempLast.month == initLast.month) {
-              continue;
-            }
-            while (dayOfMonth > daysInMonth || dayOfMonth <= 0) {
-              this.increment_month();
-              daysInMonth = Time.daysInMonth(this.last.month, this.last.year);
-              dayOfMonth = this.last.nthWeekDay(dow, pos);
-            }
-          }
-          this.last.day = dayOfMonth;
-          if (!tempLast || this.last.compare(tempLast) < 0) {
-            tempLast = this.last.clone();
-          }
-        }
-        this.last = tempLast.clone();
-        if (this.has_by_data("BYMONTHDAY")) {
-          this._byDayAndMonthDay(true);
-        }
-        if (this.last.day > daysInMonth || this.last.day == 0) {
-          throw new Error("Malformed values in BYDAY part");
-        }
-      } else if (this.has_by_data("BYMONTHDAY")) {
-        this.last.day = 1;
-        let normalized = this.normalizeByMonthDayRules(
-          this.last.year,
-          this.last.month,
-          this.rule.parts.BYMONTHDAY
-        ).filter((d) => d >= this.last.day);
-        if (normalized.length) {
-          this.last.day = normalized[0];
-          this.by_data.BYMONTHDAY = normalized;
-        } else {
-          if (!this.next_month() && !this.next_month() && !this.next_month()) {
-            throw new InvalidRecurrenceRuleError();
-          }
-        }
-      }
-    }
-  }
-  /**
-   * Retrieve the next occurrence from the iterator.
-   * @return {Time}
-   */
-  next(again = false) {
-    let before = this.last ? this.last.clone() : null;
-    if (this.rule.count && this.occurrence_number >= this.rule.count || this.rule.until && this.last.compare(this.rule.until) > 0) {
-      this.completed = true;
-    }
-    if (this.completed) {
-      return null;
-    }
-    if (this.occurrence_number == 0 && this.last.compare(this.dtstart) >= 0) {
-      this.occurrence_number++;
-      return this.last;
-    }
-    let valid;
-    let invalid_count = 0;
-    do {
-      valid = 1;
-      switch (this.rule.freq) {
-        case "SECONDLY":
-          this.next_second();
-          break;
-        case "MINUTELY":
-          this.next_minute();
-          break;
-        case "HOURLY":
-          this.next_hour();
-          break;
-        case "DAILY":
-          this.next_day();
-          break;
-        case "WEEKLY":
-          this.next_week();
-          break;
-        case "MONTHLY":
-          valid = this.next_month();
-          if (valid) {
-            invalid_count = 0;
-          } else if (++invalid_count == 336) {
-            this.completed = true;
-            return null;
-          }
-          break;
-        case "YEARLY":
-          valid = this.next_year();
-          if (valid) {
-            invalid_count = 0;
-          } else if (++invalid_count == 28) {
-            this.completed = true;
-            return null;
-          }
-          break;
-        default:
-          return null;
-      }
-    } while (!this.check_contracting_rules() || this.last.compare(this.dtstart) < 0 || !valid);
-    if (this.last.compare(before) == 0) {
-      if (again) {
-        throw new Error("Same occurrence found twice, protecting you from death by recursion");
-      }
-      this.next(true);
-    }
-    if (this.rule.until && this.last.compare(this.rule.until) > 0) {
-      this.completed = true;
-      return null;
-    } else {
-      this.occurrence_number++;
-      return this.last;
-    }
-  }
-  next_second() {
-    return this.next_generic("BYSECOND", "SECONDLY", "second", "minute");
-  }
-  increment_second(inc) {
-    return this.increment_generic(inc, "second", 60, "minute");
-  }
-  next_minute() {
-    return this.next_generic(
-      "BYMINUTE",
-      "MINUTELY",
-      "minute",
-      "hour",
-      "next_second"
-    );
-  }
-  increment_minute(inc) {
-    return this.increment_generic(inc, "minute", 60, "hour");
-  }
-  next_hour() {
-    return this.next_generic(
-      "BYHOUR",
-      "HOURLY",
-      "hour",
-      "monthday",
-      "next_minute"
-    );
-  }
-  increment_hour(inc) {
-    this.increment_generic(inc, "hour", 24, "monthday");
-  }
-  next_day() {
-    let this_freq = this.rule.freq == "DAILY";
-    if (this.next_hour() == 0) {
-      return 0;
-    }
-    if (this_freq) {
-      this.increment_monthday(this.rule.interval);
-    } else {
-      this.increment_monthday(1);
-    }
-    return 0;
-  }
-  next_week() {
-    let end_of_data = 0;
-    if (this.next_weekday_by_week() == 0) {
-      return end_of_data;
-    }
-    if (this.has_by_data("BYWEEKNO")) {
-      this.by_indices.BYWEEKNO++;
-      if (this.by_indices.BYWEEKNO == this.by_data.BYWEEKNO.length) {
-        this.by_indices.BYWEEKNO = 0;
-        end_of_data = 1;
-      }
-      this.last.month = 1;
-      this.last.day = 1;
-      let week_no = this.by_data.BYWEEKNO[this.by_indices.BYWEEKNO];
-      this.last.day += 7 * week_no;
-      if (end_of_data) {
-        this.increment_year(1);
-      }
-    } else {
-      this.increment_monthday(7 * this.rule.interval);
-    }
-    return end_of_data;
-  }
-  /**
-   * Normalize each by day rule for a given year/month.
-   * Takes into account ordering and negative rules
-   *
-   * @private
-   * @param {Number} year         Current year.
-   * @param {Number} month        Current month.
-   * @param {Array}  rules        Array of rules.
-   *
-   * @return {Array} sorted and normalized rules.
-   *                 Negative rules will be expanded to their
-   *                 correct positive values for easier processing.
-   */
-  normalizeByMonthDayRules(year, month, rules) {
-    let daysInMonth = Time.daysInMonth(month, year);
-    let newRules = [];
-    let ruleIdx = 0;
-    let len = rules.length;
-    let rule;
-    for (; ruleIdx < len; ruleIdx++) {
-      rule = parseInt(rules[ruleIdx], 10);
-      if (isNaN(rule)) {
-        throw new Error("Invalid BYMONTHDAY value");
-      }
-      if (Math.abs(rule) > daysInMonth) {
-        continue;
-      }
-      if (rule < 0) {
-        rule = daysInMonth + (rule + 1);
-      } else if (rule === 0) {
-        continue;
-      }
-      if (newRules.indexOf(rule) === -1) {
-        newRules.push(rule);
-      }
-    }
-    return newRules.sort(function(a, b) {
-      return a - b;
+    state.phase = "deciding";
+    const controller = new AbortController();
+    state.controller = controller;
+    decisionCount++;
+    decisions.set(state.peerId, (decisions.get(state.peerId) ?? 0) + 1);
+    const result = decideReceive(() => receive({
+      byteLength: state.size,
+      peerId: state.peerId,
+      signal: controller.signal,
+      ...state.metadata === void 0 ? {} : { metadata: state.metadata }
+    }), (allow) => {
+      decisionCount--;
+      const count = decisions.get(state.peerId) - 1;
+      if (count) decisions.set(state.peerId, count);
+      else decisions.delete(state.peerId);
+      if (!current(state)) return false;
+      if (allow) state.phase = "ready";
+      else reject(state, "payload rejected by receiver");
+      return allow;
     });
-  }
-  /**
-   * NOTES:
-   * We are given a list of dates in the month (BYMONTHDAY) (23, etc..)
-   * Also we are given a list of days (BYDAY) (MO, 2SU, etc..) when
-   * both conditions match a given date (this.last.day) iteration stops.
-   *
-   * @private
-   * @param {Boolean=} isInit     When given true will not increment the
-   *                                current day (this.last).
-   */
-  _byDayAndMonthDay(isInit) {
-    let byMonthDay;
-    let byDay = this.by_data.BYDAY;
-    let date;
-    let dateIdx = 0;
-    let dateLen;
-    let dayLen = byDay.length;
-    let dataIsValid = 0;
-    let daysInMonth;
-    let self2 = this;
-    let lastDay = this.last.day;
-    function initMonth() {
-      daysInMonth = Time.daysInMonth(
-        self2.last.month,
-        self2.last.year
-      );
-      byMonthDay = self2.normalizeByMonthDayRules(
-        self2.last.year,
-        self2.last.month,
-        self2.by_data.BYMONTHDAY
-      );
-      dateLen = byMonthDay.length;
-      while (byMonthDay[dateIdx] <= lastDay && !(isInit && byMonthDay[dateIdx] == lastDay) && dateIdx < dateLen - 1) {
-        dateIdx++;
-      }
-    }
-    function nextMonth() {
-      lastDay = 0;
-      self2.increment_month();
-      dateIdx = 0;
-      initMonth();
-    }
-    initMonth();
-    if (isInit) {
-      lastDay -= 1;
-    }
-    let monthsCounter = 48;
-    while (!dataIsValid && monthsCounter) {
-      monthsCounter--;
-      date = lastDay + 1;
-      if (date > daysInMonth) {
-        nextMonth();
-        continue;
-      }
-      let next = byMonthDay[dateIdx++];
-      if (next >= date) {
-        lastDay = next;
-      } else {
-        nextMonth();
-        continue;
-      }
-      for (let dayIdx = 0; dayIdx < dayLen; dayIdx++) {
-        let parts = this.ruleDayOfWeek(byDay[dayIdx]);
-        let pos = parts[0];
-        let dow = parts[1];
-        this.last.day = lastDay;
-        if (this.last.isNthWeekDay(dow, pos)) {
-          dataIsValid = 1;
-          break;
-        }
-      }
-      if (!dataIsValid && dateIdx === dateLen) {
-        nextMonth();
-        continue;
-      }
-    }
-    if (monthsCounter <= 0) {
-      throw new Error("Malformed values in BYDAY combined with BYMONTHDAY parts");
-    }
-    return dataIsValid;
-  }
-  next_month() {
-    let data_valid = 1;
-    if (this.next_hour() == 0) {
-      return data_valid;
-    }
-    if (this.has_by_data("BYDAY") && this.has_by_data("BYMONTHDAY")) {
-      data_valid = this._byDayAndMonthDay();
-    } else if (this.has_by_data("BYDAY")) {
-      let daysInMonth = Time.daysInMonth(this.last.month, this.last.year);
-      let setpos = 0;
-      let setpos_total = 0;
-      if (this.has_by_data("BYSETPOS")) {
-        let last_day = this.last.day;
-        for (let day2 = 1; day2 <= daysInMonth; day2++) {
-          this.last.day = day2;
-          if (this.is_day_in_byday(this.last)) {
-            setpos_total++;
-            if (day2 <= last_day) {
-              setpos++;
-            }
-          }
-        }
-        this.last.day = last_day;
-      }
-      data_valid = 0;
-      let day;
-      for (day = this.last.day + 1; day <= daysInMonth; day++) {
-        this.last.day = day;
-        if (this.is_day_in_byday(this.last)) {
-          if (!this.has_by_data("BYSETPOS") || this.check_set_position(++setpos) || this.check_set_position(setpos - setpos_total - 1)) {
-            data_valid = 1;
-            break;
-          }
-        }
-      }
-      if (day > daysInMonth) {
-        this.last.day = 1;
-        this.increment_month();
-        if (this.is_day_in_byday(this.last)) {
-          if (!this.has_by_data("BYSETPOS") || this.check_set_position(1)) {
-            data_valid = 1;
-          }
-        } else {
-          data_valid = 0;
-        }
-      }
-    } else if (this.has_by_data("BYMONTHDAY")) {
-      this.by_indices.BYMONTHDAY++;
-      if (this.by_indices.BYMONTHDAY >= this.by_data.BYMONTHDAY.length) {
-        this.by_indices.BYMONTHDAY = 0;
-        this.increment_month();
-        if (this.by_indices.BYMONTHDAY >= this.by_data.BYMONTHDAY.length) {
-          return 0;
-        }
-      }
-      let daysInMonth = Time.daysInMonth(this.last.month, this.last.year);
-      let day = this.by_data.BYMONTHDAY[this.by_indices.BYMONTHDAY];
-      if (day < 0) {
-        day = daysInMonth + day + 1;
-      }
-      if (day > daysInMonth) {
-        this.last.day = 1;
-        data_valid = this.is_day_in_byday(this.last);
-      } else {
-        this.last.day = day;
-      }
-    } else {
-      this.increment_month();
-      let daysInMonth = Time.daysInMonth(this.last.month, this.last.year);
-      if (this.by_data.BYMONTHDAY[0] > daysInMonth) {
-        data_valid = 0;
-      } else {
-        this.last.day = this.by_data.BYMONTHDAY[0];
-      }
-    }
-    return data_valid;
-  }
-  next_weekday_by_week() {
-    let end_of_data = 0;
-    if (this.next_hour() == 0) {
-      return end_of_data;
-    }
-    if (!this.has_by_data("BYDAY")) {
-      return 1;
-    }
-    for (; ; ) {
-      let tt = new Time();
-      this.by_indices.BYDAY++;
-      if (this.by_indices.BYDAY == Object.keys(this.by_data.BYDAY).length) {
-        this.by_indices.BYDAY = 0;
-        end_of_data = 1;
-      }
-      let coded_day = this.by_data.BYDAY[this.by_indices.BYDAY];
-      let parts = this.ruleDayOfWeek(coded_day);
-      let dow = parts[1];
-      dow -= this.rule.wkst;
-      if (dow < 0) {
-        dow += 7;
-      }
-      tt.year = this.last.year;
-      tt.month = this.last.month;
-      tt.day = this.last.day;
-      let startOfWeek = tt.startDoyWeek(this.rule.wkst);
-      if (dow + startOfWeek < 1) {
-        if (!end_of_data) {
-          continue;
-        }
-      }
-      let next = Time.fromDayOfYear(startOfWeek + dow, this.last.year);
-      this.last.year = next.year;
-      this.last.month = next.month;
-      this.last.day = next.day;
-      return end_of_data;
-    }
-  }
-  next_year() {
-    if (this.next_hour() == 0) {
-      return 0;
-    }
-    if (this.days.length == 0 || ++this.days_index == this.days.length) {
-      this.days_index = 0;
-      this.increment_year(this.rule.interval);
-      if (this.has_by_data("BYMONTHDAY")) {
-        this.by_data.BYMONTHDAY = this.normalizeByMonthDayRules(
-          this.last.year,
-          this.last.month,
-          this.rule.parts.BYMONTHDAY
-        );
-      }
-      this.expand_year_days(this.last.year);
-      if (this.days.length == 0) {
-        return 0;
-      }
-    }
-    return this._nextByYearDay();
-  }
-  _nextByYearDay() {
-    let doy = this.days[this.days_index];
-    let year = this.last.year;
-    if (Math.abs(doy) == 366 && !Time.isLeapYear(this.last.year)) {
-      return 0;
-    }
-    if (doy < 1) {
-      doy += 1;
-      year += 1;
-    }
-    let next = Time.fromDayOfYear(doy, year);
-    this.last.day = next.day;
-    this.last.month = next.month;
-    return 1;
-  }
-  /**
-   * @param dow (eg: '1TU', '-1MO')
-   * @param {weekDay=} aWeekStart The week start weekday
-   * @return [pos, numericDow] (eg: [1, 3]) numericDow is relative to aWeekStart
-   */
-  ruleDayOfWeek(dow, aWeekStart) {
-    let matches = dow.match(/([+-]?[0-9])?(MO|TU|WE|TH|FR|SA|SU)/);
-    if (matches) {
-      let pos = parseInt(matches[1] || 0, 10);
-      dow = Recur.icalDayToNumericDay(matches[2], aWeekStart);
-      return [pos, dow];
-    } else {
-      return [0, 0];
-    }
-  }
-  next_generic(aRuleType, aInterval, aDateAttr, aFollowingAttr, aPreviousIncr) {
-    let has_by_rule = aRuleType in this.by_data;
-    let this_freq = this.rule.freq == aInterval;
-    let end_of_data = 0;
-    if (aPreviousIncr && this[aPreviousIncr]() == 0) {
-      return end_of_data;
-    }
-    if (has_by_rule) {
-      this.by_indices[aRuleType]++;
-      let dta = this.by_data[aRuleType];
-      if (this.by_indices[aRuleType] == dta.length) {
-        this.by_indices[aRuleType] = 0;
-        end_of_data = 1;
-      }
-      this.last[aDateAttr] = dta[this.by_indices[aRuleType]];
-    } else if (this_freq) {
-      this["increment_" + aDateAttr](this.rule.interval);
-    }
-    if (has_by_rule && end_of_data && this_freq) {
-      this["increment_" + aFollowingAttr](1);
-    }
-    return end_of_data;
-  }
-  increment_monthday(inc) {
-    for (let i = 0; i < inc; i++) {
-      let daysInMonth = Time.daysInMonth(this.last.month, this.last.year);
-      this.last.day++;
-      if (this.last.day > daysInMonth) {
-        this.last.day -= daysInMonth;
-        this.increment_month();
-      }
-    }
-  }
-  increment_month() {
-    this.last.day = 1;
-    if (this.has_by_data("BYMONTH")) {
-      this.by_indices.BYMONTH++;
-      if (this.by_indices.BYMONTH == this.by_data.BYMONTH.length) {
-        this.by_indices.BYMONTH = 0;
-        this.increment_year(1);
-      }
-      this.last.month = this.by_data.BYMONTH[this.by_indices.BYMONTH];
-    } else {
-      if (this.rule.freq == "MONTHLY") {
-        this.last.month += this.rule.interval;
-      } else {
-        this.last.month++;
-      }
-      this.last.month--;
-      let years = trunc(this.last.month / 12);
-      this.last.month %= 12;
-      this.last.month++;
-      if (years != 0) {
-        this.increment_year(years);
-      }
-    }
-    if (this.has_by_data("BYMONTHDAY")) {
-      this.by_data.BYMONTHDAY = this.normalizeByMonthDayRules(
-        this.last.year,
-        this.last.month,
-        this.rule.parts.BYMONTHDAY
-      );
-    }
-  }
-  increment_year(inc) {
-    this.last.day = 1;
-    this.last.year += inc;
-  }
-  increment_generic(inc, aDateAttr, aFactor, aNextIncrement) {
-    this.last[aDateAttr] += inc;
-    let nextunit = trunc(this.last[aDateAttr] / aFactor);
-    this.last[aDateAttr] %= aFactor;
-    if (nextunit != 0) {
-      this["increment_" + aNextIncrement](nextunit);
-    }
-  }
-  has_by_data(aRuleType) {
-    return aRuleType in this.rule.parts;
-  }
-  expand_year_days(aYear) {
-    let t = new Time();
-    this.days = [];
-    let parts = {};
-    let rules = ["BYDAY", "BYWEEKNO", "BYMONTHDAY", "BYMONTH", "BYYEARDAY"];
-    for (let part of rules) {
-      if (part in this.rule.parts) {
-        parts[part] = this.rule.parts[part];
-      }
-    }
-    if ("BYMONTH" in parts && "BYWEEKNO" in parts) {
-      let valid = 1;
-      let validWeeks = {};
-      t.year = aYear;
-      t.isDate = true;
-      for (let monthIdx = 0; monthIdx < this.by_data.BYMONTH.length; monthIdx++) {
-        let month = this.by_data.BYMONTH[monthIdx];
-        t.month = month;
-        t.day = 1;
-        let first_week = t.weekNumber(this.rule.wkst);
-        t.day = Time.daysInMonth(month, aYear);
-        let last_week = t.weekNumber(this.rule.wkst);
-        for (monthIdx = first_week; monthIdx < last_week; monthIdx++) {
-          validWeeks[monthIdx] = 1;
-        }
-      }
-      for (let weekIdx = 0; weekIdx < this.by_data.BYWEEKNO.length && valid; weekIdx++) {
-        let weekno = this.by_data.BYWEEKNO[weekIdx];
-        if (weekno < 52) {
-          valid &= validWeeks[weekIdx];
-        } else {
-          valid = 0;
-        }
-      }
-      if (valid) {
-        delete parts.BYMONTH;
-      } else {
-        delete parts.BYWEEKNO;
-      }
-    }
-    let partCount = Object.keys(parts).length;
-    if (partCount == 0) {
-      let t1 = this.dtstart.clone();
-      t1.year = this.last.year;
-      this.days.push(t1.dayOfYear());
-    } else if (partCount == 1 && "BYMONTH" in parts) {
-      for (let month of this.by_data.BYMONTH) {
-        let t2 = this.dtstart.clone();
-        t2.year = aYear;
-        t2.month = month;
-        t2.isDate = true;
-        this.days.push(t2.dayOfYear());
-      }
-    } else if (partCount == 1 && "BYMONTHDAY" in parts) {
-      for (let monthday of this.by_data.BYMONTHDAY) {
-        let t3 = this.dtstart.clone();
-        if (monthday < 0) {
-          let daysInMonth = Time.daysInMonth(t3.month, aYear);
-          monthday = monthday + daysInMonth + 1;
-        }
-        t3.day = monthday;
-        t3.year = aYear;
-        t3.isDate = true;
-        this.days.push(t3.dayOfYear());
-      }
-    } else if (partCount == 2 && "BYMONTHDAY" in parts && "BYMONTH" in parts) {
-      for (let month of this.by_data.BYMONTH) {
-        let daysInMonth = Time.daysInMonth(month, aYear);
-        for (let monthday of this.by_data.BYMONTHDAY) {
-          if (monthday < 0) {
-            monthday = monthday + daysInMonth + 1;
-          }
-          t.day = monthday;
-          t.month = month;
-          t.year = aYear;
-          t.isDate = true;
-          this.days.push(t.dayOfYear());
-        }
-      }
-    } else if (partCount == 1 && "BYWEEKNO" in parts) ;
-    else if (partCount == 2 && "BYWEEKNO" in parts && "BYMONTHDAY" in parts) ;
-    else if (partCount == 1 && "BYDAY" in parts) {
-      this.days = this.days.concat(this.expand_by_day(aYear));
-    } else if (partCount == 2 && "BYDAY" in parts && "BYMONTH" in parts) {
-      for (let month of this.by_data.BYMONTH) {
-        let daysInMonth = Time.daysInMonth(month, aYear);
-        t.year = aYear;
-        t.month = month;
-        t.day = 1;
-        t.isDate = true;
-        let first_dow = t.dayOfWeek();
-        let doy_offset = t.dayOfYear() - 1;
-        t.day = daysInMonth;
-        let last_dow = t.dayOfWeek();
-        if (this.has_by_data("BYSETPOS")) {
-          let by_month_day = [];
-          for (let day = 1; day <= daysInMonth; day++) {
-            t.day = day;
-            if (this.is_day_in_byday(t)) {
-              by_month_day.push(day);
-            }
-          }
-          for (let spIndex = 0; spIndex < by_month_day.length; spIndex++) {
-            if (this.check_set_position(spIndex + 1) || this.check_set_position(spIndex - by_month_day.length)) {
-              this.days.push(doy_offset + by_month_day[spIndex]);
-            }
-          }
-        } else {
-          for (let coded_day of this.by_data.BYDAY) {
-            let bydayParts = this.ruleDayOfWeek(coded_day);
-            let pos = bydayParts[0];
-            let dow = bydayParts[1];
-            let month_day;
-            let first_matching_day = (dow + 7 - first_dow) % 7 + 1;
-            let last_matching_day = daysInMonth - (last_dow + 7 - dow) % 7;
-            if (pos == 0) {
-              for (let day = first_matching_day; day <= daysInMonth; day += 7) {
-                this.days.push(doy_offset + day);
-              }
-            } else if (pos > 0) {
-              month_day = first_matching_day + (pos - 1) * 7;
-              if (month_day <= daysInMonth) {
-                this.days.push(doy_offset + month_day);
-              }
-            } else {
-              month_day = last_matching_day + (pos + 1) * 7;
-              if (month_day > 0) {
-                this.days.push(doy_offset + month_day);
-              }
-            }
-          }
-        }
-      }
-      this.days.sort(function(a, b) {
-        return a - b;
-      });
-    } else if (partCount == 2 && "BYDAY" in parts && "BYMONTHDAY" in parts) {
-      let expandedDays = this.expand_by_day(aYear);
-      for (let day of expandedDays) {
-        let tt = Time.fromDayOfYear(day, aYear);
-        if (this.by_data.BYMONTHDAY.indexOf(tt.day) >= 0) {
-          this.days.push(day);
-        }
-      }
-    } else if (partCount == 3 && "BYDAY" in parts && "BYMONTHDAY" in parts && "BYMONTH" in parts) {
-      let expandedDays = this.expand_by_day(aYear);
-      for (let day of expandedDays) {
-        let tt = Time.fromDayOfYear(day, aYear);
-        if (this.by_data.BYMONTH.indexOf(tt.month) >= 0 && this.by_data.BYMONTHDAY.indexOf(tt.day) >= 0) {
-          this.days.push(day);
-        }
-      }
-    } else if (partCount == 2 && "BYDAY" in parts && "BYWEEKNO" in parts) {
-      let expandedDays = this.expand_by_day(aYear);
-      for (let day of expandedDays) {
-        let tt = Time.fromDayOfYear(day, aYear);
-        let weekno = tt.weekNumber(this.rule.wkst);
-        if (this.by_data.BYWEEKNO.indexOf(weekno)) {
-          this.days.push(day);
-        }
-      }
-    } else if (partCount == 3 && "BYDAY" in parts && "BYWEEKNO" in parts && "BYMONTHDAY" in parts) ;
-    else if (partCount == 1 && "BYYEARDAY" in parts) {
-      this.days = this.days.concat(this.by_data.BYYEARDAY);
-    } else if (partCount == 2 && "BYYEARDAY" in parts && "BYDAY" in parts) {
-      let daysInYear2 = Time.isLeapYear(aYear) ? 366 : 365;
-      let expandedDays = new Set(this.expand_by_day(aYear));
-      for (let doy of this.by_data.BYYEARDAY) {
-        if (doy < 0) {
-          doy += daysInYear2 + 1;
-        }
-        if (expandedDays.has(doy)) {
-          this.days.push(doy);
-        }
-      }
-    } else {
-      this.days = [];
-    }
-    let daysInYear = Time.isLeapYear(aYear) ? 366 : 365;
-    this.days.sort((a, b) => {
-      if (a < 0) a += daysInYear + 1;
-      if (b < 0) b += daysInYear + 1;
-      return a - b;
-    });
-    return 0;
-  }
-  expand_by_day(aYear) {
-    let days_list = [];
-    let tmp = this.last.clone();
-    tmp.year = aYear;
-    tmp.month = 1;
-    tmp.day = 1;
-    tmp.isDate = true;
-    let start_dow = tmp.dayOfWeek();
-    tmp.month = 12;
-    tmp.day = 31;
-    tmp.isDate = true;
-    let end_dow = tmp.dayOfWeek();
-    let end_year_day = tmp.dayOfYear();
-    for (let day of this.by_data.BYDAY) {
-      let parts = this.ruleDayOfWeek(day);
-      let pos = parts[0];
-      let dow = parts[1];
-      if (pos == 0) {
-        let tmp_start_doy = (dow + 7 - start_dow) % 7 + 1;
-        for (let doy = tmp_start_doy; doy <= end_year_day; doy += 7) {
-          days_list.push(doy);
-        }
-      } else if (pos > 0) {
-        let first;
-        if (dow >= start_dow) {
-          first = dow - start_dow + 1;
-        } else {
-          first = dow - start_dow + 8;
-        }
-        days_list.push(first + (pos - 1) * 7);
-      } else {
-        let last;
-        pos = -pos;
-        if (dow <= end_dow) {
-          last = end_year_day - end_dow + dow;
-        } else {
-          last = end_year_day - end_dow + dow - 7;
-        }
-        days_list.push(last - (pos - 1) * 7);
-      }
-    }
-    return days_list;
-  }
-  is_day_in_byday(tt) {
-    if (this.by_data.BYDAY) {
-      for (let day of this.by_data.BYDAY) {
-        let parts = this.ruleDayOfWeek(day);
-        let pos = parts[0];
-        let dow = parts[1];
-        let this_dow = tt.dayOfWeek();
-        if (pos == 0 && dow == this_dow || tt.nthWeekDay(dow, pos) == tt.day) {
-          return 1;
-        }
-      }
-    }
-    return 0;
-  }
-  /**
-   * Checks if given value is in BYSETPOS.
-   *
-   * @private
-   * @param {Numeric} aPos position to check for.
-   * @return {Boolean} false unless BYSETPOS rules exist
-   *                   and the given value is present in rules.
-   */
-  check_set_position(aPos) {
-    if (this.has_by_data("BYSETPOS")) {
-      let idx = this.by_data.BYSETPOS.indexOf(aPos);
-      return idx !== -1;
-    }
+    if (typeof result === "boolean") return result;
+    result.then(() => drain());
     return false;
-  }
-  sort_byday_rules(aRules) {
-    for (let i = 0; i < aRules.length; i++) {
-      for (let j = 0; j < i; j++) {
-        let one = this.ruleDayOfWeek(aRules[j], this.rule.wkst)[1];
-        let two = this.ruleDayOfWeek(aRules[i], this.rule.wkst)[1];
-        if (one > two) {
-          let tmp = aRules[i];
-          aRules[i] = aRules[j];
-          aRules[j] = tmp;
-        }
-      }
+  };
+  const complete = (state, action, bytes) => {
+    let payload;
+    try {
+      payload = decodePayload(bytes, state.format, state.kind === "inline");
+    } catch {
+      release(state);
+      fail(state.peerId, "invalid action payload");
+      return;
     }
-  }
-  check_contract_restriction(aRuleType, v) {
-    let indexMapValue = _RecurIterator._indexMap[aRuleType];
-    let ruleMapValue = _RecurIterator._expandMap[this.rule.freq][indexMapValue];
-    let pass = false;
-    if (aRuleType in this.by_data && ruleMapValue == _RecurIterator.CONTRACT) {
-      let ruleType = this.by_data[aRuleType];
-      for (let bydata of ruleType) {
-        if (bydata == v) {
-          pass = true;
-          break;
-        }
-      }
-    } else {
-      pass = true;
+    release(state);
+    deliverPayload(action, payload, state.peerId, state.metadata);
+  };
+  const tryInline = (state) => {
+    const action = actions.get(state.type);
+    if (current(state) && action && admit(state, action) && action.receiver) complete(state, action, state.data);
+  };
+  const tryBulk = (state) => {
+    const action = actions.get(state.type);
+    if (!current(state) || !action || !admit(state, action) || !action.receiver) return;
+    if (state.transfer === "receiving") {
+      if (state.offset === state.size) complete(state, action, state.data);
+      return;
     }
-    return pass;
-  }
-  check_contracting_rules() {
-    let dow = this.last.dayOfWeek();
-    let weekNo = this.last.weekNumber(this.rule.wkst);
-    let doy = this.last.dayOfYear();
-    return this.check_contract_restriction("BYSECOND", this.last.second) && this.check_contract_restriction("BYMINUTE", this.last.minute) && this.check_contract_restriction("BYHOUR", this.last.hour) && this.check_contract_restriction("BYDAY", Recur.numericDayToIcalDay(dow)) && this.check_contract_restriction("BYWEEKNO", weekNo) && this.check_contract_restriction("BYMONTHDAY", this.last.day) && this.check_contract_restriction("BYMONTH", this.last.month) && this.check_contract_restriction("BYYEARDAY", doy);
-  }
-  setup_defaults(aRuleType, req, deftime) {
-    let indexMapValue = _RecurIterator._indexMap[aRuleType];
-    let ruleMapValue = _RecurIterator._expandMap[this.rule.freq][indexMapValue];
-    if (ruleMapValue != _RecurIterator.CONTRACT) {
-      if (!(aRuleType in this.by_data)) {
-        this.by_data[aRuleType] = [deftime];
-      }
-      if (this.rule.freq != req) {
-        return this.by_data[aRuleType][0];
-      }
-    }
-    return deftime;
-  }
-  /**
-   * Convert iterator into a serialize-able object.  Will preserve current
-   * iteration sequence to ensure the seamless continuation of the recurrence
-   * rule.
-   * @return {Object}
-   */
-  toJSON() {
-    let result = /* @__PURE__ */ Object.create(null);
-    result.initialized = this.initialized;
-    result.rule = this.rule.toJSON();
-    result.dtstart = this.dtstart.toJSON();
-    result.by_data = this.by_data;
-    result.days = this.days;
-    result.last = this.last.toJSON();
-    result.by_indices = this.by_indices;
-    result.occurrence_number = this.occurrence_number;
-    return result;
-  }
-};
-var InvalidRecurrenceRuleError = class extends Error {
-  constructor() {
-    super("Recurrence rule has no valid occurrences");
-  }
-};
-var VALID_DAY_NAMES = /^(SU|MO|TU|WE|TH|FR|SA)$/;
-var VALID_BYDAY_PART = /^([+-])?(5[0-3]|[1-4][0-9]|[1-9])?(SU|MO|TU|WE|TH|FR|SA)$/;
-var DOW_MAP = {
-  SU: Time.SUNDAY,
-  MO: Time.MONDAY,
-  TU: Time.TUESDAY,
-  WE: Time.WEDNESDAY,
-  TH: Time.THURSDAY,
-  FR: Time.FRIDAY,
-  SA: Time.SATURDAY
-};
-var REVERSE_DOW_MAP = Object.fromEntries(Object.entries(DOW_MAP).map((entry) => entry.reverse()));
-var ALLOWED_FREQ = [
-  "SECONDLY",
-  "MINUTELY",
-  "HOURLY",
-  "DAILY",
-  "WEEKLY",
-  "MONTHLY",
-  "YEARLY"
-];
-var Recur = class _Recur {
-  /**
-   * Creates a new {@link ICAL.Recur} instance from the passed string.
-   *
-   * @param {String} string         The string to parse
-   * @return {Recur}                The created recurrence instance
-   */
-  static fromString(string) {
-    let data = this._stringToData(string, false);
-    return new _Recur(data);
-  }
-  /**
-   * Creates a new {@link ICAL.Recur} instance using members from the passed
-   * data object.
-   *
-   * @param {Object} aData                              An object with members of the recurrence
-   * @param {frequencyValues=} aData.freq               The frequency value
-   * @param {Number=} aData.interval                    The INTERVAL value
-   * @param {weekDay=} aData.wkst                       The week start value
-   * @param {Time=} aData.until                         The end of the recurrence set
-   * @param {Number=} aData.count                       The number of occurrences
-   * @param {Array.<Number>=} aData.bysecond            The seconds for the BYSECOND part
-   * @param {Array.<Number>=} aData.byminute            The minutes for the BYMINUTE part
-   * @param {Array.<Number>=} aData.byhour              The hours for the BYHOUR part
-   * @param {Array.<String>=} aData.byday               The BYDAY values
-   * @param {Array.<Number>=} aData.bymonthday          The days for the BYMONTHDAY part
-   * @param {Array.<Number>=} aData.byyearday           The days for the BYYEARDAY part
-   * @param {Array.<Number>=} aData.byweekno            The weeks for the BYWEEKNO part
-   * @param {Array.<Number>=} aData.bymonth             The month for the BYMONTH part
-   * @param {Array.<Number>=} aData.bysetpos            The positionals for the BYSETPOS part
-   */
-  static fromData(aData) {
-    return new _Recur(aData);
-  }
-  /**
-   * Converts a recurrence string to a data object, suitable for the fromData
-   * method.
-   *
-   * @private
-   * @param {String} string     The string to parse
-   * @param {Boolean} fmtIcal   If true, the string is considered to be an
-   *                              iCalendar string
-   * @return {Recur}            The recurrence instance
-   */
-  static _stringToData(string, fmtIcal) {
-    let dict = /* @__PURE__ */ Object.create(null);
-    let values = string.split(";");
-    let len = values.length;
-    for (let i = 0; i < len; i++) {
-      let parts = values[i].split("=");
-      let ucname = parts[0].toUpperCase();
-      let lcname = parts[0].toLowerCase();
-      let name = fmtIcal ? lcname : ucname;
-      let value = parts[1];
-      if (ucname in partDesign) {
-        let partArr = value.split(",");
-        let partSet = /* @__PURE__ */ new Set();
-        for (let part of partArr) {
-          partSet.add(partDesign[ucname](part));
-        }
-        partArr = [...partSet];
-        dict[name] = partArr.length == 1 ? partArr[0] : partArr;
-      } else if (ucname in optionDesign) {
-        optionDesign[ucname](value, dict, fmtIcal);
-      } else {
-        dict[lcname] = value;
-      }
-    }
-    return dict;
-  }
-  /**
-   * Convert an ical representation of a day (SU, MO, etc..)
-   * into a numeric value of that day.
-   *
-   * @param {String} string     The iCalendar day name
-   * @param {weekDay=} aWeekStart
-   *        The week start weekday, defaults to SUNDAY
-   * @return {Number}           Numeric value of given day
-   */
-  static icalDayToNumericDay(string, aWeekStart) {
-    let firstDow = aWeekStart || Time.SUNDAY;
-    return (DOW_MAP[string] - firstDow + 7) % 7 + 1;
-  }
-  /**
-   * Convert a numeric day value into its ical representation (SU, MO, etc..)
-   *
-   * @param {Number} num        Numeric value of given day
-   * @param {weekDay=} aWeekStart
-   *        The week start weekday, defaults to SUNDAY
-   * @return {String}           The ICAL day value, e.g SU,MO,...
-   */
-  static numericDayToIcalDay(num, aWeekStart) {
-    let firstDow = aWeekStart || Time.SUNDAY;
-    let dow = num + firstDow - Time.SUNDAY;
-    if (dow > 7) {
-      dow -= 7;
-    }
-    return REVERSE_DOW_MAP[dow];
-  }
-  /**
-   * Create a new instance of the Recur class.
-   *
-   * @param {Object} data                               An object with members of the recurrence
-   * @param {frequencyValues=} data.freq                The frequency value
-   * @param {Number=} data.interval                     The INTERVAL value
-   * @param {weekDay=} data.wkst                        The week start value
-   * @param {Time=} data.until                          The end of the recurrence set
-   * @param {Number=} data.count                        The number of occurrences
-   * @param {Array.<Number>=} data.bysecond             The seconds for the BYSECOND part
-   * @param {Array.<Number>=} data.byminute             The minutes for the BYMINUTE part
-   * @param {Array.<Number>=} data.byhour               The hours for the BYHOUR part
-   * @param {Array.<String>=} data.byday                The BYDAY values
-   * @param {Array.<Number>=} data.bymonthday           The days for the BYMONTHDAY part
-   * @param {Array.<Number>=} data.byyearday            The days for the BYYEARDAY part
-   * @param {Array.<Number>=} data.byweekno             The weeks for the BYWEEKNO part
-   * @param {Array.<Number>=} data.bymonth              The month for the BYMONTH part
-   * @param {Array.<Number>=} data.bysetpos             The positionals for the BYSETPOS part
-   */
-  constructor(data) {
-    this.wrappedJSObject = this;
-    this.parts = {};
-    if (data && typeof data === "object") {
-      this.fromData(data);
-    }
-  }
-  /**
-   * An object holding the BY-parts of the recurrence rule
-   * @memberof ICAL.Recur
-   * @typedef {Object} byParts
-   * @property {Array.<Number>=} BYSECOND            The seconds for the BYSECOND part
-   * @property {Array.<Number>=} BYMINUTE            The minutes for the BYMINUTE part
-   * @property {Array.<Number>=} BYHOUR              The hours for the BYHOUR part
-   * @property {Array.<String>=} BYDAY               The BYDAY values
-   * @property {Array.<Number>=} BYMONTHDAY          The days for the BYMONTHDAY part
-   * @property {Array.<Number>=} BYYEARDAY           The days for the BYYEARDAY part
-   * @property {Array.<Number>=} BYWEEKNO            The weeks for the BYWEEKNO part
-   * @property {Array.<Number>=} BYMONTH             The month for the BYMONTH part
-   * @property {Array.<Number>=} BYSETPOS            The positionals for the BYSETPOS part
-   */
-  /**
-   * An object holding the BY-parts of the recurrence rule
-   * @type {byParts}
-   */
-  parts = null;
-  /**
-   * The interval value for the recurrence rule.
-   * @type {Number}
-   */
-  interval = 1;
-  /**
-   * The week start day
-   *
-   * @type {weekDay}
-   * @default ICAL.Time.MONDAY
-   */
-  wkst = Time.MONDAY;
-  /**
-   * The end of the recurrence
-   * @type {?Time}
-   */
-  until = null;
-  /**
-   * The maximum number of occurrences
-   * @type {?Number}
-   */
-  count = null;
-  /**
-   * The frequency value.
-   * @type {frequencyValues}
-   */
-  freq = null;
-  /**
-   * The class identifier.
-   * @constant
-   * @type {String}
-   * @default "icalrecur"
-   */
-  icalclass = "icalrecur";
-  /**
-   * The type name, to be used in the jCal object.
-   * @constant
-   * @type {String}
-   * @default "recur"
-   */
-  icaltype = "recur";
-  /**
-   * Create a new iterator for this recurrence rule. The passed start date
-   * must be the start date of the event, not the start of the range to
-   * search in.
-   *
-   * @example
-   * let recur = comp.getFirstPropertyValue('rrule');
-   * let dtstart = comp.getFirstPropertyValue('dtstart');
-   * let iter = recur.iterator(dtstart);
-   * for (let next = iter.next(); next; next = iter.next()) {
-   *   if (next.compare(rangeStart) < 0) {
-   *     continue;
-   *   }
-   *   console.log(next.toString());
-   * }
-   *
-   * @param {Time} aStart        The item's start date
-   * @return {RecurIterator}     The recurrence iterator
-   */
-  iterator(aStart) {
-    return new RecurIterator({
-      rule: this,
-      dtstart: aStart
-    });
-  }
-  /**
-   * Returns a clone of the recurrence object.
-   *
-   * @return {Recur}      The cloned object
-   */
-  clone() {
-    return new _Recur(this.toJSON());
-  }
-  /**
-   * Checks if the current rule is finite, i.e. has a count or until part.
-   *
-   * @return {Boolean}        True, if the rule is finite
-   */
-  isFinite() {
-    return !!(this.count || this.until);
-  }
-  /**
-   * Checks if the current rule has a count part, and not limited by an until
-   * part.
-   *
-   * @return {Boolean}        True, if the rule is by count
-   */
-  isByCount() {
-    return !!(this.count && !this.until);
-  }
-  /**
-   * Adds a component (part) to the recurrence rule. This is not a component
-   * in the sense of {@link ICAL.Component}, but a part of the recurrence
-   * rule, i.e. BYMONTH.
-   *
-   * @param {String} aType            The name of the component part
-   * @param {Array|String} aValue     The component value
-   */
-  addComponent(aType, aValue) {
-    let ucname = aType.toUpperCase();
-    if (ucname in this.parts) {
-      this.parts[ucname].push(aValue);
-    } else {
-      this.parts[ucname] = [aValue];
-    }
-  }
-  /**
-   * Sets the component value for the given by-part.
-   *
-   * @param {String} aType        The component part name
-   * @param {Array} aValues       The component values
-   */
-  setComponent(aType, aValues) {
-    this.parts[aType.toUpperCase()] = aValues.slice();
-  }
-  /**
-   * Gets (a copy) of the requested component value.
-   *
-   * @param {String} aType        The component part name
-   * @return {Array}              The component part value
-   */
-  getComponent(aType) {
-    let ucname = aType.toUpperCase();
-    return ucname in this.parts ? this.parts[ucname].slice() : [];
-  }
-  /**
-   * Retrieves the next occurrence after the given recurrence id. See the
-   * guide on {@tutorial terminology} for more details.
-   *
-   * NOTE: Currently, this method iterates all occurrences from the start
-   * date. It should not be called in a loop for performance reasons. If you
-   * would like to get more than one occurrence, you can iterate the
-   * occurrences manually, see the example on the
-   * {@link ICAL.Recur#iterator iterator} method.
-   *
-   * @param {Time} aStartTime        The start of the event series
-   * @param {Time} aRecurrenceId     The date of the last occurrence
-   * @return {Time}                  The next occurrence after
-   */
-  getNextOccurrence(aStartTime, aRecurrenceId) {
-    let iter = this.iterator(aStartTime);
-    let next;
-    do {
-      next = iter.next();
-    } while (next && next.compare(aRecurrenceId) <= 0);
-    if (next && aRecurrenceId.zone) {
-      next.zone = aRecurrenceId.zone;
-    }
-    return next;
-  }
-  /**
-   * Sets up the current instance using members from the passed data object.
-   *
-   * @param {Object} data                               An object with members of the recurrence
-   * @param {frequencyValues=} data.freq                The frequency value
-   * @param {Number=} data.interval                     The INTERVAL value
-   * @param {weekDay=} data.wkst                        The week start value
-   * @param {Time=} data.until                          The end of the recurrence set
-   * @param {Number=} data.count                        The number of occurrences
-   * @param {Array.<Number>=} data.bysecond             The seconds for the BYSECOND part
-   * @param {Array.<Number>=} data.byminute             The minutes for the BYMINUTE part
-   * @param {Array.<Number>=} data.byhour               The hours for the BYHOUR part
-   * @param {Array.<String>=} data.byday                The BYDAY values
-   * @param {Array.<Number>=} data.bymonthday           The days for the BYMONTHDAY part
-   * @param {Array.<Number>=} data.byyearday            The days for the BYYEARDAY part
-   * @param {Array.<Number>=} data.byweekno             The weeks for the BYWEEKNO part
-   * @param {Array.<Number>=} data.bymonth              The month for the BYMONTH part
-   * @param {Array.<Number>=} data.bysetpos             The positionals for the BYSETPOS part
-   */
-  fromData(data) {
-    for (let key in data) {
-      let uckey = key.toUpperCase();
-      if (uckey in partDesign) {
-        if (Array.isArray(data[key])) {
-          this.parts[uckey] = data[key];
-        } else {
-          this.parts[uckey] = [data[key]];
-        }
-      } else {
-        this[key] = data[key];
-      }
-    }
-    if (this.interval && typeof this.interval != "number") {
-      optionDesign.INTERVAL(this.interval, this);
-    }
-    if (this.wkst && typeof this.wkst != "number") {
-      this.wkst = _Recur.icalDayToNumericDay(this.wkst);
-    }
-    if (this.until && !(this.until instanceof Time)) {
-      this.until = Time.fromString(this.until);
-    }
-  }
-  /**
-   * The jCal representation of this recurrence type.
-   * @return {Object}
-   */
-  toJSON() {
-    let res = /* @__PURE__ */ Object.create(null);
-    res.freq = this.freq;
-    if (this.count) {
-      res.count = this.count;
-    }
-    if (this.interval > 1) {
-      res.interval = this.interval;
-    }
-    for (let [k, kparts] of Object.entries(this.parts)) {
-      if (Array.isArray(kparts) && kparts.length == 1) {
-        res[k.toLowerCase()] = kparts[0];
-      } else {
-        res[k.toLowerCase()] = clone(kparts);
-      }
-    }
-    if (this.until) {
-      res.until = this.until.toString();
-    }
-    if ("wkst" in this && this.wkst !== Time.DEFAULT_WEEK_START) {
-      res.wkst = _Recur.numericDayToIcalDay(this.wkst);
-    }
-    return res;
-  }
-  /**
-   * The string representation of this recurrence rule.
-   * @return {String}
-   */
-  toString() {
-    let str = "FREQ=" + this.freq;
-    if (this.count) {
-      str += ";COUNT=" + this.count;
-    }
-    if (this.interval > 1) {
-      str += ";INTERVAL=" + this.interval;
-    }
-    for (let [k, v] of Object.entries(this.parts)) {
-      str += ";" + k + "=" + v;
-    }
-    if (this.until) {
-      str += ";UNTIL=" + this.until.toICALString();
-    }
-    if ("wkst" in this && this.wkst !== Time.DEFAULT_WEEK_START) {
-      str += ";WKST=" + _Recur.numericDayToIcalDay(this.wkst);
-    }
-    return str;
-  }
-};
-function parseNumericValue(type, min, max, value) {
-  let result = value;
-  if (value[0] === "+") {
-    result = value.slice(1);
-  }
-  result = strictParseInt(result);
-  if (min !== void 0 && value < min) {
-    throw new Error(
-      type + ': invalid value "' + value + '" must be > ' + min
-    );
-  }
-  if (max !== void 0 && value > max) {
-    throw new Error(
-      type + ': invalid value "' + value + '" must be < ' + min
-    );
-  }
-  return result;
-}
-var optionDesign = {
-  FREQ: function(value, dict, fmtIcal) {
-    if (ALLOWED_FREQ.indexOf(value) !== -1) {
-      dict.freq = value;
-    } else {
-      throw new Error(
-        'invalid frequency "' + value + '" expected: "' + ALLOWED_FREQ.join(", ") + '"'
-      );
-    }
-  },
-  COUNT: function(value, dict, fmtIcal) {
-    dict.count = strictParseInt(value);
-  },
-  INTERVAL: function(value, dict, fmtIcal) {
-    dict.interval = strictParseInt(value);
-    if (dict.interval < 1) {
-      dict.interval = 1;
-    }
-  },
-  UNTIL: function(value, dict, fmtIcal) {
-    if (value.length > 10) {
-      dict.until = design.icalendar.value["date-time"].fromICAL(value);
-    } else {
-      dict.until = design.icalendar.value.date.fromICAL(value);
-    }
-    if (!fmtIcal) {
-      dict.until = Time.fromString(dict.until);
-    }
-  },
-  WKST: function(value, dict, fmtIcal) {
-    if (VALID_DAY_NAMES.test(value)) {
-      dict.wkst = Recur.icalDayToNumericDay(value);
-    } else {
-      throw new Error('invalid WKST value "' + value + '"');
-    }
-  }
-};
-var partDesign = {
-  BYSECOND: parseNumericValue.bind(void 0, "BYSECOND", 0, 60),
-  BYMINUTE: parseNumericValue.bind(void 0, "BYMINUTE", 0, 59),
-  BYHOUR: parseNumericValue.bind(void 0, "BYHOUR", 0, 23),
-  BYDAY: function(value) {
-    if (VALID_BYDAY_PART.test(value)) {
-      return value;
-    } else {
-      throw new Error('invalid BYDAY value "' + value + '"');
-    }
-  },
-  BYMONTHDAY: parseNumericValue.bind(void 0, "BYMONTHDAY", -31, 31),
-  BYYEARDAY: parseNumericValue.bind(void 0, "BYYEARDAY", -366, 366),
-  BYWEEKNO: parseNumericValue.bind(void 0, "BYWEEKNO", -53, 53),
-  BYMONTH: parseNumericValue.bind(void 0, "BYMONTH", 1, 12),
-  BYSETPOS: parseNumericValue.bind(void 0, "BYSETPOS", -366, 366)
-};
-var FROM_ICAL_NEWLINE = /\\\\|\\;|\\,|\\[Nn]/g;
-var TO_ICAL_NEWLINE = /\\|;|,|\n/g;
-var FROM_VCARD_NEWLINE = /\\\\|\\,|\\[Nn]/g;
-var TO_VCARD_NEWLINE = /\\|,|\n/g;
-function createTextType(fromNewline, toNewline) {
-  let result = {
-    matches: /.*/,
-    fromICAL: function(aValue, structuredEscape) {
-      return replaceNewline(aValue, fromNewline, structuredEscape);
-    },
-    toICAL: function(aValue, structuredEscape) {
-      let regEx = toNewline;
-      if (structuredEscape)
-        regEx = new RegExp(regEx.source + "|" + structuredEscape, regEx.flags);
-      return aValue.replace(regEx, function(str) {
-        switch (str) {
-          case "\\":
-            return "\\\\";
-          case ";":
-            return "\\;";
-          case ",":
-            return "\\,";
-          case "\n":
-            return "\\n";
-          /* c8 ignore next 2 */
-          default:
-            return str;
-        }
-      });
+    const peer = peers.get(state.peerId);
+    if (!peer.active && reservedBytes + state.size <= maxReceiveBytes) {
+      peer.active = state;
+      state.transfer = "receiving";
+      reservedBytes += state.size;
+      state.lastSeen = Date.now();
+      waiting.delete(state);
+      accept(state.peerId, state.id);
     }
   };
-  return result;
-}
-var DEFAULT_TYPE_TEXT = { defaultType: "text" };
-var DEFAULT_TYPE_TEXT_MULTI = { defaultType: "text", multiValue: "," };
-var DEFAULT_TYPE_TEXT_STRUCTURED = { defaultType: "text", structuredValue: ";" };
-var DEFAULT_TYPE_INTEGER = { defaultType: "integer" };
-var DEFAULT_TYPE_DATETIME_DATE = { defaultType: "date-time", allowedTypes: ["date-time", "date"] };
-var DEFAULT_TYPE_DATETIME = { defaultType: "date-time" };
-var DEFAULT_TYPE_URI = { defaultType: "uri" };
-var DEFAULT_TYPE_UTCOFFSET = { defaultType: "utc-offset" };
-var DEFAULT_TYPE_RECUR = { defaultType: "recur" };
-var DEFAULT_TYPE_DATE_ANDOR_TIME = { defaultType: "date-and-or-time", allowedTypes: ["date-time", "date", "text"] };
-function replaceNewlineReplace(string) {
-  switch (string) {
-    case "\\\\":
-      return "\\";
-    case "\\;":
-      return ";";
-    case "\\,":
-      return ",";
-    case "\\n":
-    case "\\N":
-      return "\n";
-    /* c8 ignore next 2 */
-    default:
-      return string;
-  }
-}
-function replaceNewline(value, newline, structuredEscape) {
-  if (value.indexOf("\\") === -1) {
-    return value;
-  }
-  if (structuredEscape)
-    newline = new RegExp(newline.source + "|\\\\" + structuredEscape, newline.flags);
-  return value.replace(newline, replaceNewlineReplace);
-}
-var commonProperties = {
-  "categories": DEFAULT_TYPE_TEXT_MULTI,
-  "url": DEFAULT_TYPE_URI,
-  "version": DEFAULT_TYPE_TEXT,
-  "uid": DEFAULT_TYPE_TEXT
-};
-var commonValues = {
-  "boolean": {
-    values: ["TRUE", "FALSE"],
-    fromICAL: function(aValue) {
-      switch (aValue) {
-        case "TRUE":
-          return true;
-        case "FALSE":
-          return false;
-        default:
-          return false;
-      }
-    },
-    toICAL: function(aValue) {
-      if (aValue) {
-        return "TRUE";
-      }
-      return "FALSE";
+  const drainInline = (peerId, key) => {
+    var _a;
+    const queue = (_a = peers.get(peerId)) == null ? void 0 : _a.inline.get(key);
+    while (queue == null ? void 0 : queue[0]) {
+      const state = queue[0];
+      tryInline(state);
+      if (current(state)) break;
     }
-  },
-  float: {
-    matches: /^[+-]?\d+\.\d+$/,
-    fromICAL: function(aValue) {
-      let parsed = parseFloat(aValue);
-      if (isStrictlyNaN(parsed)) {
-        return 0;
-      }
-      return parsed;
-    },
-    toICAL: function(aValue) {
-      return String(aValue);
+  };
+  const drain = () => {
+    if (draining) {
+      drainAgain = true;
+      return;
     }
-  },
-  integer: {
-    fromICAL: function(aValue) {
-      let parsed = parseInt(aValue);
-      if (isStrictlyNaN(parsed)) {
-        return 0;
-      }
-      return parsed;
-    },
-    toICAL: function(aValue) {
-      return String(aValue);
-    }
-  },
-  "utc-offset": {
-    toICAL: function(aValue) {
-      if (aValue.length < 7) {
-        return aValue.slice(0, 3) + aValue.slice(4, 6);
-      } else {
-        return aValue.slice(0, 3) + aValue.slice(4, 6) + aValue.slice(7, 9);
-      }
-    },
-    fromICAL: function(aValue) {
-      if (aValue.length < 6) {
-        return aValue.slice(0, 3) + ":" + aValue.slice(3, 5);
-      } else {
-        return aValue.slice(0, 3) + ":" + aValue.slice(3, 5) + ":" + aValue.slice(5, 7);
-      }
-    },
-    decorate: function(aValue) {
-      return UtcOffset.fromString(aValue);
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
-    }
-  }
-};
-var icalParams = {
-  // Although the syntax is DQUOTE uri DQUOTE, I don't think we should
-  // enforce anything aside from it being a valid content line.
-  //
-  // At least some params require - if multi values are used - DQUOTEs
-  // for each of its values - e.g. delegated-from="uri1","uri2"
-  // To indicate this, I introduced the new k/v pair
-  // multiValueSeparateDQuote: true
-  //
-  // "ALTREP": { ... },
-  // CN just wants a param-value
-  // "CN": { ... }
-  "cutype": {
-    values: ["INDIVIDUAL", "GROUP", "RESOURCE", "ROOM", "UNKNOWN"],
-    allowXName: true,
-    allowIanaToken: true
-  },
-  "delegated-from": {
-    valueType: "cal-address",
-    multiValue: ",",
-    multiValueSeparateDQuote: true
-  },
-  "delegated-to": {
-    valueType: "cal-address",
-    multiValue: ",",
-    multiValueSeparateDQuote: true
-  },
-  // "DIR": { ... }, // See ALTREP
-  "encoding": {
-    values: ["8BIT", "BASE64"]
-  },
-  // "FMTTYPE": { ... }, // See ALTREP
-  "fbtype": {
-    values: ["FREE", "BUSY", "BUSY-UNAVAILABLE", "BUSY-TENTATIVE"],
-    allowXName: true,
-    allowIanaToken: true
-  },
-  // "LANGUAGE": { ... }, // See ALTREP
-  "member": {
-    valueType: "cal-address",
-    multiValue: ",",
-    multiValueSeparateDQuote: true
-  },
-  "partstat": {
-    // TODO These values are actually different per-component
-    values: [
-      "NEEDS-ACTION",
-      "ACCEPTED",
-      "DECLINED",
-      "TENTATIVE",
-      "DELEGATED",
-      "COMPLETED",
-      "IN-PROCESS"
-    ],
-    allowXName: true,
-    allowIanaToken: true
-  },
-  "range": {
-    values: ["THISANDFUTURE"]
-  },
-  "related": {
-    values: ["START", "END"]
-  },
-  "reltype": {
-    values: ["PARENT", "CHILD", "SIBLING"],
-    allowXName: true,
-    allowIanaToken: true
-  },
-  "role": {
-    values: [
-      "REQ-PARTICIPANT",
-      "CHAIR",
-      "OPT-PARTICIPANT",
-      "NON-PARTICIPANT"
-    ],
-    allowXName: true,
-    allowIanaToken: true
-  },
-  "rsvp": {
-    values: ["TRUE", "FALSE"]
-  },
-  "sent-by": {
-    valueType: "cal-address"
-  },
-  "tzid": {
-    matches: /^\//
-  },
-  "value": {
-    // since the value here is a 'type' lowercase is used.
-    values: [
-      "binary",
-      "boolean",
-      "cal-address",
-      "date",
-      "date-time",
-      "duration",
-      "float",
-      "integer",
-      "period",
-      "recur",
-      "text",
-      "time",
-      "uri",
-      "utc-offset"
-    ],
-    allowXName: true,
-    allowIanaToken: true
-  }
-};
-var icalValues = extend(commonValues, {
-  text: createTextType(FROM_ICAL_NEWLINE, TO_ICAL_NEWLINE),
-  uri: {
-    // TODO
-    /* ... */
-  },
-  "binary": {
-    decorate: function(aString) {
-      return Binary.fromString(aString);
-    },
-    undecorate: function(aBinary) {
-      return aBinary.toString();
-    }
-  },
-  "cal-address": {
-    // needs to be an uri
-  },
-  "date": {
-    decorate: function(aValue, aProp) {
-      if (design.strict) {
-        return Time.fromDateString(aValue, aProp);
-      } else {
-        return Time.fromString(aValue, aProp);
-      }
-    },
-    /**
-     * undecorates a time object.
-     */
-    undecorate: function(aValue) {
-      return aValue.toString();
-    },
-    fromICAL: function(aValue) {
-      if (!design.strict && aValue.length >= 15) {
-        return icalValues["date-time"].fromICAL(aValue);
-      } else {
-        return aValue.slice(0, 4) + "-" + aValue.slice(4, 6) + "-" + aValue.slice(6, 8);
-      }
-    },
-    toICAL: function(aValue) {
-      let len = aValue.length;
-      if (len == 10) {
-        return aValue.slice(0, 4) + aValue.slice(5, 7) + aValue.slice(8, 10);
-      } else if (len >= 19) {
-        return icalValues["date-time"].toICAL(aValue);
-      } else {
-        return aValue;
-      }
-    }
-  },
-  "date-time": {
-    fromICAL: function(aValue) {
-      if (!design.strict && aValue.length == 8) {
-        return icalValues.date.fromICAL(aValue);
-      } else {
-        let result = aValue.slice(0, 4) + "-" + aValue.slice(4, 6) + "-" + aValue.slice(6, 8) + "T" + aValue.slice(9, 11) + ":" + aValue.slice(11, 13) + ":" + aValue.slice(13, 15);
-        if (aValue[15] && aValue[15] === "Z") {
-          result += "Z";
+    draining = true;
+    try {
+      do {
+        drainAgain = false;
+        for (const state of waiting) tryBulk(state);
+        for (const [id, peer] of peers) {
+          for (const state of peer.bulk.values()) if (state.offset === state.size) tryBulk(state);
+          for (const key of peer.inline.keys()) drainInline(id, key);
         }
-        return result;
-      }
-    },
-    toICAL: function(aValue) {
-      let len = aValue.length;
-      if (len == 10 && !design.strict) {
-        return icalValues.date.toICAL(aValue);
-      } else if (len >= 19) {
-        let result = aValue.slice(0, 4) + aValue.slice(5, 7) + // grab the (DDTHH) segment
-        aValue.slice(8, 13) + // MM
-        aValue.slice(14, 16) + // SS
-        aValue.slice(17, 19);
-        if (aValue[19] && aValue[19] === "Z") {
-          result += "Z";
-        }
-        return result;
-      } else {
-        return aValue;
-      }
-    },
-    decorate: function(aValue, aProp) {
-      if (design.strict) {
-        return Time.fromDateTimeString(aValue, aProp);
-      } else {
-        return Time.fromString(aValue, aProp);
-      }
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
+      } while (drainAgain);
+    } finally {
+      draining = false;
     }
-  },
-  duration: {
-    decorate: function(aValue) {
-      return Duration.fromString(aValue);
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
+  };
+  const enqueue = (state) => {
+    let peer = peers.get(state.peerId);
+    if (pendingCount >= maxPendingTransfers || ((peer == null ? void 0 : peer.count) ?? 0) >= maxPendingPerPeer) {
+      notifyRejected(state, "too many pending transfers", state.scope, state.kind === "bulk" ? state.id : void 0);
+      return false;
     }
-  },
-  period: {
-    fromICAL: function(string) {
-      let parts = string.split("/");
-      parts[0] = icalValues["date-time"].fromICAL(parts[0]);
-      if (!Duration.isValueString(parts[1])) {
-        parts[1] = icalValues["date-time"].fromICAL(parts[1]);
-      }
-      return parts;
-    },
-    toICAL: function(parts) {
-      parts = parts.slice();
-      if (!design.strict && parts[0].length == 10) {
-        parts[0] = icalValues.date.toICAL(parts[0]);
-      } else {
-        parts[0] = icalValues["date-time"].toICAL(parts[0]);
-      }
-      if (!Duration.isValueString(parts[1])) {
-        if (!design.strict && parts[1].length == 10) {
-          parts[1] = icalValues.date.toICAL(parts[1]);
-        } else {
-          parts[1] = icalValues["date-time"].toICAL(parts[1]);
-        }
-      }
-      return parts.join("/");
-    },
-    decorate: function(aValue, aProp) {
-      return Period.fromJSON(aValue, aProp, !design.strict);
-    },
-    undecorate: function(aValue) {
-      return aValue.toJSON();
+    if (!peer) {
+      peer = {
+        bulk: /* @__PURE__ */ new Map(),
+        inline: /* @__PURE__ */ new Map(),
+        active: null,
+        count: 0
+      };
+      peers.set(state.peerId, peer);
     }
-  },
-  recur: {
-    fromICAL: function(string) {
-      return Recur._stringToData(string, true);
-    },
-    toICAL: function(data) {
-      let str = "";
-      for (let [k, val] of Object.entries(data)) {
-        if (k == "until") {
-          if (val.length > 10) {
-            val = icalValues["date-time"].toICAL(val);
-          } else {
-            val = icalValues.date.toICAL(val);
-          }
-        } else if (k == "wkst") {
-          if (typeof val === "number") {
-            val = Recur.numericDayToIcalDay(val);
-          }
-        } else if (Array.isArray(val)) {
-          val = val.join(",");
-        }
-        str += k.toUpperCase() + "=" + val + ";";
-      }
-      return str.slice(0, Math.max(0, str.length - 1));
-    },
-    decorate: function decorate(aValue) {
-      return Recur.fromData(aValue);
-    },
-    undecorate: function(aRecur) {
-      return aRecur.toJSON();
-    }
-  },
-  time: {
-    fromICAL: function(aValue) {
-      if (aValue.length < 6) {
-        return aValue;
-      }
-      let result = aValue.slice(0, 2) + ":" + aValue.slice(2, 4) + ":" + aValue.slice(4, 6);
-      if (aValue[6] === "Z") {
-        result += "Z";
-      }
-      return result;
-    },
-    toICAL: function(aValue) {
-      if (aValue.length < 8) {
-        return aValue;
-      }
-      let result = aValue.slice(0, 2) + aValue.slice(3, 5) + aValue.slice(6, 8);
-      if (aValue[8] === "Z") {
-        result += "Z";
-      }
-      return result;
-    }
-  }
-});
-var icalProperties = extend(commonProperties, {
-  "action": DEFAULT_TYPE_TEXT,
-  "attach": { defaultType: "uri" },
-  "attendee": { defaultType: "cal-address" },
-  "calscale": DEFAULT_TYPE_TEXT,
-  "class": DEFAULT_TYPE_TEXT,
-  "comment": DEFAULT_TYPE_TEXT,
-  "completed": DEFAULT_TYPE_DATETIME,
-  "contact": DEFAULT_TYPE_TEXT,
-  "created": DEFAULT_TYPE_DATETIME,
-  "description": DEFAULT_TYPE_TEXT,
-  "dtend": DEFAULT_TYPE_DATETIME_DATE,
-  "dtstamp": DEFAULT_TYPE_DATETIME,
-  "dtstart": DEFAULT_TYPE_DATETIME_DATE,
-  "due": DEFAULT_TYPE_DATETIME_DATE,
-  "duration": { defaultType: "duration" },
-  "exdate": {
-    defaultType: "date-time",
-    allowedTypes: ["date-time", "date"],
-    multiValue: ","
-  },
-  "exrule": DEFAULT_TYPE_RECUR,
-  "freebusy": { defaultType: "period", multiValue: "," },
-  "geo": { defaultType: "float", structuredValue: ";" },
-  "last-modified": DEFAULT_TYPE_DATETIME,
-  "location": DEFAULT_TYPE_TEXT,
-  "method": DEFAULT_TYPE_TEXT,
-  "organizer": { defaultType: "cal-address" },
-  "percent-complete": DEFAULT_TYPE_INTEGER,
-  "priority": DEFAULT_TYPE_INTEGER,
-  "prodid": DEFAULT_TYPE_TEXT,
-  "related-to": DEFAULT_TYPE_TEXT,
-  "repeat": DEFAULT_TYPE_INTEGER,
-  "rdate": {
-    defaultType: "date-time",
-    allowedTypes: ["date-time", "date", "period"],
-    multiValue: ",",
-    detectType: function(string) {
-      if (string.indexOf("/") !== -1) {
-        return "period";
-      }
-      return string.indexOf("T") === -1 ? "date" : "date-time";
-    }
-  },
-  "recurrence-id": DEFAULT_TYPE_DATETIME_DATE,
-  "resources": DEFAULT_TYPE_TEXT_MULTI,
-  "request-status": DEFAULT_TYPE_TEXT_STRUCTURED,
-  "rrule": DEFAULT_TYPE_RECUR,
-  "sequence": DEFAULT_TYPE_INTEGER,
-  "status": DEFAULT_TYPE_TEXT,
-  "summary": DEFAULT_TYPE_TEXT,
-  "transp": DEFAULT_TYPE_TEXT,
-  "trigger": { defaultType: "duration", allowedTypes: ["duration", "date-time"] },
-  "tzoffsetfrom": DEFAULT_TYPE_UTCOFFSET,
-  "tzoffsetto": DEFAULT_TYPE_UTCOFFSET,
-  "tzurl": DEFAULT_TYPE_URI,
-  "tzid": DEFAULT_TYPE_TEXT,
-  "tzname": DEFAULT_TYPE_TEXT
-});
-var vcardValues = extend(commonValues, {
-  text: createTextType(FROM_VCARD_NEWLINE, TO_VCARD_NEWLINE),
-  uri: createTextType(FROM_VCARD_NEWLINE, TO_VCARD_NEWLINE),
-  date: {
-    decorate: function(aValue) {
-      return VCardTime.fromDateAndOrTimeString(aValue, "date");
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
-    },
-    fromICAL: function(aValue) {
-      if (aValue.length == 8) {
-        return icalValues.date.fromICAL(aValue);
-      } else if (aValue[0] == "-" && aValue.length == 6) {
-        return aValue.slice(0, 4) + "-" + aValue.slice(4);
-      } else {
-        return aValue;
-      }
-    },
-    toICAL: function(aValue) {
-      if (aValue.length == 10) {
-        return icalValues.date.toICAL(aValue);
-      } else if (aValue[0] == "-" && aValue.length == 7) {
-        return aValue.slice(0, 4) + aValue.slice(5);
-      } else {
-        return aValue;
-      }
-    }
-  },
-  time: {
-    decorate: function(aValue) {
-      return VCardTime.fromDateAndOrTimeString("T" + aValue, "time");
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
-    },
-    fromICAL: function(aValue) {
-      let splitzone = vcardValues.time._splitZone(aValue, true);
-      let zone = splitzone[0], value = splitzone[1];
-      if (value.length == 6) {
-        value = value.slice(0, 2) + ":" + value.slice(2, 4) + ":" + value.slice(4, 6);
-      } else if (value.length == 4 && value[0] != "-") {
-        value = value.slice(0, 2) + ":" + value.slice(2, 4);
-      } else if (value.length == 5) {
-        value = value.slice(0, 3) + ":" + value.slice(3, 5);
-      }
-      if (zone.length == 5 && (zone[0] == "-" || zone[0] == "+")) {
-        zone = zone.slice(0, 3) + ":" + zone.slice(3);
-      }
-      return value + zone;
-    },
-    toICAL: function(aValue) {
-      let splitzone = vcardValues.time._splitZone(aValue);
-      let zone = splitzone[0], value = splitzone[1];
-      if (value.length == 8) {
-        value = value.slice(0, 2) + value.slice(3, 5) + value.slice(6, 8);
-      } else if (value.length == 5 && value[0] != "-") {
-        value = value.slice(0, 2) + value.slice(3, 5);
-      } else if (value.length == 6) {
-        value = value.slice(0, 3) + value.slice(4, 6);
-      }
-      if (zone.length == 6 && (zone[0] == "-" || zone[0] == "+")) {
-        zone = zone.slice(0, 3) + zone.slice(4);
-      }
-      return value + zone;
-    },
-    _splitZone: function(aValue, isFromIcal) {
-      let lastChar = aValue.length - 1;
-      let signChar = aValue.length - (isFromIcal ? 5 : 6);
-      let sign = aValue[signChar];
-      let zone, value;
-      if (aValue[lastChar] == "Z") {
-        zone = aValue[lastChar];
-        value = aValue.slice(0, Math.max(0, lastChar));
-      } else if (aValue.length > 6 && (sign == "-" || sign == "+")) {
-        zone = aValue.slice(signChar);
-        value = aValue.slice(0, Math.max(0, signChar));
-      } else {
-        zone = "";
-        value = aValue;
-      }
-      return [zone, value];
-    }
-  },
-  "date-time": {
-    decorate: function(aValue) {
-      return VCardTime.fromDateAndOrTimeString(aValue, "date-time");
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
-    },
-    fromICAL: function(aValue) {
-      return vcardValues["date-and-or-time"].fromICAL(aValue);
-    },
-    toICAL: function(aValue) {
-      return vcardValues["date-and-or-time"].toICAL(aValue);
-    }
-  },
-  "date-and-or-time": {
-    decorate: function(aValue) {
-      return VCardTime.fromDateAndOrTimeString(aValue, "date-and-or-time");
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
-    },
-    fromICAL: function(aValue) {
-      let parts = aValue.split("T");
-      return (parts[0] ? vcardValues.date.fromICAL(parts[0]) : "") + (parts[1] ? "T" + vcardValues.time.fromICAL(parts[1]) : "");
-    },
-    toICAL: function(aValue) {
-      let parts = aValue.split("T");
-      return vcardValues.date.toICAL(parts[0]) + (parts[1] ? "T" + vcardValues.time.toICAL(parts[1]) : "");
-    }
-  },
-  timestamp: icalValues["date-time"],
-  "language-tag": {
-    matches: /^[a-zA-Z0-9-]+$/
-    // Could go with a more strict regex here
-  },
-  "phone-number": {
-    fromICAL: function(aValue) {
-      return Array.from(aValue).filter(function(c) {
-        return c === "\\" ? void 0 : c;
-      }).join("");
-    },
-    toICAL: function(aValue) {
-      return Array.from(aValue).map(function(c) {
-        return c === "," || c === ";" ? "\\" + c : c;
-      }).join("");
-    }
-  }
-});
-var vcardParams = {
-  "type": {
-    valueType: "text",
-    multiValue: ","
-  },
-  "value": {
-    // since the value here is a 'type' lowercase is used.
-    values: [
-      "text",
-      "uri",
-      "date",
-      "time",
-      "date-time",
-      "date-and-or-time",
-      "timestamp",
-      "boolean",
-      "integer",
-      "float",
-      "utc-offset",
-      "language-tag"
-    ],
-    allowXName: true,
-    allowIanaToken: true
-  }
-};
-var vcardProperties = extend(commonProperties, {
-  "adr": { defaultType: "text", structuredValue: ";", multiValue: "," },
-  "anniversary": DEFAULT_TYPE_DATE_ANDOR_TIME,
-  "bday": DEFAULT_TYPE_DATE_ANDOR_TIME,
-  "caladruri": DEFAULT_TYPE_URI,
-  "caluri": DEFAULT_TYPE_URI,
-  "clientpidmap": DEFAULT_TYPE_TEXT_STRUCTURED,
-  "email": DEFAULT_TYPE_TEXT,
-  "fburl": DEFAULT_TYPE_URI,
-  "fn": DEFAULT_TYPE_TEXT,
-  "gender": DEFAULT_TYPE_TEXT_STRUCTURED,
-  "geo": DEFAULT_TYPE_URI,
-  "impp": DEFAULT_TYPE_URI,
-  "key": DEFAULT_TYPE_URI,
-  "kind": DEFAULT_TYPE_TEXT,
-  "lang": { defaultType: "language-tag" },
-  "logo": DEFAULT_TYPE_URI,
-  "member": DEFAULT_TYPE_URI,
-  "n": { defaultType: "text", structuredValue: ";", multiValue: "," },
-  "nickname": DEFAULT_TYPE_TEXT_MULTI,
-  "note": DEFAULT_TYPE_TEXT,
-  "org": { defaultType: "text", structuredValue: ";" },
-  "photo": DEFAULT_TYPE_URI,
-  "related": DEFAULT_TYPE_URI,
-  "rev": { defaultType: "timestamp" },
-  "role": DEFAULT_TYPE_TEXT,
-  "sound": DEFAULT_TYPE_URI,
-  "source": DEFAULT_TYPE_URI,
-  "tel": { defaultType: "uri", allowedTypes: ["uri", "text"] },
-  "title": DEFAULT_TYPE_TEXT,
-  "tz": { defaultType: "text", allowedTypes: ["text", "utc-offset", "uri"] },
-  "xml": DEFAULT_TYPE_TEXT
-});
-var vcard3Values = extend(commonValues, {
-  binary: icalValues.binary,
-  date: vcardValues.date,
-  "date-time": vcardValues["date-time"],
-  "phone-number": vcardValues["phone-number"],
-  uri: icalValues.uri,
-  text: vcardValues.text,
-  time: icalValues.time,
-  vcard: icalValues.text,
-  "utc-offset": {
-    toICAL: function(aValue) {
-      return aValue.slice(0, 7);
-    },
-    fromICAL: function(aValue) {
-      return aValue.slice(0, 7);
-    },
-    decorate: function(aValue) {
-      return UtcOffset.fromString(aValue);
-    },
-    undecorate: function(aValue) {
-      return aValue.toString();
-    }
-  }
-});
-var vcard3Params = {
-  "type": {
-    valueType: "text",
-    multiValue: ","
-  },
-  "value": {
-    // since the value here is a 'type' lowercase is used.
-    values: [
-      "text",
-      "uri",
-      "date",
-      "date-time",
-      "phone-number",
-      "time",
-      "boolean",
-      "integer",
-      "float",
-      "utc-offset",
-      "vcard",
-      "binary"
-    ],
-    allowXName: true,
-    allowIanaToken: true
-  }
-};
-var vcard3Properties = extend(commonProperties, {
-  fn: DEFAULT_TYPE_TEXT,
-  n: { defaultType: "text", structuredValue: ";", multiValue: "," },
-  nickname: DEFAULT_TYPE_TEXT_MULTI,
-  photo: { defaultType: "binary", allowedTypes: ["binary", "uri"] },
-  bday: {
-    defaultType: "date-time",
-    allowedTypes: ["date-time", "date"],
-    detectType: function(string) {
-      return string.indexOf("T") === -1 ? "date" : "date-time";
-    }
-  },
-  adr: { defaultType: "text", structuredValue: ";", multiValue: "," },
-  label: DEFAULT_TYPE_TEXT,
-  tel: { defaultType: "phone-number" },
-  email: DEFAULT_TYPE_TEXT,
-  mailer: DEFAULT_TYPE_TEXT,
-  tz: { defaultType: "utc-offset", allowedTypes: ["utc-offset", "text"] },
-  geo: { defaultType: "float", structuredValue: ";" },
-  title: DEFAULT_TYPE_TEXT,
-  role: DEFAULT_TYPE_TEXT,
-  logo: { defaultType: "binary", allowedTypes: ["binary", "uri"] },
-  agent: { defaultType: "vcard", allowedTypes: ["vcard", "text", "uri"] },
-  org: DEFAULT_TYPE_TEXT_STRUCTURED,
-  note: DEFAULT_TYPE_TEXT_MULTI,
-  prodid: DEFAULT_TYPE_TEXT,
-  rev: {
-    defaultType: "date-time",
-    allowedTypes: ["date-time", "date"],
-    detectType: function(string) {
-      return string.indexOf("T") === -1 ? "date" : "date-time";
-    }
-  },
-  "sort-string": DEFAULT_TYPE_TEXT,
-  sound: { defaultType: "binary", allowedTypes: ["binary", "uri"] },
-  class: DEFAULT_TYPE_TEXT,
-  key: { defaultType: "binary", allowedTypes: ["binary", "text"] }
-});
-var icalSet = {
-  name: "ical",
-  value: icalValues,
-  param: icalParams,
-  property: icalProperties,
-  propertyGroups: false
-};
-var vcardSet = {
-  name: "vcard4",
-  value: vcardValues,
-  param: vcardParams,
-  property: vcardProperties,
-  propertyGroups: true
-};
-var vcard3Set = {
-  name: "vcard3",
-  value: vcard3Values,
-  param: vcard3Params,
-  property: vcard3Properties,
-  propertyGroups: true
-};
-var design = {
-  /**
-   * Can be set to false to make the parser more lenient.
-   */
-  strict: true,
-  /**
-   * The default set for new properties and components if none is specified.
-   * @type {designSet}
-   */
-  defaultSet: icalSet,
-  /**
-   * The default type for unknown properties
-   * @type {String}
-   */
-  defaultType: "unknown",
-  /**
-   * Holds the design set for known top-level components
-   *
-   * @type {Object}
-   * @property {designSet} vcard       vCard VCARD
-   * @property {designSet} vevent      iCalendar VEVENT
-   * @property {designSet} vtodo       iCalendar VTODO
-   * @property {designSet} vjournal    iCalendar VJOURNAL
-   * @property {designSet} valarm      iCalendar VALARM
-   * @property {designSet} vtimezone   iCalendar VTIMEZONE
-   * @property {designSet} daylight    iCalendar DAYLIGHT
-   * @property {designSet} standard    iCalendar STANDARD
-   *
-   * @example
-   * let propertyName = 'fn';
-   * let componentDesign = ICAL.design.components.vcard;
-   * let propertyDetails = componentDesign.property[propertyName];
-   * if (propertyDetails.defaultType == 'text') {
-   *   // Yep, sure is...
-   * }
-   */
-  components: {
-    vcard: vcardSet,
-    vcard3: vcard3Set,
-    vevent: icalSet,
-    vtodo: icalSet,
-    vjournal: icalSet,
-    valarm: icalSet,
-    vtimezone: icalSet,
-    daylight: icalSet,
-    standard: icalSet
-  },
-  /**
-   * The design set for iCalendar (rfc5545/rfc7265) components.
-   * @type {designSet}
-   */
-  icalendar: icalSet,
-  /**
-   * The design set for vCard (rfc6350/rfc7095) components.
-   * @type {designSet}
-   */
-  vcard: vcardSet,
-  /**
-   * The design set for vCard (rfc2425/rfc2426/rfc7095) components.
-   * @type {designSet}
-   */
-  vcard3: vcard3Set,
-  /**
-   * Gets the design set for the given component name.
-   *
-   * @param {String} componentName        The name of the component
-   * @return {designSet}      The design set for the component
-   */
-  getDesignSet: function(componentName) {
-    let isInDesign = componentName && componentName in design.components;
-    return isInDesign ? design.components[componentName] : design.defaultSet;
-  }
-};
-var LINE_ENDING = "\r\n";
-var DEFAULT_VALUE_TYPE = "unknown";
-var RFC6868_REPLACE_MAP = { '"': "^'", "\n": "^n", "^": "^^" };
-function stringify(jCal) {
-  if (typeof jCal[0] == "string") {
-    jCal = [jCal];
-  }
-  let i = 0;
-  let len = jCal.length;
-  let result = "";
-  for (; i < len; i++) {
-    result += stringify.component(jCal[i]) + LINE_ENDING;
-  }
-  return result;
-}
-stringify.component = function(component, designSet) {
-  let name = component[0].toUpperCase();
-  let result = "BEGIN:" + name + LINE_ENDING;
-  let props = component[1];
-  let propIdx = 0;
-  let propLen = props.length;
-  let designSetName = component[0];
-  if (designSetName === "vcard" && component[1].length > 0 && !(component[1][0][0] === "version" && component[1][0][3] === "4.0")) {
-    designSetName = "vcard3";
-  }
-  designSet = designSet || design.getDesignSet(designSetName);
-  for (; propIdx < propLen; propIdx++) {
-    result += stringify.property(props[propIdx], designSet) + LINE_ENDING;
-  }
-  let comps = component[2] || [];
-  let compIdx = 0;
-  let compLen = comps.length;
-  for (; compIdx < compLen; compIdx++) {
-    result += stringify.component(comps[compIdx], designSet) + LINE_ENDING;
-  }
-  result += "END:" + name;
-  return result;
-};
-stringify.property = function(property, designSet, noFold) {
-  let name = property[0].toUpperCase();
-  let jsName = property[0];
-  let params = property[1];
-  if (!designSet) {
-    designSet = design.defaultSet;
-  }
-  let groupName = params.group;
-  let line;
-  if (designSet.propertyGroups && groupName) {
-    line = groupName.toUpperCase() + "." + name;
-  } else {
-    line = name;
-  }
-  for (let [paramName, value] of Object.entries(params)) {
-    if (designSet.propertyGroups && paramName == "group") {
-      continue;
-    }
-    let paramDesign = designSet.param[paramName];
-    let multiValue2 = paramDesign && paramDesign.multiValue;
-    if (multiValue2 && Array.isArray(value)) {
-      value = value.map(function(val) {
-        val = stringify._rfc6868Unescape(val);
-        val = stringify.paramPropertyValue(val, paramDesign.multiValueSeparateDQuote);
-        return val;
-      });
-      value = stringify.multiValue(value, multiValue2, "unknown", null, designSet);
+    peer.count++;
+    pendingCount++;
+    if (state.kind === "inline") {
+      const queue = peer.inline.get(state.key) ?? [];
+      queue.push(state);
+      peer.inline.set(state.key, queue);
     } else {
-      value = stringify._rfc6868Unescape(value);
-      value = stringify.paramPropertyValue(value);
+      peer.bulk.set(state.id, state);
+      waiting.add(state);
     }
-    line += ";" + paramName.toUpperCase() + "=" + value;
-  }
-  if (property.length === 3) {
-    return line + ":";
-  }
-  let valueType = property[2];
-  let propDetails;
-  let multiValue = false;
-  let structuredValue = false;
-  let isDefault = false;
-  if (jsName in designSet.property) {
-    propDetails = designSet.property[jsName];
-    if ("multiValue" in propDetails) {
-      multiValue = propDetails.multiValue;
-    }
-    if ("structuredValue" in propDetails && Array.isArray(property[3])) {
-      structuredValue = propDetails.structuredValue;
-    }
-    if ("defaultType" in propDetails) {
-      if (valueType === propDetails.defaultType) {
-        isDefault = true;
+    const expire = () => {
+      const remaining = transferTimeoutMs - (Date.now() - state.lastSeen);
+      if (remaining > 0) state.timer = setTimeout(expire, remaining);
+      else {
+        reject(state, "action transfer timed out");
+        drain();
       }
-    } else {
-      if (valueType === DEFAULT_VALUE_TYPE) {
-        isDefault = true;
+    };
+    state.timer = setTimeout(expire, transferTimeoutMs);
+    if (state.scope) {
+      const { signal } = state.scope;
+      const cancel = () => {
+        reject(state, "receive cancelled");
+        drain();
+      };
+      signal.addEventListener("abort", cancel, { once: true });
+      state.removeAbortListener = () => signal.removeEventListener("abort", cancel);
+      if (signal.aborted) {
+        cancel();
+        return false;
       }
     }
-  } else {
-    if (valueType === DEFAULT_VALUE_TYPE) {
-      isDefault = true;
+    return true;
+  };
+  const resolveAdmission = (message, bulkId) => {
+    var _a;
+    const action = actions.get(message.type);
+    const scope = (_a = action == null ? void 0 : action.receiveScope) == null ? void 0 : _a.call(action, message.peerId, message.metadata);
+    if (scope === null || (scope == null ? void 0 : scope.signal.aborted)) {
+      if (bulkId !== void 0) refuse(message.peerId, bulkId, "unexpected response");
+      return null;
     }
-  }
-  if (!isDefault) {
-    line += ";VALUE=" + valueType.toUpperCase();
-  }
-  line += ":";
-  if (multiValue && structuredValue) {
-    line += stringify.multiValue(
-      property[3],
-      structuredValue,
-      valueType,
-      multiValue,
-      designSet,
-      structuredValue
-    );
-  } else if (multiValue) {
-    line += stringify.multiValue(
-      property.slice(3),
-      multiValue,
-      valueType,
-      null,
-      designSet,
-      false
-    );
-  } else if (structuredValue) {
-    line += stringify.multiValue(
-      property[3],
-      structuredValue,
-      valueType,
-      null,
-      designSet,
-      structuredValue
-    );
-  } else {
-    line += stringify.value(property[3], valueType, designSet, false);
-  }
-  return noFold ? line : foldline(line);
-};
-stringify.paramPropertyValue = function(value, force) {
-  if (!force && value.indexOf(",") === -1 && value.indexOf(":") === -1 && value.indexOf(";") === -1) {
-    return value;
-  }
-  return '"' + value + '"';
-};
-stringify.multiValue = function(values, delim, type, innerMulti, designSet, structuredValue) {
-  let result = "";
-  let len = values.length;
-  let i = 0;
-  for (; i < len; i++) {
-    if (innerMulti && Array.isArray(values[i])) {
-      result += stringify.multiValue(values[i], innerMulti, type, null, designSet, structuredValue);
-    } else {
-      result += stringify.value(values[i], type, designSet, structuredValue);
+    if (message.size > payloadLimit(action)) {
+      notifyRejected(message, "payload exceeds receiver size limit", scope, bulkId);
+      return null;
     }
-    if (i !== len - 1) {
-      result += delim;
+    return {
+      action,
+      scope
+    };
+  };
+  const admission = (message, scope) => ({
+    ...message,
+    ...scope ? { scope } : {},
+    phase: "pending",
+    controller: null,
+    lastSeen: Date.now(),
+    timer: null
+  });
+  return {
+    register: (type, options = {}) => {
+      const action = {
+        ...options,
+        receiver: null,
+        receive: null,
+        reject: null,
+        progress: noOp
+      };
+      actions.set(type, action);
+      return {
+        onMessage: (handler) => {
+          action.receiver = handler;
+          drain();
+        },
+        onReceive: (handler) => {
+          action.receive = handler;
+          drain();
+        },
+        onReject: (handler) => {
+          action.reject = handler;
+        },
+        onProgress: (handler) => {
+          action.progress = handler;
+        }
+      };
+    },
+    receiveInline: (message, data) => {
+      var _a;
+      const resolved = resolveAdmission(message);
+      if (!resolved) return;
+      const { action, scope } = resolved;
+      const key = scope ? `${message.type}\0${scope.key}` : message.type;
+      if ((action == null ? void 0 : action.receiver) && !(scope ? scope.receive : action.receive) && !((_a = peers.get(message.peerId)) == null ? void 0 : _a.inline.has(key))) {
+        let payload;
+        try {
+          payload = decodePayload(data, message.format, true);
+        } catch {
+          fail(message.peerId, "invalid action payload");
+          return;
+        }
+        deliverPayload(action, payload, message.peerId, message.metadata);
+        return;
+      }
+      const state = {
+        ...admission(message, scope),
+        kind: "inline",
+        key,
+        data
+      };
+      if (enqueue(state)) drainInline(message.peerId, key);
+    },
+    receiveOffer: (message, id) => {
+      var _a;
+      if ((_a = peers.get(message.peerId)) == null ? void 0 : _a.bulk.has(id)) {
+        fail(message.peerId, "duplicate action offer");
+        return;
+      }
+      const resolved = resolveAdmission(message, id);
+      if (!resolved) return;
+      const state = {
+        ...admission(message, resolved.scope),
+        kind: "bulk",
+        id,
+        transfer: "waiting",
+        offset: 0,
+        data: null
+      };
+      if (enqueue(state)) drain();
+    },
+    receiveChunk: (peerId, id, offset, data) => {
+      var _a;
+      const peer = peers.get(peerId);
+      const state = peer == null ? void 0 : peer.bulk.get(id);
+      if (!state) return;
+      if (state.transfer !== "receiving" || offset !== state.offset || !data.length || data.length !== Math.min(chunkSize2, state.size - state.offset)) {
+        fail(peerId, "invalid action chunk offset or length");
+        return;
+      }
+      try {
+        state.data ?? (state.data = new Uint8Array(state.size));
+      } catch {
+        reject(state, "unable to allocate receive buffer");
+        drain();
+        return;
+      }
+      state.data.set(data, state.offset);
+      state.offset += data.length;
+      const now = Date.now();
+      state.lastSeen = now;
+      for (const queued of waiting) if (queued.phase === "ready" && ((_a = actions.get(queued.type)) == null ? void 0 : _a.receiver)) queued.lastSeen = now;
+      if (state.offset === state.size) {
+        tryBulk(state);
+        if (current(state) && (peer == null ? void 0 : peer.active) === state) {
+          peer.active = null;
+          rotateWaitingForPeer(peerId);
+        }
+        drain();
+      } else progress(actions.get(state.type), state.offset / state.size, peerId, state.metadata);
+    },
+    cancel: (peerId, id) => {
+      var _a, _b;
+      const state = (_a = peers.get(peerId)) == null ? void 0 : _a.bulk.get(id);
+      if (state) {
+        release(state);
+        (_b = state.scope) == null ? void 0 : _b.reject("response cancelled by sender");
+      }
+      drain();
+    },
+    clearPeer: (peerId) => {
+      const peer = peers.get(peerId);
+      if (peer) {
+        for (const state of peer.bulk.values()) release(state);
+        for (const queue of peer.inline.values()) {
+          const queuedMessages = [...queue];
+          for (const state of queuedMessages) release(state);
+        }
+      }
+      drain();
     }
-  }
-  return result;
+  };
 };
-stringify.value = function(value, type, designSet, structuredValue) {
-  if (type in designSet.value && "toICAL" in designSet.value[type]) {
-    return designSet.value[type].toICAL(value, structuredValue);
-  }
-  return value;
+
+// node_modules/@trystero-p2p/core/dist/action-wire.mjs
+var version = 2;
+var inline = 0;
+var offer = 1;
+var chunk = 2;
+var accepted = 3;
+var rejected = 4;
+var cancelled = 5;
+var inlineHeaderSize = 36;
+var offerHeaderSize = 48;
+var controlHeaderSize = 6;
+var chunkHeaderSize = 14;
+var chunkSize = maxActionFrameBytes - chunkHeaderSize;
+var defaultMaxReceiveBytes = 256 * 1024 ** 2;
+var maxControlBufferedBytes = 1024 ** 2;
+var buffLowEvent = "bufferedamountlow";
+var channelCloseEvent = "close";
+var channelErrorEvent = "error";
+var backpressureWaitTimeoutMs = 1e4;
+var makeActionError = (kind, message) => {
+  const error = mkErr(message);
+  error.kind = kind;
+  error.name = kind === "aborted" ? "AbortError" : error.name;
+  return error;
 };
-stringify._rfc6868Unescape = function(val) {
-  return val.replace(/[\n^"]/g, function(x) {
-    return RFC6868_REPLACE_MAP[x];
+var throwIfAborted = (signal) => {
+  if (signal == null ? void 0 : signal.aborted) throw makeActionError("aborted", "operation aborted");
+};
+var packet = (kind, id, size = controlHeaderSize) => {
+  const bytes = new Uint8Array(size);
+  bytes[0] = version;
+  bytes[1] = kind;
+  new DataView(bytes.buffer).setUint32(2, id);
+  return bytes;
+};
+var transferError = makeActionError;
+var waitForBufferedAmountLow = (channel, signal, timeoutMs = backpressureWaitTimeoutMs) => {
+  if (channel.readyState !== "open" || channel.bufferedAmount <= channel.bufferedAmountLowThreshold) return Promise.resolve(channel.readyState === "open");
+  return new Promise((res) => {
+    let settled = false;
+    let timeout = null;
+    const finish = (didDrain) => {
+      if (settled) return;
+      settled = true;
+      channel.removeEventListener(buffLowEvent, onBufferLow);
+      channel.removeEventListener(channelCloseEvent, onCloseOrError);
+      channel.removeEventListener(channelErrorEvent, onCloseOrError);
+      signal == null ? void 0 : signal.removeEventListener("abort", onCloseOrError);
+      resetTimer(timeout);
+      res(didDrain);
+    };
+    const onBufferLow = () => finish(true);
+    const onCloseOrError = () => finish(false);
+    channel.addEventListener(buffLowEvent, onBufferLow);
+    channel.addEventListener(channelCloseEvent, onCloseOrError);
+    channel.addEventListener(channelErrorEvent, onCloseOrError);
+    signal == null ? void 0 : signal.addEventListener("abort", onCloseOrError, { once: true });
+    timeout = setTimeout(() => finish(false), timeoutMs);
+    if (channel.readyState !== "open" || (signal == null ? void 0 : signal.aborted)) {
+      finish(false);
+      return;
+    }
+    if (channel.bufferedAmount <= channel.bufferedAmountLowThreshold) finish(true);
   });
 };
-var NAME_INDEX$1 = 0;
-var PROP_INDEX = 1;
-var TYPE_INDEX = 2;
-var VALUE_INDEX = 3;
-var Property = class _Property {
-  /**
-   * Create an {@link ICAL.Property} by parsing the passed iCalendar string.
-   *
-   * @param {String} str            The iCalendar string to parse
-   * @param {designSet=} designSet  The design data to use for this property
-   * @return {Property}             The created iCalendar property
-   */
-  static fromString(str, designSet) {
-    return new _Property(parse.property(str, designSet));
-  }
-  /**
-   * Creates a new ICAL.Property instance.
-   *
-   * It is important to note that mutations done in the wrapper directly mutate the jCal object used
-   * to initialize.
-   *
-   * Can also be used to create new properties by passing the name of the property (as a String).
-   *
-   * @param {Array|String} jCal         Raw jCal representation OR the new name of the property
-   * @param {Component=} parent         Parent component
-   */
-  constructor(jCal, parent) {
-    this._parent = parent || null;
-    if (typeof jCal === "string") {
-      this.jCal = [jCal, {}, design.defaultType];
-      this.jCal[TYPE_INDEX] = this.getDefaultType();
-    } else {
-      this.jCal = jCal;
+var createActionWireManager = ({ getPeer, getPeerIds, canReceiveFromPeer, onPeerError, throwIfAborted: checkAborted = throwIfAborted, maxReceiveBytes = defaultMaxReceiveBytes }) => {
+  if (!Number.isSafeInteger(maxReceiveBytes) || maxReceiveBytes <= 0) throw mkErr("maxReceiveBytes must be a positive safe integer");
+  const actions = /* @__PURE__ */ new Map();
+  const outgoing = /* @__PURE__ */ new Map();
+  const failedPeers = /* @__PURE__ */ new WeakSet();
+  let nextId = 0;
+  const receiver = createActionReceiver({
+    fail: (peerId, reason) => failPeer(peerId, reason),
+    accept: (peerId, id) => control(peerId, id, accepted),
+    refuse: (peerId, id, reason) => control(peerId, id, rejected, reason),
+    maxReceiveBytes,
+    chunkSize
+  });
+  const clearPeer = (peerId) => {
+    var _a;
+    for (const state of ((_a = outgoing.get(peerId)) == null ? void 0 : _a.values()) ?? []) state.fail(transferError("disconnected", "peer disconnected"));
+    outgoing.delete(peerId);
+    receiver.clearPeer(peerId);
+  };
+  const failPeer = (peerId, reason) => {
+    const peer = getPeer(peerId, true);
+    if (peer && !failedPeers.has(peer)) {
+      failedPeers.add(peer);
+      console.warn(`${libName}: ${reason}; disconnecting peer ${peerId}`);
+      onPeerError(peerId, mkErr(reason));
     }
-    this._updateType();
-  }
-  /**
-   * The value type for this property
-   * @type {String}
-   */
-  get type() {
-    return this.jCal[TYPE_INDEX];
-  }
-  /**
-   * The name of this property, in lowercase.
-   * @type {String}
-   */
-  get name() {
-    return this.jCal[NAME_INDEX$1];
-  }
-  /**
-   * The parent component for this property.
-   * @type {Component}
-   */
-  get parent() {
-    return this._parent;
-  }
-  set parent(p) {
-    let designSetChanged = !this._parent || p && p._designSet != this._parent._designSet;
-    this._parent = p;
-    if (this.type == design.defaultType && designSetChanged) {
-      this.jCal[TYPE_INDEX] = this.getDefaultType();
-      this._updateType();
+  };
+  const control = (peerId, id, kind, reason = "") => {
+    var _a;
+    const peer = getPeer(peerId, true);
+    if (!peer) return;
+    const text = encodeBytes(reason).subarray(0, 200);
+    const bytes = packet(kind, id, controlHeaderSize + text.length);
+    bytes.set(text, controlHeaderSize);
+    try {
+      if ((((_a = peer.channel) == null ? void 0 : _a.bufferedAmount) ?? 0) > maxControlBufferedBytes) throw mkErr("control send buffer is full");
+      peer.sendData(bytes);
+    } catch {
+      failPeer(peerId, "unable to send action control");
     }
-  }
-  /**
-   * The design set for this property, e.g. icalendar vs vcard
-   *
-   * @type {designSet}
-   * @private
-   */
-  get _designSet() {
-    return this.parent ? this.parent._designSet : design.defaultSet;
-  }
-  /**
-   * Updates the type metadata from the current jCal type and design set.
-   *
-   * @private
-   */
-  _updateType() {
-    let designSet = this._designSet;
-    if (this.type in designSet.value) {
-      if ("decorate" in designSet.value[this.type]) {
-        this.isDecorated = true;
-      } else {
-        this.isDecorated = false;
+  };
+  const makeInternalAction = (type, options = {}) => {
+    const normalizedOptions = {
+      sendToPending: Boolean(options.sendToPending),
+      receiveWhilePending: Boolean(options.receiveWhilePending),
+      ...options.maxPayloadBytes === void 0 ? {} : { maxPayloadBytes: options.maxPayloadBytes },
+      ...options.receiveScope ? { receiveScope: options.receiveScope } : {}
+    };
+    const cached = actions.get(type);
+    if (cached) {
+      if (cached.options.sendToPending !== normalizedOptions.sendToPending || cached.options.receiveWhilePending !== normalizedOptions.receiveWhilePending || cached.options.receiveScope !== normalizedOptions.receiveScope || cached.options.maxPayloadBytes !== normalizedOptions.maxPayloadBytes) throw mkErr(`action type "${type}" cannot be redefined`);
+      return cached.action;
+    }
+    const typeBytes = encodeBytes(type);
+    if (!type || type.includes("\0") || typeBytes.length > 32) throw mkErr("action type must contain 1\u201332 UTF-8 bytes and no null characters");
+    const action = {
+      options: normalizedOptions,
+      action: {
+        ...receiver.register(type, normalizedOptions),
+        send: async (data, targets, metadata, onProgress, signal) => {
+          checkAborted(signal);
+          if (data === void 0) throw mkErr("action data cannot be undefined");
+          const isBlob = data instanceof Blob;
+          const binary = isBlob || data instanceof ArrayBuffer || ArrayBuffer.isView(data);
+          const format = binary ? 2 : typeof data === "string" ? 0 : 1;
+          let source = isBlob ? data : data instanceof ArrayBuffer ? new Uint8Array(data) : ArrayBuffer.isView(data) ? new Uint8Array(data.buffer, data.byteOffset, data.byteLength) : encodeBytes(format === 0 ? data : toJson(data));
+          const size = source instanceof Blob ? source.size : source.byteLength;
+          const meta = metadata === void 0 ? /* @__PURE__ */ new Uint8Array() : encodeBytes(toJson(metadata));
+          if (meta.length > 16336) throw mkErr("action metadata is too large");
+          const small = inlineHeaderSize + meta.length + size <= maxActionFrameBytes;
+          if (!small && binary && !(source instanceof Blob)) source = source.slice();
+          const id = small ? 0 : nextId++ >>> 0;
+          const headerSize = small ? inlineHeaderSize : offerHeaderSize;
+          const start = new Uint8Array(headerSize + meta.length + (small ? size : 0));
+          start[0] = version;
+          start[1] = (small ? inline : offer) | format << 4;
+          start.set(typeBytes, 2);
+          const view = new DataView(start.buffer);
+          view.setUint16(34, meta.length);
+          if (!small) {
+            view.setUint32(36, id);
+            view.setFloat64(40, size);
+          }
+          start.set(meta, headerSize);
+          if (small) start.set(source instanceof Blob ? new Uint8Array(await source.arrayBuffer()) : source, headerSize + meta.length);
+          const ids = targets ? Array.isArray(targets) ? targets : [targets] : getPeerIds(normalizedOptions.sendToPending);
+          await all([...new Set(ids)].map(async (peerId) => {
+            const peer = getPeer(peerId, normalizedOptions.sendToPending);
+            if (!peer) {
+              console.warn(`${libName}: no peer with id ${peerId} found`);
+              return;
+            }
+            let failure = null;
+            const check = () => {
+              var _a;
+              if (failure) throw failure;
+              checkAborted(signal);
+              if (getPeer(peerId, normalizedOptions.sendToPending) !== peer || ((_a = peer.channel) == null ? void 0 : _a.readyState) === "closed") throw transferError("disconnected", "peer disconnected");
+            };
+            const sendFrame = async (bytes) => {
+              check();
+              const channel = peer.channel;
+              if (channel && (channel.readyState !== "open" || channel.bufferedAmount > channel.bufferedAmountLowThreshold)) {
+                if (!await waitForBufferedAmountLow(channel, signal)) {
+                  checkAborted(signal);
+                  throw transferError("disconnected", "data channel stopped draining");
+                }
+                check();
+              }
+              try {
+                peer.sendData(bytes);
+              } catch {
+                throw transferError("disconnected", "peer disconnected");
+              }
+            };
+            if (small) {
+              await sendFrame(start);
+              onProgress == null ? void 0 : onProgress(1, peerId, metadata);
+              return;
+            }
+            let didSendOffer = false;
+            let settledByReceiver = false;
+            let lastSeen = Date.now();
+            let accept;
+            let rejectOffer;
+            const permission = new Promise((resolve, rejectPromise) => {
+              accept = resolve;
+              rejectOffer = rejectPromise;
+            });
+            permission.catch(noOp);
+            const transfers = outgoing.get(peerId) ?? /* @__PURE__ */ new Map();
+            if (transfers.has(id)) throw mkErr("action transmission id is still in use");
+            outgoing.set(peerId, transfers);
+            let timer = null;
+            const state = {
+              accept: () => {
+                if (!timer || failure) return false;
+                timer = resetTimer(timer);
+                accept();
+                return true;
+              },
+              fail: (error, fromReceiver = false) => {
+                if (fromReceiver) settledByReceiver = true;
+                failure = error;
+                rejectOffer(error);
+              },
+              touch: () => {
+                if (timer) lastSeen = Date.now();
+              }
+            };
+            transfers.set(id, state);
+            const expire = () => {
+              const remaining = transferTimeoutMs - (Date.now() - lastSeen);
+              if (remaining > 0) timer = setTimeout(expire, remaining);
+              else state.fail(transferError("timeout", "action offer timed out"));
+            };
+            timer = setTimeout(expire, transferTimeoutMs);
+            const abort = () => {
+              try {
+                checkAborted(signal);
+              } catch (error) {
+                state.fail(error);
+              }
+            };
+            signal == null ? void 0 : signal.addEventListener("abort", abort, { once: true });
+            try {
+              await sendFrame(start);
+              didSendOffer = true;
+              await permission;
+              for (let offset = 0; offset < size; offset += chunkSize) {
+                check();
+                const length = Math.min(chunkSize, size - offset);
+                const bytes = packet(chunk, id, chunkHeaderSize + length);
+                new DataView(bytes.buffer).setFloat64(controlHeaderSize, offset);
+                bytes.set(source instanceof Blob ? new Uint8Array(await source.slice(offset, offset + length).arrayBuffer()) : source.subarray(offset, offset + length), chunkHeaderSize);
+                await sendFrame(bytes);
+                for (const pending of transfers.values()) pending.touch();
+                onProgress == null ? void 0 : onProgress((offset + length) / size, peerId, metadata);
+              }
+              check();
+            } catch (error) {
+              if (didSendOffer && !settledByReceiver && getPeer(peerId, true) === peer && (!peer.channel || peer.channel.readyState === "open" && (peer.channel.bufferedAmount ?? 0) <= maxControlBufferedBytes)) control(peerId, id, cancelled);
+              throw error;
+            } finally {
+              timer = resetTimer(timer);
+              signal == null ? void 0 : signal.removeEventListener("abort", abort);
+              transfers.delete(id);
+              if (!transfers.size && outgoing.get(peerId) === transfers) outgoing.delete(peerId);
+            }
+          }));
+        }
       }
-      if (this.name in designSet.property) {
-        this.isMultiValue = "multiValue" in designSet.property[this.name];
-        this.isStructuredValue = "structuredValue" in designSet.property[this.name];
+    };
+    actions.set(type, action);
+    return action.action;
+  };
+  const handleData = (peerId, data) => {
+    var _a, _b, _c;
+    if (data.byteLength < 2 || data.byteLength > 16384) {
+      failPeer(peerId, "invalid action frame");
+      return;
+    }
+    const bytes = new Uint8Array(data);
+    if (bytes[0] !== version) {
+      failPeer(peerId, "incompatible action protocol version");
+      return;
+    }
+    const kind = bytes[1] & 15;
+    const format = bytes[1] >>> 4;
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    if (kind > cancelled || format > 2 || kind > offer && format !== 0) {
+      failPeer(peerId, "invalid action frame");
+      return;
+    }
+    if (kind >= chunk) {
+      if (bytes.length < controlHeaderSize || (kind === accepted || kind === cancelled) && bytes.length !== controlHeaderSize || kind === rejected && bytes.length > 206) {
+        failPeer(peerId, "invalid action control");
+        return;
       }
-    }
-  }
-  /**
-   * Hydrate a single value. The act of hydrating means turning the raw jCal
-   * value into a potentially wrapped object, for example {@link ICAL.Time}.
-   *
-   * @private
-   * @param {Number} index        The index of the value to hydrate
-   * @return {?Object}             The decorated value.
-   */
-  _hydrateValue(index) {
-    if (this._values && this._values[index]) {
-      return this._values[index];
-    }
-    if (this.jCal.length <= VALUE_INDEX + index) {
-      return null;
-    }
-    if (this.isDecorated) {
-      if (!this._values) {
-        this._values = [];
+      const id2 = view.getUint32(2);
+      if (kind === accepted) {
+        const transfers = outgoing.get(peerId);
+        if ((_a = transfers == null ? void 0 : transfers.get(id2)) == null ? void 0 : _a.accept()) for (const pending of transfers.values()) pending.touch();
+        return;
       }
-      return this._values[index] = this._decorate(
-        this.jCal[VALUE_INDEX + index]
-      );
-    } else {
-      return this.jCal[VALUE_INDEX + index];
-    }
-  }
-  /**
-   * Decorate a single value, returning its wrapped object. This is used by
-   * the hydrate function to actually wrap the value.
-   *
-   * @private
-   * @param {?} value         The value to decorate
-   * @return {Object}         The decorated value
-   */
-  _decorate(value) {
-    return this._designSet.value[this.type].decorate(value, this);
-  }
-  /**
-   * Undecorate a single value, returning its raw jCal data.
-   *
-   * @private
-   * @param {Object} value         The value to undecorate
-   * @return {?}                   The undecorated value
-   */
-  _undecorate(value) {
-    return this._designSet.value[this.type].undecorate(value, this);
-  }
-  /**
-   * Sets the value at the given index while also hydrating it. The passed
-   * value can either be a decorated or undecorated value.
-   *
-   * @private
-   * @param {?} value             The value to set
-   * @param {Number} index        The index to set it at
-   */
-  _setDecoratedValue(value, index) {
-    if (!this._values) {
-      this._values = [];
-    }
-    if (typeof value === "object" && "icaltype" in value) {
-      this.jCal[VALUE_INDEX + index] = this._undecorate(value);
-      this._values[index] = value;
-    } else {
-      this.jCal[VALUE_INDEX + index] = value;
-      this._values[index] = this._decorate(value);
-    }
-  }
-  /**
-   * Gets a parameter on the property.
-   *
-   * @param {String}        name   Parameter name (lowercase)
-   * @return {Array|String}        Parameter value
-   */
-  getParameter(name) {
-    if (name in this.jCal[PROP_INDEX]) {
-      return this.jCal[PROP_INDEX][name];
-    } else {
-      return void 0;
-    }
-  }
-  /**
-   * Gets first parameter on the property.
-   *
-   * @param {String}        name   Parameter name (lowercase)
-   * @return {String}        Parameter value
-   */
-  getFirstParameter(name) {
-    let parameters = this.getParameter(name);
-    if (Array.isArray(parameters)) {
-      return parameters[0];
-    }
-    return parameters;
-  }
-  /**
-   * Sets a parameter on the property.
-   *
-   * @param {String}       name     The parameter name
-   * @param {Array|String} value    The parameter value
-   */
-  setParameter(name, value) {
-    let lcname = name.toLowerCase();
-    if (typeof value === "string" && lcname in this._designSet.param && "multiValue" in this._designSet.param[lcname]) {
-      value = [value];
-    }
-    this.jCal[PROP_INDEX][name] = value;
-  }
-  /**
-   * Removes a parameter
-   *
-   * @param {String} name     The parameter name
-   */
-  removeParameter(name) {
-    delete this.jCal[PROP_INDEX][name];
-  }
-  /**
-   * Get the default type based on this property's name.
-   *
-   * @return {String}     The default type for this property
-   */
-  getDefaultType() {
-    let name = this.jCal[NAME_INDEX$1];
-    let designSet = this._designSet;
-    if (name in designSet.property) {
-      let details = designSet.property[name];
-      if ("defaultType" in details) {
-        return details.defaultType;
+      if (kind === rejected) {
+        (_c = (_b = outgoing.get(peerId)) == null ? void 0 : _b.get(id2)) == null ? void 0 : _c.fail(transferError("rejected", decodeBytes(bytes.subarray(controlHeaderSize))), true);
+        return;
       }
+      if (kind === cancelled) receiver.cancel(peerId, id2);
+      else receiver.receiveChunk(peerId, id2, bytes.length >= chunkHeaderSize ? view.getFloat64(controlHeaderSize) : NaN, bytes.subarray(chunkHeaderSize));
+      return;
     }
-    return design.defaultType;
+    const headerSize = kind === inline ? inlineHeaderSize : offerHeaderSize;
+    if (bytes.length < headerSize) {
+      failPeer(peerId, "invalid action header");
+      return;
+    }
+    const type = decodeBytes(bytes.subarray(2, 34)).replaceAll("\0", "");
+    const action = actions.get(type);
+    if (!canReceiveFromPeer(peerId, Boolean(action == null ? void 0 : action.options.receiveWhilePending))) return;
+    const metaLength = view.getUint16(34);
+    const payloadIndex = headerSize + metaLength;
+    const size = kind === inline ? bytes.length - payloadIndex : view.getFloat64(40);
+    const id = kind === offer ? view.getUint32(36) : 0;
+    if (!type || payloadIndex > bytes.length || !Number.isSafeInteger(size) || size < 0 || kind === offer && (size === 0 || payloadIndex !== bytes.length)) {
+      failPeer(peerId, "invalid action proposal");
+      return;
+    }
+    let metadata;
+    try {
+      if (metaLength) metadata = fromJson(decodeBytes(bytes.subarray(headerSize, payloadIndex)));
+    } catch {
+      failPeer(peerId, "invalid action metadata");
+      return;
+    }
+    const message = {
+      peerId,
+      type,
+      format,
+      size,
+      ...metadata === void 0 ? {} : { metadata }
+    };
+    if (kind === inline) receiver.receiveInline(message, bytes.subarray(payloadIndex));
+    else receiver.receiveOffer(message, id);
+  };
+  return {
+    makeInternalAction,
+    handleData,
+    clearPeer
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/actions.mjs
+var getEnvelopeRecord = (metadata) => metadata && typeof metadata === "object" && !Array.isArray(metadata) && typeof metadata.r === "string" ? metadata : null;
+var getRequestMetadata = (metadata) => {
+  const record = getEnvelopeRecord(metadata);
+  return record ? {
+    r: record.r,
+    ...Object.hasOwn(record, "m") ? { m: record.m } : {}
+  } : null;
+};
+var getResponseMetadata = (metadata) => {
+  const record = getEnvelopeRecord(metadata);
+  return record ? {
+    r: record.r,
+    ...typeof record.e === "string" ? { e: record.e } : {}
+  } : null;
+};
+var withMetadata = (context, metadata) => metadata === void 0 ? context : {
+  ...context,
+  metadata
+};
+var createActionManager = ({ getPeer, getPeerIds, canReceiveFromPeer, onPeerError, maxReceiveBytes }) => {
+  const publicActions = /* @__PURE__ */ Object.create(null);
+  const pendingRequestWaiters = {};
+  const activeRequestControllers = /* @__PURE__ */ new Map();
+  const wire = createActionWireManager({
+    getPeer,
+    getPeerIds,
+    canReceiveFromPeer,
+    onPeerError,
+    ...maxReceiveBytes === void 0 ? {} : { maxReceiveBytes }
+  });
+  const makeInternalAction = wire.makeInternalAction;
+  const handleData = wire.handleData;
+  const clearPendingRequestWaiter = (requestId) => {
+    const waiter = pendingRequestWaiters[requestId];
+    if (!waiter) return;
+    resetTimer(waiter.timer);
+    if (waiter.signal && waiter.abortHandler) waiter.signal.removeEventListener("abort", waiter.abortHandler);
+    delete pendingRequestWaiters[requestId];
+    waiter.controller.abort();
+  };
+  const rejectPendingRequestsForPeer = (id, error) => {
+    entries(pendingRequestWaiters).forEach(([requestId, waiter]) => {
+      if (waiter.peerId !== id) return;
+      clearPendingRequestWaiter(requestId);
+      waiter.reject(error);
+    });
+  };
+  const clearPeer = (id, error) => {
+    wire.clearPeer(id);
+    const controllers = activeRequestControllers.get(id);
+    if (controllers) {
+      activeRequestControllers.delete(id);
+      controllers.forEach((controller) => controller.abort());
+    }
+    rejectPendingRequestsForPeer(id, makeActionError("disconnected", toErrorMessage(error, "peer disconnected")));
+  };
+  const responseAction = makeInternalAction("@_response", { receiveScope: (peerId, metadata) => {
+    const parsed = getResponseMetadata(metadata);
+    const waiter = parsed && pendingRequestWaiters[parsed.r];
+    if (!parsed || !waiter || waiter.peerId !== peerId) return null;
+    const receive = parsed.e === void 0 ? waiter.getReceive() : null;
+    return {
+      key: parsed.r,
+      signal: waiter.controller.signal,
+      receive: receive ? (context) => receive({
+        byteLength: context.byteLength,
+        peerId: context.peerId,
+        kind: "response",
+        signal: context.signal
+      }) : null,
+      reject: (reason) => {
+        if (pendingRequestWaiters[parsed.r] === waiter) {
+          clearPendingRequestWaiter(parsed.r);
+          waiter.reject(makeActionError("rejected", reason));
+        }
+      }
+    };
+  } });
+  responseAction.onProgress((progress2, id, metadata) => {
+    var _a;
+    const parsed = getResponseMetadata(metadata);
+    const waiter = parsed && pendingRequestWaiters[parsed.r];
+    if (waiter && waiter.peerId === id && (parsed == null ? void 0 : parsed.e) === void 0) (_a = waiter.getReceiveProgress()) == null ? void 0 : _a(progress2, { peerId: id });
+  });
+  responseAction.onMessage((payload, id, metadata) => {
+    const parsed = getResponseMetadata(metadata);
+    if (!parsed) return;
+    const waiter = pendingRequestWaiters[parsed.r];
+    if (!waiter || waiter.peerId !== id) return;
+    clearPendingRequestWaiter(parsed.r);
+    if (parsed.e !== void 0) {
+      waiter.reject(makeActionError("rejected", parsed.e));
+      return;
+    }
+    waiter.resolve(payload);
+  });
+  const makeActionImpl = (type, config) => {
+    if (config && "onRequest" in config && config.kind !== "request") throw mkErr('request actions must use kind: "request"');
+    const kind = (config == null ? void 0 : config.kind) ?? "message";
+    const rawAction = makeInternalAction(type);
+    const existingState = publicActions[type];
+    if (existingState) {
+      if (existingState.kind !== kind) throw mkErr(`action type "${type}" cannot be redefined`);
+      return existingState.action;
+    }
+    const state = {
+      kind,
+      action: null,
+      onReceive: (config == null ? void 0 : config.onReceive) ?? null,
+      onReceiveProgress: (config == null ? void 0 : config.onReceiveProgress) ?? null
+    };
+    const toProgressHandler = (handler, metadata) => handler ? (progress2, peerId) => handler(progress2, withMetadata({ peerId }, metadata)) : void 0;
+    const dispatchReceiveProgress = (progress2, peerId, metadata) => {
+      var _a;
+      const requestMetadata = state.kind === "request" ? getRequestMetadata(metadata) : null;
+      (_a = state.onReceiveProgress) == null ? void 0 : _a.call(state, progress2, withMetadata({ peerId }, requestMetadata ? requestMetadata.m : metadata));
+    };
+    const setReceive = (handler) => {
+      state.onReceive = handler;
+      rawAction.onReceive(handler ? (context) => {
+        const requestMetadata = kind === "request" ? getRequestMetadata(context.metadata) : null;
+        return handler(withMetadata({
+          byteLength: context.byteLength,
+          peerId: context.peerId,
+          signal: context.signal,
+          kind
+        }, requestMetadata ? requestMetadata.m : context.metadata));
+      } : null);
+    };
+    setReceive(state.onReceive);
+    rawAction.onProgress(dispatchReceiveProgress);
+    if (kind === "message") {
+      let onMessage = (config == null ? void 0 : config.onMessage) ?? null;
+      const receiveMessage = (payload, peerId, metadata) => {
+        const handler = onMessage;
+        Promise.resolve().then(() => handler(payload, withMetadata({ peerId }, metadata))).catch((err) => console.error(`${libName} action handler error:`, err));
+      };
+      const action2 = {
+        send: async (data, options = {}) => {
+          await rawAction.send(data, options.target, options.metadata, toProgressHandler(options.onProgress, options.metadata), options.signal);
+        },
+        get onMessage() {
+          return onMessage;
+        },
+        set onMessage(handler) {
+          onMessage = handler;
+          rawAction.onMessage(handler ? receiveMessage : null);
+        },
+        get onReceive() {
+          return state.onReceive;
+        },
+        set onReceive(handler) {
+          setReceive(handler);
+        },
+        get onReceiveProgress() {
+          return state.onReceiveProgress;
+        },
+        set onReceiveProgress(handler) {
+          state.onReceiveProgress = handler;
+        }
+      };
+      state.action = action2;
+      publicActions[type] = state;
+      rawAction.onMessage(onMessage ? receiveMessage : null);
+      return action2;
+    }
+    rawAction.onReject((peerId, metadata, reason) => {
+      const parsed = getRequestMetadata(metadata);
+      if (parsed) responseAction.send(null, peerId, {
+        r: parsed.r,
+        e: reason
+      }).catch(noOp);
+    });
+    let onRequest = (config == null ? void 0 : config.onRequest) ?? null;
+    const receiveRequest = (payload, peerId, metadata) => {
+      const parsed = getRequestMetadata(metadata);
+      if (!parsed) return;
+      const handler = onRequest;
+      const controller = new AbortController();
+      let peerControllers = activeRequestControllers.get(peerId);
+      if (!peerControllers) {
+        peerControllers = /* @__PURE__ */ new Set();
+        activeRequestControllers.set(peerId, peerControllers);
+      }
+      peerControllers.add(controller);
+      Promise.resolve().then(async () => {
+        const response = await handler(payload, {
+          ...withMetadata({ peerId }, parsed.m),
+          signal: controller.signal
+        });
+        if (response === void 0) throw mkErr("request handler returned undefined");
+        return response;
+      }).then((response) => responseAction.send(response, peerId, { r: parsed.r }), (error) => responseAction.send(null, peerId, {
+        r: parsed.r,
+        e: toErrorMessage(error, "request failed").slice(0, 512)
+      })).catch(noOp).finally(() => {
+        const controllers = activeRequestControllers.get(peerId);
+        controllers == null ? void 0 : controllers.delete(controller);
+        if (controllers && !controllers.size) activeRequestControllers.delete(peerId);
+        controller.abort();
+      });
+    };
+    const requestOne = async (data, options) => {
+      const { target, metadata, onProgress, signal, timeoutMs } = options;
+      throwIfAborted(signal);
+      if (!getPeer(target, false)) throw makeActionError("disconnected", `no active peer with id ${target}`);
+      const requestId = genId(20);
+      const controller = new AbortController();
+      const responsePromise = new Promise((resolve, reject) => {
+        const waiter = {
+          controller,
+          getReceive: () => state.onReceive,
+          getReceiveProgress: () => state.onReceiveProgress,
+          peerId: target,
+          resolve,
+          reject,
+          timer: null,
+          ...signal === void 0 ? {} : { signal }
+        };
+        const rejectAsAborted = () => {
+          clearPendingRequestWaiter(requestId);
+          reject(makeActionError("aborted", "operation aborted"));
+        };
+        if (signal) {
+          waiter.abortHandler = rejectAsAborted;
+          signal.addEventListener("abort", rejectAsAborted, { once: true });
+        }
+        pendingRequestWaiters[requestId] = waiter;
+        if (timeoutMs !== void 0) waiter.timer = setTimeout(() => {
+          clearPendingRequestWaiter(requestId);
+          waiter.reject(makeActionError("timeout", "request timed out"));
+        }, timeoutMs);
+      });
+      try {
+        const sending = rawAction.send(data, target, metadata === void 0 ? { r: requestId } : {
+          r: requestId,
+          m: metadata
+        }, toProgressHandler(onProgress, metadata), controller.signal);
+        return await Promise.race([responsePromise, sending.then(() => responsePromise)]);
+      } finally {
+        clearPendingRequestWaiter(requestId);
+      }
+    };
+    const action = {
+      request: requestOne,
+      requestMany: async (data, options) => {
+        const { targets, onResult, ...requestOptions } = options;
+        throwIfAborted(requestOptions.signal);
+        return await all(targets.map(async (target) => {
+          try {
+            const result = {
+              peerId: target,
+              status: "fulfilled",
+              value: await requestOne(data, {
+                ...requestOptions,
+                target
+              })
+            };
+            onResult == null ? void 0 : onResult(result);
+            return result;
+          } catch (err) {
+            const error = toError(err, "request failed");
+            if (error.kind === "aborted" || !error.kind) throw error;
+            const result = error.kind === "timeout" ? {
+              peerId: target,
+              status: "timeout"
+            } : error.kind === "disconnected" ? {
+              peerId: target,
+              status: "disconnected"
+            } : {
+              peerId: target,
+              status: "rejected",
+              error
+            };
+            onResult == null ? void 0 : onResult(result);
+            return result;
+          }
+        }));
+      },
+      get onRequest() {
+        return onRequest;
+      },
+      set onRequest(handler) {
+        onRequest = handler;
+        rawAction.onMessage(handler ? receiveRequest : null);
+      },
+      get onReceive() {
+        return state.onReceive;
+      },
+      set onReceive(handler) {
+        setReceive(handler);
+      },
+      get onReceiveProgress() {
+        return state.onReceiveProgress;
+      },
+      set onReceiveProgress(handler) {
+        state.onReceiveProgress = handler;
+      }
+    };
+    state.action = action;
+    publicActions[type] = state;
+    rawAction.onMessage(onRequest ? receiveRequest : null);
+    return action;
+  };
+  return {
+    makeAction: makeActionImpl,
+    makeInternalAction,
+    handleData,
+    clearPeer
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/media.mjs
+var toPendingMediaMeta = (value) => {
+  if (value && typeof value === "object" && !Array.isArray(value) && typeof value.k === "string") return {
+    key: value.k,
+    ...typeof value.s === "string" ? { streamId: value.s } : {},
+    ...typeof value.t === "string" ? { trackId: value.t } : {},
+    ...Object.hasOwn(value, "m") ? { metadata: value.m } : {}
+  };
+  return null;
+};
+var makeKeyGetter = (map) => (item) => {
+  let key = map.get(item);
+  if (!key) {
+    key = genId(20);
+    map.set(item, key);
   }
-  /**
-   * Sets type of property and clears out any existing values of the current
-   * type.
-   *
-   * @param {String} type     New iCAL type (see design.*.values)
-   */
-  resetType(type) {
-    this.removeAllValues();
-    this.jCal[TYPE_INDEX] = type;
-    this._updateType();
-  }
-  /**
-   * Finds the first property value.
-   *
-   * @return {Binary | Duration | Period |
-   * Recur | Time | UtcOffset | Geo | string | null}         First property value
-   */
-  getFirstValue() {
-    return this._hydrateValue(0);
-  }
-  /**
-   * Gets all values on the property.
-   *
-   * NOTE: this creates an array during each call.
-   *
-   * @return {Array}          List of values
-   */
-  getValues() {
-    let len = this.jCal.length - VALUE_INDEX;
-    if (len < 1) {
+  return key;
+};
+var createMediaIdentityCache = () => {
+  const localStreamKeys = /* @__PURE__ */ new WeakMap();
+  const localTrackKeys = /* @__PURE__ */ new WeakMap();
+  const remoteStreamsByKey = /* @__PURE__ */ new Map();
+  const remoteStreamsById = /* @__PURE__ */ new Map();
+  const remoteTracksByKey = /* @__PURE__ */ new Map();
+  const remoteTracksById = /* @__PURE__ */ new Map();
+  const remoteStreamKeys = /* @__PURE__ */ new WeakMap();
+  const remoteTrackKeys = /* @__PURE__ */ new WeakMap();
+  return {
+    getStreamKey: makeKeyGetter(localStreamKeys),
+    getTrackKey: makeKeyGetter(localTrackKeys),
+    rememberRemoteStream: (key, stream, streamId) => {
+      var _a;
+      const previous = remoteStreamKeys.get(stream);
+      if (previous !== void 0 && remoteStreamsByKey.get(previous) === stream) remoteStreamsByKey.delete(previous);
+      remoteStreamKeys.set(stream, key);
+      remoteStreamsByKey.set(key, stream);
+      if (streamId) remoteStreamsById.set(streamId, stream);
+      (_a = stream.getTracks) == null ? void 0 : _a.call(stream).forEach((track) => {
+        if (typeof track.id === "string") remoteTracksById.set(track.id, {
+          track,
+          stream
+        });
+      });
+    },
+    getRemoteStream: (key, streamId) => remoteStreamsByKey.get(key) ?? (streamId ? remoteStreamsById.get(streamId) : void 0),
+    rememberRemoteTrack: (key, track, stream, trackId, streamId) => {
+      var _a;
+      const ref = {
+        track,
+        stream
+      };
+      const previous = remoteTrackKeys.get(track);
+      if (previous !== void 0 && ((_a = remoteTracksByKey.get(previous)) == null ? void 0 : _a.track) === track) remoteTracksByKey.delete(previous);
+      remoteTrackKeys.set(track, key);
+      remoteTracksByKey.set(key, ref);
+      if (trackId) remoteTracksById.set(trackId, ref);
+      if (streamId) remoteStreamsById.set(streamId, stream);
+    },
+    getRemoteTrack: (key, trackId) => remoteTracksByKey.get(key) ?? (trackId ? remoteTracksById.get(trackId) : void 0),
+    hasRemoteMedia: () => remoteStreamsByKey.size > 0 || remoteTracksByKey.size > 0,
+    clearRemote: () => {
+      remoteStreamsByKey.clear();
+      remoteStreamsById.clear();
+      remoteTracksByKey.clear();
+      remoteTracksById.clear();
+    }
+  };
+};
+var createMediaManager = ({ iterate, isActive, getSharedMediaPeer, onPeerError }) => {
+  const pendingStreamMetas = {};
+  const pendingTrackMetas = {};
+  const peerMediaCaches = {};
+  const localMedia = createMediaIdentityCache();
+  const getPeerMedia = (id) => {
+    var _a;
+    return ((_a = getSharedMediaPeer(id)) == null ? void 0 : _a.__trysteroMedia) ?? (peerMediaCaches[id] ?? (peerMediaCaches[id] = createMediaIdentityCache()));
+  };
+  const queuePendingMeta = (metas, id, parsed, kind) => {
+    const queue = metas[id] ?? (metas[id] = []);
+    if (queue.length >= 64) {
+      console.warn(`${libName}: too many pending ${kind} metadata messages`);
+      onPeerError(id, mkErr("too many pending media metadata messages"));
+      return;
+    }
+    queue.push(parsed);
+  };
+  const takePendingMeta = (queue, idValue, getMetaId) => {
+    if (!(queue == null ? void 0 : queue.length)) return;
+    const index = idValue ? queue.findIndex((meta) => {
+      const metaId = getMetaId(meta);
+      return !metaId || metaId === idValue;
+    }) : 0;
+    return index >= 0 ? queue.splice(index, 1)[0] : void 0;
+  };
+  const emitStream = (id, key, stream, metadata) => {
+    var _a;
+    if (!isActive(id)) return;
+    getPeerMedia(id).rememberRemoteStream(key, stream, typeof stream.id === "string" ? stream.id : void 0);
+    (_a = manager.onPeerStream) == null ? void 0 : _a.call(manager, stream, id, metadata);
+  };
+  const emitTrack = (id, key, track, stream, metadata) => {
+    var _a;
+    if (!isActive(id)) return;
+    getPeerMedia(id).rememberRemoteTrack(key, track, stream, typeof track.id === "string" ? track.id : void 0, typeof stream.id === "string" ? stream.id : void 0);
+    (_a = manager.onPeerTrack) == null ? void 0 : _a.call(manager, track, stream, id, metadata);
+  };
+  const applyMediaOp = (targets, key, metadata, sendMeta, op, mediaIds = {}) => {
+    const payload = {
+      k: key,
+      ...mediaIds,
+      ...metadata === void 0 ? {} : { m: metadata }
+    };
+    return iterate(targets, async (id, peer) => {
+      await sendMeta(payload, id);
+      await op(peer);
+    });
+  };
+  const manager = {
+    addStream: (stream, options, sendMeta) => applyMediaOp(options.target, localMedia.getStreamKey(stream), options.metadata, sendMeta, (peer) => peer.addStream(stream), { s: stream.id }),
+    removeStream: (stream, target) => {
+      iterate(target, (_, peer) => peer.removeStream(stream));
+    },
+    addTrack: (track, stream, options, sendMeta) => applyMediaOp(options.target, localMedia.getTrackKey(track), options.metadata, sendMeta, (peer) => peer.addTrack(track, stream), {
+      s: stream.id,
+      t: track.id
+    }),
+    removeTrack: (track, target) => {
+      iterate(target, (_, peer) => peer.removeTrack(track));
+    },
+    replaceTrack: (oldTrack, newTrack, options, sendMeta) => applyMediaOp(options.target, localMedia.getTrackKey(newTrack), options.metadata, sendMeta, (peer) => peer.replaceTrack(oldTrack, newTrack), { t: oldTrack.id }),
+    receiveStreamMeta: (meta, id) => {
+      if (!isActive(id)) return;
+      const parsed = toPendingMediaMeta(meta);
+      if (!parsed) return;
+      const cached = getPeerMedia(id).getRemoteStream(parsed.key, parsed.streamId);
+      if (cached == null ? void 0 : cached.getTracks().length) {
+        emitStream(id, parsed.key, cached, parsed.metadata);
+        return;
+      }
+      queuePendingMeta(pendingStreamMetas, id, parsed, "stream");
+    },
+    receiveTrackMeta: (meta, id) => {
+      if (!isActive(id)) return;
+      const parsed = toPendingMediaMeta(meta);
+      if (!parsed) return;
+      const cached = getPeerMedia(id).getRemoteTrack(parsed.key, parsed.trackId);
+      if (cached && cached.track.readyState !== "ended" && (!cached.stream.getTracks || cached.stream.getTracks().includes(cached.track))) {
+        emitTrack(id, parsed.key, cached.track, cached.stream, parsed.metadata);
+        return;
+      }
+      queuePendingMeta(pendingTrackMetas, id, parsed, "track");
+    },
+    receiveRemoteStream: (id, stream) => {
+      if (!isActive(id)) return;
+      const next = takePendingMeta(pendingStreamMetas[id], typeof stream.id === "string" ? stream.id : void 0, (meta) => meta.streamId);
+      if (!next) return;
+      emitStream(id, next.key, stream, next.metadata);
+    },
+    receiveRemoteTrack: (id, track, stream) => {
+      if (!isActive(id)) return;
+      const queue = pendingTrackMetas[id];
+      const trackId = typeof track.id === "string" ? track.id : void 0;
+      const streamId = typeof stream.id === "string" ? stream.id : void 0;
+      const byTrackIdx = queue && trackId ? queue.findIndex((meta) => meta.trackId === trackId) : -1;
+      const next = byTrackIdx >= 0 ? queue == null ? void 0 : queue.splice(byTrackIdx, 1)[0] : takePendingMeta(queue, streamId, (meta) => meta.streamId);
+      if (!next) return;
+      emitTrack(id, next.key, track, stream, next.metadata);
+    },
+    clearPeer: (id) => {
+      delete pendingStreamMetas[id];
+      delete pendingTrackMetas[id];
+      delete peerMediaCaches[id];
+    },
+    onPeerStream: null,
+    onPeerTrack: null
+  };
+  return manager;
+};
+
+// node_modules/@trystero-p2p/core/dist/room.mjs
+var unloadEvent = "beforeunload";
+var defaultHandshakeTimeoutMs = 1e4;
+var internalNs = (ns) => "@_" + ns;
+var beforeUnloadRoomCleanups = /* @__PURE__ */ new Set();
+var cleanupActiveRoomsOnBeforeUnload = () => beforeUnloadRoomCleanups.forEach((cleanup) => cleanup());
+var registerBeforeUnloadCleanup = (cleanup) => {
+  beforeUnloadRoomCleanups.add(cleanup);
+  if (beforeUnloadRoomCleanups.size === 1) addEventListener(unloadEvent, cleanupActiveRoomsOnBeforeUnload);
+  return () => {
+    beforeUnloadRoomCleanups.delete(cleanup);
+    if (!beforeUnloadRoomCleanups.size) removeEventListener(unloadEvent, cleanupActiveRoomsOnBeforeUnload);
+  };
+};
+var room_default = (onPeer, onPeerLeave, onSelfLeave, { onPeerHandshake, onHandshakeError, handshakeTimeoutMs = defaultHandshakeTimeoutMs, maxReceiveBytes, isPassive = false, onBeforeLeave } = {}) => {
+  const peerMap = {};
+  const activePeerMap = {};
+  const pendingPongs = {};
+  const listeners = {
+    onPeerJoin: null,
+    onPeerLeave: null
+  };
+  let unregisterBeforeUnloadCleanup = noOp;
+  let leavePromise = null;
+  const iterate = (targets, f) => (targets ? Array.isArray(targets) ? targets : [targets] : keys(activePeerMap)).flatMap((id) => {
+    const peer = activePeerMap[id];
+    if (!peer) {
+      console.warn(`${libName}: no peer with id ${id} found`);
       return [];
     }
-    let i = 0;
-    let result = [];
-    for (; i < len; i++) {
-      result[i] = this._hydrateValue(i);
-    }
-    return result;
-  }
-  /**
-   * Removes all values from this property
-   */
-  removeAllValues() {
-    if (this._values) {
-      this._values.length = 0;
-    }
-    this.jCal.length = 3;
-  }
-  /**
-   * Sets the values of the property.  Will overwrite the existing values.
-   * This can only be used for multi-value properties.
-   *
-   * @param {Array} values    An array of values
-   */
-  setValues(values) {
-    if (!this.isMultiValue) {
-      throw new Error(
-        this.name + ": does not not support mulitValue.\noverride isMultiValue"
-      );
-    }
-    let len = values.length;
-    let i = 0;
-    this.removeAllValues();
-    if (len > 0 && typeof values[0] === "object" && "icaltype" in values[0]) {
-      this.resetType(values[0].icaltype);
-    }
-    if (this.isDecorated) {
-      for (; i < len; i++) {
-        this._setDecoratedValue(values[i], i);
-      }
-    } else {
-      for (; i < len; i++) {
-        this.jCal[VALUE_INDEX + i] = values[i];
-      }
-    }
-  }
-  /**
-   * Sets the current value of the property. If this is a multi-value
-   * property, all other values will be removed.
-   *
-   * @param {String|Object} value     New property value.
-   */
-  setValue(value) {
-    this.removeAllValues();
-    if (typeof value === "object" && "icaltype" in value) {
-      this.resetType(value.icaltype);
-    }
-    if (this.isDecorated) {
-      this._setDecoratedValue(value, 0);
-    } else {
-      this.jCal[VALUE_INDEX] = value;
-    }
-  }
-  /**
-   * Returns the Object representation of this component. The returned object
-   * is a live jCal object and should be cloned if modified.
-   * @return {Object}
-   */
-  toJSON() {
-    return this.jCal;
-  }
-  /**
-   * The string representation of this component.
-   * @return {String}
-   */
-  toICALString() {
-    return stringify.property(
-      this.jCal,
-      this._designSet,
-      true
-    );
-  }
-};
-var NAME_INDEX = 0;
-var PROPERTY_INDEX = 1;
-var COMPONENT_INDEX = 2;
-var PROPERTY_NAME_INDEX = 0;
-var PROPERTY_VALUE_INDEX = 3;
-var Component = class _Component {
-  /**
-   * Create an {@link ICAL.Component} by parsing the passed iCalendar string.
-   *
-   * @param {String} str        The iCalendar string to parse
-   */
-  static fromString(str) {
-    return new _Component(parse.component(str));
-  }
-  /**
-   * Creates a new Component instance.
-   *
-   * @param {Array|String} jCal         Raw jCal component data OR name of new
-   *                                      component
-   * @param {Component=} parent     Parent component to associate
-   */
-  constructor(jCal, parent) {
-    if (typeof jCal === "string") {
-      jCal = [jCal, [], []];
-    }
-    this.jCal = jCal;
-    this.parent = parent || null;
-    if (!this.parent && this.name === "vcalendar") {
-      this._timezoneCache = /* @__PURE__ */ new Map();
-    }
-  }
-  /**
-   * Hydrated properties are inserted into the _properties array at the same
-   * position as in the jCal array, so it is possible that the array contains
-   * undefined values for unhydrdated properties. To avoid iterating the
-   * array when checking if all properties have been hydrated, we save the
-   * count here.
-   *
-   * @type {Number}
-   * @private
-   */
-  _hydratedPropertyCount = 0;
-  /**
-   * The same count as for _hydratedPropertyCount, but for subcomponents
-   *
-   * @type {Number}
-   * @private
-   */
-  _hydratedComponentCount = 0;
-  /**
-   * A cache of hydrated time zone objects which may be used by consumers, keyed
-   * by time zone ID.
-   *
-   * @type {Map}
-   * @private
-   */
-  _timezoneCache = null;
-  /**
-   * @private
-   */
-  _components = null;
-  /**
-   * @private
-   */
-  _properties = null;
-  /**
-   * The name of this component
-   *
-   * @type {String}
-   */
-  get name() {
-    return this.jCal[NAME_INDEX];
-  }
-  /**
-   * The design set for this component, e.g. icalendar vs vcard
-   *
-   * @type {designSet}
-   * @private
-   */
-  get _designSet() {
+    return [Promise.resolve(f(id, peer))];
+  });
+  const kickPeer = (id, peer, reason) => {
+    const current = peerMap[id];
+    if (!current || peer && current !== peer) return;
+    leaveAction.send("", id).catch(noOp);
+    exitPeer(id, current, reason);
+  };
+  const onPeerError = (id, error) => kickPeer(id, void 0, error);
+  const mediaManager = createMediaManager({
+    onPeerError,
+    iterate: (targets, f) => iterate(targets, (id, peer) => f(id, peer)),
+    isActive: (id) => Boolean(activePeerMap[id]),
+    getSharedMediaPeer: (id) => peerMap[id] ?? null
+  });
+  const actionManager = createActionManager({
+    onPeerError,
+    ...maxReceiveBytes === void 0 ? {} : { maxReceiveBytes },
+    getPeer: (id, includePending) => (includePending ? peerMap : activePeerMap)[id],
+    getPeerIds: (includePending) => keys(includePending ? peerMap : activePeerMap),
+    canReceiveFromPeer: (id, receiveWhilePending) => handshakeManager.canReceiveFromPeer(id, receiveWhilePending)
+  });
+  const makeActionInternal = actionManager.makeInternalAction;
+  const handleData = actionManager.handleData;
+  const makeAction = actionManager.makeAction;
+  const clearPeerState = (id, reason = mkErr("peer disconnected")) => {
     var _a;
-    let parentDesign = this.parent && this.parent._designSet;
-    if (!parentDesign && this.name == "vcard") {
-      let versionProp = (_a = this.jCal[PROPERTY_INDEX]) == null ? void 0 : _a[0];
-      if (versionProp && versionProp[PROPERTY_NAME_INDEX] == "version" && versionProp[PROPERTY_VALUE_INDEX] == "3.0") {
-        return design.getDesignSet("vcard3");
-      }
-    }
-    return parentDesign || design.getDesignSet(this.name);
-  }
-  /**
-   * @private
-   */
-  _hydrateComponent(index) {
-    if (!this._components) {
-      this._components = [];
-      this._hydratedComponentCount = 0;
-    }
-    if (this._components[index]) {
-      return this._components[index];
-    }
-    let comp = new _Component(
-      this.jCal[COMPONENT_INDEX][index],
-      this
-    );
-    this._hydratedComponentCount++;
-    return this._components[index] = comp;
-  }
-  /**
-   * @private
-   */
-  _hydrateProperty(index) {
-    if (!this._properties) {
-      this._properties = [];
-      this._hydratedPropertyCount = 0;
-    }
-    if (this._properties[index]) {
-      return this._properties[index];
-    }
-    let prop = new Property(
-      this.jCal[PROPERTY_INDEX][index],
-      this
-    );
-    this._hydratedPropertyCount++;
-    return this._properties[index] = prop;
-  }
-  /**
-   * Finds first sub component, optionally filtered by name.
-   *
-   * @param {String=} name        Optional name to filter by
-   * @return {?Component}     The found subcomponent
-   */
-  getFirstSubcomponent(name) {
-    if (name) {
-      let i = 0;
-      let comps = this.jCal[COMPONENT_INDEX];
-      let len = comps.length;
-      for (; i < len; i++) {
-        if (comps[i][NAME_INDEX] === name) {
-          let result = this._hydrateComponent(i);
-          return result;
-        }
-      }
-    } else {
-      if (this.jCal[COMPONENT_INDEX].length) {
-        return this._hydrateComponent(0);
-      }
-    }
-    return null;
-  }
-  /**
-   * Finds all sub components, optionally filtering by name.
-   *
-   * @param {String=} name            Optional name to filter by
-   * @return {Component[]}       The found sub components
-   */
-  getAllSubcomponents(name) {
-    let jCalLen = this.jCal[COMPONENT_INDEX].length;
-    let i = 0;
-    if (name) {
-      let comps = this.jCal[COMPONENT_INDEX];
-      let result = [];
-      for (; i < jCalLen; i++) {
-        if (name === comps[i][NAME_INDEX]) {
-          result.push(
-            this._hydrateComponent(i)
-          );
-        }
-      }
-      return result;
-    } else {
-      if (!this._components || this._hydratedComponentCount !== jCalLen) {
-        for (; i < jCalLen; i++) {
-          this._hydrateComponent(i);
-        }
-      }
-      return this._components || [];
-    }
-  }
-  /**
-   * Returns true when a named property exists.
-   *
-   * @param {String} name     The property name
-   * @return {Boolean}        True, when property is found
-   */
-  hasProperty(name) {
-    let props = this.jCal[PROPERTY_INDEX];
-    let len = props.length;
-    let i = 0;
-    for (; i < len; i++) {
-      if (props[i][NAME_INDEX] === name) {
-        return true;
-      }
-    }
-    return false;
-  }
-  /**
-   * Finds the first property, optionally with the given name.
-   *
-   * @param {String=} name        Lowercase property name
-   * @return {?Property}     The found property
-   */
-  getFirstProperty(name) {
-    if (name) {
-      let i = 0;
-      let props = this.jCal[PROPERTY_INDEX];
-      let len = props.length;
-      for (; i < len; i++) {
-        if (props[i][NAME_INDEX] === name) {
-          let result = this._hydrateProperty(i);
-          return result;
-        }
-      }
-    } else {
-      if (this.jCal[PROPERTY_INDEX].length) {
-        return this._hydrateProperty(0);
-      }
-    }
-    return null;
-  }
-  /**
-   * Returns first property's value, if available.
-   *
-   * @param {String=} name                    Lowercase property name
-   * @return {Binary | Duration | Period |
-   * Recur | Time | UtcOffset | Geo | string | null}         The found property value.
-   */
-  getFirstPropertyValue(name) {
-    let prop = this.getFirstProperty(name);
-    if (prop) {
-      return prop.getFirstValue();
-    }
-    return null;
-  }
-  /**
-   * Get all properties in the component, optionally filtered by name.
-   *
-   * @param {String=} name        Lowercase property name
-   * @return {Property[]}    List of properties
-   */
-  getAllProperties(name) {
-    let jCalLen = this.jCal[PROPERTY_INDEX].length;
-    let i = 0;
-    if (name) {
-      let props = this.jCal[PROPERTY_INDEX];
-      let result = [];
-      for (; i < jCalLen; i++) {
-        if (name === props[i][NAME_INDEX]) {
-          result.push(
-            this._hydrateProperty(i)
-          );
-        }
-      }
-      return result;
-    } else {
-      if (!this._properties || this._hydratedPropertyCount !== jCalLen) {
-        for (; i < jCalLen; i++) {
-          this._hydrateProperty(i);
-        }
-      }
-      return this._properties || [];
-    }
-  }
-  /**
-   * @private
-   */
-  _removeObjectByIndex(jCalIndex, cache, index) {
-    cache = cache || [];
-    if (cache[index]) {
-      let obj = cache[index];
-      if ("parent" in obj) {
-        obj.parent = null;
-      }
-    }
-    cache.splice(index, 1);
-    this.jCal[jCalIndex].splice(index, 1);
-  }
-  /**
-   * @private
-   */
-  _removeObject(jCalIndex, cache, nameOrObject) {
-    let i = 0;
-    let objects = this.jCal[jCalIndex];
-    let len = objects.length;
-    let cached = this[cache];
-    if (typeof nameOrObject === "string") {
-      for (; i < len; i++) {
-        if (objects[i][NAME_INDEX] === nameOrObject) {
-          this._removeObjectByIndex(jCalIndex, cached, i);
-          return true;
-        }
-      }
-    } else if (cached) {
-      for (; i < len; i++) {
-        if (cached[i] && cached[i] === nameOrObject) {
-          this._removeObjectByIndex(jCalIndex, cached, i);
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-  /**
-   * @private
-   */
-  _removeAllObjects(jCalIndex, cache, name) {
-    let cached = this[cache];
-    let objects = this.jCal[jCalIndex];
-    let i = objects.length - 1;
-    for (; i >= 0; i--) {
-      if (!name || objects[i][NAME_INDEX] === name) {
-        this._removeObjectByIndex(jCalIndex, cached, i);
-      }
-    }
-  }
-  /**
-   * Adds a single sub component.
-   *
-   * @param {Component} component        The component to add
-   * @return {Component}                 The passed in component
-   */
-  addSubcomponent(component) {
-    if (!this._components) {
-      this._components = [];
-      this._hydratedComponentCount = 0;
-    }
-    if (component.parent) {
-      component.parent.removeSubcomponent(component);
-    }
-    let idx = this.jCal[COMPONENT_INDEX].push(component.jCal);
-    this._components[idx - 1] = component;
-    this._hydratedComponentCount++;
-    component.parent = this;
-    return component;
-  }
-  /**
-   * Removes a single component by name or the instance of a specific
-   * component.
-   *
-   * @param {Component|String} nameOrComp    Name of component, or component
-   * @return {Boolean}                            True when comp is removed
-   */
-  removeSubcomponent(nameOrComp) {
-    let removed = this._removeObject(COMPONENT_INDEX, "_components", nameOrComp);
-    if (removed) {
-      this._hydratedComponentCount--;
-    }
-    return removed;
-  }
-  /**
-   * Removes all components or (if given) all components by a particular
-   * name.
-   *
-   * @param {String=} name            Lowercase component name
-   */
-  removeAllSubcomponents(name) {
-    let removed = this._removeAllObjects(COMPONENT_INDEX, "_components", name);
-    this._hydratedComponentCount = 0;
-    return removed;
-  }
-  /**
-   * Adds an {@link ICAL.Property} to the component.
-   *
-   * @param {Property} property      The property to add
-   * @return {Property}              The passed in property
-   */
-  addProperty(property) {
-    if (!(property instanceof Property)) {
-      throw new TypeError("must be instance of ICAL.Property");
-    }
-    if (!this._properties) {
-      this._properties = [];
-      this._hydratedPropertyCount = 0;
-    }
-    if (property.parent) {
-      property.parent.removeProperty(property);
-    }
-    let idx = this.jCal[PROPERTY_INDEX].push(property.jCal);
-    this._properties[idx - 1] = property;
-    this._hydratedPropertyCount++;
-    property.parent = this;
-    return property;
-  }
-  /**
-   * Helper method to add a property with a value to the component.
-   *
-   * @param {String}               name         Property name to add
-   * @param {String|Number|Object} value        Property value
-   * @return {Property}                    The created property
-   */
-  addPropertyWithValue(name, value) {
-    let prop = new Property(name);
-    prop.setValue(value);
-    this.addProperty(prop);
-    return prop;
-  }
-  /**
-   * Helper method that will update or create a property of the given name
-   * and sets its value. If multiple properties with the given name exist,
-   * only the first is updated.
-   *
-   * @param {String}               name         Property name to update
-   * @param {String|Number|Object} value        Property value
-   * @return {Property}                    The created property
-   */
-  updatePropertyWithValue(name, value) {
-    let prop = this.getFirstProperty(name);
-    if (prop) {
-      prop.setValue(value);
-    } else {
-      prop = this.addPropertyWithValue(name, value);
-    }
-    return prop;
-  }
-  /**
-   * Removes a single property by name or the instance of the specific
-   * property.
-   *
-   * @param {String|Property} nameOrProp     Property name or instance to remove
-   * @return {Boolean}                            True, when deleted
-   */
-  removeProperty(nameOrProp) {
-    let removed = this._removeObject(PROPERTY_INDEX, "_properties", nameOrProp);
-    if (removed) {
-      this._hydratedPropertyCount--;
-    }
-    return removed;
-  }
-  /**
-   * Removes all properties associated with this component, optionally
-   * filtered by name.
-   *
-   * @param {String=} name        Lowercase property name
-   * @return {Boolean}            True, when deleted
-   */
-  removeAllProperties(name) {
-    let removed = this._removeAllObjects(PROPERTY_INDEX, "_properties", name);
-    this._hydratedPropertyCount = 0;
-    return removed;
-  }
-  /**
-   * Returns the Object representation of this component. The returned object
-   * is a live jCal object and should be cloned if modified.
-   * @return {Object}
-   */
-  toJSON() {
-    return this.jCal;
-  }
-  /**
-   * The string representation of this component.
-   * @return {String}
-   */
-  toString() {
-    return stringify.component(
-      this.jCal,
-      this._designSet
-    );
-  }
-  /**
-   * Retrieve a time zone definition from the component tree, if any is present.
-   * If the tree contains no time zone definitions or the TZID cannot be
-   * matched, returns null.
-   *
-   * @param {String} tzid     The ID of the time zone to retrieve
-   * @return {Timezone}  The time zone corresponding to the ID, or null
-   */
-  getTimeZoneByID(tzid) {
-    if (this.parent) {
-      return this.parent.getTimeZoneByID(tzid);
-    }
-    if (!this._timezoneCache) {
-      return null;
-    }
-    if (this._timezoneCache.has(tzid)) {
-      return this._timezoneCache.get(tzid);
-    }
-    const zones2 = this.getAllSubcomponents("vtimezone");
-    for (const zone of zones2) {
-      if (zone.getFirstProperty("tzid").getFirstValue() === tzid) {
-        const hydratedZone = new Timezone({
-          component: zone,
-          tzid
-        });
-        this._timezoneCache.set(tzid, hydratedZone);
-        return hydratedZone;
-      }
-    }
-    return null;
-  }
-};
-var RecurExpansion = class {
-  /**
-   * Creates a new ICAL.RecurExpansion instance.
-   *
-   * The options object can be filled with the specified initial values. It can also contain
-   * additional members, as a result of serializing a previous expansion state, as shown in the
-   * example.
-   *
-   * @param {Object} options
-   *        Recurrence expansion options
-   * @param {Time} options.dtstart
-   *        Start time of the event
-   * @param {Component=} options.component
-   *        Component for expansion, required if not resuming.
-   */
-  constructor(options) {
-    this.ruleDates = [];
-    this.exDates = [];
-    this.fromData(options);
-  }
-  /**
-   * True when iteration is fully completed.
-   * @type {Boolean}
-   */
-  complete = false;
-  /**
-   * Array of rrule iterators.
-   *
-   * @type {RecurIterator[]}
-   * @private
-   */
-  ruleIterators = null;
-  /**
-   * Array of rdate instances.
-   *
-   * @type {Time[]}
-   * @private
-   */
-  ruleDates = null;
-  /**
-   * Array of exdate instances.
-   *
-   * @type {Time[]}
-   * @private
-   */
-  exDates = null;
-  /**
-   * Current position in ruleDates array.
-   * @type {Number}
-   * @private
-   */
-  ruleDateInc = 0;
-  /**
-   * Current position in exDates array
-   * @type {Number}
-   * @private
-   */
-  exDateInc = 0;
-  /**
-   * Current negative date.
-   *
-   * @type {Time}
-   * @private
-   */
-  exDate = null;
-  /**
-   * Current additional date.
-   *
-   * @type {Time}
-   * @private
-   */
-  ruleDate = null;
-  /**
-   * Start date of recurring rules.
-   *
-   * @type {Time}
-   */
-  dtstart = null;
-  /**
-   * Last expanded time
-   *
-   * @type {Time}
-   */
-  last = null;
-  /**
-   * Initialize the recurrence expansion from the data object. The options
-   * object may also contain additional members, see the
-   * {@link ICAL.RecurExpansion constructor} for more details.
-   *
-   * @param {Object} options
-   *        Recurrence expansion options
-   * @param {Time} options.dtstart
-   *        Start time of the event
-   * @param {Component=} options.component
-   *        Component for expansion, required if not resuming.
-   */
-  fromData(options) {
-    let start = formatClassType(options.dtstart, Time);
-    if (!start) {
-      throw new Error(".dtstart (ICAL.Time) must be given");
-    } else {
-      this.dtstart = start;
-    }
-    if (options.component) {
-      this._init(options.component);
-    } else {
-      this.last = formatClassType(options.last, Time) || start.clone();
-      if (!options.ruleIterators) {
-        throw new Error(".ruleIterators or .component must be given");
-      }
-      this.ruleIterators = options.ruleIterators.map(function(item) {
-        return formatClassType(item, RecurIterator);
+    const err = toError(reason, "peer disconnected");
+    handshakeManager.clearPeer(id, err);
+    delete peerMap[id];
+    delete activePeerMap[id];
+    actionManager.clearPeer(id, err);
+    (_a = pendingPongs[id]) == null ? void 0 : _a.splice(0).forEach((waiter) => waiter.reject(err));
+    delete pendingPongs[id];
+    mediaManager.clearPeer(id);
+  };
+  const exitPeer = (id, peer, reason) => {
+    var _a;
+    const current = peerMap[id];
+    if (!current) return;
+    if (peer && current !== peer) return;
+    const wasActive = Boolean(activePeerMap[id]);
+    clearPeerState(id, reason);
+    current.destroy();
+    if (wasActive) (_a = listeners.onPeerLeave) == null ? void 0 : _a.call(listeners, id);
+    onPeerLeave(id);
+  };
+  const leave = () => leavePromise ?? (leavePromise = (async () => {
+    onBeforeLeave == null ? void 0 : onBeforeLeave();
+    const controller = new AbortController();
+    leaveAction.send("", void 0, void 0, void 0, controller.signal).catch(noOp);
+    await new Promise((res) => setTimeout(res, 99));
+    controller.abort();
+    try {
+      entries(peerMap).forEach(([id, peer]) => {
+        peer.destroy();
+        clearPeerState(id, mkErr("room left"));
       });
-      this.ruleDateInc = options.ruleDateInc;
-      this.exDateInc = options.exDateInc;
-      if (options.ruleDates) {
-        this.ruleDates = options.ruleDates.map((item) => formatClassType(item, Time));
-        this.ruleDate = this.ruleDates[this.ruleDateInc];
-      }
-      if (options.exDates) {
-        this.exDates = options.exDates.map((item) => formatClassType(item, Time));
-        this.exDate = this.exDates[this.exDateInc];
-      }
-      if (typeof options.complete !== "undefined") {
-        this.complete = options.complete;
+    } finally {
+      try {
+        unregisterBeforeUnloadCleanup();
+      } finally {
+        onSelfLeave();
       }
     }
+  })());
+  const pingAction = makeActionInternal(internalNs("ping"));
+  const pongAction = makeActionInternal(internalNs("pong"));
+  const signalAction = makeActionInternal(internalNs("signal"));
+  const streamMetaAction = makeActionInternal(internalNs("stream"), { maxPayloadBytes: 65536 });
+  const trackMetaAction = makeActionInternal(internalNs("track"), { maxPayloadBytes: 65536 });
+  const leaveAction = makeActionInternal(internalNs("leave"), {
+    sendToPending: true,
+    receiveWhilePending: true
+  });
+  const handshakeDataAction = makeActionInternal(internalNs("hsdata"), {
+    sendToPending: true,
+    receiveWhilePending: true,
+    maxPayloadBytes: 65536
+  });
+  const handshakeReadyAction = makeActionInternal(internalNs("hsready"), {
+    sendToPending: true,
+    receiveWhilePending: true
+  });
+  const handshakeManager = createHandshakeManager({
+    ...onPeerHandshake === void 0 ? {} : { onPeerHandshake },
+    ...onHandshakeError === void 0 ? {} : { onHandshakeError },
+    handshakeTimeoutMs,
+    sendHandshakeData: handshakeDataAction.send,
+    sendHandshakeReady: handshakeReadyAction.send,
+    onActivate: (id, peer) => {
+      var _a;
+      activePeerMap[id] = peer;
+      peer.setHandlers({ signal: (sdp) => {
+        if (activePeerMap[id] === peer) signalAction.send(sdp, id).catch(noOp);
+      } });
+      (_a = listeners.onPeerJoin) == null ? void 0 : _a.call(listeners, id);
+    },
+    onFailure: (id, peer, reason) => kickPeer(id, peer, reason)
+  });
+  pingAction.onMessage((_, id) => {
+    pongAction.send("", id).catch(noOp);
+  });
+  pongAction.onMessage((_, id) => {
+    var _a;
+    const queue = pendingPongs[id];
+    (_a = queue == null ? void 0 : queue.shift()) == null ? void 0 : _a.resolve();
+    if (queue && !queue.length) delete pendingPongs[id];
+  });
+  signalAction.onMessage((sdp, id) => {
+    var _a;
+    (_a = activePeerMap[id]) == null ? void 0 : _a.signal(sdp);
+  });
+  streamMetaAction.onMessage((meta, id) => mediaManager.receiveStreamMeta(meta, id));
+  trackMetaAction.onMessage((meta, id) => mediaManager.receiveTrackMeta(meta, id));
+  leaveAction.onMessage((_, id) => exitPeer(id, void 0, mkErr("peer left room")));
+  handshakeDataAction.onMessage((data, id, metadata) => handshakeManager.receiveHandshakeData(data, id, metadata));
+  handshakeReadyAction.onMessage((_, id) => handshakeManager.receiveHandshakeReady(id));
+  onPeer((peer, id) => {
+    const existingPeer = peerMap[id];
+    if (existingPeer) {
+      if (existingPeer === peer) return;
+      existingPeer.destroy();
+      clearPeerState(id, mkErr("peer replaced"));
+    }
+    peerMap[id] = peer;
+    handshakeManager.addPeer(id, peer);
+    peer.setHandlers({
+      data: (d) => {
+        if (peerMap[id] === peer) handleData(id, d);
+      },
+      stream: (stream) => mediaManager.receiveRemoteStream(id, stream),
+      track: (track, stream) => mediaManager.receiveRemoteTrack(id, track, stream),
+      close: () => exitPeer(id, peer, mkErr("peer disconnected")),
+      error: (err) => {
+        console.error(`${libName} peer error:`, err);
+        exitPeer(id, peer, err);
+      }
+    });
+    handshakeManager.start(id, peer);
+  });
+  if (isBrowser) unregisterBeforeUnloadCleanup = registerBeforeUnloadCleanup(() => leave().catch(noOp));
+  return {
+    makeAction,
+    leave,
+    ping: async (id) => {
+      if (!activePeerMap[id]) throw mkErr(`no active peer with id ${id}`);
+      const start = Date.now();
+      await new Promise((resolve, reject) => {
+        const queue = pendingPongs[id] ?? (pendingPongs[id] = []);
+        const clearFromQueue = () => {
+          const currentQueue = pendingPongs[id];
+          if (!currentQueue) return;
+          const i = currentQueue.indexOf(waiter);
+          if (i > -1) currentQueue.splice(i, 1);
+          if (!currentQueue.length) delete pendingPongs[id];
+        };
+        const waiter = {
+          resolve: () => {
+            clearFromQueue();
+            resolve();
+          },
+          reject: (reason) => {
+            clearFromQueue();
+            reject(reason);
+          }
+        };
+        queue.push(waiter);
+        pingAction.send("", id).catch((err) => waiter.reject(toError(err, "peer disconnected")));
+      });
+      return Date.now() - start;
+    },
+    isPassive: () => isPassive,
+    getPeers: () => fromEntries(entries(activePeerMap).map(([id, peer]) => [id, peer.connection])),
+    addStream: (stream, options = {}) => mediaManager.addStream(stream, options, streamMetaAction.send),
+    removeStream: (stream, options = {}) => {
+      mediaManager.removeStream(stream, options.target);
+    },
+    addTrack: (track, stream, options = {}) => mediaManager.addTrack(track, stream, options, trackMetaAction.send),
+    removeTrack: (track, options = {}) => {
+      mediaManager.removeTrack(track, options.target);
+    },
+    replaceTrack: (oldTrack, newTrack, options = {}) => mediaManager.replaceTrack(oldTrack, newTrack, options, trackMetaAction.send),
+    get onPeerJoin() {
+      return listeners.onPeerJoin;
+    },
+    set onPeerJoin(handler) {
+      listeners.onPeerJoin = handler;
+      if (handler) keys(activePeerMap).forEach((peerId) => handler(peerId));
+    },
+    get onPeerLeave() {
+      return listeners.onPeerLeave;
+    },
+    set onPeerLeave(handler) {
+      listeners.onPeerLeave = handler;
+    },
+    get onPeerStream() {
+      return mediaManager.onPeerStream;
+    },
+    set onPeerStream(handler) {
+      mediaManager.onPeerStream = handler;
+    },
+    get onPeerTrack() {
+      return mediaManager.onPeerTrack;
+    },
+    set onPeerTrack(handler) {
+      mediaManager.onPeerTrack = handler;
+    }
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/shared-peer.mjs
+var roomFrameVersion = 1;
+var roomPresenceFrameVersion = 2;
+var wrapRoomFrame = (roomToken, data) => {
+  const tokenBytes = encodeBytes(roomToken);
+  const frame = new Uint8Array(3 + tokenBytes.byteLength + data.byteLength);
+  frame[0] = roomFrameVersion;
+  frame[1] = tokenBytes.byteLength >>> 8 & 255;
+  frame[2] = tokenBytes.byteLength & 255;
+  frame.set(tokenBytes, 3);
+  frame.set(data, 3 + tokenBytes.byteLength);
+  return frame;
+};
+var wrapRoomPresenceFrame = (roomToken, isPresent) => {
+  const tokenBytes = encodeBytes(roomToken);
+  const frame = new Uint8Array(4 + tokenBytes.byteLength);
+  frame[0] = roomPresenceFrameVersion;
+  frame[1] = Number(isPresent);
+  frame[2] = tokenBytes.byteLength >>> 8 & 255;
+  frame[3] = tokenBytes.byteLength & 255;
+  frame.set(tokenBytes, 4);
+  return frame;
+};
+var decodeRoomTokenHeader = (buffer, offset) => {
+  if (buffer.byteLength < offset + 2) return null;
+  const tokenSize = (buffer[offset] ?? 0) << 8 | (buffer[offset + 1] ?? 0);
+  const headerSize = offset + 2 + tokenSize;
+  if (tokenSize <= 0 || tokenSize > 128 || buffer.byteLength < headerSize) return null;
+  return {
+    roomToken: decodeBytes(buffer.subarray(offset + 2, headerSize)),
+    headerSize
+  };
+};
+var unwrapFrame = (data) => {
+  const buffer = new Uint8Array(data);
+  if (buffer.byteLength < 3 || buffer.byteLength > 16515) return null;
+  if (buffer[0] === roomFrameVersion) {
+    const header = decodeRoomTokenHeader(buffer, 1);
+    return header ? {
+      type: "room",
+      roomToken: header.roomToken,
+      payload: buffer.subarray(header.headerSize).slice().buffer
+    } : null;
   }
-  /**
-   * Compare two ICAL.Time objects.  When the second parameter is a DATE and the first parameter is
-   * DATE-TIME, strip the time and compare only the days.
-   *
-   * @private
-   * @param {Time} a   The one object to compare
-   * @param {Time} b   The other object to compare
-   */
-  _compare_special(a, b) {
-    if (!a.isDate && b.isDate)
-      return new Time({ year: a.year, month: a.month, day: a.day }).compare(b);
-    return a.compare(b);
+  if (buffer[0] === roomPresenceFrameVersion) {
+    const header = decodeRoomTokenHeader(buffer, 2);
+    return header ? {
+      type: "presence",
+      roomToken: header.roomToken,
+      isPresent: buffer[1] === 1
+    } : null;
   }
-  /**
-   * Retrieve the next occurrence in the series.
-   * @return {Time}
-   */
-  next() {
-    let iter;
-    let next;
-    let compare;
-    let maxTries = 500;
-    let currentTry = 0;
-    while (true) {
-      if (currentTry++ > maxTries) {
-        throw new Error(
-          "max tries have occurred, rule may be impossible to fulfill."
-        );
+  return null;
+};
+var isPeerUnderlyingStale = (peer) => {
+  const { connection, channel } = peer;
+  return peer.isDead || connection.connectionState === "closed" || connection.connectionState === "failed" || connection.iceConnectionState === "closed" || connection.iceConnectionState === "failed" || (channel == null ? void 0 : channel.readyState) === "closing" || (channel == null ? void 0 : channel.readyState) === "closed";
+};
+var getConnectedPeerHealth = (peer) => {
+  if (isPeerUnderlyingStale(peer)) return "stale";
+  const { channel } = peer;
+  if (!channel || channel.readyState !== "open") return "transient";
+  return "live";
+};
+var SharedPeerManager = class {
+  rooms = /* @__PURE__ */ new Map();
+  unclaimedDataTimers = /* @__PURE__ */ new WeakMap();
+  pendingDataTimers = /* @__PURE__ */ new WeakMap();
+  byApp = {};
+  registerRoom(appId, roomId, tokenPromise, options) {
+    const rooms = this.rooms.get(appId) ?? /* @__PURE__ */ new Map();
+    if (rooms.has(roomId)) throw mkErr("room membership already registered");
+    const registration = {
+      token: null,
+      tokenPromise,
+      ...options
+    };
+    rooms.set(roomId, registration);
+    this.rooms.set(appId, rooms);
+    const current = () => {
+      var _a;
+      return ((_a = this.rooms.get(appId)) == null ? void 0 : _a.get(roomId)) === registration;
+    };
+    const advertise = (present) => {
+      if (!registration.token) return;
+      for (const shared of values(this.byApp[appId] ?? {})) try {
+        this.sendRoomPresence(shared, registration.token, present);
+      } catch {
       }
-      next = this.ruleDate;
-      iter = this._nextRecurrenceIter(this.last);
-      if (!next && !iter) {
-        this.complete = true;
-        break;
+    };
+    tokenPromise.then((token) => {
+      if (!current()) return;
+      registration.token = token;
+      for (const shared of values(this.byApp[appId] ?? {})) {
+        if (shared.remoteRoomTokens.has(token)) this.attachRoom(appId, roomId, registration, shared);
+        this.discardUnboundData(shared);
       }
-      if (!next || iter && next.compare(iter.last) > 0) {
-        next = iter.last.clone();
-        iter.next();
-      }
-      if (this.ruleDate === next) {
-        this._nextRuleDay();
-      }
-      this.last = next;
-      if (this.exDate) {
-        compare = this._compare_special(this.last, this.exDate);
-        if (compare > 0) {
-          this._nextExDay();
+      if (current() && registration.active) advertise(true);
+    });
+    return {
+      connect: (peerId, peer, idleMs) => {
+        if (!current()) {
+          peer.destroy();
+          return;
         }
-        if (compare === 0) {
-          this._nextExDay();
-          continue;
+        const existing = this.reusable(appId, peerId);
+        if (existing && existing.peer !== peer) peer.destroy();
+        const shared = existing ?? this.register(appId, peerId, peer, idleMs);
+        this.attachRoom(appId, roomId, registration, shared);
+        if (!existing) {
+          for (const room of rooms.values()) if (room.active && room.token) this.sendRoomPresence(shared, room.token, true);
+        }
+      },
+      reuse: (peerId) => {
+        if (!current()) return false;
+        const shared = this.reusable(appId, peerId);
+        if (!shared) return false;
+        this.attachRoom(appId, roomId, registration, shared);
+        return true;
+      },
+      setActive: (active) => {
+        if (!current() || registration.active === active) return;
+        registration.active = active;
+        advertise(active);
+      },
+      leave: () => {
+        var _a, _b;
+        if (!current()) return;
+        rooms.delete(roomId);
+        if (!rooms.size) this.rooms.delete(appId);
+        advertise(false);
+        for (const shared of values(this.byApp[appId] ?? {})) {
+          const binding = shared.bindings[roomId];
+          (_b = binding == null ? void 0 : (_a = binding.handlers).close) == null ? void 0 : _b.call(_a);
+          binding == null ? void 0 : binding.detach();
+          this.discardUnboundData(shared);
         }
       }
-      return this.last;
-    }
+    };
   }
-  /**
-   * Converts object into a serialize-able format. This format can be passed
-   * back into the expansion to resume iteration.
-   * @return {Object}
-   */
-  toJSON() {
-    function toJSON(item) {
-      return item.toJSON();
-    }
-    let result = /* @__PURE__ */ Object.create(null);
-    result.ruleIterators = this.ruleIterators.map(toJSON);
-    if (this.ruleDates) {
-      result.ruleDates = this.ruleDates.map(toJSON);
-    }
-    if (this.exDates) {
-      result.exDates = this.exDates.map(toJSON);
-    }
-    result.ruleDateInc = this.ruleDateInc;
-    result.exDateInc = this.exDateInc;
-    result.last = this.last.toJSON();
-    result.dtstart = this.dtstart.toJSON();
-    result.complete = this.complete;
-    return result;
+  owns(appId, peerId, peer) {
+    var _a, _b;
+    return ((_b = (_a = this.byApp[appId]) == null ? void 0 : _a[peerId]) == null ? void 0 : _b.peer) === peer;
   }
-  /**
-   * Extract all dates from the properties in the given component. The
-   * properties will be filtered by the property name.
-   *
-   * @private
-   * @param {Component} component             The component to search in
-   * @param {String} propertyName             The property name to search for
-   * @return {Time[]}                         The extracted dates.
-   */
-  _extractDates(component, propertyName) {
-    let result = [];
-    let props = component.getAllProperties(propertyName);
-    for (let i = 0, len = props.length; i < len; i++) {
-      for (let prop of props[i].getValues()) {
-        let idx = binsearchInsert(
-          result,
-          prop,
-          (a, b) => a.compare(b)
-        );
-        result.splice(idx, 0, prop);
-      }
-    }
-    return result;
-  }
-  /**
-   * Initialize the recurrence expansion.
-   *
-   * @private
-   * @param {Component} component    The component to initialize from.
-   */
-  _init(component) {
-    this.ruleIterators = [];
-    this.last = this.dtstart.clone();
-    if (!component.hasProperty("rdate") && !component.hasProperty("rrule") && !component.hasProperty("recurrence-id")) {
-      this.ruleDate = this.last.clone();
-      this.complete = true;
+  reusable(appId, peerId) {
+    var _a;
+    const shared = (_a = this.byApp[appId]) == null ? void 0 : _a[peerId];
+    if (shared && isPeerUnderlyingStale(shared.peer)) {
+      this.clear(appId, peerId, { destroyPeer: true });
       return;
     }
-    if (component.hasProperty("rdate")) {
-      this.ruleDates = this._extractDates(component, "rdate");
-      if (this.ruleDates[0] && this.ruleDates[0].compare(this.dtstart) < 0) {
-        this.ruleDateInc = 0;
-        this.last = this.ruleDates[0].clone();
-      } else {
-        this.ruleDateInc = binsearchInsert(
-          this.ruleDates,
-          this.last,
-          (a, b) => a.compare(b)
-        );
-      }
-      this.ruleDate = this.ruleDates[this.ruleDateInc];
-    }
-    if (component.hasProperty("rrule")) {
-      let rules = component.getAllProperties("rrule");
-      let i = 0;
-      let len = rules.length;
-      let rule;
-      let iter;
-      for (; i < len; i++) {
-        rule = rules[i].getFirstValue();
-        iter = rule.iterator(this.dtstart);
-        this.ruleIterators.push(iter);
-        iter.next();
-      }
-    }
-    if (component.hasProperty("exdate")) {
-      this.exDates = this._extractDates(component, "exdate");
-      this.exDateInc = binsearchInsert(
-        this.exDates,
-        this.last,
-        this._compare_special
-      );
-      this.exDate = this.exDates[this.exDateInc];
-    }
+    return shared;
   }
-  /**
-   * Advance to the next exdate
-   * @private
-   */
-  _nextExDay() {
-    this.exDate = this.exDates[++this.exDateInc];
+  attachRoom(appId, roomId, registration, shared) {
+    var _a;
+    if (((_a = this.rooms.get(appId)) == null ? void 0 : _a.get(roomId)) !== registration || shared.isClosing || this.get(appId, shared.peerId) !== shared) return;
+    const { proxy, isNew } = this.bind(roomId, registration.tokenPromise, shared, { onDetach: () => registration.onDetach(shared.peerId, shared.peer) });
+    if (isNew) registration.onPeer(proxy, shared.peerId, shared.peer);
   }
-  /**
-   * Advance to the next rule date
-   * @private
-   */
-  _nextRuleDay() {
-    this.ruleDate = this.ruleDates[++this.ruleDateInc];
+  get(appId, peerId) {
+    var _a;
+    return (_a = this.byApp[appId]) == null ? void 0 : _a[peerId];
   }
-  /**
-   * Find and return the recurrence rule with the most recent event and
-   * return it.
-   *
-   * @private
-   * @return {?RecurIterator}    Found iterator.
-   */
-  _nextRecurrenceIter() {
-    let iters = this.ruleIterators;
-    if (iters.length === 0) {
-      return null;
-    }
-    let len = iters.length;
-    let iter;
-    let iterTime;
-    let iterIdx = 0;
-    let chosenIter;
-    for (; iterIdx < len; iterIdx++) {
-      iter = iters[iterIdx];
-      iterTime = iter.last;
-      if (iter.completed) {
-        len--;
-        if (iterIdx !== 0) {
-          iterIdx--;
-        }
-        iters.splice(iterIdx, 1);
-        continue;
-      }
-      if (!chosenIter || chosenIter.last.compare(iterTime) > 0) {
-        chosenIter = iter;
-      }
-    }
-    return chosenIter;
+  sendRoomPresence(shared, roomToken, isPresent) {
+    if (shared.isClosing || isPeerUnderlyingStale(shared.peer)) return;
+    shared.peer.sendData(wrapRoomPresenceFrame(roomToken, isPresent));
   }
-};
-var Event = class _Event {
-  /**
-   * Creates a new ICAL.Event instance.
-   *
-   * @param {Component=} component              The ICAL.Component to base this event on
-   * @param {Object} [options]                  Options for this event
-   * @param {Boolean=} options.strictExceptions  When true, will verify exceptions are related by
-   *                                              their UUID
-   * @param {Array<Component|Event>=} options.exceptions
-   *          Exceptions to this event, either as components or events. If not
-   *            specified exceptions will automatically be set in relation of
-   *            component's parent
-   */
-  constructor(component, options) {
-    if (!(component instanceof Component)) {
-      options = component;
-      component = null;
-    }
-    if (component) {
-      this.component = component;
-    } else {
-      this.component = new Component("vevent");
-    }
-    this._rangeExceptionCache = /* @__PURE__ */ Object.create(null);
-    this.exceptions = /* @__PURE__ */ Object.create(null);
-    this.rangeExceptions = [];
-    if (options && options.strictExceptions) {
-      this.strictExceptions = options.strictExceptions;
-    }
-    if (options && options.exceptions) {
-      options.exceptions.forEach(this.relateException, this);
-    } else if (this.component.parent && !this.isRecurrenceException()) {
-      this.component.parent.getAllSubcomponents("vevent").forEach(function(event) {
-        if (event.hasProperty("recurrence-id")) {
-          this.relateException(event);
-        }
-      }, this);
-    }
+  clear(appId, peerId, { destroyPeer }) {
+    const map = this.byApp[appId];
+    const shared = map == null ? void 0 : map[peerId];
+    if (!shared || shared.isClosing) return;
+    shared.idleTimer = resetTimer(shared.idleTimer);
+    this.clearDataTimers(shared);
+    shared.isClosing = true;
+    if (destroyPeer && !shared.peer.isDead) shared.peer.destroy();
+    const bindings = values(shared.bindings);
+    shared.bindings = {};
+    shared.bindingsByToken = {};
+    shared.controlRoomId = null;
+    delete map[peerId];
+    bindings.forEach((binding) => {
+      var _a, _b;
+      (_b = (_a = binding.handlers).close) == null ? void 0 : _b.call(_a);
+      binding.pendingData.length = 0;
+      binding.pendingSendData.length = 0;
+      binding.pendingTracks.length = 0;
+    });
+    shared.media.clearRemote();
+    shared.pendingDataByToken.clear();
+    shared.remoteRoomTokens.clear();
+    if (keys(map).length === 0) delete this.byApp[appId];
   }
-  static THISANDFUTURE = "THISANDFUTURE";
-  /**
-   * List of related event exceptions.
-   *
-   * @type {Event[]}
-   */
-  exceptions = null;
-  /**
-   * When true, will verify exceptions are related by their UUID.
-   *
-   * @type {Boolean}
-   */
-  strictExceptions = false;
-  /**
-   * Relates a given event exception to this object.  If the given component
-   * does not share the UID of this event it cannot be related and will throw
-   * an exception.
-   *
-   * If this component is an exception it cannot have other exceptions
-   * related to it.
-   *
-   * @param {Component|Event} obj       Component or event
-   */
-  relateException(obj) {
-    if (this.isRecurrenceException()) {
-      throw new Error("cannot relate exception to exceptions");
+  register(appId, peerId, peer, idleMs) {
+    var _a, _b;
+    const existing = (_a = this.byApp[appId]) == null ? void 0 : _a[peerId];
+    if (existing) {
+      existing.idleTimer = resetTimer(existing.idleTimer);
+      if (existing.peer === peer) return existing;
+      this.clear(appId, peerId, { destroyPeer: true });
     }
-    if (obj instanceof Component) {
-      obj = new _Event(obj);
-    }
-    if (this.strictExceptions && obj.uid !== this.uid) {
-      throw new Error("attempted to relate unrelated exception");
-    }
-    let id = obj.recurrenceId.toString();
-    this.exceptions[id] = obj;
-    if (obj.modifiesFuture()) {
-      let item = [
-        obj.recurrenceId.toUnixTime(),
-        id
-      ];
-      let idx = binsearchInsert(
-        this.rangeExceptions,
-        item,
-        compareRangeException
-      );
-      this.rangeExceptions.splice(idx, 0, item);
-    }
-  }
-  /**
-   * Checks if this record is an exception and has the RANGE=THISANDFUTURE
-   * value.
-   *
-   * @return {Boolean}        True, when exception is within range
-   */
-  modifiesFuture() {
-    if (!this.component.hasProperty("recurrence-id")) {
-      return false;
-    }
-    let range = this.component.getFirstProperty("recurrence-id").getParameter("range");
-    return range === _Event.THISANDFUTURE;
-  }
-  /**
-   * Finds the range exception nearest to the given date.
-   *
-   * @param {Time} time   usually an occurrence time of an event
-   * @return {?Event}     the related event/exception or null
-   */
-  findRangeException(time) {
-    if (!this.rangeExceptions.length) {
-      return null;
-    }
-    let utc = time.toUnixTime();
-    let idx = binsearchInsert(
-      this.rangeExceptions,
-      [utc],
-      compareRangeException
-    );
-    idx -= 1;
-    if (idx < 0) {
-      return null;
-    }
-    let rangeItem = this.rangeExceptions[idx];
-    if (utc < rangeItem[0]) {
-      return null;
-    }
-    return rangeItem[1];
-  }
-  /**
-   * Returns the occurrence details based on its start time.  If the
-   * occurrence has an exception will return the details for that exception.
-   *
-   * NOTE: this method is intend to be used in conjunction
-   *       with the {@link ICAL.Event#iterator iterator} method.
-   *
-   * @param {Time} occurrence               time occurrence
-   * @return {occurrenceDetails}            Information about the occurrence
-   */
-  getOccurrenceDetails(occurrence) {
-    let id = occurrence.toString();
-    let utcId = occurrence.convertToZone(Timezone.utcTimezone).toString();
-    let item;
-    let result = {
-      //XXX: Clone?
-      recurrenceId: occurrence
+    const shared = {
+      appId,
+      peerId,
+      peer,
+      bindings: {},
+      bindingsByToken: {},
+      pendingDataByToken: /* @__PURE__ */ new Map(),
+      remoteRoomTokens: /* @__PURE__ */ new Set(),
+      idleTimer: null,
+      controlRoomId: null,
+      streamOwners: /* @__PURE__ */ new Map(),
+      trackOwners: /* @__PURE__ */ new Map(),
+      media: createMediaIdentityCache(),
+      idleMs,
+      isClosing: false
     };
-    if (id in this.exceptions) {
-      item = result.item = this.exceptions[id];
-      result.startDate = item.startDate;
-      result.endDate = item.endDate;
-      result.item = item;
-    } else if (utcId in this.exceptions) {
-      item = this.exceptions[utcId];
-      result.startDate = item.startDate;
-      result.endDate = item.endDate;
-      result.item = item;
-    } else {
-      let rangeExceptionId = this.findRangeException(
-        occurrence
-      );
-      let end;
-      if (rangeExceptionId) {
-        let exception = this.exceptions[rangeExceptionId];
-        result.item = exception;
-        let startDiff = this._rangeExceptionCache[rangeExceptionId];
-        if (!startDiff) {
-          let original = exception.recurrenceId.clone();
-          let newStart = exception.startDate.clone();
-          original.zone = newStart.zone;
-          startDiff = newStart.subtractDate(original);
-          this._rangeExceptionCache[rangeExceptionId] = startDiff;
-        }
-        let start = occurrence.clone();
-        start.zone = exception.startDate.zone;
-        start.addDuration(startDiff);
-        end = start.clone();
-        end.addDuration(exception.duration);
-        result.startDate = start;
-        result.endDate = end;
-      } else {
-        end = occurrence.clone();
-        end.addDuration(this.duration);
-        result.endDate = end;
-        result.startDate = occurrence;
-        result.item = this;
-      }
-    }
-    return result;
+    ((_b = this.byApp)[appId] ?? (_b[appId] = {}))[peerId] = shared;
+    const clearCurrent = () => {
+      if (this.owns(appId, peerId, peer)) this.clear(appId, peerId, { destroyPeer: true });
+    };
+    peer.setHandlers({
+      data: (data) => this.dispatchData(shared, data),
+      signal: (signal) => this.dispatchSignal(shared, signal),
+      close: clearCurrent,
+      error: (err) => {
+        console.error(`${libName} peer error:`, err);
+        clearCurrent();
+      },
+      track: (track, stream) => this.dispatchTrack(shared, track, stream)
+    });
+    return shared;
   }
-  /**
-   * Builds a recur expansion instance for a specific point in time (defaults
-   * to startDate).
-   *
-   * @param {Time=} startTime     Starting point for expansion
-   * @return {RecurExpansion}    Expansion object
-   */
-  iterator(startTime) {
-    return new RecurExpansion({
-      component: this.component,
-      dtstart: startTime || this.startDate
+  bind(roomId, roomTokenPromise, shared, { onDetach }) {
+    const existingBinding = shared.bindings[roomId];
+    if (existingBinding) {
+      shared.idleTimer = resetTimer(shared.idleTimer);
+      return {
+        proxy: existingBinding.proxy,
+        isNew: false
+      };
+    }
+    const binding = {
+      roomId,
+      roomToken: null,
+      roomTokenPromise,
+      handlers: {},
+      pendingData: [],
+      pendingSendData: [],
+      pendingTracks: [],
+      detach: noOp,
+      proxy: {}
+    };
+    const detachBinding = () => {
+      if (shared.bindings[roomId] !== binding) return;
+      const shouldDestroy = keys(shared.bindings).length === 1 && (shared.streamOwners.size > 0 || shared.trackOwners.size > 0 || shared.media.hasRemoteMedia());
+      if (!shouldDestroy) this.pruneRoomOwnership(shared, roomId);
+      delete shared.bindings[roomId];
+      if (binding.roomToken && shared.bindingsByToken[binding.roomToken] === binding) delete shared.bindingsByToken[binding.roomToken];
+      if (shared.controlRoomId === roomId) shared.controlRoomId = keys(shared.bindings)[0] ?? null;
+      this.discardUnboundData(shared);
+      onDetach();
+      if (shouldDestroy) this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+      else this.scheduleIdleTimer(shared);
+    };
+    const proxy = {
+      get connection() {
+        return shared.peer.connection;
+      },
+      get channel() {
+        return shared.peer.channel;
+      },
+      get isDead() {
+        return shared.peer.isDead;
+      },
+      getOffer: (restartIce) => shared.peer.getOffer(restartIce),
+      signal: (sdp) => shared.peer.signal(sdp),
+      sendData: (data) => {
+        if (!binding.roomToken) {
+          binding.pendingSendData.push(data);
+          return;
+        }
+        shared.peer.sendData(wrapRoomFrame(binding.roomToken, data));
+      },
+      destroy: () => detachBinding(),
+      setHandlers: (newHandlers) => {
+        Object.assign(binding.handlers, newHandlers);
+        this.flushBindingQueues(shared, binding);
+      },
+      addStream: (stream) => {
+        const owners = shared.streamOwners.get(stream) ?? /* @__PURE__ */ new Set();
+        const shouldAttach = owners.size === 0;
+        owners.add(roomId);
+        shared.streamOwners.set(stream, owners);
+        if (shouldAttach) shared.peer.addStream(stream);
+      },
+      removeStream: (stream) => this.releaseStreamOwner(shared, stream, roomId),
+      addTrack: (track, stream) => {
+        const entry = shared.trackOwners.get(track) ?? {
+          stream,
+          rooms: /* @__PURE__ */ new Set()
+        };
+        const shouldAttach = entry.rooms.size === 0;
+        entry.stream = stream;
+        entry.rooms.add(roomId);
+        shared.trackOwners.set(track, entry);
+        if (shouldAttach) return shared.peer.addTrack(track, stream);
+        return shared.peer.connection.getSenders().find((s) => s.track === track) ?? shared.peer.addTrack(track, stream);
+      },
+      removeTrack: (track) => this.releaseTrackOwner(shared, track, roomId),
+      replaceTrack: async (oldTrack, newTrack) => {
+        const oldEntry = shared.trackOwners.get(oldTrack);
+        await shared.peer.replaceTrack(oldTrack, newTrack);
+        if (oldEntry && shared.trackOwners.get(oldTrack) === oldEntry) {
+          shared.trackOwners.delete(oldTrack);
+          const nextEntry = shared.trackOwners.get(newTrack) ?? {
+            stream: oldEntry.stream,
+            rooms: /* @__PURE__ */ new Set()
+          };
+          oldEntry.rooms.forEach((room) => nextEntry.rooms.add(room));
+          shared.trackOwners.set(newTrack, nextEntry);
+        }
+      },
+      __trysteroMedia: shared.media
+    };
+    binding.proxy = proxy;
+    binding.detach = detachBinding;
+    shared.bindings[roomId] = binding;
+    shared.controlRoomId ?? (shared.controlRoomId = roomId);
+    shared.idleTimer = resetTimer(shared.idleTimer);
+    roomTokenPromise.then((roomToken) => {
+      if (shared.isClosing || shared.bindings[roomId] !== binding) return;
+      binding.roomToken = roomToken;
+      shared.bindingsByToken[roomToken] = binding;
+      const pendingData = shared.pendingDataByToken.get(roomToken);
+      if (pendingData == null ? void 0 : pendingData.length) {
+        binding.pendingData.push(...pendingData);
+        shared.pendingDataByToken.delete(roomToken);
+      }
+      const pendingSendData = binding.pendingSendData.splice(0);
+      if (!isPeerUnderlyingStale(shared.peer)) pendingSendData.forEach((payload) => {
+        try {
+          shared.peer.sendData(wrapRoomFrame(roomToken, payload));
+        } catch {
+        }
+      });
+      this.flushBindingQueues(shared, binding);
+      this.discardUnboundData(shared);
+    });
+    return {
+      proxy,
+      isNew: true
+    };
+  }
+  releaseStreamOwner(shared, stream, roomIdToRemove) {
+    const rooms = shared.streamOwners.get(stream);
+    if (!rooms) return;
+    rooms.delete(roomIdToRemove);
+    if (rooms.size === 0) {
+      shared.streamOwners.delete(stream);
+      shared.peer.removeStream(stream);
+    }
+  }
+  releaseTrackOwner(shared, track, roomIdToRemove) {
+    const entry = shared.trackOwners.get(track);
+    if (!entry) return;
+    entry.rooms.delete(roomIdToRemove);
+    if (entry.rooms.size === 0) {
+      shared.trackOwners.delete(track);
+      shared.peer.removeTrack(track);
+    }
+  }
+  pruneRoomOwnership(shared, roomIdToRemove) {
+    shared.streamOwners.forEach((_, stream) => this.releaseStreamOwner(shared, stream, roomIdToRemove));
+    shared.trackOwners.forEach((_, track) => this.releaseTrackOwner(shared, track, roomIdToRemove));
+  }
+  scheduleIdleTimer(shared) {
+    if (shared.isClosing || keys(shared.bindings).length > 0) return;
+    shared.idleTimer = resetTimer(shared.idleTimer);
+    shared.idleTimer = setTimeout(() => {
+      var _a;
+      const current = (_a = this.byApp[shared.appId]) == null ? void 0 : _a[shared.peerId];
+      if (!current || keys(current.bindings).length > 0) return;
+      this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+    }, shared.idleMs);
+  }
+  getSignalBinding(shared) {
+    if (shared.controlRoomId) {
+      const selected = shared.bindings[shared.controlRoomId];
+      if (selected == null ? void 0 : selected.handlers.signal) return selected;
+    }
+    const fallback = values(shared.bindings).find((binding) => Boolean(binding.handlers.signal));
+    if (!fallback) return null;
+    shared.controlRoomId = fallback.roomId;
+    return fallback;
+  }
+  flushBindingQueues(shared, binding) {
+    const { handlers } = binding;
+    if (handlers.data && binding.pendingData.length > 0) {
+      const queued = binding.pendingData.splice(0);
+      this.syncDataTimers(shared);
+      queued.forEach((payload) => {
+        var _a;
+        return (_a = handlers.data) == null ? void 0 : _a.call(handlers, payload);
+      });
+    } else this.syncDataTimers(shared);
+    if ((handlers.track || handlers.stream) && binding.pendingTracks.length) binding.pendingTracks.splice(0).forEach(({ track, stream }) => {
+      var _a, _b;
+      (_a = handlers.track) == null ? void 0 : _a.call(handlers, track, stream);
+      (_b = handlers.stream) == null ? void 0 : _b.call(handlers, stream);
     });
   }
-  /**
-   * Checks if the event is recurring
-   *
-   * @return {Boolean}        True, if event is recurring
-   */
-  isRecurring() {
-    let comp = this.component;
-    return comp.hasProperty("rrule") || comp.hasProperty("rdate");
+  unclaimedBufferedFrameCount(shared) {
+    let count = 0;
+    for (const queue of shared.pendingDataByToken.values()) count += queue.length;
+    return count;
   }
-  /**
-   * Checks if the event describes a recurrence exception. See
-   * {@tutorial terminology} for details.
-   *
-   * @return {Boolean}    True, if the event describes a recurrence exception
-   */
-  isRecurrenceException() {
-    return this.component.hasProperty("recurrence-id");
+  boundBufferedFrameCount(shared) {
+    let count = 0;
+    for (const binding of values(shared.bindings)) count += binding.pendingData.length;
+    return count;
   }
-  /**
-   * Returns the types of recurrences this event may have.
-   *
-   * Returned as an object with the following possible keys:
-   *
-   *    - YEARLY
-   *    - MONTHLY
-   *    - WEEKLY
-   *    - DAILY
-   *    - MINUTELY
-   *    - SECONDLY
-   *
-   * @return {Object.<frequencyValues, Boolean>}
-   *          Object of recurrence flags
-   */
-  getRecurrenceTypes() {
-    let rules = this.component.getAllProperties("rrule");
-    let i = 0;
-    let len = rules.length;
-    let result = /* @__PURE__ */ Object.create(null);
-    for (; i < len; i++) {
-      let value = rules[i].getFirstValue();
-      result[value.freq] = true;
+  bufferedFrameCount(shared) {
+    return this.unclaimedBufferedFrameCount(shared) + this.boundBufferedFrameCount(shared);
+  }
+  clearDataTimers(shared) {
+    resetTimer(this.unclaimedDataTimers.get(shared));
+    this.unclaimedDataTimers.delete(shared);
+    resetTimer(this.pendingDataTimers.get(shared));
+    this.pendingDataTimers.delete(shared);
+  }
+  syncDataTimers(shared) {
+    if (shared.isClosing) {
+      this.clearDataTimers(shared);
+      return;
     }
-    return result;
+    if (this.unclaimedBufferedFrameCount(shared) === 0) {
+      resetTimer(this.unclaimedDataTimers.get(shared));
+      this.unclaimedDataTimers.delete(shared);
+    } else if (!this.unclaimedDataTimers.has(shared)) this.unclaimedDataTimers.set(shared, setTimeout(() => {
+      this.unclaimedDataTimers.delete(shared);
+      shared.pendingDataByToken.clear();
+    }, pendingDataTimeoutMs));
+    if (this.boundBufferedFrameCount(shared) === 0) {
+      resetTimer(this.pendingDataTimers.get(shared));
+      this.pendingDataTimers.delete(shared);
+    } else if (!this.pendingDataTimers.has(shared)) this.pendingDataTimers.set(shared, setTimeout(() => {
+      this.pendingDataTimers.delete(shared);
+      if (this.boundBufferedFrameCount(shared) > 0) this.failData(shared, "room data handler timed out");
+    }, pendingDataTimeoutMs));
   }
-  /**
-   * The uid of this event
-   * @type {String}
-   */
-  get uid() {
-    return this._firstProp("uid");
+  canBindRoomToken(shared, token) {
+    var _a;
+    return values(shared.bindings).some((binding) => !binding.roomToken) || [...((_a = this.rooms.get(shared.appId)) == null ? void 0 : _a.values()) ?? []].some((room) => !room.token || room.token === token);
   }
-  set uid(value) {
-    this._setProp("uid", value);
+  discardUnboundData(shared) {
+    for (const token of shared.pendingDataByToken.keys()) if (!this.canBindRoomToken(shared, token)) shared.pendingDataByToken.delete(token);
+    this.syncDataTimers(shared);
   }
-  /**
-   * The start date
-   * @type {Time}
-   */
-  get startDate() {
-    return this._firstProp("dtstart");
+  failData(shared, reason) {
+    console.warn(`${libName}: ${reason}; disconnecting peer ${shared.peerId}`);
+    this.clear(shared.appId, shared.peerId, { destroyPeer: true });
   }
-  set startDate(value) {
-    this._setTime("dtstart", value);
-  }
-  /**
-   * The end date. This can be the result directly from the property, or the
-   * end date calculated from start date and duration. Setting the property
-   * will remove any duration properties.
-   * @type {Time}
-   */
-  get endDate() {
-    let endDate = this._firstProp("dtend");
-    if (!endDate) {
-      let duration = this._firstProp("duration");
-      endDate = this.startDate.clone();
-      if (duration) {
-        endDate.addDuration(duration);
-      } else if (endDate.isDate) {
-        endDate.day += 1;
+  dispatchData(shared, data) {
+    var _a, _b;
+    if (shared.isClosing) return;
+    const decoded = unwrapFrame(data);
+    if (!decoded) {
+      this.failData(shared, "invalid or incompatible room frame");
+      return;
+    }
+    if (decoded.type === "presence") {
+      if (decoded.isPresent) {
+        if (!shared.remoteRoomTokens.has(decoded.roomToken) && shared.remoteRoomTokens.size >= 64) {
+          this.failData(shared, "too many advertised rooms");
+          return;
+        }
+        shared.remoteRoomTokens.add(decoded.roomToken);
+        for (const [roomId, registration] of this.rooms.get(shared.appId) ?? []) if (registration.token === decoded.roomToken) this.attachRoom(shared.appId, roomId, registration, shared);
+      } else {
+        shared.remoteRoomTokens.delete(decoded.roomToken);
+        shared.pendingDataByToken.delete(decoded.roomToken);
+        const binding2 = shared.bindingsByToken[decoded.roomToken];
+        (_b = binding2 == null ? void 0 : (_a = binding2.handlers).close) == null ? void 0 : _b.call(_a);
+        binding2 == null ? void 0 : binding2.detach();
+        this.syncDataTimers(shared);
       }
+      return;
     }
-    return endDate;
-  }
-  set endDate(value) {
-    if (this.component.hasProperty("duration")) {
-      this.component.removeProperty("duration");
+    const binding = shared.bindingsByToken[decoded.roomToken];
+    if (!binding) {
+      if (!this.canBindRoomToken(shared, decoded.roomToken) || this.bufferedFrameCount(shared) >= 64) return;
+      const pending = shared.pendingDataByToken.get(decoded.roomToken) ?? [];
+      pending.push(decoded.payload);
+      shared.pendingDataByToken.set(decoded.roomToken, pending);
+      this.syncDataTimers(shared);
+      return;
     }
-    this._setTime("dtend", value);
-  }
-  /**
-   * The duration. This can be the result directly from the property, or the
-   * duration calculated from start date and end date. Setting the property
-   * will remove any `dtend` properties.
-   * @type {Duration}
-   */
-  get duration() {
-    let duration = this._firstProp("duration");
-    if (!duration) {
-      return this.endDate.subtractDateTz(this.startDate);
-    }
-    return duration;
-  }
-  set duration(value) {
-    if (this.component.hasProperty("dtend")) {
-      this.component.removeProperty("dtend");
-    }
-    this._setProp("duration", value);
-  }
-  /**
-   * The location of the event.
-   * @type {String}
-   */
-  get location() {
-    return this._firstProp("location");
-  }
-  set location(value) {
-    this._setProp("location", value);
-  }
-  /**
-   * The attendees in the event
-   * @type {Property[]}
-   */
-  get attendees() {
-    return this.component.getAllProperties("attendee");
-  }
-  /**
-   * The event summary
-   * @type {String}
-   */
-  get summary() {
-    return this._firstProp("summary");
-  }
-  set summary(value) {
-    this._setProp("summary", value);
-  }
-  /**
-   * The event description.
-   * @type {String}
-   */
-  get description() {
-    return this._firstProp("description");
-  }
-  set description(value) {
-    this._setProp("description", value);
-  }
-  /**
-   * The event color from [rfc7986](https://datatracker.ietf.org/doc/html/rfc7986)
-   * @type {String}
-   */
-  get color() {
-    return this._firstProp("color");
-  }
-  set color(value) {
-    this._setProp("color", value);
-  }
-  /**
-   * The organizer value as an uri. In most cases this is a mailto: uri, but
-   * it can also be something else, like urn:uuid:...
-   * @type {String}
-   */
-  get organizer() {
-    return this._firstProp("organizer");
-  }
-  set organizer(value) {
-    this._setProp("organizer", value);
-  }
-  /**
-   * The sequence value for this event. Used for scheduling
-   * see {@tutorial terminology}.
-   * @type {Number}
-   */
-  get sequence() {
-    return this._firstProp("sequence");
-  }
-  set sequence(value) {
-    this._setProp("sequence", value);
-  }
-  /**
-   * The recurrence id for this event. See {@tutorial terminology} for details.
-   * @type {Time}
-   */
-  get recurrenceId() {
-    return this._firstProp("recurrence-id");
-  }
-  set recurrenceId(value) {
-    this._setTime("recurrence-id", value);
-  }
-  /**
-   * Set/update a time property's value.
-   * This will also update the TZID of the property.
-   *
-   * TODO: this method handles the case where we are switching
-   * from a known timezone to an implied timezone (one without TZID).
-   * This does _not_ handle the case of moving between a known
-   *  (by TimezoneService) timezone to an unknown timezone...
-   *
-   * We will not add/remove/update the VTIMEZONE subcomponents
-   *  leading to invalid ICAL data...
-   * @private
-   * @param {String} propName     The property name
-   * @param {Time} time           The time to set
-   */
-  _setTime(propName, time) {
-    let prop = this.component.getFirstProperty(propName);
-    if (!prop) {
-      prop = new Property(propName);
-      this.component.addProperty(prop);
-    }
-    if (time.zone === Timezone.localTimezone || time.zone === Timezone.utcTimezone) {
-      prop.removeParameter("tzid");
-    } else {
-      prop.setParameter("tzid", time.zone.tzid);
-    }
-    prop.setValue(time);
-  }
-  _setProp(name, value) {
-    this.component.updatePropertyWithValue(name, value);
-  }
-  _firstProp(name) {
-    return this.component.getFirstPropertyValue(name);
-  }
-  /**
-   * The string representation of this event.
-   * @return {String}
-   */
-  toString() {
-    return this.component.toString();
-  }
-};
-function compareRangeException(a, b) {
-  if (a[0] > b[0]) return 1;
-  if (b[0] > a[0]) return -1;
-  return 0;
-}
-var ComponentParser = class {
-  /**
-   * Creates a new ICAL.ComponentParser instance.
-   *
-   * @param {Object=} options                   Component parser options
-   * @param {Boolean} options.parseEvent        Whether events should be parsed
-   * @param {Boolean} options.parseTimezeone    Whether timezones should be parsed
-   */
-  constructor(options) {
-    if (typeof options === "undefined") {
-      options = {};
-    }
-    for (let [key, value] of Object.entries(options)) {
-      this[key] = value;
-    }
-  }
-  /**
-   * When true, parse events
-   *
-   * @type {Boolean}
-   */
-  parseEvent = true;
-  /**
-   * When true, parse timezones
-   *
-   * @type {Boolean}
-   */
-  parseTimezone = true;
-  /* SAX like events here for reference */
-  /**
-   * Fired when parsing is complete
-   * @callback
-   */
-  oncomplete = (
-    /* c8 ignore next */
-    function() {
-    }
-  );
-  /**
-   * Fired if an error occurs during parsing.
-   *
-   * @callback
-   * @param {Error} err details of error
-   */
-  onerror = (
-    /* c8 ignore next */
-    function(err) {
-    }
-  );
-  /**
-   * Fired when a top level component (VTIMEZONE) is found
-   *
-   * @callback
-   * @param {Timezone} component     Timezone object
-   */
-  ontimezone = (
-    /* c8 ignore next */
-    function(component) {
-    }
-  );
-  /**
-   * Fired when a top level component (VEVENT) is found.
-   *
-   * @callback
-   * @param {Event} component    Top level component
-   */
-  onevent = (
-    /* c8 ignore next */
-    function(component) {
-    }
-  );
-  /**
-   * Process a string or parse ical object.  This function itself will return
-   * nothing but will start the parsing process.
-   *
-   * Events must be registered prior to calling this method.
-   *
-   * @param {Component|String|Object} ical      The component to process,
-   *        either in its final form, as a jCal Object, or string representation
-   */
-  process(ical) {
-    if (typeof ical === "string") {
-      ical = parse(ical);
-    }
-    if (!(ical instanceof Component)) {
-      ical = new Component(ical);
-    }
-    let components = ical.getAllSubcomponents();
-    let i = 0;
-    let len = components.length;
-    let component;
-    for (; i < len; i++) {
-      component = components[i];
-      switch (component.name) {
-        case "vtimezone":
-          if (this.parseTimezone) {
-            let tzid = component.getFirstPropertyValue("tzid");
-            if (tzid) {
-              this.ontimezone(new Timezone({
-                tzid,
-                component
-              }));
-            }
-          }
-          break;
-        case "vevent":
-          if (this.parseEvent) {
-            this.onevent(new Event(component));
-          }
-          break;
-        default:
-          continue;
+    if (binding.handlers.data) binding.handlers.data(decoded.payload);
+    else {
+      if (this.bufferedFrameCount(shared) >= 64) {
+        this.failData(shared, "too much data waiting for a room handler");
+        return;
       }
+      binding.pendingData.push(decoded.payload);
+      this.syncDataTimers(shared);
     }
-    this.oncomplete();
   }
-};
-var ICALmodule = {
-  /**
-   * The number of characters before iCalendar line folding should occur
-   * @type {Number}
-   * @default 75
-   */
-  foldLength: 75,
-  debug: false,
-  /**
-   * The character(s) to be used for a newline. The default value is provided by
-   * rfc5545.
-   * @type {String}
-   * @default "\r\n"
-   */
-  newLineChar: "\r\n",
-  Binary,
-  Component,
-  ComponentParser,
-  Duration,
-  Event,
-  Period,
-  Property,
-  Recur,
-  RecurExpansion,
-  RecurIterator,
-  Time,
-  Timezone,
-  TimezoneService,
-  UtcOffset,
-  VCardTime,
-  parse,
-  stringify,
-  design,
-  helpers
+  dispatchSignal(shared, signal) {
+    var _a, _b;
+    const binding = this.getSignalBinding(shared);
+    if (binding) (_b = (_a = binding.handlers).signal) == null ? void 0 : _b.call(_a, signal);
+    else if (signal.type === "offer") this.clear(shared.appId, shared.peerId, { destroyPeer: true });
+  }
+  dispatchTrack(shared, track, stream) {
+    values(shared.bindings).forEach((binding) => {
+      var _a, _b, _c, _d;
+      if (binding.handlers.track || binding.handlers.stream) {
+        (_b = (_a = binding.handlers).track) == null ? void 0 : _b.call(_a, track, stream);
+        (_d = (_c = binding.handlers).stream) == null ? void 0 : _d.call(_c, stream);
+        return;
+      }
+      binding.pendingTracks.push({
+        track,
+        stream
+      });
+    });
+  }
 };
 
-// src/plugins/calendar/types.ts
-var DEFAULT_EVENT_COLOR = "#6ba7e8";
-var CALENDAR_DEFAULT_CONFIG = {
-  sources: [],
-  title: "",
-  showTitle: false,
-  daysAhead: 7,
-  refreshIntervalMinutes: 15
-};
-function readCalendarConfig(raw) {
-  const sources = readSources(raw);
-  return {
-    sources,
-    title: typeof raw.title === "string" ? raw.title : CALENDAR_DEFAULT_CONFIG.title,
-    showTitle: typeof raw.showTitle === "boolean" ? raw.showTitle : CALENDAR_DEFAULT_CONFIG.showTitle,
-    daysAhead: typeof raw.daysAhead === "number" ? raw.daysAhead : CALENDAR_DEFAULT_CONFIG.daysAhead,
-    refreshIntervalMinutes: typeof raw.refreshIntervalMinutes === "number" && raw.refreshIntervalMinutes > 0 ? raw.refreshIntervalMinutes : typeof raw.refreshIntervalMinutes === "string" && Number(raw.refreshIntervalMinutes) > 0 ? Number(raw.refreshIntervalMinutes) : CALENDAR_DEFAULT_CONFIG.refreshIntervalMinutes
-  };
-}
-function readSources(raw) {
-  if (Array.isArray(raw.sources)) {
-    return raw.sources.filter((s) => typeof s === "object" && s !== null).map((s) => ({
-      icalUrl: typeof s.icalUrl === "string" ? s.icalUrl : "",
-      color: typeof s.color === "string" && s.color ? s.color : DEFAULT_EVENT_COLOR,
-      ...typeof s.name === "string" ? { name: s.name } : {}
-    })).filter((s) => s.icalUrl !== "");
-  }
-  if (typeof raw.icalUrl === "string" && raw.icalUrl !== "") {
-    return [{ icalUrl: raw.icalUrl, color: DEFAULT_EVENT_COLOR }];
-  }
-  return [];
-}
-
-// src/plugins/calendar/service.ts
-function normalizeIcalUrl(raw) {
-  let url = raw.trim().replace(/^webcal:\/\//i, "https://");
-  const headers = {};
-  try {
-    const parsed = new URL(url);
-    if (parsed.username || parsed.password) {
-      const token = btoa(`${parsed.username}:${parsed.password}`);
-      headers.authorization = `Basic ${token}`;
-      parsed.username = "";
-      parsed.password = "";
-      url = parsed.toString();
-    }
+// node_modules/@trystero-p2p/core/dist/signal-handler.mjs
+var offerPostAnswerTtlMs = 23333;
+var offerTtl = 57333;
+var offerIdSize = 12;
+var disconnectedPeerGraceMs = 7533;
+var answeringTtlMs = 23333;
+var offerRelayPlaceholder = "offer-placeholder";
+var signalKeys = [
+  "offer",
+  "answer",
+  "candidate"
+];
+var toPayload = (msg) => {
+  if (typeof msg === "string") try {
+    const parsed = fromJson(msg);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
   } catch {
+    return null;
   }
-  return { url, headers };
-}
-function toEvent(event, startMs, endMs, color) {
-  return {
-    uid: event.uid || `${event.summary}-${startMs}`,
-    summary: event.summary || "(no title)",
-    location: event.location || "",
-    start: startMs,
-    end: endMs,
-    allDay: Boolean(event.startDate.isDate),
-    color
-  };
-}
-function expandEvent(vevent, fromMs, toMs, color) {
-  const event = new ICALmodule.Event(vevent);
-  const durationMs = event.duration.toSeconds() * 1e3;
-  if (!event.isRecurring()) {
-    const startMs = event.startDate.toJSDate().getTime();
-    if (startMs >= fromMs && startMs <= toMs) {
-      return [toEvent(event, startMs, startMs + durationMs, color)];
-    }
-    return [];
-  }
-  const results = [];
-  const iterator = event.iterator();
-  let next = iterator.next();
-  let guard = 0;
-  while (next && guard < 1e3) {
-    guard += 1;
-    const startMs = next.toJSDate().getTime();
-    if (startMs > toMs) break;
-    if (startMs >= fromMs) results.push(toEvent(event, startMs, startMs + durationMs, color));
-    next = iterator.next();
-  }
-  return results;
-}
-function parseCalendar(icsText, daysAhead, color = DEFAULT_EVENT_COLOR) {
-  const now = Date.now();
-  const to = now + daysAhead * 24 * 60 * 60 * 1e3;
-  const jcal = ICALmodule.parse(icsText);
-  const comp = new ICALmodule.Component(jcal);
-  const vevents = comp.getAllSubcomponents("vevent");
-  const events = vevents.flatMap((v) => expandEvent(v, now, to, color));
-  return events.sort((a, b) => a.start - b.start);
-}
-function mergeEvents(lists) {
-  return lists.flat().sort((a, b) => a.start - b.start);
-}
-
-// src/plugins/calendar/locales/de.json
-var de_default = {
-  manifest: {
-    Calendar: "Kalender",
-    "Upcoming events from an iCal feed": "Anstehende Termine aus einem iCal-Kalender",
-    "Calendar Agenda": "Kalender\xFCbersicht",
-    "Upcoming events from any iCal (.ics) feed": "Anstehende Termine aus iCal-Kalendern",
-    Feeds: "Kalender",
-    Calendars: "Kalender",
-    "Add calendar": "Kalender hinzuf\xFCgen",
-    "Each feed is merged into one agenda. Basic auth in the URL and webcal:// are supported.": "Alle Kalender werden in einer \xDCbersicht zusammengef\xFChrt. Basis-Authentifizierung in der URL und webcal:// werden unterst\xFCtzt.",
-    Color: "Farbe",
-    "Days ahead": "Tage im Voraus",
-    "Refresh interval": "Aktualisierungsintervall",
-    "5 minutes": "5 Minuten",
-    "15 minutes": "15 Minuten",
-    "30 minutes": "30 Minuten",
-    "60 minutes": "60 Minuten",
-    "Show title": "Titel anzeigen",
-    "A heading above the agenda. Usually unnecessary once feeds are merged.": "Eine \xDCberschrift \xFCber der Termin\xFCbersicht. Bei zusammengef\xFChrten Kalendern meist nicht n\xF6tig.",
-    "Title text": "Titeltext"
-  },
-  runtime: {
-    allDay: "Ganzt\xE4gig",
-    configure: "F\xFCgen Sie in den Einstellungen mindestens einen iCal-Kalender (.ics) hinzu.",
-    none: "Keine anstehenden Termine",
-    title: "Kalender"
+  return msg && typeof msg === "object" && !Array.isArray(msg) ? msg : null;
+};
+var getString = (payload, key) => typeof payload[key] === "string" && payload[key] ? payload[key] : void 0;
+var isPeerHandle = (value) => Boolean(value && typeof value === "object" && typeof value.signal === "function" && typeof value.destroy === "function" && typeof value.setHandlers === "function");
+var hasInvalidSignalField = (payload, isStringMessage = false) => signalKeys.some((key) => key in payload && (typeof payload[key] !== "string" || payload[key] === "")) || "peer" in payload && (isStringMessage || payload["peer"] !== void 0 && !isPeerHandle(payload["peer"]));
+var shouldActivatePassiveRoom = (msg) => {
+  const payload = toPayload(msg);
+  if (!payload || hasInvalidSignalField(payload, typeof msg === "string")) return false;
+  const peerId = getString(payload, "peerId");
+  return Boolean(peerId && peerId !== selfId && payload["passive"] !== true && !getString(payload, "answer") && !getString(payload, "candidate"));
+};
+var publishCipheredSignalingMessage = (ctx, signal, peerTopic, signalPeer, buildPayload, stillValid) => {
+  ctx.toCipher(signal).then((encryptedSignal) => {
+    if (ctx.isLeaving() || !stillValid()) return;
+    signalPeer(peerTopic, toJson(buildPayload(encryptedSignal.sdp)));
+  });
+};
+var makeState = () => ({
+  offerPeer: null,
+  offerId: null,
+  offerSdp: null,
+  offerInitPromise: null,
+  offerAnswered: false,
+  offerRelays: [],
+  offerSignalRelays: [],
+  offerSignalBacklog: [],
+  offerRelayTimers: [],
+  offerExpiryTimer: null,
+  connectedPeer: null,
+  connectedPeerUnhealthySinceMs: null,
+  answeringExpiryTimer: null,
+  answeringPeer: null,
+  answerSent: false,
+  answerReplay: null,
+  connectionErrorReported: false
+});
+var hasTurnServer = (config) => {
+  var _a;
+  return [...config.turnConfig ?? [], ...((_a = config.rtcConfig) == null ? void 0 : _a.iceServers) ?? []].some(({ urls }) => {
+    return (Array.isArray(urls) ? urls : [urls]).some((url) => /^turns?:/i.test(url));
+  });
+};
+var getSdpExchangeConnectionError = (peerId, config) => `could not connect to peer ${peerId} after exchanging SDP; ${hasTurnServer(config) ? "check that your TURN server URLs and credentials are reachable by both peers" : "configure TURN servers with turnConfig or rtcConfig.iceServers"}`;
+var reportSdpExchangeConnectionFailure = (ctx, state, peerId) => {
+  var _a;
+  if (ctx.isLeaving() || state.connectedPeer || state.connectionErrorReported) return;
+  state.connectionErrorReported = true;
+  (_a = ctx.onJoinError) == null ? void 0 : _a.call(ctx, {
+    error: getSdpExchangeConnectionError(peerId, ctx.config),
+    appId: ctx.appId,
+    peerId,
+    roomId: ctx.roomId
+  });
+};
+var getState = (peerStates, peerId) => peerStates[peerId] ?? (peerStates[peerId] = makeState());
+var counterAnnounceTimestamps = /* @__PURE__ */ new WeakMap();
+var resetAnsweringState = (state) => {
+  counterAnnounceTimestamps.delete(state);
+  state.answeringExpiryTimer = resetTimer(state.answeringExpiryTimer);
+  state.answeringPeer = null;
+  state.answerSent = false;
+  state.answerReplay = null;
+};
+var clearAnswering = (state, peer) => {
+  if (state.answeringPeer === peer) {
+    resetAnsweringState(state);
+    if (state.connectedPeer !== peer && !peer.isDead) peer.destroy();
   }
 };
-
-// src/plugins/calendar/translate.ts
-var translations = { de: de_default.runtime };
-function text(locale, key, fallback = key) {
-  var _a;
-  return ((_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key]) ?? fallback;
-}
-
-// src/plugins/calendar/CalendarWidget.tsx
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function formatWhen(locale, event) {
-  const start = new Date(event.start);
-  const day = start.toLocaleDateString(locale, { weekday: "short", day: "numeric", month: "short" });
-  if (event.allDay) return `${day} \xB7 ${text(locale, "allDay")}`;
-  const time = start.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-  return `${day} \xB7 ${time}`;
-}
-function CalendarWidget({ context }) {
-  const config = (0, import_react2.useMemo)(() => readCalendarConfig(context.config), [context.config]);
-  const configured = config.sources.length > 0;
-  const sourceKey = config.sources.map((s) => `${s.icalUrl}|${s.color}`).join(",");
-  const { data: events, error, refetch } = useWidgetData(context, {
-    key: ["calendar", sourceKey, config.daysAhead],
-    enabled: configured,
-    fetcher: async () => {
-      const perFeed = await Promise.all(
-        config.sources.map(async (source) => {
-          const { url, headers } = normalizeIcalUrl(source.icalUrl);
-          const res = await context.http({ url, headers, responseType: "text", proxy: "always" });
-          if (!res.ok) throw new Error(`Calendar fetch failed (${res.status})`);
-          return parseCalendar(String(res.data), config.daysAhead, source.color);
-        })
-      );
-      return mergeEvents(perFeed);
-    },
-    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
-    staleMessage: "Offline \u2014 showing cached schedule",
-    errorMessage: "Calendar unavailable"
+var markPeerConnected = (state, physical) => {
+  if (state.answeringPeer && state.answeringPeer !== physical && !state.answeringPeer.isDead) state.answeringPeer.destroy();
+  resetAnsweringState(state);
+  state.connectedPeer = physical;
+  state.connectedPeerUnhealthySinceMs = null;
+};
+var detachConnectedPeer = (state, physical) => {
+  if ((state == null ? void 0 : state.connectedPeer) === physical) {
+    state.connectedPeer = null;
+    state.connectedPeerUnhealthySinceMs = null;
+  }
+};
+var clearConnectedPeer = (state, peerId, _reason) => {
+  if (!state.connectedPeer) return;
+  if (!state.connectedPeer.isDead) state.connectedPeer.destroy();
+  state.connectedPeer = null;
+  state.connectedPeerUnhealthySinceMs = null;
+};
+var clearOfferRelay = (state, relayId) => {
+  state.offerRelayTimers[relayId] = resetTimer(state.offerRelayTimers[relayId]);
+  if (state.offerRelays[relayId]) state.offerRelays[relayId] = void 0;
+};
+var clearOfferRelayIfPlaceholder = (state, relayId) => {
+  if ((state == null ? void 0 : state.offerRelays[relayId]) === offerRelayPlaceholder) clearOfferRelay(state, relayId);
+};
+var resetOfferState = (state) => {
+  counterAnnounceTimestamps.delete(state);
+  state.offerExpiryTimer = resetTimer(state.offerExpiryTimer);
+  state.offerInitPromise = null;
+  state.offerRelays.forEach((_, relayId) => clearOfferRelay(state, relayId));
+  state.offerRelays = [];
+  state.offerSignalRelays = [];
+  state.offerRelayTimers = [];
+  state.offerSignalBacklog = [];
+  if (state.offerPeer && state.offerPeer !== state.connectedPeer) {
+    if (!state.offerPeer.isDead) state.offerPeer.destroy();
+  }
+  state.offerPeer = null;
+  state.offerId = null;
+  state.offerSdp = null;
+  state.offerAnswered = false;
+  state.connectionErrorReported = false;
+};
+var scheduleAnsweringExpiry = (ctx, state, peerId, peer) => {
+  resetTimer(state.answeringExpiryTimer);
+  state.answeringExpiryTimer = setTimeout(() => {
+    const current = ctx.peerStates[peerId];
+    if (!current || current.connectedPeer || current.answeringPeer !== peer) return;
+    if (current.answerSent) reportSdpExchangeConnectionFailure(ctx, current, peerId);
+    clearAnswering(current, peer);
+    ctx.checkDeactivate();
+  }, answeringTtlMs);
+};
+var scheduleOfferExpiry = (ctx, state, peerId, ttlMs = offerTtl) => {
+  resetTimer(state.offerExpiryTimer);
+  const offerId = state.offerId;
+  state.offerExpiryTimer = setTimeout(() => {
+    const current = ctx.peerStates[peerId];
+    if (!current || current.connectedPeer || current.offerId !== offerId) return;
+    if (current.offerAnswered) reportSdpExchangeConnectionFailure(ctx, current, peerId);
+    resetOfferState(current);
+    ctx.checkDeactivate();
+  }, ttlMs);
+};
+var bindOfferPeerHandlers = (ctx, state, peerId, peer, onSignal) => {
+  const onOfferPeerClosedOrError = () => {
+    if (state.offerPeer === peer && !state.connectedPeer) {
+      if (state.offerAnswered) reportSdpExchangeConnectionFailure(ctx, state, peerId);
+      resetOfferState(state);
+    }
+    ctx.disconnectPeer(peer, peerId);
+    ctx.checkDeactivate();
+  };
+  peer.setHandlers({
+    connect: () => ctx.connectPeer(peer, peerId),
+    ...onSignal ? { signal: onSignal } : {},
+    close: onOfferPeerClosedOrError,
+    error: onOfferPeerClosedOrError
   });
-  const containerRef = usePullToRefresh(refetch);
-  if (!configured) {
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-widget calendar-empty", children: /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("strong", { children: text(context.locale, "title") }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("p", { children: text(context.locale, "configure") })
-    ] }) });
+};
+var ensureOffer = (ctx, state, peerId) => {
+  if (state.offerPeer && state.offerId && state.offerSdp) return Promise.resolve({
+    peer: state.offerPeer,
+    offer: state.offerSdp,
+    offerId: state.offerId
+  });
+  if (state.offerInitPromise) return state.offerInitPromise;
+  const allocateOffer = async () => {
+    let firstOffer;
+    try {
+      firstOffer = (await ctx.offerManager.checkout(1, false, ctx.encryptOffer))[0];
+    } catch (error) {
+      if (ctx.isLeaving() || state.offerInitPromise !== pending) return null;
+      throw error;
+    }
+    if (!firstOffer) throw mkErr("failed to allocate offer peer");
+    const { peer, offer: offer2 } = firstOffer;
+    if (ctx.isLeaving() || state.offerInitPromise !== pending) {
+      peer.destroy();
+      return null;
+    }
+    state.offerPeer = peer;
+    state.offerId = genId(offerIdSize);
+    state.offerSdp = offer2;
+    state.offerAnswered = false;
+    state.connectionErrorReported = false;
+    state.offerSignalBacklog = [];
+    bindOfferPeerHandlers(ctx, state, peerId, peer, (signal) => {
+      if (state.offerPeer !== peer) return;
+      state.offerSignalBacklog.push(signal);
+      state.offerSignalRelays.forEach((sendSignal) => sendSignal == null ? void 0 : sendSignal(signal));
+    });
+    scheduleOfferExpiry(ctx, state, peerId);
+    return {
+      peer,
+      offer: offer2,
+      offerId: state.offerId
+    };
+  };
+  const pending = allocateOffer().finally(() => {
+    if (state.offerInitPromise === pending) state.offerInitPromise = null;
+  });
+  return state.offerInitPromise = pending;
+};
+var handleAnnouncement = async (ctx, relayId, peerId, signalPeer, retryAttempt = 0) => {
+  const state = ctx.peerStates[peerId];
+  if (!state || state.connectedPeer || state.answeringPeer || state.offerAnswered) {
+    clearOfferRelayIfPlaceholder(state, relayId);
+    return;
   }
-  const showTitle = config.showTitle && config.title !== "";
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "calendar-widget", children: [
-    showTitle && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-header", children: config.title }),
-    error && !events && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-error", role: "alert", children: error }),
-    events && events.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "calendar-none", children: text(context.locale, "none") }),
-    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ul", { ref: containerRef, className: "calendar-list", children: events == null ? void 0 : events.map((event) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(
-      "li",
-      {
-        className: "calendar-event",
-        style: { borderLeftColor: event.color },
-        children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "calendar-when", children: formatWhen(context.locale, event) }),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "calendar-summary", children: event.summary }),
-          event.location && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { className: "calendar-loc", children: event.location })
-        ]
+  if (state.offerRelays[relayId] !== offerRelayPlaceholder) return;
+  const [peerTopic, offerInfo] = await all([sha1(topicPath(ctx.rootTopicPlaintext, peerId)), ensureOffer(ctx, state, peerId)]);
+  if (!offerInfo) {
+    clearOfferRelayIfPlaceholder(state, relayId);
+    return;
+  }
+  if (ctx.isLeaving()) {
+    resetOfferState(state);
+    return;
+  }
+  if (state.connectedPeer || state.answeringPeer || state.offerAnswered || state.offerRelays[relayId] !== offerRelayPlaceholder) {
+    clearOfferRelayIfPlaceholder(state, relayId);
+    return;
+  }
+  state.offerRelayTimers[relayId] = resetTimer(state.offerRelayTimers[relayId]);
+  state.offerRelays[relayId] = true;
+  state.offerRelayTimers[relayId] = setTimeout(() => {
+    if (retryAttempt >= 2 || ctx.isLeaving() || state.connectedPeer || state.answeringPeer || state.offerAnswered || state.offerPeer !== offerInfo.peer || state.offerId !== offerInfo.offerId) {
+      prunePendingOffer(ctx, peerId, relayId);
+      return;
+    }
+    state.offerRelays[relayId] = offerRelayPlaceholder;
+    handleAnnouncement(ctx, relayId, peerId, signalPeer, retryAttempt + 1);
+  }, retryAttempt === 0 && ctx.announceIntervals[relayId] === void 0 ? 2e3 : (ctx.announceIntervals[relayId] ?? ctx.announceIntervalMs) * 0.9);
+  let didSendOffer = false;
+  state.offerSignalRelays[relayId] = (signal) => {
+    if (!didSendOffer) return;
+    if (ctx.isLeaving() || state.connectedPeer || state.offerPeer !== offerInfo.peer || state.offerId !== offerInfo.offerId || signal.type !== "candidate") return;
+    publishCipheredSignalingMessage(ctx, signal, peerTopic, signalPeer, (sdp) => ({
+      peerId: selfId,
+      offerId: offerInfo.offerId,
+      candidate: sdp,
+      ...ctx.isPassive ? { passive: true } : {}
+    }), () => !state.connectedPeer && state.offerPeer === offerInfo.peer && state.offerId === offerInfo.offerId);
+  };
+  signalPeer(peerTopic, toJson({
+    peerId: selfId,
+    offerId: offerInfo.offerId,
+    offer: offerInfo.offer,
+    ...ctx.isPassive ? { passive: true } : {}
+  }));
+  didSendOffer = true;
+  state.offerSignalBacklog.forEach((signal) => {
+    var _a, _b;
+    return (_b = (_a = state.offerSignalRelays)[relayId]) == null ? void 0 : _b.call(_a, signal);
+  });
+};
+var handleOffer = async (ctx, relayId, peerId, offer2, offerId, signalPeer) => {
+  var _a;
+  const state = getState(ctx.peerStates, peerId);
+  if (state.answeringPeer || state.offerAnswered) {
+    const replay2 = state.answerReplay;
+    const lastSentAt = replay2 == null ? void 0 : replay2.lastSentAt[relayId];
+    if (state.answeringPeer && !state.answeringPeer.isDead && replay2 && replay2.offer === offer2 && replay2.offerId === offerId && (lastSentAt === void 0 || Date.now() - lastSentAt >= 1e3)) {
+      replay2.lastSentAt[relayId] = Date.now();
+      const peerTopic2 = await sha1(topicPath(ctx.rootTopicPlaintext, peerId));
+      if (!ctx.isLeaving() && state.answerReplay === replay2 && !state.connectedPeer) {
+        const send = (message) => signalPeer(peerTopic2, message);
+        replay2.relays[relayId] = send;
+        replay2.messages.forEach(send);
+      }
+    }
+    return;
+  }
+  const hasTrackedOutgoingOffer = Boolean(state.offerPeer || state.offerRelays.some(Boolean));
+  if (hasTrackedOutgoingOffer && selfId < peerId) return;
+  if (hasTrackedOutgoingOffer) resetOfferState(state);
+  const answerPeer = ctx.initPeer(false, ctx.config);
+  const replay = {
+    offer: offer2,
+    offerId,
+    messages: [],
+    lastSentAt: [],
+    relays: []
+  };
+  replay.lastSentAt[relayId] = Date.now();
+  state.answeringPeer = answerPeer;
+  state.answerSent = false;
+  state.answerReplay = replay;
+  state.connectionErrorReported = false;
+  scheduleAnsweringExpiry(ctx, state, peerId, answerPeer);
+  const onAnswerPeerClosedOrError = () => {
+    if (state.answeringPeer === answerPeer && !state.connectedPeer && state.answerSent) reportSdpExchangeConnectionFailure(ctx, state, peerId);
+    clearAnswering(state, answerPeer);
+    ctx.disconnectPeer(answerPeer, peerId);
+    ctx.checkDeactivate();
+  };
+  answerPeer.setHandlers({
+    connect: () => ctx.connectPeer(answerPeer, peerId),
+    close: onAnswerPeerClosedOrError,
+    error: onAnswerPeerClosedOrError
+  });
+  let plainOffer;
+  try {
+    plainOffer = await ctx.toPlain({
+      type: "offer",
+      sdp: offer2
+    });
+  } catch {
+    clearAnswering(state, answerPeer);
+    (_a = ctx.onJoinError) == null ? void 0 : _a.call(ctx, {
+      error: "incorrect room password when decrypting offer",
+      appId: ctx.appId,
+      peerId,
+      roomId: ctx.roomId
+    });
+    return;
+  }
+  if (answerPeer.isDead) {
+    clearAnswering(state, answerPeer);
+    return;
+  }
+  const peerTopic = await sha1(topicPath(ctx.rootTopicPlaintext, peerId));
+  if (ctx.isLeaving() || state.answerReplay !== replay) return;
+  replay.relays[relayId] = (message) => signalPeer(peerTopic, message);
+  const pendingCandidates = [];
+  let didSendAnswer = false;
+  const publishAnswerSignal = (signal) => {
+    ctx.toCipher(signal).then((encryptedSignal) => {
+      if (ctx.isLeaving() || state.answeringPeer !== answerPeer || answerPeer.isDead) return;
+      const payloadToSend = { peerId: selfId };
+      if (signal.type === "answer") {
+        state.answerSent = true;
+        payloadToSend["answer"] = encryptedSignal.sdp;
+      } else payloadToSend["candidate"] = encryptedSignal.sdp;
+      if (offerId) payloadToSend["offerId"] = offerId;
+      if (ctx.isPassive) payloadToSend["passive"] = true;
+      const message = toJson(payloadToSend);
+      const now = Date.now();
+      replay.messages.push(message);
+      replay.relays.forEach((send, id) => {
+        if (send) {
+          replay.lastSentAt[id] = now;
+          send(message);
+        }
+      });
+      if (signal.type === "answer" && !didSendAnswer) {
+        didSendAnswer = true;
+        pendingCandidates.splice(0).forEach(publishAnswerSignal);
+      }
+    });
+  };
+  answerPeer.setHandlers({ signal: (signal) => {
+    if (ctx.isLeaving() || state.answeringPeer !== answerPeer || answerPeer.isDead) return;
+    if (signal.type !== "answer" && signal.type !== "candidate") return;
+    if (signal.type === "candidate" && !didSendAnswer) {
+      pendingCandidates.push(signal);
+      return;
+    }
+    publishAnswerSignal(signal);
+  } });
+  await answerPeer.signal(plainOffer);
+};
+var handleCandidate = async (ctx, peerId, candidate, offerId, peer) => {
+  var _a;
+  let plainCandidate;
+  try {
+    plainCandidate = await ctx.toPlain({
+      type: candidateType,
+      sdp: candidate
+    });
+  } catch {
+    return;
+  }
+  const state = ctx.peerStates[peerId];
+  const offerPeerMatch = offerId && (state == null ? void 0 : state.offerPeer) && state.offerId === offerId ? state.offerPeer : null;
+  const answeringPeer = !offerId || ((_a = state == null ? void 0 : state.answerReplay) == null ? void 0 : _a.offerId) === offerId ? state == null ? void 0 : state.answeringPeer : null;
+  const fallbackOfferPeer = !offerId && (state == null ? void 0 : state.offerPeer) ? state.offerPeer : null;
+  const targetPeer = peer && !peer.isDead ? peer : offerPeerMatch ?? answeringPeer ?? fallbackOfferPeer;
+  if (targetPeer && !targetPeer.isDead) targetPeer.signal(plainCandidate);
+};
+var handleAnswer = async (ctx, peerId, answer, offerId, peer) => {
+  var _a;
+  let plainAnswer;
+  try {
+    plainAnswer = await ctx.toPlain({
+      type: "answer",
+      sdp: answer
+    });
+  } catch {
+    if (peer) {
+      ctx.offerManager.reclaimLeased(peer);
+      if (!peer.isDead) peer.destroy();
+    }
+    (_a = ctx.onJoinError) == null ? void 0 : _a.call(ctx, {
+      error: "incorrect room password when decrypting answer",
+      appId: ctx.appId,
+      peerId,
+      roomId: ctx.roomId
+    });
+    return;
+  }
+  if (peer) {
+    const state = getState(ctx.peerStates, peerId);
+    ctx.offerManager.claimLeased(peer);
+    if (state.connectedPeer || state.offerAnswered || state.answeringPeer && !state.answeringPeer.isDead && selfId > peerId) {
+      peer.destroy();
+      return;
+    }
+    if (state.answeringPeer) {
+      const answeringPeer = state.answeringPeer;
+      clearAnswering(state, answeringPeer);
+    }
+    resetOfferState(state);
+    state.offerPeer = peer;
+    state.offerId = offerId ?? null;
+    state.offerAnswered = true;
+    scheduleOfferExpiry(ctx, state, peerId, offerPostAnswerTtlMs);
+    bindOfferPeerHandlers(ctx, state, peerId, peer);
+    peer.signal(plainAnswer);
+  } else {
+    const state = ctx.peerStates[peerId];
+    if (!state || !state.offerPeer || state.offerAnswered || offerId && state.offerId && offerId !== state.offerId || state.offerPeer.isDead) return;
+    state.offerAnswered = true;
+    scheduleOfferExpiry(ctx, state, peerId, offerPostAnswerTtlMs);
+    state.offerPeer.signal(plainAnswer);
+  }
+};
+var prunePendingOffer = (ctx, peerId, relayId) => {
+  const state = ctx.peerStates[peerId];
+  if (!state || state.connectedPeer) return;
+  if (state.offerRelays[relayId]) {
+    clearOfferRelay(state, relayId);
+    ctx.checkDeactivate();
+  }
+};
+var createSignalHandler = (ctx) => (relayId) => async (topic, msg, signalPeer) => {
+  var _a;
+  if (ctx.isLeaving()) return;
+  const payload = toPayload(msg);
+  if (!payload || hasInvalidSignalField(payload, typeof msg === "string")) return;
+  const peerId = getString(payload, "peerId") ?? "";
+  const offer2 = getString(payload, "offer");
+  const answer = getString(payload, "answer");
+  const candidate = getString(payload, "candidate");
+  const offerId = getString(payload, "offerId");
+  const peer = isPeerHandle(payload["peer"]) ? payload["peer"] : void 0;
+  const remoteIsPassive = payload["passive"] === true;
+  if (!peerId || peerId === selfId) return;
+  const [rootTopic, selfTopic] = await all([ctx.rootTopicP, ctx.selfTopicP]);
+  if (ctx.isLeaving()) return;
+  if (topic !== rootTopic && topic !== selfTopic) return;
+  if (ctx.isPassive && remoteIsPassive) return;
+  if (ctx.isPassive && !ctx.isActive && !answer && !candidate) {
+    ctx.isActive = true;
+    (_a = ctx.requeueAnnounce) == null ? void 0 : _a.call(ctx);
+  }
+  if (ctx.isPassive && !ctx.isActive) return;
+  const state = ctx.peerStates[peerId];
+  const connectedPeer = state == null ? void 0 : state.connectedPeer;
+  if (connectedPeer && state) {
+    const health = getConnectedPeerHealth(connectedPeer);
+    if (health === "live") {
+      state.connectedPeerUnhealthySinceMs = null;
+      return;
+    }
+    if (health === "stale") clearConnectedPeer(state, peerId, "message-from-stale-peer");
+    else {
+      const nowMs = Date.now();
+      const unhealthySinceMs = state.connectedPeerUnhealthySinceMs ?? nowMs;
+      state.connectedPeerUnhealthySinceMs = unhealthySinceMs;
+      if (nowMs - unhealthySinceMs < disconnectedPeerGraceMs) return;
+      clearConnectedPeer(state, peerId, "message-from-prolonged-disconnect");
+    }
+  }
+  if (ctx.reusePeer(peerId)) return;
+  if (Boolean(peerId && !offer2 && !answer && !candidate)) {
+    const announcePeerState = getState(ctx.peerStates, peerId);
+    const shouldLeadOffer = selfId < peerId;
+    if (announcePeerState.answeringPeer || announcePeerState.connectedPeer || announcePeerState.offerAnswered) return;
+    if (!shouldLeadOffer && !announcePeerState.offerPeer) {
+      let lastSentByRelay = counterAnnounceTimestamps.get(announcePeerState);
+      if (!lastSentByRelay) {
+        lastSentByRelay = [];
+        counterAnnounceTimestamps.set(announcePeerState, lastSentByRelay);
+      }
+      const lastSentAt = lastSentByRelay[relayId];
+      if (lastSentAt !== void 0 && Date.now() - lastSentAt < 1e3) return;
+      lastSentByRelay[relayId] = Date.now();
+      const peerSelfTopic = await sha1(topicPath(ctx.rootTopicPlaintext, peerId));
+      if (!ctx.isLeaving() && !announcePeerState.connectedPeer && !announcePeerState.answeringPeer && !announcePeerState.offerAnswered) signalPeer(peerSelfTopic, toJson({ peerId: selfId }));
+      return;
+    }
+    if (announcePeerState.offerRelays[relayId]) return;
+    announcePeerState.offerRelays[relayId] = offerRelayPlaceholder;
+    return handleAnnouncement(ctx, relayId, peerId, signalPeer);
+  }
+  if (offer2) return handleOffer(ctx, relayId, peerId, offer2, offerId, signalPeer);
+  if (candidate) return handleCandidate(ctx, peerId, candidate, offerId, peer);
+  if (answer) return handleAnswer(ctx, peerId, answer, offerId, peer);
+};
+
+// node_modules/@trystero-p2p/core/dist/strategy.mjs
+var announceIntervalMs = 5333;
+var announceWarmupIntervalsMs = [
+  233,
+  533,
+  1333
+];
+var passiveActivationGraceMs = 7533;
+var sharedPeerIdleMsDefault = 123333;
+var strategy_default = ({ init, subscribe: subscribe2, announce, deactivate }) => {
+  const occupiedRooms = {};
+  const leavingRoomCleanups = {};
+  const sharedPeers = new SharedPeerManager();
+  const hasActiveRooms = () => values(occupiedRooms).some((rooms) => keys(rooms).length > 0);
+  let didInit = false;
+  let initPromises = [];
+  let cleanupWatchOnline = noOp;
+  return (config, roomId, callbacks) => {
+    var _a, _b, _c, _d;
+    if (!config) throw mkErr("requires a config map as the first argument");
+    if (callbacks && typeof callbacks !== "object") throw mkErr("third argument must be a callbacks object");
+    const { appId } = config;
+    const onJoinError = callbacks == null ? void 0 : callbacks.onJoinError;
+    const onPeerHandshake = callbacks == null ? void 0 : callbacks.onPeerHandshake;
+    const handshakeTimeoutMs = callbacks == null ? void 0 : callbacks.handshakeTimeoutMs;
+    if (!appId) throw mkErr("config map is missing appId field");
+    if (!roomId) throw mkErr("roomId argument required");
+    if (config.maxReceiveBytes !== void 0 && (!Number.isSafeInteger(config.maxReceiveBytes) || config.maxReceiveBytes <= 0)) throw mkErr("maxReceiveBytes must be a positive safe integer");
+    if (handshakeTimeoutMs !== void 0 && (!Number.isFinite(handshakeTimeoutMs) || handshakeTimeoutMs <= 0)) throw mkErr("handshakeTimeoutMs must be a positive number");
+    if ((_a = occupiedRooms[appId]) == null ? void 0 : _a[roomId]) return occupiedRooms[appId][roomId];
+    (_c = (_b = leavingRoomCleanups[appId]) == null ? void 0 : _b[roomId]) == null ? void 0 : _c.call(_b, true);
+    const rootTopicPlaintext = topicPath(libName, appId, roomId);
+    const rootTopicP = sha1(rootTopicPlaintext);
+    const selfTopicP = sha1(topicPath(rootTopicPlaintext, selfId));
+    const key = genKey(config.password ?? "", appId, roomId);
+    const roomNamespacePromise = deriveRoomNamespace(appId, roomId);
+    const sharedPeerIdleMs = config._test_only_sharedPeerIdleMs ?? sharedPeerIdleMsDefault;
+    let didLeaveRoom = false;
+    const withKey = (f) => async (signal) => ({
+      type: signal.type,
+      sdp: await f(key, signal.sdp)
+    });
+    const toPlain = withKey(decrypt);
+    const toCipher = withKey(encrypt);
+    const makeOffer = () => peer_default(true, config);
+    let reannounceOnDisconnect = false;
+    const offerManager = new OfferManager(makeOffer);
+    const encryptOffer = async (peer) => {
+      const plainOffer = await peer.getOffer();
+      if (!plainOffer || plainOffer.type !== "offer") throw mkErr("failed to get offer for peer");
+      return (await toCipher(plainOffer)).sdp;
+    };
+    const connectPeer = (peer, peerId) => {
+      membership.connect(peerId, peer, sharedPeerIdleMs);
+    };
+    let disconnectReannounceQueued = false;
+    const reannounceAfterDisconnect = () => {
+      if (isPassive || !reannounceOnDisconnect || disconnectReannounceQueued) return;
+      disconnectReannounceQueued = true;
+      queueMicrotask(() => {
+        var _a2;
+        disconnectReannounceQueued = false;
+        if (!didLeaveRoom) (_a2 = ctx.requeueAnnounce) == null ? void 0 : _a2.call(ctx);
+      });
+    };
+    const disconnectPeer = (peer, peerId) => {
+      if (didLeaveRoom) return;
+      const state = ctx.peerStates[peerId];
+      if ((state == null ? void 0 : state.connectedPeer) === peer) {
+        clearConnectedPeer(state, peerId, "close-event");
+        checkDeactivate();
+        reannounceAfterDisconnect();
+      }
+    };
+    const isPassive = Boolean(config.passive);
+    let passiveActivationTimeout;
+    let deactivateRelayAnnouncements = noOp;
+    const checkDeactivate = () => {
+      if (!isPassive || !ctx.isActive) return;
+      let hasActiveWork = false;
+      entries(ctx.peerStates).forEach(([peerId, state]) => {
+        if (state.connectedPeer || state.answeringPeer || state.offerInitPromise || state.offerPeer || state.offerRelays.some(Boolean)) hasActiveWork = true;
+        else delete ctx.peerStates[peerId];
+      });
+      if (!hasActiveWork) {
+        ctx.isActive = false;
+        passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+        announceTimeouts.forEach(resetTimer);
+        announceTimeouts.length = 0;
+        deactivateRelayAnnouncements();
+        membership.setActive(false);
+      }
+    };
+    const ctx = {
+      appId,
+      roomId,
+      config,
+      peerStates: {},
+      rootTopicPlaintext,
+      rootTopicP,
+      selfTopicP,
+      toPlain,
+      toCipher,
+      isLeaving: () => didLeaveRoom,
+      isPassive,
+      isActive: !isPassive,
+      onJoinError,
+      offerManager,
+      encryptOffer,
+      initPeer: peer_default,
+      connectPeer,
+      disconnectPeer,
+      reusePeer: (peerId) => membership.reuse(peerId),
+      checkDeactivate,
+      announceIntervals: [],
+      announceIntervalMs
+    };
+    const strategyContext = {
+      config,
+      appId,
+      roomId,
+      isPassive
+    };
+    const handleMessage = createSignalHandler(ctx);
+    if (!didInit) {
+      const initRes = init(config);
+      initPromises = (Array.isArray(initRes) ? initRes : [initRes]).map((value) => Promise.resolve(value));
+      didInit = true;
+      cleanupWatchOnline = ((_d = config.relayConfig) == null ? void 0 : _d.manualReconnection) ? noOp : watchOnline();
+    }
+    const announceScheduleIntervals = initPromises.map(() => announceIntervalMs);
+    const announceAttemptCounts = initPromises.map(() => 0);
+    const announceErrorStreaks = initPromises.map(() => 0);
+    const announceTimeouts = [];
+    const unsubFns = initPromises.map(async (relayP, i) => subscribe2(await relayP, await rootTopicP, await selfTopicP, handleMessage(i), (n) => offerManager.getOffers(n, encryptOffer), strategyContext));
+    all([rootTopicP, selfTopicP]).then(([rootTopic, selfTopic]) => {
+      if (didLeaveRoom) return;
+      const queueAnnounce = async (relay, i) => {
+        var _a2;
+        if (didLeaveRoom) return;
+        if (isPassive && !ctx.isActive) return;
+        const extra = isPassive ? { passive: true } : void 0;
+        let announceResult = void 0;
+        try {
+          announceResult = await announce(relay, rootTopic, selfTopic, extra, strategyContext);
+          announceErrorStreaks[i] = 0;
+        } catch (error) {
+          if (didLeaveRoom) return;
+          const errorStreak = announceErrorStreaks[i] ?? 0;
+          if (errorStreak === 0 && ((_a2 = config.relayConfig) == null ? void 0 : _a2.warnOnRelayFailure) !== false) console.warn(`${libName}: announce failed - ${toErrorMessage(error, "")}`);
+          announceErrorStreaks[i] = errorStreak + 1;
+        }
+        if (didLeaveRoom || isPassive && !ctx.isActive) return;
+        if (announceResult && typeof announceResult !== "number" && "stopAnnouncing" in announceResult) return;
+        if (typeof announceResult === "number") {
+          ctx.announceIntervals[i] = announceResult;
+          announceScheduleIntervals[i] = announceResult;
+        } else if (announceResult) {
+          announceScheduleIntervals[i] = announceResult.nextAnnounceMs;
+          reannounceOnDisconnect || (reannounceOnDisconnect = announceResult.reannounceOnDisconnect === true);
+        }
+        const announceAttempt = announceAttemptCounts[i] ?? 0;
+        announceAttemptCounts[i] = announceAttempt + 1;
+        const currentInterval = announceScheduleIntervals[i] ?? announceIntervalMs;
+        const warmupDelay = announceWarmupIntervalsMs[announceAttempt] ?? (announceAttempt === 3 && typeof announceResult === "object" ? announceIntervalMs : void 0);
+        announceTimeouts[i] = setTimeout(() => {
+          queueAnnounce(relay, i);
+        }, typeof warmupDelay === "number" ? Math.min(currentInterval, warmupDelay) : currentInterval);
+      };
+      deactivateRelayAnnouncements = () => {
+        if (!deactivate) return;
+        initPromises.forEach(async (relayP) => {
+          const relay = await relayP;
+          if (!didLeaveRoom) deactivate(relay, rootTopic, selfTopic, strategyContext);
+        });
+      };
+      ctx.requeueAnnounce = () => {
+        announceTimeouts.forEach(resetTimer);
+        announceTimeouts.length = 0;
+        passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+        membership.setActive(true);
+        passiveActivationTimeout = setTimeout(checkDeactivate, passiveActivationGraceMs);
+        initPromises.forEach(async (relayP, i) => {
+          const relay = await relayP;
+          if (relay && !didLeaveRoom) {
+            announceAttemptCounts[i] = 0;
+            queueAnnounce(relay, i);
+          }
+        });
+      };
+      unsubFns.forEach(async (didSub, i) => {
+        await didSub;
+        if (didLeaveRoom) return;
+        const relay = await initPromises[i];
+        if (relay && !didLeaveRoom && (!isPassive || ctx.isActive)) queueAnnounce(relay, i);
+      });
+    });
+    let onPeerConnect = noOp;
+    const sharedPassword = config.password ?? "";
+    const { compose } = createPasswordHandshake(sharedPassword, appId, roomId);
+    const composedPeerHandshake = compose(onPeerHandshake);
+    const releaseOccupiedRoom = () => {
+      var _a2;
+      if (((_a2 = occupiedRooms[appId]) == null ? void 0 : _a2[roomId]) === joinedRoom) {
+        delete occupiedRooms[appId][roomId];
+        if (keys(occupiedRooms[appId]).length === 0) delete occupiedRooms[appId];
+      }
+    };
+    const clearLeavingCleanup = () => {
+      var _a2;
+      if (((_a2 = leavingRoomCleanups[appId]) == null ? void 0 : _a2[roomId]) === cleanupRoom) {
+        delete leavingRoomCleanups[appId][roomId];
+        if (keys(leavingRoomCleanups[appId]).length === 0) delete leavingRoomCleanups[appId];
+      }
+    };
+    const cleanupRoom = (rejoining = false) => {
+      if (didLeaveRoom) return;
+      didLeaveRoom = true;
+      onPeerConnect = noOp;
+      releaseOccupiedRoom();
+      clearLeavingCleanup();
+      membership.leave();
+      entries(ctx.peerStates).forEach(([peerId, state]) => {
+        if (state.connectedPeer && !state.connectedPeer.isDead) {
+          if (!sharedPeers.owns(appId, peerId, state.connectedPeer)) state.connectedPeer.destroy();
+        }
+        if (state.answeringPeer && !state.answeringPeer.isDead) state.answeringPeer.destroy();
+        resetOfferState(state);
+        resetAnsweringState(state);
+        state.connectedPeer = null;
+        state.connectedPeerUnhealthySinceMs = null;
+      });
+      announceTimeouts.forEach(resetTimer);
+      passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+      unsubFns.forEach(async (f) => {
+        (await f)();
+      });
+      offerManager.destroy();
+      if (rejoining || hasActiveRooms()) return;
+      didInit = false;
+      cleanupWatchOnline();
+    };
+    const roomOptions = {
+      ...config.maxReceiveBytes === void 0 ? {} : { maxReceiveBytes: config.maxReceiveBytes },
+      ...composedPeerHandshake ? { onPeerHandshake: composedPeerHandshake } : {},
+      ...handshakeTimeoutMs === void 0 ? {} : { handshakeTimeoutMs },
+      isPassive,
+      onBeforeLeave: () => {
+        releaseOccupiedRoom();
+        (leavingRoomCleanups[appId] ?? (leavingRoomCleanups[appId] = {}))[roomId] = cleanupRoom;
       },
-      `${event.uid}-${event.start}`
-    )) })
-  ] });
+      onHandshakeError: (peerId, error) => onJoinError == null ? void 0 : onJoinError({
+        error: error.replace(/^handshake failed: /, ""),
+        appId,
+        peerId,
+        roomId
+      })
+    };
+    occupiedRooms[appId] ?? (occupiedRooms[appId] = {});
+    const joinedRoom = room_default((f) => onPeerConnect = f, (id) => {
+      if (didLeaveRoom) return;
+      const state = ctx.peerStates[id];
+      if (state == null ? void 0 : state.connectedPeer) detachConnectedPeer(state, state.connectedPeer);
+      checkDeactivate();
+      reannounceAfterDisconnect();
+    }, () => cleanupRoom(false), roomOptions);
+    const membership = sharedPeers.registerRoom(appId, roomId, roomNamespacePromise, {
+      active: !isPassive || ctx.isActive,
+      onPeer: (proxy, peerId, physical) => {
+        const state = getState(ctx.peerStates, peerId);
+        markPeerConnected(state, physical);
+        if (isPassive && !ctx.isActive) {
+          ctx.isActive = true;
+          membership.setActive(true);
+          if (ctx.requeueAnnounce) ctx.requeueAnnounce();
+          else {
+            passiveActivationTimeout = resetTimer(passiveActivationTimeout);
+            passiveActivationTimeout = setTimeout(checkDeactivate, passiveActivationGraceMs);
+          }
+        }
+        onPeerConnect(proxy, peerId);
+        resetOfferState(state);
+      },
+      onDetach: (peerId, physical) => {
+        detachConnectedPeer(ctx.peerStates[peerId], physical);
+        checkDeactivate();
+      }
+    });
+    return occupiedRooms[appId][roomId] = joinedRoom;
+  };
+};
+
+// node_modules/@trystero-p2p/core/dist/topic-strategy.mjs
+var defaultSteadyAnnounceIntervalMs = 6e4;
+var requireContext = (context) => {
+  if (!context) throw mkErr("topic strategy missing room context");
+  return context;
+};
+var makeTopicContext = (context, kind, rootTopic, selfTopic) => ({
+  kind,
+  appId: context.appId,
+  roomId: context.roomId,
+  rootTopic,
+  selfTopic
+});
+var topic_strategy_default = ({ steadyAnnounceIntervalMs = defaultSteadyAnnounceIntervalMs, reannounceOnDisconnect = true, init, subscribeTopic, publishTopic, unpublishTopic }) => strategy_default({
+  init,
+  subscribe: async (relay, rootTopic, selfTopic, onMessage, _getOffers, rawContext) => {
+    const context = requireContext(rawContext);
+    const signalPeer = (peerTopic, signal) => void publishTopic(relay, peerTopic, signal, makeTopicContext(context, "signal", rootTopic, selfTopic));
+    let selfCleanup = null;
+    let selfCleanupDone = false;
+    let selfSubscriptionP = null;
+    let didCleanup = false;
+    const cleanupSelf = (cleanup) => {
+      if (selfCleanupDone) return;
+      selfCleanupDone = true;
+      cleanup();
+    };
+    const ensureSelfSubscription = () => {
+      if (!selfSubscriptionP) selfSubscriptionP = Promise.resolve(subscribeTopic(relay, selfTopic, (topic, msg) => {
+        if (!didCleanup) onMessage(topic, msg, signalPeer);
+      }, makeTopicContext(context, "self", rootTopic, selfTopic))).then((cleanup) => {
+        selfCleanup = cleanup;
+        if (didCleanup) cleanupSelf(cleanup);
+      });
+      return selfSubscriptionP;
+    };
+    if (!context.isPassive) await ensureSelfSubscription();
+    const rootCleanup = await subscribeTopic(relay, rootTopic, async (topic, msg) => {
+      if (didCleanup) return;
+      if (context.isPassive && shouldActivatePassiveRoom(msg)) await ensureSelfSubscription();
+      if (!didCleanup) await onMessage(topic, msg, signalPeer);
+    }, makeTopicContext(context, "root", rootTopic, selfTopic));
+    return () => {
+      didCleanup = true;
+      if (selfCleanup) cleanupSelf(selfCleanup);
+      rootCleanup();
+    };
+  },
+  announce: async (relay, rootTopic, selfTopic, extraPayload, rawContext) => {
+    const context = requireContext(rawContext);
+    const result = await publishTopic(relay, rootTopic, toJson({
+      peerId: selfId,
+      ...extraPayload
+    }), makeTopicContext(context, "announce", rootTopic, selfTopic));
+    return typeof result === "number" || result !== void 0 && "stopAnnouncing" in result ? result : {
+      nextAnnounceMs: (result == null ? void 0 : result.nextAnnounceMs) ?? steadyAnnounceIntervalMs,
+      reannounceOnDisconnect: (result == null ? void 0 : result.reannounceOnDisconnect) ?? reannounceOnDisconnect
+    };
+  },
+  ...unpublishTopic ? { deactivate: (relay, rootTopic, selfTopic, rawContext) => {
+    const context = requireContext(rawContext);
+    return unpublishTopic(relay, rootTopic, makeTopicContext(context, "announce", rootTopic, selfTopic));
+  } } : {}
+});
+
+// node_modules/@trystero-p2p/ws-relay/dist/index.mjs
+var relayManager = createRelayManager((client) => client.socket);
+var msgHandlers = relayManager.scoped();
+var announcementMessages = relayManager.scoped();
+var isRecord = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+var isStrategyMessage = (value) => typeof value === "string" || isRecord(value);
+var parseServerMessage = (data) => {
+  try {
+    const msg = JSON.parse(data);
+    return typeof msg.topic === "string" && isStrategyMessage(msg.payload) ? {
+      topic: msg.topic,
+      payload: msg.payload
+    } : null;
+  } catch {
+    return null;
+  }
+};
+var publish = (topic, payload) => ({
+  type: "publish",
+  topic,
+  payload
+});
+var subscribe = (topic) => ({
+  type: "subscribe",
+  topic
+});
+var unsubscribe = (topic) => ({
+  type: "unsubscribe",
+  topic
+});
+var joinRoom = topic_strategy_default({
+  init: (config) => config.relayConfig.urls.map((url) => {
+    const client = relayManager.register(url, () => makeSocket(url, (data) => {
+      var _a;
+      const msg = parseServerMessage(data);
+      if (!msg) return;
+      (_a = msgHandlers.forRelay(client)[msg.topic]) == null ? void 0 : _a.forEach((handler) => handler(msg.topic, msg.payload));
+    }, () => {
+      Object.keys(msgHandlers.forKey(url)).forEach((topic) => client.send(toJson(subscribe(topic))));
+      Object.entries(announcementMessages.forKey(url)).forEach(([topic, msg]) => client.send(toJson(publish(topic, msg))));
+    }));
+    return client.ready;
+  }),
+  subscribeTopic: (client, topic, onMessage) => {
+    const handlers = msgHandlers.forRelay(client);
+    const topicHandler = (topic2, data) => void onMessage(topic2, data);
+    const wasEmpty = !handlers[topic];
+    (handlers[topic] ?? (handlers[topic] = /* @__PURE__ */ new Set())).add(topicHandler);
+    if (wasEmpty) client.send(toJson(subscribe(topic)));
+    return () => {
+      const topicHandlers = handlers[topic];
+      if (!topicHandlers) return;
+      topicHandlers.delete(topicHandler);
+      if (topicHandlers.size === 0) {
+        delete handlers[topic];
+        delete announcementMessages.forRelay(client)[topic];
+        client.send(toJson(unsubscribe(topic)));
+      }
+    };
+  },
+  publishTopic: (client, topic, msg, { kind }) => {
+    client.send(toJson(publish(topic, msg)));
+    if (kind === "announce") announcementMessages.forRelay(client)[topic] = msg;
+  }
+});
+var getRelaySockets = relayManager.getSockets;
+
+// src/cast-protocol/index.ts
+var CAST_APP_ID = "dash-widgeter-cast-v1";
+var MAX_CAST_MESSAGE_BYTES = 16 * 1024;
+function parseCastCommand(value) {
+  const sourceKind = value.sourceKind;
+  if (sourceKind !== "idle" && sourceKind !== "website" && sourceKind !== "media" && sourceKind !== "youtube") return null;
+  const sourceUrl = String(value.sourceUrl ?? "");
+  if (sourceUrl.length > 8192) return null;
+  const volume = typeof value.volume === "number" && Number.isFinite(value.volume) ? Math.min(1, Math.max(0, value.volume)) : void 0;
+  const outputMode = value.outputMode === "audio-only" || value.outputMode === "video-only" ? value.outputMode : "audio-video";
+  return {
+    sourceKind,
+    sourceUrl,
+    muted: value.muted === true,
+    outputMode,
+    ...typeof value.paused === "boolean" ? { paused: value.paused } : {},
+    ...volume === void 0 ? {} : { volume }
+  };
+}
+function roleHandshake(role) {
+  return async (_peerId, send, receive) => {
+    await send(role);
+    const remote = await receive();
+    if (remote.data === role || remote.data !== "receiver" && remote.data !== "sender") {
+      throw new Error("Invalid cast peer role");
+    }
+  };
 }
 
-// src/plugins/calendar/calendar-styles.ts
-var CALENDAR_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-  body { width: 100%; height: 100%; }
-  .wg-plugin-root { width: 100%; height: 100%; }
-  .calendar-widget {
-    position: relative; width: 100%; height: 100%; padding: 14px 16px;
-    display: flex; flex-direction: column; color: #fff; overflow: hidden; box-sizing: border-box;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  }
-  .calendar-header { font-size: 15px; font-weight: 600; margin-bottom: 10px; flex-shrink: 0; }
-  .calendar-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scrollbar-width: none; -ms-overflow-style: none; }
-  .calendar-list::-webkit-scrollbar { display: none; }
-  .calendar-event { display: flex; flex-direction: column; gap: 1px; padding-left: 10px; border-left: 3px solid #6ba7e8; }
-  .calendar-when { font-size: 11px; color: rgba(255,255,255,0.7); }
-  .calendar-summary { font-size: 14px; font-weight: 500; }
-  .calendar-loc { font-size: 11px; color: rgba(255,255,255,0.7); }
-  .calendar-empty, .calendar-none, .calendar-error {
-    display: grid; place-items: center; flex: 1; text-align: center; color: rgba(255,255,255,0.7);
-  }
-  .calendar-empty p { margin-top: 6px; font-size: 13px; }
-  .calendar-error { color: #ff8080; }
+// src/plugins/cast-receiver/receiver.ts
+function createPluginReceiver(options, onState) {
+  const state = { status: "connecting", command: null, stream: null, peerCount: 0, error: null };
+  const peers = /* @__PURE__ */ new Set();
+  let activePeerId = null;
+  let closed = false;
+  const emit = () => {
+    if (!closed) onState({ ...state });
+  };
+  const stopActiveStream = () => {
+    var _a;
+    for (const track of ((_a = state.stream) == null ? void 0 : _a.getTracks()) ?? []) track.stop();
+    state.stream = null;
+  };
+  const activate = (peerId) => {
+    if (activePeerId && activePeerId !== peerId) void stop.send({}, { target: activePeerId });
+    activePeerId = peerId;
+    stopActiveStream();
+  };
+  const iceServers = options.turnUrl ? [{
+    urls: options.turnUrl,
+    ...options.turnUsername ? { username: options.turnUsername } : {},
+    ...options.turnCredential ? { credential: options.turnCredential } : {}
+  }] : [];
+  const config = {
+    appId: CAST_APP_ID,
+    password: options.password,
+    maxReceiveBytes: MAX_CAST_MESSAGE_BYTES,
+    relayConfig: { urls: [options.relayUrl] },
+    rtcConfig: { iceServers }
+  };
+  const room = joinRoom(config, options.roomCode, {
+    onPeerHandshake: roleHandshake("receiver"),
+    onJoinError: ({ error }) => {
+      state.status = "error";
+      state.error = error;
+      emit();
+    }
+  });
+  const command = room.makeAction("cast-command");
+  const stop = room.makeAction("cast-stop");
+  command.onMessage = (value, { peerId }) => {
+    const next = parseCastCommand(value);
+    if (!next || !peers.has(peerId)) return;
+    activate(peerId);
+    state.command = next;
+    state.status = next.sourceKind === "idle" ? "paired" : "casting";
+    emit();
+  };
+  room.onPeerJoin = (peerId) => {
+    peers.add(peerId);
+    state.peerCount = peers.size;
+    state.status = state.command || state.stream ? "casting" : "paired";
+    emit();
+  };
+  room.onPeerLeave = (peerId) => {
+    peers.delete(peerId);
+    state.peerCount = peers.size;
+    if (peerId === activePeerId) {
+      activePeerId = null;
+      stopActiveStream();
+      state.command = null;
+    }
+    state.status = peers.size === 0 ? "disconnected" : state.command || state.stream ? "casting" : "paired";
+    emit();
+  };
+  room.onPeerStream = (stream, peerId) => {
+    if (!peers.has(peerId)) return;
+    activate(peerId);
+    state.stream = stream;
+    state.command = null;
+    state.status = "casting";
+    emit();
+  };
+  emit();
+  return () => {
+    closed = true;
+    stopActiveStream();
+    peers.clear();
+    activePeerId = null;
+    void room.leave();
+  };
+}
+
+// src/plugins/cast-receiver/session-store.ts
+var INITIAL = {
+  status: "connecting",
+  command: null,
+  stream: null,
+  peerCount: 0,
+  error: null,
+  roomCode: "",
+  relayUrl: "",
+  senderUrl: ""
+};
+var RENEW_EARLY_MS = 3e4;
+var RELEASE_DELAY_MS = 1e3;
+var sessions = /* @__PURE__ */ new Map();
+var playbackListeners = /* @__PURE__ */ new Set();
+var playbackState = INITIAL;
+function publishPlayback(state) {
+  playbackState = state;
+  playbackListeners.forEach((listener) => listener(state));
+}
+function sessionKey(config) {
+  return `${config.relayUrl}
+${config.senderUrl}`;
+}
+function createEntry(context, key) {
+  const config = readCastConfig(context.config);
+  const abort = new AbortController();
+  const entry = { state: { ...INITIAL, relayUrl: config.relayUrl, senderUrl: config.senderUrl }, listeners: /* @__PURE__ */ new Set(), refs: 0, release: void 0, dispose: () => void 0 };
+  let stop = null;
+  let close = null;
+  let renewal;
+  let hadPeer = false;
+  let rotationScheduled = false;
+  const publish2 = (patch) => {
+    entry.state = { ...entry.state, ...patch };
+    entry.listeners.forEach((listener) => listener(entry.state));
+    publishPlayback(entry.state);
+    void context.setCastState({ ...entry.state, stream: null });
+  };
+  const fail = (cause) => {
+    if (abort.signal.aborted) return;
+    const error = cause instanceof Error ? cause.message : String(cause);
+    publish2({ status: "error", error, roomCode: "" });
+    context.reportStatus("error", error);
+  };
+  const open = async () => {
+    const session = await createPairingSession(
+      config.relayUrl,
+      abort.signal,
+      (url) => context.validateNativeOrigin("signaling", url)
+    );
+    if (abort.signal.aborted) {
+      await session.close();
+      return;
+    }
+    const previousClose = close;
+    close = () => session.close();
+    if (!stop) {
+      stop = createPluginReceiver(session.options, (next) => {
+        const firstPeerConnected = !hadPeer && next.peerCount > 0;
+        if (next.peerCount > 0) hadPeer = true;
+        publish2({ ...next, roomCode: entry.state.roomCode });
+        if (next.error) context.reportStatus("error", next.error);
+        else context.reportStatus("ok", "");
+        if (firstPeerConnected && !rotationScheduled) {
+          rotationScheduled = true;
+          clearTimeout(renewal);
+          renewal = window.setTimeout(() => void open().catch(fail), 0);
+        }
+      });
+    }
+    publish2({ roomCode: session.roomCode, error: null });
+    if (previousClose && !hadPeer) await previousClose().catch(() => void 0);
+    rotationScheduled = false;
+    renewal = window.setTimeout(
+      () => void open().catch(fail),
+      Math.max(1e3, session.expiresAt - Date.now() - RENEW_EARLY_MS)
+    );
+  };
+  if (!config.relayUrl) fail("Configure and approve a signaling origin.");
+  else void open().catch(fail);
+  entry.dispose = () => {
+    abort.abort();
+    clearTimeout(renewal);
+    stop == null ? void 0 : stop();
+    if (close) void close().catch(() => void 0);
+    sessions.delete(key);
+  };
+  return entry;
+}
+function useCastSession(context) {
+  const config = readCastConfig(context.config);
+  const key = sessionKey(config);
+  const [state, setState] = (0, import_react2.useState)(() => {
+    const existing = sessions.get(key);
+    if (existing) return existing.state;
+    const created = createEntry(context, key);
+    sessions.set(key, created);
+    return created.state;
+  });
+  (0, import_react2.useEffect)(() => {
+    const entry = sessions.get(key) ?? createEntry(context, key);
+    sessions.set(key, entry);
+    clearTimeout(entry.release);
+    entry.release = void 0;
+    entry.refs += 1;
+    entry.listeners.add(setState);
+    setState(entry.state);
+    return () => {
+      entry.listeners.delete(setState);
+      entry.refs -= 1;
+      if (entry.refs === 0) entry.release = window.setTimeout(entry.dispose, RELEASE_DELAY_MS);
+    };
+  }, [context, key]);
+  return state;
+}
+function useCastPlayback(context) {
+  const [state, setState] = (0, import_react2.useState)(playbackState);
+  (0, import_react2.useEffect)(() => {
+    let cancelled2 = false;
+    const refresh = async () => {
+      const next = await context.getCastState();
+      if (!cancelled2 && next) setState(next);
+    };
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 200);
+    return () => {
+      cancelled2 = true;
+      clearInterval(interval);
+    };
+  }, [context]);
+  return state;
+}
+
+// src/plugins/cast-receiver/CastWidget.tsx
+var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+function applyPlayback(media, paused, volume, muted) {
+  media.volume = volume;
+  media.muted = muted;
+  if (paused) media.pause();
+  else void media.play().catch(() => void 0);
+}
+function CastWidget({ context }) {
+  const config = (0, import_react3.useMemo)(() => readCastConfig(context.config), [context.config]);
+  const receiver = useCastSession(context);
+  const videoRef = (0, import_react3.useRef)(null);
+  const effectiveConfig = (0, import_react3.useMemo)(() => receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" }, [config, receiver.command]);
+  const target = (0, import_react3.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
+  const paused = effectiveConfig.paused ?? false;
+  const volume = effectiveConfig.volume ?? 1;
+  const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
+  (0, import_react3.useEffect)(() => {
+    const video = videoRef.current;
+    if (!video || !receiver.stream) return;
+    video.srcObject = receiver.stream;
+    applyPlayback(video, paused, volume, effectiveConfig.muted);
+    return () => {
+      video.srcObject = null;
+    };
+  }, [effectiveConfig.muted, paused, receiver.stream, volume]);
+  (0, import_react3.useEffect)(() => {
+    const stream = receiver.stream;
+    if (!stream) return;
+    const tracks = stream.getTracks();
+    const describe = () => {
+      if (tracks.every((track) => track.readyState === "ended")) context.reportStatus("error", "The shared stream ended.");
+      else if (stream.getAudioTracks().length === 0) context.reportStatus("error", "This shared stream has no audio.");
+      else context.reportStatus("ok", "");
+    };
+    tracks.forEach((track) => track.addEventListener("ended", describe));
+    describe();
+    return () => tracks.forEach((track) => track.removeEventListener("ended", describe));
+  }, [context, receiver.stream]);
+  (0, import_react3.useEffect)(() => {
+    const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode } : target.kind === "website" ? { provider: "website", url: target.url } : null;
+    const updatePresentation = async () => {
+      await context.setPresentation(next);
+      await context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
+    };
+    void updatePresentation().catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    return void 0;
+  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
+  (0, import_react3.useEffect)(() => {
+    const video = videoRef.current;
+    if (video && target.kind === "media") applyPlayback(
+      video,
+      paused,
+      volume,
+      effectiveConfig.muted || effectiveConfig.outputMode === "video-only"
+    );
+  }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
+  if (receiver.stream) return effectiveConfig.outputMode !== "audio-only" && receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty", "aria-label": context.locale.startsWith("de") ? "Audio\xFCbertragung aktiv" : "Audio casting active" });
+  if (target.kind === "youtube" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
+  if (target.kind === "media") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `cast-root cast-active ${effectiveConfig.outputMode === "audio-only" ? "cast-audio-only" : ""}`, "data-overlay": config.overlayMode, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", src: target.url, autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty" });
+}
+
+// src/plugins/cast-receiver/PairingWidget.tsx
+var import_react4 = __toESM(require_react(), 1);
+var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+var EN = { title: "Cast pairing", devices: "Connected devices" };
+var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te" };
+function senderLink(senderUrl, relayUrl, roomCode) {
+  if (!senderUrl || !relayUrl || !roomCode) return "";
+  const url = new URL(senderUrl, new URL(relayUrl));
+  url.searchParams.set("relay", relayUrl);
+  url.searchParams.set("code", roomCode);
+  return url.href;
+}
+function PairingWidget({ context }) {
+  const receiver = useCastPlayback(context);
+  const config = (0, import_react4.useMemo)(() => readCastConfig(context.config), [context.config]);
+  const strings = context.locale.startsWith("de") ? DE : EN;
+  const [open, setOpen] = (0, import_react4.useState)(false);
+  const roomCode = receiver.roomCode;
+  const url = (0, import_react4.useMemo)(
+    () => senderLink(config.senderUrl, config.relayUrl, roomCode),
+    [config.relayUrl, config.senderUrl, roomCode]
+  );
+  (0, import_react4.useEffect)(() => {
+    if (!open) return;
+    void context.setPairingDetails(roomCode && url ? { code: roomCode, url } : null);
+    return () => {
+      void context.setPairingDetails(null).catch(() => void 0);
+    };
+  }, [context, open, roomCode, url]);
+  const toggleDetails = () => {
+    const next = !open;
+    setOpen(next);
+    if (!next) void context.setPairingDetails(null);
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+    "button",
+    {
+      type: "button",
+      className: "cast-pairing-icon",
+      onClick: toggleDetails,
+      disabled: !roomCode,
+      "aria-label": strings.title,
+      title: `${strings.title} \xB7 ${roomCode} \xB7 ${strings.devices}: ${receiver.peerCount}`,
+      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) })
+    }
+  );
+}
+
+// src/plugins/cast-receiver/styles.ts
+var CAST_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; color: #fff; }
+  body, button { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  .wg-plugin-root, .cast-root, .cast-pairing-root { width: 100%; height: 100%; }
+  .cast-root { position: relative; overflow: hidden; }
+  .cast-empty { background: transparent; pointer-events: none; }
+  .cast-active[data-overlay='cover'] { background: #000; }
+  .cast-active[data-overlay='dim'] { background: rgba(0,0,0,0.6); }
+  .cast-active[data-overlay='inline'] { background: transparent; }
+  .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
+  .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
+  .cast-pairing-icon { width: 100%; height: 100%; min-width: 32px; min-height: 32px; display: grid; place-items: center; padding: 7px; border: 0; border-radius: inherit; color: inherit; background: transparent; cursor: pointer; }
+  .cast-pairing-icon:disabled { opacity: .45; cursor: default; }
+  .cast-pairing-icon svg { width: min(100%, 28px); height: min(100%, 28px); fill: currentColor; }
 `;
 
-// src/plugins/calendar/sandbox.ts
-injectStyle("calendar-style", CALENDAR_SANDBOX_CSS);
+// src/plugins/cast-receiver/sandbox.ts
+injectStyle("cast-receiver-style", CAST_SANDBOX_CSS);
 var sandbox_default = definePlugin({
   widgets: {
-    "calendar.agenda": defineReactWidget(CalendarWidget)
+    "cast-receiver.screen": defineReactWidget(CastWidget),
+    "cast-receiver.pairing": defineReactWidget(PairingWidget)
   }
 });
 export {

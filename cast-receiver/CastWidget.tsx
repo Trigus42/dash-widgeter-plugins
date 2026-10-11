@@ -52,10 +52,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     };
     void updatePresentation().catch((error: unknown) =>
       context.reportStatus('error', error instanceof Error ? error.message : String(error)));
-    return () => {
-      void context.setPresentation(null).catch(() => undefined);
-      void context.setPresentationMode('normal').catch(() => undefined);
-    };
+    return undefined;
   }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
   useEffect(() => {
     const video = videoRef.current;

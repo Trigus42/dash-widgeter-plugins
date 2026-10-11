@@ -24195,8 +24195,9 @@ function defineReactWidget(Component) {
       root = (0, import_client.createRoot)(el);
       draw();
     },
-    update(ctx) {
-      context = ctx;
+    update(next) {
+      if (context) Object.assign(context, next);
+      else context = next;
       draw();
     },
     unmount() {
