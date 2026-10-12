@@ -1826,7 +1826,8 @@
             "webRtc": true,
             "sandboxPolicy": [
               "embed-sites",
-              "remote-media"
+              "remote-media",
+              "cast-crypto"
             ],
             "settings": [
               {
@@ -1945,8 +1946,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-152935fda8f92557d1b5d74e5a2af4a97b06b0773722815fdf9411ccea639fac.js",
-      "sha256": "152935fda8f92557d1b5d74e5a2af4a97b06b0773722815fdf9411ccea639fac"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-049b13f3e0fea482eb9a434efe82c7619e16207eca54786f7a5b45617f6facdb.js",
+      "sha256": "049b13f3e0fea482eb9a434efe82c7619e16207eca54786f7a5b45617f6facdb"
     }
   ]
 }

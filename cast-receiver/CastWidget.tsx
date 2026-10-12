@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
 import { readCastConfig, resolveCastTarget } from './resolve';
-import { useCastSession } from './session-store';
+import { createScreenSession, type ScreenSession } from './screen-session';
 
 function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number, muted: boolean): void {
   media.volume = volume;
@@ -12,8 +12,13 @@ function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number,
 
 export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const config = useMemo(() => readCastConfig(context.config), [context.config]);
-  const receiver = useCastSession(context);
+  const [receiver, setReceiver] = useState<ScreenSession['state']>(() => ({ status: 'connecting', command: null, stream: null,
+    peerCount: 0, error: null, roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl }));
   const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => { const session = createScreenSession(context); const unsubscribe = session.subscribe(setReceiver);
+    return () => { unsubscribe(); session.close(); }; }, [context]);
+  useEffect(() => { document.body.dataset.castStream = receiver.stream
+    ? receiver.stream.getTracks().map((track) => `${track.kind}:${track.readyState}:${track.muted}`).join(',') : 'none'; }, [receiver.stream]);
   const effectiveConfig = useMemo(() => receiver.command
     ? { ...config, ...receiver.command }
     : { ...config, sourceKind: 'idle' as const }, [config, receiver.command]);

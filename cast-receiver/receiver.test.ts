@@ -1,44 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Room } from '@trystero-p2p/ws-relay';
+import { describe, expect, it, vi } from 'vitest';
 
-const { joinRoom, room, command, stopAction } = vi.hoisted(() => {
-  const command = { send: vi.fn(() => Promise.resolve()), onMessage: null as null | ((data: Record<string, string | boolean | number>, context: { peerId: string }) => void) };
-  const stopAction = { send: vi.fn(() => Promise.resolve()), onMessage: null };
-  const room = { makeAction: vi.fn((name: string) => name === 'cast-stop' ? stopAction : command), leave: vi.fn(),
-    onPeerJoin: null, onPeerLeave: null, onPeerStream: null } as unknown as Room;
-  return { joinRoom: vi.fn(() => room), room, command, stopAction };
-});
-vi.mock('@trystero-p2p/ws-relay', () => ({ joinRoom }));
+const { createCastReceiver } = vi.hoisted(() => ({ createCastReceiver: vi.fn((_options: object, _callback: (state: object) => void) => vi.fn()) }));
+vi.mock('@/core/cast/session', () => ({ createCastReceiver }));
+import { createPluginReceiver } from './receiver';
 
-import { createPluginReceiver, type ReceiverState } from './receiver';
-
-const options = { relayUrl: 'wss://relay.test', roomCode: '123456', password: 'x'.repeat(43) };
-
-describe('plugin Cast receiver', () => {
-  beforeEach(() => {
-    vi.clearAllMocks(); command.onMessage = null; room.onPeerJoin = null; room.onPeerLeave = null; room.onPeerStream = null;
-  });
-
-  it('accepts multiple senders and stops the previous owner when another starts', () => {
-    const states: Array<{ peerCount: number; command: unknown }> = [];
-    createPluginReceiver(options, (state) => states.push(state));
-    room.onPeerJoin?.('sender-1'); room.onPeerJoin?.('sender-2');
-    expect(states.at(-1)?.peerCount).toBe(2);
-    command.onMessage?.({ sourceKind: 'youtube', sourceUrl: 'dQw4w9WgXcQ', muted: false }, { peerId: 'sender-1' });
-    command.onMessage?.({ sourceKind: 'website', sourceUrl: 'https://example.com', muted: false }, { peerId: 'sender-2' });
-    expect(stopAction.send).toHaveBeenCalledWith({}, { target: 'sender-1' });
-    expect(states.at(-1)?.command).toMatchObject({ sourceKind: 'website' });
-  });
-
-  it('keeps URL playback after its sender disconnects', () => {
-    const states: ReceiverState[] = [];
-    const stop = createPluginReceiver(options, (state) => states.push(state));
-    room.onPeerJoin?.('sender');
-    command.onMessage?.({ sourceKind: 'youtube', sourceUrl: 'dQw4w9WgXcQ', muted: false,
-      outputMode: 'audio-video' }, { peerId: 'sender' });
-    room.onPeerLeave?.('sender');
-    expect(states.at(-1)?.command?.sourceKind).toBe('youtube');
-    expect(states.at(-1)?.status).toBe('casting');
-    stop();
+describe('plugin cast receiver facade', () => {
+  it('maps the shared receiver stream shape without duplicating transport logic', () => {
+    const states: Array<{ stream: MediaStream | null }> = [];
+    createPluginReceiver({ relayUrl: 'wss://relay.test', roomCode: '1234', authCode: '123456', generation: 'abcdefghijklmnop' },
+      { bytes: new Uint8Array(), sha256: 'digest' }, (state) => states.push(state));
+    const callback = createCastReceiver.mock.calls[0]?.[1];
+    callback?.({ status: 'paired', command: null, screenStream: null, peerCount: 1, error: null });
+    expect(states).toEqual([{ status: 'paired', command: null, screenStream: null, stream: null, peerCount: 1, error: null }]);
   });
 });
