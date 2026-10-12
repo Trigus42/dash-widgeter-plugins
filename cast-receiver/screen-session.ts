@@ -38,7 +38,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     });
     publish({ roomCode: room.roomCode, error: null });
     decisionPoll = window.setInterval(() => { void context.getCastSasDecision().then((decision) => {
-      if (decision && decision.roomCode === state.roomCode && decision.sas === state.sas) receiver?.confirmSas(decision.accepted);
+      if (decision && decision.roomCode === state.roomCode && decision.sas === state.sas) {
+        receiver?.confirmSas(decision.accepted); if (!decision.accepted) publish({ status: 'disconnected', peerCount: 0, sasTrusted: false });
+      }
     }).catch(report); }, 250); schedule(room.expiresAt);
   };
   const maintain = async (): Promise<void> => {
