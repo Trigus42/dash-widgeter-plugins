@@ -8,6 +8,7 @@ export interface ReceiverState {
   stream: MediaStream | null;
   peerCount: number;
   error: string | null;
+  sas?: string;
 }
 
 export function createPluginReceiver(options: CastSessionOptions, asset: SpakeRuntimeAsset, onState: (state: ReceiverState) => void): () => void {

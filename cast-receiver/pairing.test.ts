@@ -17,6 +17,16 @@ describe('createPairingSession', () => {
     expect(result.options.reclaimToken).toBe(room.reclaimToken);
   });
 
+  it('uses the relay-authoritative renewed expiry', async () => {
+    const renewed = Date.now() + 120_000;
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(room), { status: 201 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ expiresAt: renewed }), { status: 200 }));
+    vi.stubGlobal('fetch', fetcher);
+    const result = await createPairingSession('https://relay.example', new AbortController().signal, vi.fn(() => Promise.resolve()));
+    await expect(result.renew()).resolves.toBe(renewed);
+  });
+
   it('rejects an unapproved advertised origin', async () => {
     vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify(room), { status: 201 }))));
     const validate = vi.fn(() => Promise.reject(new Error('Native network origin is not approved')));
