@@ -15,10 +15,11 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const [receiver, setReceiver] = useState<ScreenSession['state']>(() => ({ status: 'connecting', command: null, stream: null,
     peerCount: 0, error: null, roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl }));
   const videoRef = useRef<HTMLVideoElement>(null);
-  useEffect(() => { const session = createScreenSession(context); const unsubscribe = session.subscribe(setReceiver);
-    return () => { unsubscribe(); session.close(); }; }, [context]);
-  useEffect(() => { document.body.dataset.castStream = receiver.stream
-    ? receiver.stream.getTracks().map((track) => `${track.kind}:${track.readyState}:${track.muted}`).join(',') : 'none'; }, [receiver.stream]);
+  useEffect(() => { const sessionContext = { ...context, config: { ...config } }; const session = createScreenSession(sessionContext); const unsubscribe = session.subscribe(setReceiver);
+    return () => { unsubscribe(); session.close(); };
+    // Session identity changes only with its connection settings; other render context updates must preserve the live peer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.relayUrl, config.senderUrl]);
   const effectiveConfig = useMemo(() => receiver.command
     ? { ...config, ...receiver.command }
     : { ...config, sourceKind: 'idle' as const }, [config, receiver.command]);

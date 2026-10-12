@@ -10,8 +10,10 @@ export interface ReceiverState {
   peerCount: number;
   error: string | null;
   sas?: string;
+  sasTrusted?: boolean;
 }
 
-export function createPluginReceiver(options: CastSessionOptions, asset: SpakeRuntimeAsset, onState: (state: ReceiverState) => void): () => void {
+export interface PluginReceiver { close(): void; confirmSas(accepted: boolean): void }
+export function createPluginReceiver(options: CastSessionOptions, asset: SpakeRuntimeAsset, onState: (state: ReceiverState) => void): PluginReceiver {
   return createCastReceiver(options, (state) => onState({ ...state, stream: state.screenStream }), asset);
 }
