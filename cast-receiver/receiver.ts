@@ -14,6 +14,9 @@ export interface ReceiverState {
 }
 
 export interface PluginReceiver { close(): void; confirmSas(accepted: boolean): void }
-export function createPluginReceiver(options: CastSessionOptions, asset: SpakeRuntimeAsset, onState: (state: ReceiverState) => void): PluginReceiver {
-  return createCastReceiver(options, (state) => onState({ ...state, stream: state.screenStream }), asset);
+export function createPluginReceiver(options: CastSessionOptions, asset: SpakeRuntimeAsset, onState: (state: ReceiverState) => void,
+  onResumeBinding?: (binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>,
+  onResumeRevoke?: (bindingId: string) => Promise<void>): PluginReceiver {
+  return createCastReceiver(options, (state) => onState({ status: state.status, command: state.command, stream: state.screenStream,
+    peerCount: state.peerCount, error: state.error, ...(state.sas ? { sas: state.sas } : {}), ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) }), asset, onResumeBinding, onResumeRevoke);
 }

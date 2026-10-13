@@ -14,7 +14,7 @@ describe('plugin cast receiver facade', () => {
       { bytes: new Uint8Array(), sha256: 'digest' }, (state) => states.push(state));
     const callback = createCastReceiver.mock.calls[0]?.[1];
     callback?.({ status: 'paired', command: null, screenStream: null, peerCount: 1, error: null });
-    expect(states).toEqual([{ status: 'paired', command: null, screenStream: null, stream: null, peerCount: 1, error: null }]);
+    expect(states).toEqual([{ status: 'paired', command: null, stream: null, peerCount: 1, error: null }]);
     result.confirmSas(true); expect(controller.confirmSas).toHaveBeenCalledWith(true);
   });
 });

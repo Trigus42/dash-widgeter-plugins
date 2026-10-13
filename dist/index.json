@@ -1755,7 +1755,7 @@
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "4.4.3",
+        "version": "4.4.4",
         "description": "Remote receiver for YouTube, screen sharing, websites, and media",
         "translations": {
           "de": {
@@ -1827,7 +1827,7 @@
             "sandboxPolicy": [
               "embed-sites",
               "remote-media",
-              "cast-crypto"
+              "secure-webrtc"
             ],
             "settings": [
               {
@@ -1922,10 +1922,9 @@
               "background": "glass",
               "backgroundOpacity": 0.55
             },
-            "nativeNetwork": [
-              "signaling"
-            ],
-            "webRtc": true,
+            "nativeNetwork": [],
+            "webRtc": false,
+            "sandboxPolicy": [],
             "settings": [
               {
                 "key": "relayUrl",
@@ -1946,8 +1945,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-049b13f3e0fea482eb9a434efe82c7619e16207eca54786f7a5b45617f6facdb.js",
-      "sha256": "049b13f3e0fea482eb9a434efe82c7619e16207eca54786f7a5b45617f6facdb"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-277fa2af2a56c1440271c86c8d8b70b8eefb4c24200fb9132e316b40a5287893.js",
+      "sha256": "277fa2af2a56c1440271c86c8d8b70b8eefb4c24200fb9132e316b40a5287893"
     }
   ]
 }
