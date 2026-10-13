@@ -10,7 +10,7 @@ export interface ScreenSession {
   subscribe(listener: (state: ScreenSession['state']) => void): () => void;
   close(): void;
 }
-interface ReceiverEntry { room: { options: CastSessionOptions; roomCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean }
+interface ReceiverEntry { room: { options: CastSessionOptions; roomCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; revoked: boolean }
 type TimerHandle = number | NodeJS.Timeout;
 
 
@@ -22,23 +22,37 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const listeningBindings = new Set<string>();
   const resumeEntries = new Map<string, ReceiverEntry>();
   const connected = new Set<ReceiverEntry>(); const abort = new AbortController();
-  let pairing: ReceiverEntry | undefined, renewal: TimerHandle | undefined, disposed = false;
+  let pairing: ReceiverEntry | undefined, presenter: ReceiverEntry | undefined, renewal: TimerHandle | undefined, disposed = false;
   let lifecycle: Promise<void> = Promise.resolve();
   const publish = (patch: Partial<ScreenSession['state']>): void => {
     Object.assign(state, patch); listeners.forEach((listener) => listener({ ...state }));
     const hostState = { status: state.status, command: state.command, peerCount: state.peerCount, error: state.error,
-      roomCode: state.roomCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl };
+      roomCode: state.roomCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, ...(state.sas ? { sas: state.sas } : {}),
+      ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
     void context.setCastState(hostState);
   };
   const report = (error: unknown): void => publish({ status: 'error', error: error instanceof Error ? error.message : String(error) });
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const aggregate = (entry: ReceiverEntry): void => {
-    const latest = entry.state; publish({ ...latest, peerCount: connected.size, roomCode: state.roomCode });
+    const latest = entry.state;
+    const presenting = latest.stream !== null || (latest.command !== null && latest.command.sourceKind !== 'idle');
+    if (presenting && !entry.revoked && presenter !== entry) {
+      if (presenter) { presenter.revoked = true; presenter.state = { ...presenter.state, command: null, stream: null, status: 'paired' }; presenter.receiver?.revokePresenter(); }
+      presenter = entry;
+    } else if (presenter === entry && !presenting) presenter = undefined;
+    const displayed = presenter?.state ?? latest;
+    const preservesPresenter = presenter && presenter !== entry;
+    const patch = preservesPresenter
+      ? { peerCount: connected.size, roomCode: state.roomCode }
+      : { ...displayed, peerCount: connected.size, roomCode: state.roomCode };
+    publish({ ...patch, ...(state.sas ? { sas: state.sas } : {}),
+      ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) });
     context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
   };
   const disposeEntry = async (entry: ReceiverEntry): Promise<void> => {
-    connected.delete(entry); if (pairing === entry) pairing = undefined; entry.receiver?.close();
-    publish({ peerCount: connected.size, status: connected.size > 0 ? 'paired' : 'disconnected' });
+    connected.delete(entry); if (pairing === entry) pairing = undefined; if (presenter === entry) presenter = undefined; entry.receiver?.close();
+    publish({ peerCount: connected.size, status: connected.size > 0 ? 'paired' : 'disconnected',
+      ...(presenter ? { command: presenter.state.command, stream: presenter.state.stream } : { command: null, stream: null }) });
     await entry.room.close();
   };
   const resume = async (): Promise<void> => {
@@ -51,12 +65,12 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
           const asset = await context.secureWebRtcCryptoAsset();
           const entry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-            state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false };
+            state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false, revoked: false };
           resumeEntries.set(binding.bindingId, entry);
           entry.receiver = createPluginReceiver(options, asset, (next) => {
             entry.state = next;
             if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); }
-            if (next.peerCount === 0 && entry.connected) { entry.connected = false; connected.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId); entry.receiver?.close(); if (!disposed) enqueue(listen); }
+            if (next.peerCount === 0 && entry.connected) { entry.connected = false; connected.delete(entry); if (presenter === entry) presenter = undefined; resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId); entry.receiver?.close(); if (!disposed) enqueue(listen); }
             aggregate(entry);
           });
         } catch (error) {
@@ -74,12 +88,12 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     const asset = await context.secureWebRtcCryptoAsset();
     const initialState: ReceiverState = { status: 'connecting', command: null, stream: null, peerCount: 0, error: null };
     const pendingStates: ReceiverState[] = [];
-    const entry: ReceiverEntry = { room, state: initialState, connected: false };
+    const entry: ReceiverEntry = { room, state: initialState, connected: false, revoked: false };
     const applyState = (next: ReceiverState): void => {
       entry.state = next;
       if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry);
         if (pairing === entry) { pairing = undefined; clearTimeout(renewal); enqueue(allocate); } }
-      if (next.peerCount === 0 && entry.connected) { entry.connected = false; enqueue(() => disposeEntry(entry)); }
+      if (next.peerCount === 0 && entry.connected) { entry.connected = false; enqueue(() => disposeEntry(entry)); return; }
       aggregate(entry);
     };
     let initialized = false;
@@ -91,12 +105,12 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       listeningBindings.add(binding.bindingId);
       const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
       const resumeEntry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-        state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false };
+        state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false, revoked: false };
       resumeEntries.set(binding.bindingId, resumeEntry);
       resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
         resumeEntry.state = next;
         if (next.peerCount > 0 && !resumeEntry.connected) { resumeEntry.connected = true; connected.add(resumeEntry); }
-        if (next.peerCount === 0 && resumeEntry.connected) { resumeEntry.connected = false; connected.delete(resumeEntry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId); resumeEntry.receiver?.close(); enqueue(resume); }
+        if (next.peerCount === 0 && resumeEntry.connected) { resumeEntry.connected = false; connected.delete(resumeEntry); if (presenter === resumeEntry) presenter = undefined; resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId); resumeEntry.receiver?.close(); enqueue(resume); }
         aggregate(resumeEntry);
       }, undefined, (bindingId) => context.castResume.delete(bindingId));
     }, (bindingId) => context.castResume.delete(bindingId));
@@ -109,5 +123,5 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
     close() { disposed = true; abort.abort(); clearTimeout(renewal); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
       for (const entry of entries) entry.receiver?.close();
-      resumeEntries.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => undefined).catch(report); listeners.clear(); } };
+      resumeEntries.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; presenter = undefined; lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => undefined).catch(report); listeners.clear(); } };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 const { controller, createCastReceiver } = vi.hoisted(() => {
-  const controller = { close: vi.fn(), confirmSas: vi.fn() };
+  const controller = { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
   return { controller, createCastReceiver: vi.fn((_options: object, _callback: (state: object) => void) => controller) };
 });
 vi.mock('@/core/cast/session', () => ({ createCastReceiver }));
@@ -16,5 +16,14 @@ describe('plugin cast receiver facade', () => {
     callback?.({ status: 'paired', command: null, screenStream: null, peerCount: 1, error: null });
     expect(states).toEqual([{ status: 'paired', command: null, stream: null, peerCount: 1, error: null }]);
     result.confirmSas(true); expect(controller.confirmSas).toHaveBeenCalledWith(true);
+  });
+
+  it('preserves the receiver SAS for plugin consumers', () => {
+    const states: object[] = [];
+    createPluginReceiver({ relayUrl: 'wss://relay.test', roomCode: '1234', authCode: '123456', generation: 'abcdefghijklmnop' },
+      { bytes: new Uint8Array(), sha256: 'digest' }, (state) => states.push(state));
+    const callback = createCastReceiver.mock.calls.at(-1)?.[1];
+    callback?.({ status: 'paired', command: null, screenStream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
+    expect(states).toEqual([{ status: 'paired', command: null, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false }]);
   });
 });
