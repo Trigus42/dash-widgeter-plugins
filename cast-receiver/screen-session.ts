@@ -10,7 +10,7 @@ export interface ScreenSession {
   subscribe(listener: (state: ScreenSession['state']) => void): () => void;
   close(): void;
 }
-interface ReceiverEntry { room: { options: CastSessionOptions; roomCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; revoked: boolean }
+interface ReceiverEntry { room: { options: CastSessionOptions; roomCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; revoked: boolean; awaitingIdle: boolean }
 type TimerHandle = number | NodeJS.Timeout;
 
 
@@ -36,8 +36,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const aggregate = (entry: ReceiverEntry): void => {
     const latest = entry.state;
     const presenting = latest.stream !== null || (latest.command !== null && latest.command.sourceKind !== 'idle');
-    if (presenting && !entry.revoked && presenter !== entry) {
-      if (presenter) { presenter.revoked = true; presenter.state = { ...presenter.state, command: null, stream: null, status: 'paired' }; presenter.receiver?.revokePresenter(); }
+    if (entry.revoked && !presenting) { entry.revoked = false; entry.awaitingIdle = false; }
+    if (presenting && !entry.revoked && !entry.awaitingIdle && presenter !== entry) {
+      if (presenter) { presenter.revoked = true; presenter.awaitingIdle = true; presenter.state = { ...presenter.state, command: null, stream: null, status: 'paired' }; presenter.receiver?.revokePresenter(); }
       presenter = entry;
     } else if (presenter === entry && !presenting) presenter = undefined;
     const displayed = presenter?.state ?? latest;
@@ -65,7 +66,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
           const asset = await context.secureWebRtcCryptoAsset();
           const entry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-            state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false, revoked: false };
+            state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false, revoked: false, awaitingIdle: false };
           resumeEntries.set(binding.bindingId, entry);
           entry.receiver = createPluginReceiver(options, asset, (next) => {
             entry.state = next;
@@ -88,7 +89,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     const asset = await context.secureWebRtcCryptoAsset();
     const initialState: ReceiverState = { status: 'connecting', command: null, stream: null, peerCount: 0, error: null };
     const pendingStates: ReceiverState[] = [];
-    const entry: ReceiverEntry = { room, state: initialState, connected: false, revoked: false };
+    const entry: ReceiverEntry = { room, state: initialState, connected: false, revoked: false, awaitingIdle: false };
     const applyState = (next: ReceiverState): void => {
       entry.state = next;
       if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry);
@@ -105,7 +106,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       listeningBindings.add(binding.bindingId);
       const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
       const resumeEntry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-        state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false, revoked: false };
+        state: { status: 'connecting', command: null, stream: null, peerCount: 0, error: null }, connected: false, revoked: false, awaitingIdle: false };
       resumeEntries.set(binding.bindingId, resumeEntry);
       resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
         resumeEntry.state = next;

@@ -91,8 +91,9 @@ describe('screen session room lifecycle', () => {
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
+    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
-      callbacks.push(onState); return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
+      callbacks.push(onState); return receivers[callbacks.length - 1];
     });
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
@@ -104,8 +105,13 @@ describe('screen session room lifecycle', () => {
     expect(session.state.command).toEqual(firstCommand);
     const secondCommand = { sourceKind: 'youtube', sourceUrl: 'second', muted: false, outputMode: 'audio-video' };
     callbacks[1]!({ status: 'casting', command: secondCommand, stream: null, peerCount: 1, error: null });
-    expect(session.state.command).toEqual(secondCommand);
-    callbacks[1]!({ status: 'paired', command: null, stream: null, peerCount: 1, error: null });
+    expect(session.state.command).toEqual(secondCommand); expect(receivers[0]!.revokePresenter).toHaveBeenCalledOnce();
+    callbacks[0]!({ status: 'casting', command: firstCommand, stream: null, peerCount: 1, error: null });
+    expect(session.state.command).toEqual(secondCommand); expect(receivers[1]!.revokePresenter).not.toHaveBeenCalled();
+    callbacks[0]!({ status: 'paired', command: null, stream: null, peerCount: 1, error: null });
+    callbacks[0]!({ status: 'casting', command: firstCommand, stream: null, peerCount: 1, error: null });
+    expect(session.state.command).toEqual(firstCommand); expect(receivers[1]!.revokePresenter).toHaveBeenCalledOnce();
+    callbacks[0]!({ status: 'paired', command: null, stream: null, peerCount: 1, error: null });
     expect(session.state.command).toBeNull(); session.close();
   });
 });
