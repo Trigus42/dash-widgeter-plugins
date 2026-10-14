@@ -11,7 +11,7 @@ import de from './locales/de.json';
 
 const settings: WidgetSettingField[] = [
   { key: 'relayUrl', label: 'Signaling URL', type: 'text', placeholder: 'https://signal.example', help: 'Must match the signaling origin approved in plugin permissions.', section: 'Connection' },
-  { key: 'senderUrl', label: 'Sender URL', type: 'text', placeholder: 'https://signal.example/cast', section: 'Connection' },
+  { key: 'senderUrl', label: 'Sender URL', type: 'text', hidden: true, section: 'Connection' },
   {
     key: 'sourceKind',
     label: 'What to cast',
@@ -49,7 +49,7 @@ const settings: WidgetSettingField[] = [
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '4.4.6',
+  version: '4.4.7',
   description: 'Remote receiver for YouTube, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',

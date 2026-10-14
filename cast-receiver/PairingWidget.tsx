@@ -8,7 +8,7 @@ const DE = { title: 'Cast-Kopplung', devices: 'Verbundene Geräte', sas: 'Sicher
 
 function senderLink(senderUrl: string, relayUrl: string, roomCode: string): string {
   if (!senderUrl || !relayUrl || !roomCode) return '';
-  const url = new URL(senderUrl, new URL(relayUrl));
+  const url = new URL(senderUrl);
   url.searchParams.set('relay', relayUrl);
   url.searchParams.set('code', roomCode);
   return url.href;
@@ -19,9 +19,17 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const config = useMemo(() => readCastConfig(context.config), [context.config]);
   const strings = context.locale.startsWith('de') ? DE : EN;
   const [open, setOpen] = useState(false);
+  const [defaultSenderUrl, setDefaultSenderUrl] = useState('');
   const roomCode = receiver.roomCode;
-  const url = useMemo(() => senderLink(config.senderUrl, config.relayUrl, roomCode),
-    [config.relayUrl, config.senderUrl, roomCode]);
+  const relayUrl = receiver.relayUrl || config.relayUrl;
+  const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
+  const url = useMemo(() => senderLink(senderUrl, relayUrl, roomCode),
+    [relayUrl, roomCode, senderUrl]);
+  useEffect(() => {
+    if (receiver.senderUrl || config.senderUrl) return;
+    void context.castDefaultSenderUrl().then(setDefaultSenderUrl)
+      .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
+  }, [config.senderUrl, context, receiver.senderUrl]);
   useEffect(() => {
     if (!open) return;
     void context.setPairingDetails(roomCode && url ? { code: roomCode, url, ...(receiver.sas ? { sas: receiver.sas } : {}) } : null)

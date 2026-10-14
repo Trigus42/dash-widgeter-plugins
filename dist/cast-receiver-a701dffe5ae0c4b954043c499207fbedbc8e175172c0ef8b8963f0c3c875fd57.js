@@ -25685,7 +25685,7 @@ var EN = { title: "Cast pairing", devices: "Connected devices", sas: "Security c
 var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te", sas: "Sicherheitscode" };
 function senderLink(senderUrl, relayUrl, roomCode) {
   if (!senderUrl || !relayUrl || !roomCode) return "";
-  const url = new URL(senderUrl, new URL(relayUrl));
+  const url = new URL(senderUrl);
   url.searchParams.set("relay", relayUrl);
   url.searchParams.set("code", roomCode);
   return url.href;
@@ -25695,11 +25695,18 @@ function PairingWidget({ context }) {
   const config = (0, import_react4.useMemo)(() => readCastConfig(context.config), [context.config]);
   const strings = context.locale.startsWith("de") ? DE : EN;
   const [open, setOpen] = (0, import_react4.useState)(false);
+  const [defaultSenderUrl, setDefaultSenderUrl] = (0, import_react4.useState)("");
   const roomCode = receiver.roomCode;
+  const relayUrl = receiver.relayUrl || config.relayUrl;
+  const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
   const url = (0, import_react4.useMemo)(
-    () => senderLink(config.senderUrl, config.relayUrl, roomCode),
-    [config.relayUrl, config.senderUrl, roomCode]
+    () => senderLink(senderUrl, relayUrl, roomCode),
+    [relayUrl, roomCode, senderUrl]
   );
+  (0, import_react4.useEffect)(() => {
+    if (receiver.senderUrl || config.senderUrl) return;
+    void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [config.senderUrl, context, receiver.senderUrl]);
   (0, import_react4.useEffect)(() => {
     if (!open) return;
     void context.setPairingDetails(roomCode && url ? { code: roomCode, url, ...receiver.sas ? { sas: receiver.sas } : {} } : null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
