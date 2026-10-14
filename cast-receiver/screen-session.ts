@@ -22,9 +22,11 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const listeningBindings = new Set<string>();
   const resumeEntries = new Map<string, ReceiverEntry>();
   const connected = new Set<ReceiverEntry>(); const abort = new AbortController();
-  let pairing: ReceiverEntry | undefined, presenter: ReceiverEntry | undefined, renewal: TimerHandle | undefined, disposed = false;
+  let pairing: ReceiverEntry | undefined, presenter: ReceiverEntry | undefined, sasOwner: ReceiverEntry | undefined, renewal: TimerHandle | undefined, disposed = false;
   let lifecycle: Promise<void> = Promise.resolve();
   const publish = (patch: Partial<ScreenSession['state']>): void => {
+    if ('sas' in patch && patch.sas === undefined) delete state.sas;
+    if ('sasTrusted' in patch && patch.sasTrusted === undefined) delete state.sasTrusted;
     Object.assign(state, patch); listeners.forEach((listener) => listener({ ...state }));
     const hostState = { status: state.status, command: state.command, peerCount: state.peerCount, error: state.error,
       roomCode: state.roomCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, ...(state.sas ? { sas: state.sas } : {}),
@@ -35,7 +37,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const aggregate = (entry: ReceiverEntry): void => {
     const latest = entry.state;
-    const presenting = latest.stream !== null || (latest.command !== null && latest.command.sourceKind !== 'idle');
+    const presenting = latest.status === 'casting' || latest.stream !== null || (latest.command !== null && latest.command.sourceKind !== 'idle');
     const stale = latest.presentationEpoch <= entry.revokedEpoch;
     if (presenting && !stale && (presenter !== entry || presenter.state.presentationEpoch !== latest.presentationEpoch)) {
       if (presenter) {
@@ -51,12 +53,16 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     const patch = preservesPresenter
       ? { peerCount: connected.size, roomCode: state.roomCode }
       : { ...displayed, peerCount: connected.size, roomCode: state.roomCode };
-    publish({ ...patch, ...(latest.sas ? { sas: latest.sas } : {}),
-      ...(latest.sasTrusted === undefined ? {} : { sasTrusted: latest.sasTrusted }) });
+    if (latest.sas) sasOwner = entry;
+    if (sasOwner === entry && (!latest.sas || latest.peerCount === 0)) sasOwner = undefined;
+    const ownedSas = sasOwner?.state.sas;
+    if (!ownedSas) { delete state.sas; delete state.sasTrusted; }
+    publish({ ...patch, ...(ownedSas ? { sas: ownedSas } : {}),
+      ...(ownedSas && sasOwner?.state.sasTrusted !== undefined ? { sasTrusted: sasOwner.state.sasTrusted } : {}) });
     context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
   };
   const disposeEntry = async (entry: ReceiverEntry): Promise<void> => {
-    connected.delete(entry); if (pairing === entry) pairing = undefined; if (presenter === entry) presenter = undefined; entry.receiver?.close();
+    connected.delete(entry); if (pairing === entry) pairing = undefined; if (presenter === entry) presenter = undefined; if (sasOwner === entry) sasOwner = undefined; entry.receiver?.close();
     publish({ peerCount: connected.size, status: connected.size > 0 ? 'paired' : 'disconnected',
       ...(presenter ? { command: presenter.state.command, stream: presenter.state.stream } : { command: null, stream: null }) });
     await entry.room.close();
@@ -130,5 +136,5 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
     close() { disposed = true; abort.abort(); clearTimeout(renewal); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
       for (const entry of entries) entry.receiver?.close();
-      resumeEntries.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; presenter = undefined; lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => undefined).catch(report); listeners.clear(); } };
+      resumeEntries.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; presenter = undefined; sasOwner = undefined; lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => undefined).catch(report); listeners.clear(); } };
 }
