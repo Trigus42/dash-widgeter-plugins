@@ -37,7 +37,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const aggregate = (entry: ReceiverEntry): void => {
     const latest = entry.state;
-    const presenting = latest.status === 'casting' || latest.stream !== null || (latest.command !== null && latest.command.sourceKind !== 'idle');
+    const presenting = latest.stream !== null || (latest.command !== null && latest.command.sourceKind !== 'idle');
     const stale = latest.presentationEpoch <= entry.revokedEpoch;
     if (presenting && !stale && (presenter !== entry || presenter.state.presentationEpoch !== latest.presentationEpoch)) {
       if (presenter) {

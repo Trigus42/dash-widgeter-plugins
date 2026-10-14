@@ -25363,7 +25363,7 @@ function createScreenSession(context) {
   const aggregate = (entry) => {
     var _a;
     const latest = entry.state;
-    const presenting = latest.status === "casting" || latest.stream !== null || latest.command !== null && latest.command.sourceKind !== "idle";
+    const presenting = latest.stream !== null || latest.command !== null && latest.command.sourceKind !== "idle";
     const stale = latest.presentationEpoch <= entry.revokedEpoch;
     if (presenting && !stale && (presenter !== entry || presenter.state.presentationEpoch !== latest.presentationEpoch)) {
       if (presenter) {
