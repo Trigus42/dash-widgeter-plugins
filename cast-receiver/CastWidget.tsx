@@ -12,7 +12,7 @@ function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number,
 
 export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const config = useMemo(() => readCastConfig(context.config), [context.config]);
-  const [receiver, setReceiver] = useState<ScreenSession['state']>(() => ({ status: 'connecting', command: null, stream: null,
+  const [receiver, setReceiver] = useState<ScreenSession['state']>(() => ({ status: 'connecting', command: null, presentationEpoch: 0, stream: null,
     peerCount: 0, error: null, roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl }));
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => { const sessionContext = { ...context, config: { ...config } }; const session = createScreenSession(sessionContext); const unsubscribe = session.subscribe(setReceiver);

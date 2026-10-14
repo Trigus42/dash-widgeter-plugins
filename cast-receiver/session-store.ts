@@ -9,7 +9,7 @@ export interface CastSessionState extends ReceiverState {
 }
 
 const INITIAL: CastSessionState = {
-  status: 'connecting', command: null, stream: null, peerCount: 0, error: null,
+  status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null,
   roomCode: '', relayUrl: '', senderUrl: '',
 };
 
