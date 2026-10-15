@@ -12,7 +12,9 @@ compatibility rules specific to plugins under `src/plugins`.
 4. Run `bun run build:plugins` when distributable plugin bytes change. It
    recreates `dist/index.json` and content-addressed
    `dist/<id>-<sha256>.js` bundles for every first-party plugin.
-5. Commit source, manifest, tests, and regenerated `dist/` together.
+5. Commit source, manifest, tests, and regenerated `dist/` together in this
+   submodule, then advance the `src/plugins` submodule pointer in the host
+   repository so the application tracks the shipped plugin commit.
 
 Never hand-edit `dist/`. The SHA-256 recorded in `index.json` is verified before
 execution, so mismatched generated files are rejected.
@@ -23,8 +25,10 @@ execution, so mismatched generated files are rejected.
   `sandbox.ts` module that runs in the null-origin sandbox iframe.
 - Receive host services through the scoped sandbox context. Never import a
   Tauri API or host singleton from plugin code.
-- Declare exact native-network origins and the correct CSP surface. WebRTC is a
-  separate grant because CSP does not constrain ICE peers.
+- Declare complete, exact native-network origins on the correct CSP surface.
+  Never submit raw CSP, wildcard hosts, credentials, paths, queries, or
+  fragments as origins. WebRTC is a separate grant because CSP does not
+  constrain ICE peers.
 - Use `context.http` only for declared CORS compatibility or injected-only
   credentials; it is not an automatic fallback for native requests.
 - Keep secrets out of config, storage, cache keys, logs, and errors.
@@ -34,20 +38,21 @@ execution, so mismatched generated files are rejected.
 The authoritative authority and storage contract is
 [`../../docs/PLUGIN_AUTHORITY.md`](../../docs/PLUGIN_AUTHORITY.md).
 
+The following authoring guardrails remain mandatory in addition to that
+authoritative contract:
 
-## Config compatibility — never break existing users
+- Use `useWidgetData` for server-state fetching and stale/offline state, and
+  report status through the host API rather than a private badge.
+- Use `context.blobs.fetch` for proxy-fetched binary assets; use
+  `context.blobs.get`/`put` for native-fetched or generated blobs.
+- Never use direct IndexedDB from the opaque plugin frame. Use host storage,
+  choose plugin or instance scope deliberately, and stay within reviewed
+  manifest quotas.
+- Permission grants are scoped to the plugin capability and entry point, not
+  to individual widget prompts; instance namespaces still isolate data,
+  secrets, config, and status.
 
-A plugin's `config` is persisted user data. When you change the config shape:
 
-- **Coerce, don't assume.** Read persisted config through a validating reader
-  (see `immich/config.ts`) that falls back to defaults for unknown/removed
-  values — a stale field or a dropped enum value must never throw.
-- **Migrate legacy shapes** in that reader rather than forcing users to
-  reconfigure (e.g. immich migrated flat `albumIds` → the tri-state
-  `{ include, exclude }` filter, and dropped pool modes fall back to a default).
-- **Removed remote entities are not errors.** Ids that no longer exist on the
-  server (albums/people/tags) must be tolerated — send them and match nothing,
-  never crash or hard-error the widget.
 
 
 ## License
