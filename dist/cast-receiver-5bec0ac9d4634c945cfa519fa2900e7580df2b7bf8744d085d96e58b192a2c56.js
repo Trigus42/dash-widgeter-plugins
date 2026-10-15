@@ -26287,6 +26287,7 @@ function parseDataMessage(input, now = Date.now()) {
 
 // ../core/cast/session.ts
 var CastAuthenticationError = class extends Error {
+  code = "CAST_AUTHENTICATION_FAILED";
   constructor(cause) {
     super("Cast authentication failed", { cause });
     this.name = "CastAuthenticationError";
@@ -26674,6 +26675,7 @@ function createScreenSession(context) {
   const resumeEntries = /* @__PURE__ */ new Map();
   const connected = /* @__PURE__ */ new Set();
   const abort = new AbortController();
+  const pendingConnectionEvents = /* @__PURE__ */ new Map();
   let pairing, livePresenter, sasOwner, renewal, sasTimer, disposed = false;
   let authoritativeEpoch = 0;
   let lifecycle = Promise.resolve();
@@ -26701,6 +26703,16 @@ function createScreenSession(context) {
   const report = (error) => publish({ status: "error", error: error instanceof Error ? error.message : String(error) });
   const enqueue = (operation) => {
     lifecycle = lifecycle.then(operation).catch(report);
+  };
+  const applyConnection = (entry, expectedGeneration, event) => {
+    var _a, _b;
+    if (event.generation !== expectedGeneration) return;
+    entry.trusted = event.trusted;
+    if (event.trusted) {
+      delete state.sas;
+      publish({ sasTrusted: true });
+      (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
+    }
   };
   const broadcastQueue = (conflictEntry) => {
     var _a, _b;
@@ -26880,7 +26892,7 @@ function createScreenSession(context) {
       if (next.peerCount > 0 && !entry.connected) {
         entry.connected = true;
         connected.add(entry);
-        (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
+        if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
         if (pairing === entry) {
           pairing = void 0;
           clearTimeout(renewal);
@@ -26952,18 +26964,20 @@ function createScreenSession(context) {
           }
         });
       }).catch(report);
-    }, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(entry), ({ trusted }) => {
-      var _a;
-      entry.trusted = trusted;
-      if (trusted) {
-        delete state.sas;
-        publish({ sasTrusted: true });
-        (_a = entry.receiver) == null ? void 0 : _a.send({ type: "queue-snapshot", snapshot: state.queue, conflict: false });
+    }, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(entry), (event) => {
+      if (!initialized) {
+        const pending = pendingConnectionEvents.get(entry) ?? [];
+        pending.push(event);
+        pendingConnectionEvents.set(entry, pending);
+        return;
       }
+      applyConnection(entry, room.options.generation, event);
     });
     pairing = entry;
     initialized = true;
     pendingStates.forEach(applyState);
+    for (const event of pendingConnectionEvents.get(entry) ?? []) applyConnection(entry, room.options.generation, event);
+    pendingConnectionEvents.delete(entry);
     if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
     if (pairing === entry) {
       clearTimeout(renewal);

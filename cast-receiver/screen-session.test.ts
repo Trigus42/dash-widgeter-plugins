@@ -101,8 +101,35 @@ describe('screen session room lifecycle', () => {
     for (const call of setCastState.mock.calls) expect(() => structuredClone(call[0])).not.toThrow();
     session.close();
   });
+  it('accepts authenticated messages only after the exact receiver generation is trusted', async () => {
+    const options = { relayUrl: 'https://relay.example', roomCode: 'room', authCode: 'code', generation: 'expected-generation' };
+    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options, close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValueOnce(pairing);
+    let message: ((value: { type: string; mutation?: object }) => void) | undefined;
+    let connection: ((event: { generation: string; trusted: boolean }) => void) | undefined;
+    const send = vi.fn();
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, _state, _binding, _revoke,
+      onMessage: (value: { type: string; mutation?: object }, outgoing: (message: object) => void) => void,
+      onConnection: (event: { generation: string; trusted: boolean }) => void) => {
+      message = (value) => { onMessage(value, send); }; connection = onConnection;
+      connection?.({ generation: 'wrong-generation', trusted: true });
+      return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send };
+    });
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(message).toBeTypeOf('function'));
+    const command = { sourceKind: 'website', sourceUrl: 'https://example.test', muted: false, outputMode: 'audio-video' };
+    const mutation = { type: 'queue-add', item: { id: '0123456789abcdef', command }, expectedRevision: 0 };
+    message?.({ type: 'pair-display-request' }); message?.({ type: 'queue-mutation', mutation });
+    expect(session.state.pairingReveal).toBe(0); expect(session.state.queue.revision).toBe(0); expect(send).not.toHaveBeenCalled();
+    connection?.({ generation: 'wrong-generation', trusted: true }); message?.({ type: 'queue-mutation', mutation });
+    expect(session.state.queue.revision).toBe(0);
+    connection?.({ generation: options.generation, trusted: true }); message?.({ type: 'pair-display-request' }); message?.({ type: 'queue-mutation', mutation });
+    expect(session.state.pairingReveal).toBe(1); expect(session.state.queue.revision).toBe(1); expect(send).toHaveBeenCalledWith(expect.objectContaining({ type: 'queue-snapshot' }));
+    session.close();
+  });
   it('preserves authoritative playback and queue while a sender reconnects', async () => {
-    const rooms = ['1111111111', '2222222222'].map((roomCode) => ({ roomCode, expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) }));
+    const rooms = ['1111111111', '2222222222'].map((roomCode, index) => ({ roomCode, expiresAt: Date.now() + 60_000, options: { generation: String(index) }, close: vi.fn(() => Promise.resolve()) }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
     const messages: Array<(message: { type: string; mutation?: object }) => void> = [];

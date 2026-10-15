@@ -24,6 +24,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const listeningBindings = new Set<string>();
   const resumeEntries = new Map<string, ReceiverEntry>();
   const connected = new Set<ReceiverEntry>(); const abort = new AbortController();
+  const pendingConnectionEvents = new Map<ReceiverEntry, Array<{ generation: string; trusted: boolean }>>();
   let pairing: ReceiverEntry | undefined, livePresenter: ReceiverEntry | undefined, sasOwner: ReceiverEntry | undefined, renewal: TimerHandle | undefined, sasTimer: TimerHandle | undefined, disposed = false;
   let authoritativeEpoch = 0;
   let lifecycle: Promise<void> = Promise.resolve();
@@ -39,6 +40,11 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   };
   const report = (error: unknown): void => publish({ status: 'error', error: error instanceof Error ? error.message : String(error) });
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
+  const applyConnection = (entry: ReceiverEntry, expectedGeneration: string, event: { generation: string; trusted: boolean }): void => {
+    if (event.generation !== expectedGeneration) return;
+    entry.trusted = event.trusted;
+    if (event.trusted) { delete state.sas; publish({ sasTrusted: true }); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false }); }
+  };
   const broadcastQueue = (conflictEntry?: ReceiverEntry): void => {
     for (const entry of connected) if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: entry === conflictEntry });
   };
@@ -140,7 +146,8 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     const entry: ReceiverEntry = { room, state: initialState, connected: false, trusted: false, revokedEpoch: 0, epochOffset: authoritativeEpoch };
     const applyState = (next: ReceiverState): void => {
       entry.state = next;
-      if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false });
+      if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry);
+        if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false });
         if (pairing === entry) { pairing = undefined; clearTimeout(renewal); enqueue(allocate); } }
       if (next.peerCount === 0 && entry.connected) {
         entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
@@ -172,10 +179,13 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           aggregate(resumeEntry);
         }, undefined, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(resumeEntry), ({ trusted }) => { resumeEntry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
       }).catch(report);
-    }, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(entry), ({ trusted }) => {
-      entry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); entry.receiver?.send({ type: 'queue-snapshot', snapshot: state.queue, conflict: false }); }
+    }, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(entry), (event) => {
+      if (!initialized) { const pending = pendingConnectionEvents.get(entry) ?? []; pending.push(event); pendingConnectionEvents.set(entry, pending); return; }
+      applyConnection(entry, room.options.generation, event);
     });
-    pairing = entry; initialized = true; pendingStates.forEach(applyState); if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
+    pairing = entry; initialized = true; pendingStates.forEach(applyState);
+    for (const event of pendingConnectionEvents.get(entry) ?? []) applyConnection(entry, room.options.generation, event);
+    pendingConnectionEvents.delete(entry); if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
     if (pairing === entry) { clearTimeout(renewal); renewal = setTimeout(() => enqueue(async () => {
       if (pairing === entry) { await disposeEntry(entry); await allocate(); }
     }), Math.max(1_000, room.expiresAt - Date.now() - 30_000)); }
