@@ -24,9 +24,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// node_modules/react/cjs/react.development.js
+// ../../node_modules/react/cjs/react.development.js
 var require_react_development = __commonJS({
-  "node_modules/react/cjs/react.development.js"(exports, module) {
+  "../../node_modules/react/cjs/react.development.js"(exports, module) {
     "use strict";
     (function() {
       function defineDeprecationWarning(methodName, info) {
@@ -1021,9 +1021,9 @@ var require_react_development = __commonJS({
   }
 });
 
-// node_modules/react/index.js
+// ../../node_modules/react/index.js
 var require_react = __commonJS({
-  "node_modules/react/index.js"(exports, module) {
+  "../../node_modules/react/index.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -1033,9 +1033,9 @@ var require_react = __commonJS({
   }
 });
 
-// node_modules/scheduler/cjs/scheduler.development.js
+// ../../node_modules/scheduler/cjs/scheduler.development.js
 var require_scheduler_development = __commonJS({
-  "node_modules/scheduler/cjs/scheduler.development.js"(exports) {
+  "../../node_modules/scheduler/cjs/scheduler.development.js"(exports) {
     "use strict";
     (function() {
       function performWorkUntilDeadline() {
@@ -1292,9 +1292,9 @@ var require_scheduler_development = __commonJS({
   }
 });
 
-// node_modules/scheduler/index.js
+// ../../node_modules/scheduler/index.js
 var require_scheduler = __commonJS({
-  "node_modules/scheduler/index.js"(exports, module) {
+  "../../node_modules/scheduler/index.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -1304,9 +1304,9 @@ var require_scheduler = __commonJS({
   }
 });
 
-// node_modules/react-dom/cjs/react-dom.development.js
+// ../../node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS({
-  "node_modules/react-dom/cjs/react-dom.development.js"(exports) {
+  "../../node_modules/react-dom/cjs/react-dom.development.js"(exports) {
     "use strict";
     (function() {
       function noop() {
@@ -1559,9 +1559,9 @@ var require_react_dom_development = __commonJS({
   }
 });
 
-// node_modules/react-dom/index.js
+// ../../node_modules/react-dom/index.js
 var require_react_dom = __commonJS({
-  "node_modules/react-dom/index.js"(exports, module) {
+  "../../node_modules/react-dom/index.js"(exports, module) {
     "use strict";
     if (false) {
       checkDCE();
@@ -1572,9 +1572,9 @@ var require_react_dom = __commonJS({
   }
 });
 
-// node_modules/react-dom/cjs/react-dom-client.development.js
+// ../../node_modules/react-dom/cjs/react-dom-client.development.js
 var require_react_dom_client_development = __commonJS({
-  "node_modules/react-dom/cjs/react-dom-client.development.js"(exports) {
+  "../../node_modules/react-dom/cjs/react-dom-client.development.js"(exports) {
     "use strict";
     (function() {
       function findHook(fiber, id) {
@@ -23533,9 +23533,9 @@ var require_react_dom_client_development = __commonJS({
   }
 });
 
-// node_modules/react-dom/client.js
+// ../../node_modules/react-dom/client.js
 var require_client = __commonJS({
-  "node_modules/react-dom/client.js"(exports, module) {
+  "../../node_modules/react-dom/client.js"(exports, module) {
     "use strict";
     if (false) {
       checkDCE();
@@ -23546,9 +23546,9 @@ var require_client = __commonJS({
   }
 });
 
-// node_modules/pulltorefreshjs/dist/index.umd.js
+// ../../node_modules/pulltorefreshjs/dist/index.umd.js
 var require_index_umd = __commonJS({
-  "node_modules/pulltorefreshjs/dist/index.umd.js"(exports, module) {
+  "../../node_modules/pulltorefreshjs/dist/index.umd.js"(exports, module) {
     "use strict";
     (function(global, factory) {
       typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = global || self, global.PullToRefresh = factory());
@@ -23880,9 +23880,9 @@ var require_index_umd = __commonJS({
   }
 });
 
-// node_modules/react/cjs/react-jsx-runtime.development.js
+// ../../node_modules/react/cjs/react-jsx-runtime.development.js
 var require_react_jsx_runtime_development = __commonJS({
-  "node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
+  "../../node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
     "use strict";
     (function() {
       function getComponentNameFromType(type) {
@@ -24151,9 +24151,9 @@ var require_react_jsx_runtime_development = __commonJS({
   }
 });
 
-// node_modules/react/jsx-runtime.js
+// ../../node_modules/react/jsx-runtime.js
 var require_jsx_runtime = __commonJS({
-  "node_modules/react/jsx-runtime.js"(exports, module) {
+  "../../node_modules/react/jsx-runtime.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -24163,7 +24163,7 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/sdk.ts
+// ../sandbox/sdk.ts
 function definePlugin(module) {
   return module;
 }
@@ -24175,7 +24175,7 @@ function injectStyle(id, css) {
   document.head.appendChild(style);
 }
 
-// src/sandbox/react.tsx
+// ../sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var import_pulltorefreshjs = __toESM(require_index_umd(), 1);
@@ -24208,10 +24208,10 @@ function defineReactWidget(Component) {
   };
 }
 
-// src/plugins/clock/ClockWidget.tsx
+// clock/ClockWidget.tsx
 var import_react2 = __toESM(require_react(), 1);
 
-// src/plugins/clock/types.ts
+// clock/types.ts
 var CLOCK_DEFAULT_CONFIG = {
   use24Hour: true,
   showSeconds: false,
@@ -24233,7 +24233,7 @@ function readClockConfig(raw) {
   };
 }
 
-// src/plugins/clock/format.ts
+// clock/format.ts
 function formatClock(now, config, locale) {
   const timeOptions = {
     hour: "2-digit",
@@ -24247,7 +24247,7 @@ function formatClock(now, config, locale) {
   return { time, date };
 }
 
-// src/plugins/clock/fit.ts
+// clock/fit.ts
 var MIN_FONT_PX = 12;
 var TIME_HEIGHT_SHARE = 0.7;
 var DATE_HEIGHT_SHARE = 0.22;
@@ -24271,7 +24271,7 @@ function fitClock(widget, timeEl, dateEl) {
   if (dateEl) fitLine(dateEl, availH * DATE_HEIGHT_SHARE, availW);
 }
 
-// src/plugins/clock/ClockWidget.tsx
+// clock/ClockWidget.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
 function ClockWidget({ context }) {
   const config = (0, import_react2.useMemo)(() => readClockConfig(context.config), [context.config]);
@@ -24315,7 +24315,7 @@ function ClockWidget({ context }) {
   ] });
 }
 
-// src/plugins/clock/clock-styles.ts
+// clock/clock-styles.ts
 var CLOCK_SANDBOX_CSS = `
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
   body { width: 100%; height: 100%; }
@@ -24338,7 +24338,7 @@ var CLOCK_SANDBOX_CSS = `
   }
 `;
 
-// src/plugins/clock/sandbox.ts
+// clock/sandbox.ts
 injectStyle("clock-style", CLOCK_SANDBOX_CSS);
 var sandbox_default = definePlugin({
   widgets: {

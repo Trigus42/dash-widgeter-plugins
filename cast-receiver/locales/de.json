@@ -19,7 +19,11 @@
     "Dim backdrop": "Hintergrund abdunkeln",
     "Inline (transparent)": "Inline (transparent)",
     "Show pairing code when idle": "Kopplungscode im Leerlauf anzeigen",
-    "Start muted": "Stummgeschaltet starten"
+    "Start muted": "Stummgeschaltet starten",
+    "Autoplay": "Automatisch abspielen",
+    "Start queued and YouTube presentations automatically.": "Warteschlangen- und YouTube-Inhalte automatisch starten.",
+    "Security code timeout (seconds)": "Zeitlimit für Sicherheitscode (Sekunden)",
+    "Hide the verification code after 10–300 seconds without trusting automatically.": "Den Prüfcode nach 10–300 Sekunden ausblenden, ohne automatisch zu vertrauen."
   },
   "runtime": {
     "idleTitle": "Bereit zum Casten",

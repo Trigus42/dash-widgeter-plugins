@@ -57,6 +57,22 @@ describe('screen session room lifecycle', () => {
     expect(() => structuredClone(setCastState.mock.calls.at(-1)?.[0])).not.toThrow();
     session.close();
   });
+  it('publishes the trusted SAS transition so pairing UI can close', async () => {
+    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValueOnce(pairing);
+    let callback: ((state: Record<string, unknown>) => void) | undefined;
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
+      callback = onState; return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    });
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(callback).toBeTypeOf('function'));
+    callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
+    callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sasTrusted: true });
+    expect(session.state.sas).toBeUndefined(); expect(session.state.sasTrusted).toBe(true);
+    callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null });
+    expect(session.state.sasTrusted).toBe(true); session.close();
+  });
 
   it('keeps another connected room alive when one receiver disconnects', async () => {
     const rooms = ['1111111111', '2222222222', '3333333333'].map((roomCode) => ({
@@ -84,6 +100,34 @@ describe('screen session room lifecycle', () => {
     expect(session.state.status).toBe('paired');
     for (const call of setCastState.mock.calls) expect(() => structuredClone(call[0])).not.toThrow();
     session.close();
+  });
+  it('preserves authoritative playback and queue while a sender reconnects', async () => {
+    const rooms = ['1111111111', '2222222222'].map((roomCode) => ({ roomCode, expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) }));
+    mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
+    const callbacks: Array<(state: Record<string, unknown>) => void> = [];
+    const messages: Array<(message: { type: string; mutation?: object }) => void> = [];
+    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void,
+      _binding, _revoke, onMessage: (message: { type: string; mutation?: object }, send: () => void) => void,
+      onConnection: (event: { generation: string; trusted: boolean }) => void) => {
+      const index = callbacks.length; callbacks.push(onState); messages.push((message) => onMessage(message, vi.fn())); queueMicrotask(() => onConnection({ generation: String(index), trusted: true })); return receivers[index];
+    });
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(callbacks).toHaveLength(1));
+    await Promise.resolve();
+    const command = { sourceKind: 'website', sourceUrl: 'https://example.test', muted: false, outputMode: 'audio-video' };
+    callbacks[0]!({ status: 'casting', command, presentationEpoch: 1, stream: null, peerCount: 1, error: null });
+    messages[0]!({ type: 'queue-mutation', mutation: { type: 'queue-add', item: { id: '0123456789abcdef', command }, expectedRevision: 0 } });
+    const before = { command: session.state.command, epoch: session.state.presentationEpoch, queue: session.state.queue };
+    callbacks[0]!({ status: 'disconnected', command: null, presentationEpoch: 1, stream: null, peerCount: 0, error: null });
+    await vi.waitFor(() => expect(callbacks).toHaveLength(2));
+    await Promise.resolve();
+    callbacks[1]!({ status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null });
+    expect(session.state).toMatchObject({ command: before.command, presentationEpoch: before.epoch, queue: before.queue });
+    callbacks[1]!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null });
+    messages[1]!({ type: 'queue-mutation', mutation: { type: 'queue-play', itemId: '0123456789abcdef', expectedRevision: 1 } });
+    expect(session.state.queue.revision).toBe(2); expect(session.state.command).toEqual(command); session.close();
   });
   it('ignores revoked epochs and permits a genuinely newer A epoch to reacquire', async () => {
     const rooms = ['1111111111', '2222222222'].map((roomCode) => ({
@@ -137,8 +181,7 @@ describe('screen session room lifecycle', () => {
     callbacks[0]!({ status: 'casting', command: null, presentationEpoch: 1, stream: null, peerCount: 1, error: null });
     expect(session.state.command).toEqual(secondCommand);
     callbacks[1]!({ status: 'paired', command: null, presentationEpoch: 1, stream: null, peerCount: 1, error: null });
-    expect(session.state.status).toBe('paired');
-    expect(session.state.command).toBeNull();
+    expect(session.state.command).toEqual(secondCommand);
     expect(receivers[0]!.revokePresenter).toHaveBeenCalledTimes(1);
     session.close();
   });

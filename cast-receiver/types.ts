@@ -18,6 +18,8 @@ export interface CastConfig extends CastCommand {
   overlayMode: CastOverlayMode;
   relayUrl: string;
   senderUrl: string;
+  autoplay: boolean;
+  sasTimeoutSeconds: number;
 }
 
 export const CAST_DEFAULT_CONFIG: CastConfig = {
@@ -28,4 +30,6 @@ export const CAST_DEFAULT_CONFIG: CastConfig = {
   outputMode: 'audio-video',
   overlayMode: 'inline',
   muted: false,
+  autoplay: true,
+  sasTimeoutSeconds: 60,
 };

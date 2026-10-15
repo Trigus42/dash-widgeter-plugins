@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
 import { readCastConfig, resolveCastTarget } from './resolve';
+import { createCastQueueSnapshot } from '@/cast-protocol';
 import { createScreenSession, type ScreenSession } from './screen-session';
 
 function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number, muted: boolean): void {
@@ -13,7 +14,7 @@ function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number,
 export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const config = useMemo(() => readCastConfig(context.config), [context.config]);
   const [receiver, setReceiver] = useState<ScreenSession['state']>(() => ({ status: 'connecting', command: null, presentationEpoch: 0, stream: null,
-    peerCount: 0, error: null, roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl }));
+    peerCount: 0, error: null, roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0 }));
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => { const sessionContext = { ...context, config: { ...config } }; const session = createScreenSession(sessionContext); const unsubscribe = session.subscribe(setReceiver);
     return () => { unsubscribe(); session.close(); };
@@ -50,7 +51,8 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   }, [context, receiver.stream]);
   useEffect(() => {
     const next = receiver.stream ? null : target.kind === 'youtube'
-      ? { provider: 'youtube' as const, videoId: target.videoId, muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode }
+      ? { provider: 'youtube' as const, videoId: target.videoId, muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode,
+        ...(target.playlistId ? { playlistId: target.playlistId } : {}), ...(target.index ? { index: target.index } : {}) }
       : target.kind === 'website' ? { provider: 'website' as const, url: target.url } : null;
     const updatePresentation = async (): Promise<void> => {
       await context.setPresentation(next);

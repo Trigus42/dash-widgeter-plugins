@@ -6,11 +6,12 @@ export interface CastSessionState extends ReceiverState {
   roomCode: string;
   relayUrl: string;
   senderUrl: string;
+  pairingReveal: number;
 }
 
 const INITIAL: CastSessionState = {
   status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null,
-  roomCode: '', relayUrl: '', senderUrl: '',
+  roomCode: '', relayUrl: '', senderUrl: '', pairingReveal: 0,
 };
 
 let playbackState: CastSessionState = INITIAL;

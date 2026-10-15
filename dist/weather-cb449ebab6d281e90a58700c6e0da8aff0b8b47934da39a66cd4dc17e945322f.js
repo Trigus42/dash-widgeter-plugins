@@ -24,9 +24,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// node_modules/react/cjs/react.development.js
+// ../../node_modules/react/cjs/react.development.js
 var require_react_development = __commonJS({
-  "node_modules/react/cjs/react.development.js"(exports, module) {
+  "../../node_modules/react/cjs/react.development.js"(exports, module) {
     "use strict";
     (function() {
       function defineDeprecationWarning(methodName, info) {
@@ -1021,9 +1021,9 @@ var require_react_development = __commonJS({
   }
 });
 
-// node_modules/react/index.js
+// ../../node_modules/react/index.js
 var require_react = __commonJS({
-  "node_modules/react/index.js"(exports, module) {
+  "../../node_modules/react/index.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -1033,9 +1033,9 @@ var require_react = __commonJS({
   }
 });
 
-// node_modules/scheduler/cjs/scheduler.development.js
+// ../../node_modules/scheduler/cjs/scheduler.development.js
 var require_scheduler_development = __commonJS({
-  "node_modules/scheduler/cjs/scheduler.development.js"(exports) {
+  "../../node_modules/scheduler/cjs/scheduler.development.js"(exports) {
     "use strict";
     (function() {
       function performWorkUntilDeadline() {
@@ -1292,9 +1292,9 @@ var require_scheduler_development = __commonJS({
   }
 });
 
-// node_modules/scheduler/index.js
+// ../../node_modules/scheduler/index.js
 var require_scheduler = __commonJS({
-  "node_modules/scheduler/index.js"(exports, module) {
+  "../../node_modules/scheduler/index.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -1304,9 +1304,9 @@ var require_scheduler = __commonJS({
   }
 });
 
-// node_modules/react-dom/cjs/react-dom.development.js
+// ../../node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS({
-  "node_modules/react-dom/cjs/react-dom.development.js"(exports) {
+  "../../node_modules/react-dom/cjs/react-dom.development.js"(exports) {
     "use strict";
     (function() {
       function noop() {
@@ -1559,9 +1559,9 @@ var require_react_dom_development = __commonJS({
   }
 });
 
-// node_modules/react-dom/index.js
+// ../../node_modules/react-dom/index.js
 var require_react_dom = __commonJS({
-  "node_modules/react-dom/index.js"(exports, module) {
+  "../../node_modules/react-dom/index.js"(exports, module) {
     "use strict";
     if (false) {
       checkDCE();
@@ -1572,9 +1572,9 @@ var require_react_dom = __commonJS({
   }
 });
 
-// node_modules/react-dom/cjs/react-dom-client.development.js
+// ../../node_modules/react-dom/cjs/react-dom-client.development.js
 var require_react_dom_client_development = __commonJS({
-  "node_modules/react-dom/cjs/react-dom-client.development.js"(exports) {
+  "../../node_modules/react-dom/cjs/react-dom-client.development.js"(exports) {
     "use strict";
     (function() {
       function findHook(fiber, id) {
@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text) {
-        if (text) {
+      function setTextContent(node, text2) {
+        if (text2) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text;
+            firstChild.nodeValue = text2;
             return;
           }
         }
-        node.textContent = text;
+        node.textContent = text2;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text) {
-        textInstance.nodeValue = text;
+      function unhideTextInstance(textInstance, text2) {
+        textInstance.nodeValue = text2;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
-        if ("" === text) return null;
+      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
+        if ("" === text2) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -23533,9 +23533,9 @@ var require_react_dom_client_development = __commonJS({
   }
 });
 
-// node_modules/react-dom/client.js
+// ../../node_modules/react-dom/client.js
 var require_client = __commonJS({
-  "node_modules/react-dom/client.js"(exports, module) {
+  "../../node_modules/react-dom/client.js"(exports, module) {
     "use strict";
     if (false) {
       checkDCE();
@@ -23546,9 +23546,9 @@ var require_client = __commonJS({
   }
 });
 
-// node_modules/pulltorefreshjs/dist/index.umd.js
+// ../../node_modules/pulltorefreshjs/dist/index.umd.js
 var require_index_umd = __commonJS({
-  "node_modules/pulltorefreshjs/dist/index.umd.js"(exports, module) {
+  "../../node_modules/pulltorefreshjs/dist/index.umd.js"(exports, module) {
     "use strict";
     (function(global, factory) {
       typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = global || self, global.PullToRefresh = factory());
@@ -23880,9 +23880,9 @@ var require_index_umd = __commonJS({
   }
 });
 
-// node_modules/react/cjs/react-jsx-runtime.development.js
+// ../../node_modules/react/cjs/react-jsx-runtime.development.js
 var require_react_jsx_runtime_development = __commonJS({
-  "node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
+  "../../node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
     "use strict";
     (function() {
       function getComponentNameFromType(type) {
@@ -24151,9 +24151,9 @@ var require_react_jsx_runtime_development = __commonJS({
   }
 });
 
-// node_modules/react/jsx-runtime.js
+// ../../node_modules/react/jsx-runtime.js
 var require_jsx_runtime = __commonJS({
-  "node_modules/react/jsx-runtime.js"(exports, module) {
+  "../../node_modules/react/jsx-runtime.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -24163,7 +24163,7 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/sdk.ts
+// ../sandbox/sdk.ts
 function definePlugin(module) {
   return module;
 }
@@ -24175,7 +24175,7 @@ function injectStyle(id, css) {
   document.head.appendChild(style);
 }
 
-// src/sandbox/react.tsx
+// ../sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var import_pulltorefreshjs = __toESM(require_index_umd(), 1);
@@ -24207,1555 +24207,465 @@ function defineReactWidget(Component) {
     }
   };
 }
+function useWidgetData(context, options) {
+  const [snapshot, setSnapshot] = (0, import_react.useState)({
+    data: void 0,
+    isLoading: true,
+    isStale: false,
+    fetchedAt: null,
+    error: null
+  });
+  const refetchRef = (0, import_react.useRef)(() => void 0);
+  const keyId = JSON.stringify(options.key);
+  (0, import_react.useEffect)(() => {
+    const sub = context.useData({
+      ...options,
+      onUpdate: (snap) => setSnapshot(snap)
+    });
+    refetchRef.current = () => sub.refetch();
+    return () => sub.dispose();
+  }, [keyId]);
+  return { ...snapshot, refetch: () => refetchRef.current() };
+}
+function usePullToRefresh(onRefresh) {
+  const containerRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    const el = containerRef.current;
+    if (!el || typeof window === "undefined") return;
+    let style = document.getElementById("wg-pull-to-refresh-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "wg-pull-to-refresh-style";
+      style.textContent = ".ptr--text,.ptr--icon{color:rgba(255,255,255,.72)!important}";
+      document.head.appendChild(style);
+    }
+    const ptr = import_pulltorefreshjs.default.init({
+      mainElement: el,
+      triggerElement: el,
+      shouldPullToRefresh: () => el.scrollTop <= 0,
+      onRefresh() {
+        return Promise.resolve(onRefresh());
+      },
+      distThreshold: 45,
+      distMax: 65,
+      distReload: 35
+    });
+    return () => {
+      ptr.destroy();
+    };
+  }, [onRefresh]);
+  return containerRef;
+}
 
-// src/plugins/cast-receiver/CastWidget.tsx
+// weather/WeatherWidget.tsx
 var import_react2 = __toESM(require_react(), 1);
 
-// src/plugins/cast-receiver/types.ts
-var CAST_DEFAULT_CONFIG = {
-  sourceKind: "idle",
-  sourceUrl: "",
-  relayUrl: "",
-  senderUrl: "",
-  outputMode: "audio-video",
-  overlayMode: "inline",
-  muted: false
+// weather/wmo.ts
+var WMO = {
+  0: { label: "Clear sky", icon: "clear" },
+  1: { label: "Mainly clear", icon: "partly" },
+  2: { label: "Partly cloudy", icon: "partly" },
+  3: { label: "Overcast", icon: "cloudy" },
+  45: { label: "Fog", icon: "fog" },
+  48: { label: "Rime fog", icon: "fog" },
+  51: { label: "Light drizzle", icon: "drizzle" },
+  53: { label: "Drizzle", icon: "drizzle" },
+  55: { label: "Dense drizzle", icon: "drizzle" },
+  61: { label: "Slight rain", icon: "rain" },
+  63: { label: "Rain", icon: "rain" },
+  65: { label: "Heavy rain", icon: "rain" },
+  66: { label: "Freezing rain", icon: "rain" },
+  67: { label: "Freezing rain", icon: "rain" },
+  71: { label: "Slight snow", icon: "snow" },
+  73: { label: "Snow", icon: "snow" },
+  75: { label: "Heavy snow", icon: "snow" },
+  77: { label: "Snow grains", icon: "snow" },
+  80: { label: "Rain showers", icon: "rain" },
+  81: { label: "Rain showers", icon: "rain" },
+  82: { label: "Violent showers", icon: "rain" },
+  85: { label: "Snow showers", icon: "snow" },
+  86: { label: "Snow showers", icon: "snow" },
+  95: { label: "Thunderstorm", icon: "thunder" },
+  96: { label: "Thunderstorm", icon: "thunder" },
+  99: { label: "Thunderstorm", icon: "thunder" }
 };
-
-// src/plugins/cast-receiver/resolve.ts
-function str(raw, fallback) {
-  return typeof raw === "string" ? raw : fallback;
-}
-function bool(raw, fallback) {
-  return typeof raw === "boolean" ? raw : fallback;
-}
-var SOURCE_KINDS = ["idle", "website", "media", "youtube"];
-var OVERLAY_MODES = ["inline", "cover", "dim"];
-var OUTPUT_MODES = ["audio-video", "audio-only", "video-only"];
-function readCastConfig(raw) {
-  const d = CAST_DEFAULT_CONFIG;
-  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind) ? raw.sourceKind : d.sourceKind;
-  const overlayMode = OVERLAY_MODES.includes(raw.overlayMode) ? raw.overlayMode : d.overlayMode;
-  const outputMode = OUTPUT_MODES.includes(raw.outputMode) ? raw.outputMode : d.outputMode;
-  return {
-    sourceKind,
-    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
-    relayUrl: str(raw.relayUrl, d.relayUrl),
-    senderUrl: str(raw.senderUrl, d.senderUrl),
-    overlayMode,
-    muted: bool(raw.muted, d.muted),
-    outputMode
-  };
-}
-function youTubeVideoId(input) {
-  const trimmed = input.trim();
-  if (!trimmed) return null;
-  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return trimmed;
-  const patterns = [
-    /[?&]v=([A-Za-z0-9_-]{11})/,
-    // watch?v=ID
-    /youtu\.be\/([A-Za-z0-9_-]{11})/,
-    // youtu.be/ID
-    /\/embed\/([A-Za-z0-9_-]{11})/,
-    // /embed/ID
-    /\/shorts\/([A-Za-z0-9_-]{11})/
-    // /shorts/ID
-  ];
-  for (const pattern of patterns) {
-    const match = pattern.exec(trimmed);
-    if (match == null ? void 0 : match[1]) return match[1];
-  }
-  return null;
-}
-function isHttpsUrl(value) {
-  try {
-    return new URL(value).protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-function youTubeEmbedUrl(videoId, muted) {
-  const params = new URLSearchParams({
-    autoplay: "1",
-    mute: muted ? "1" : "0",
-    rel: "0",
-    modestbranding: "1",
-    playsinline: "1"
-  });
-  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
-}
-function resolveCastTarget(config) {
-  if (config.sourceKind === "idle") return { kind: "idle" };
-  if (config.sourceKind === "youtube") {
-    const videoId = youTubeVideoId(config.sourceUrl);
-    return videoId ? { kind: "youtube", videoId, embedUrl: youTubeEmbedUrl(videoId, config.muted) } : { kind: "idle" };
-  }
-  if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
-  return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
+var FALLBACK = { label: "Unknown", icon: "cloudy" };
+function describeWeather(code) {
+  return WMO[code] ?? FALLBACK;
 }
 
-// src/cast-protocol/secure.ts
-var MAX_CRYPTO_FAILURES = 8;
-var PROTOCOL_VERSION = 2;
-var encoder = new TextEncoder();
-function powDifficulty(challengeCount) {
-  if (!Number.isSafeInteger(challengeCount) || challengeCount < 1) throw new Error("Invalid challenge count");
-  return Math.min(10 + 2 * (challengeCount - 1), 24);
-}
-function createChallenge(count, now = Date.now(), lifetimeMs = 3e4) {
-  if (!Number.isSafeInteger(now) || lifetimeMs < 1) throw new Error("Invalid challenge lifetime");
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return { challenge: encode(bytes), count, difficulty: powDifficulty(count), expiresAt: now + lifetimeMs };
-}
-async function verifyProof(challenge, context, proverShare, nonce, difficulty) {
-  if (!Number.isSafeInteger(nonce) || nonce < 0 || nonce > 4294967295 || difficulty < 1 || difficulty > 24) return false;
-  const message = new Uint8Array(challenge.length + context.length + proverShare.length + 4);
-  message.set(challenge);
-  message.set(context, challenge.length);
-  message.set(proverShare, challenge.length + context.length);
-  new DataView(message.buffer).setUint32(message.length - 4, nonce, false);
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", message));
-  let bits = difficulty;
-  for (const byte of digest) {
-    const checked = Math.min(bits, 8);
-    if (byte >>> 8 - checked !== 0) return false;
-    bits -= checked;
-    if (!bits) return true;
-  }
-  return false;
-}
-function field(value) {
-  const bytes = encoder.encode(String(value));
-  const result = new Uint8Array(4 + bytes.length);
-  new DataView(result.buffer).setUint32(0, bytes.length, false);
-  result.set(bytes, 4);
-  return result;
-}
-function canonicalTranscript(input) {
-  const values = [
-    "dash-cast",
-    PROTOCOL_VERSION,
-    "sender",
-    "receiver",
-    input.roomId,
-    input.generation,
-    input.challenge,
-    input.challengeCount,
-    input.difficulty,
-    input.expiresAt,
-    input.proverNonce,
-    input.proverShare,
-    input.verifierShare
-  ];
-  const parts = values.map(field);
-  const result = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
-  let offset = 0;
-  for (const part of parts) {
-    result.set(part, offset);
-    offset += part.length;
-  }
-  return result;
-}
-function buffer(bytes) {
-  const copy = new Uint8Array(bytes.length);
-  copy.set(bytes);
-  return copy.buffer;
-}
-async function deriveDirectionalKeys(sharedKey, transcript, role) {
-  const material = await crypto.subtle.importKey("raw", buffer(sharedKey), "HKDF", false, ["deriveKey"]);
-  const derive = (label) => crypto.subtle.deriveKey({
-    name: "HKDF",
-    hash: "SHA-256",
-    salt: buffer(transcript),
-    info: buffer(encoder.encode(`dash-cast/signaling/v2/${label}`))
-  }, material, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-  const senderToReceiver = await derive("sender-to-receiver");
-  const receiverToSender = await derive("receiver-to-sender");
-  return role === "sender" ? { send: senderToReceiver, receive: receiverToSender } : { send: receiverToSender, receive: senderToReceiver };
-}
-async function deriveBinding(sharedKey, transcript, role) {
-  const key = await crypto.subtle.importKey("raw", buffer(sharedKey), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  return encode(new Uint8Array(await crypto.subtle.sign("HMAC", key, buffer(concat(transcript, encoder.encode(`channel-binding/${role}`))))));
-}
-function sequenceIv(sequence) {
-  if (!Number.isSafeInteger(sequence) || sequence < 0) throw new Error("Invalid signaling sequence");
-  const iv = new Uint8Array(12);
-  new DataView(iv.buffer).setBigUint64(4, BigInt(sequence));
-  return iv;
-}
-function aad(direction, type, sequence) {
-  return encoder.encode(`dash-cast/signaling/v2/${direction}/${type}/${sequence}`);
-}
-function encode(bytes) {
-  let value = "";
-  for (const byte of bytes) value += String.fromCharCode(byte);
-  return btoa(value).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
-}
-function decode(value) {
-  const normalized = value.replaceAll("-", "+").replaceAll("_", "/");
-  const raw = atob(normalized);
-  const bytes = new Uint8Array(raw.length);
-  for (let index = 0; index < raw.length; index += 1) bytes[index] = raw.charCodeAt(index);
-  return bytes;
-}
-function concat(a, b) {
-  const result = new Uint8Array(a.length + b.length);
-  result.set(a);
-  result.set(b, a.length);
-  return result;
-}
-async function encryptSignal(key, sequence, message, type = "offer", direction = "sender") {
-  const plaintext = encoder.encode(JSON.stringify(message));
-  const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv: buffer(sequenceIv(sequence)), additionalData: buffer(aad(direction, type, sequence)) }, key, buffer(plaintext));
-  return { sequence, ciphertext: encode(new Uint8Array(ciphertext)) };
-}
-async function decryptSignal(key, frame, lastSequence, type = "offer", direction = "sender") {
-  if (!Number.isSafeInteger(frame.sequence) || frame.sequence !== lastSequence + 1) throw new Error("Replayed or out-of-order signaling frame");
-  const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv: buffer(sequenceIv(frame.sequence)), additionalData: buffer(aad(direction, type, frame.sequence)) }, key, buffer(decode(frame.ciphertext)));
-  return { value: JSON.parse(new TextDecoder().decode(plaintext)), sequence: frame.sequence };
-}
-
-// src/cast-protocol/random.ts
-function generateAuthCode() {
-  const range = 4294967296;
-  const limit = range - range % 1e6;
-  const word = new Uint32Array(1);
-  do {
-    crypto.getRandomValues(word);
-  } while ((word[0] ?? range) >= limit);
-  return String((word[0] ?? 0) % 1e6).padStart(6, "0");
-}
-
-// src/cast-protocol/index.ts
-var MAX_CAST_MESSAGE_BYTES = 16 * 1024;
-function parseCastCommand(value) {
-  const sourceKind = value.sourceKind;
-  if (sourceKind !== "idle" && sourceKind !== "website" && sourceKind !== "media" && sourceKind !== "youtube") return null;
-  const sourceUrl = String(value.sourceUrl ?? "");
-  if (sourceUrl.length > 8192) return null;
-  const volume = typeof value.volume === "number" && Number.isFinite(value.volume) ? Math.min(1, Math.max(0, value.volume)) : void 0;
-  const outputMode = value.outputMode === "audio-only" || value.outputMode === "video-only" ? value.outputMode : "audio-video";
-  return {
-    sourceKind,
-    sourceUrl,
-    muted: value.muted === true,
-    outputMode,
-    ...typeof value.paused === "boolean" ? { paused: value.paused } : {},
-    ...volume === void 0 ? {} : { volume }
-  };
-}
-
-// src/plugins/cast-receiver/pairing.ts
-async function createPairingSession(baseUrl, signal, validateOrigin) {
-  const base = new URL(baseUrl);
-  if (base.username || base.password || base.search || base.hash) throw new Error("Invalid signaling URL");
-  const response = await fetch(new URL("/room", base), { method: "POST", signal });
-  if (!response.ok) throw new Error(`Signaling service rejected room (${response.status})`);
-  const value = await response.json();
-  if (!value || typeof value !== "object") throw new Error("Cast signaling service returned an invalid room");
-  const room = value;
-  if (typeof room.roomId !== "string" || !/^\d{4,}$/.test(room.roomId) || typeof room.reclaimToken !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(room.reclaimToken) || typeof room.generation !== "string" || typeof room.expiresAt !== "number" || room.expiresAt <= Date.now() || typeof room.websocketUrl !== "string" || !/^wss?:\/\//.test(room.websocketUrl)) throw new Error("Cast signaling service returned an invalid room");
-  const created = room;
-  await validateOrigin(created.websocketUrl);
-  const authCode = generateAuthCode();
-  return {
-    options: { relayUrl: created.websocketUrl, roomCode: created.roomId, authCode, generation: created.generation, reclaimToken: created.reclaimToken },
-    roomCode: `${created.roomId}${authCode}`,
-    authCode,
-    generation: created.generation,
-    expiresAt: created.expiresAt,
-    async renew() {
-      const renewal = await fetch(new URL(`/room/${created.roomId}`, base), { method: "POST", headers: { authorization: `Bearer ${created.reclaimToken}` }, signal });
-      if (!renewal.ok) throw new Error(`Signaling renewal failed (${renewal.status})`);
-      const value2 = await renewal.json();
-      if (!value2 || typeof value2 !== "object" || !("expiresAt" in value2) || typeof value2.expiresAt !== "number" || value2.expiresAt <= Date.now()) throw new Error("Signaling renewal returned invalid expiry");
-      created.expiresAt = value2.expiresAt;
-      return created.expiresAt;
-    },
-    async close() {
-      const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), { method: "DELETE", headers: { authorization: `Bearer ${created.reclaimToken}` } });
-      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
-    }
-  };
-}
-
-// src/core/cast/receiver-client.ts
-function validateCastRelayUrl(relayUrl) {
-  const url = new URL(relayUrl);
-  if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("The cast relay must use HTTP or HTTPS");
-  if (url.username || url.password || url.search || url.hash) throw new Error("The cast relay URL is invalid");
-  return url;
-}
-async function resumeLookup(relayUrl, bindingId, signal) {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId)) throw new Error("Invalid Cast resume binding");
-  const base = validateCastRelayUrl(relayUrl);
-  if (!base.pathname.endsWith("/")) base.pathname += "/";
-  const response = await fetch(new URL(`resume/${bindingId}`, base), { method: "POST", ...signal ? { signal } : {} });
-  if (response.status === 404) throw new Error("Cast resume binding is unavailable");
-  if (!response.ok) throw new Error(`Cast relay rejected resume (${response.status})`);
-  const value = await response.json();
-  if (!value || typeof value !== "object") throw new Error("Cast relay returned an invalid resume room");
-  const room = value;
-  if (typeof room.websocketUrl !== "string" || !/^wss?:\/\//.test(room.websocketUrl) || typeof room.generation !== "string" || !/^[A-Za-z0-9_-]{16,64}$/.test(room.generation) || typeof room.expiresAt !== "number" || room.expiresAt <= Date.now()) throw new Error("Cast relay returned an invalid resume room");
-  return room;
-}
-async function createResumeSession(relayUrl, bindingId, resumePassword, signal) {
-  if (resumePassword.length !== 32) throw new Error("Invalid Cast resume password");
-  const room = await resumeLookup(relayUrl, bindingId, signal);
-  return {
-    relayUrl: room.websocketUrl,
-    roomCode: bindingId,
-    authCode: "",
-    generation: room.generation,
-    resumeBindingId: bindingId,
-    resumePassword
-  };
-}
-
-// src/core/cast/crypto/web/spake.source.ts
-var SIZE = { handle: 16, scalar: 32, share: 65, confirm: 32, secret: 32 };
-var encoder2 = new TextEncoder();
-var SpakeError = class extends Error {
-  constructor() {
-    super("SPAKE2+ operation failed");
-    this.name = "SpakeError";
-  }
-};
-var Secret = class {
-  value;
-  constructor(value) {
-    this.value = value;
-  }
-  bytes() {
-    if (!this.value) throw new SpakeError();
-    return this.value.slice();
-  }
-  destroy() {
-    if (this.value) {
-      this.value.fill(0);
-      this.value = void 0;
-    }
-  }
-};
-function equal(a, b) {
-  if (a.length !== b.length) return false;
-  let difference = 0;
-  for (let i = 0; i < a.length; ++i) difference |= a[i] ^ b[i];
-  return difference === 0;
-}
-var Spake = class _Spake {
-  constructor(native) {
-    this.native = native;
-  }
-  static fromNativeForTest(native) {
-    return new _Spake(native);
-  }
-  static async load(bytes, trustedSha256) {
-    if (trustedSha256.length !== 32) throw new SpakeError();
-    const raw = bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", raw));
-    if (!equal(digest, trustedSha256)) throw new SpakeError();
-    const holder = {};
-    const entropy = (pointer, length) => {
-      if (!holder.instance || !Number.isInteger(pointer) || !Number.isInteger(length) || pointer < 0 || length < 0 || length > 65536) return -1;
-      const exports = holder.instance.exports;
-      const byteLength = exports.memory.buffer.byteLength;
-      if (pointer > byteLength - length) return -1;
-      try {
-        crypto.getRandomValues(new Uint8Array(exports.memory.buffer, pointer, length));
-        return 0;
-      } catch {
-        return -1;
-      }
-    };
-    const result = await WebAssembly.instantiate(raw, {
-      env: { getentropy: entropy, emscripten_notify_memory_growth: () => void 0 },
-      wasi_snapshot_preview1: {
-        random_get: entropy,
-        fd_write: () => 0,
-        fd_close: () => 0,
-        fd_seek: () => 0,
-        proc_exit: () => {
-          throw new SpakeError();
-        }
-      }
-    });
-    const instance = result instanceof WebAssembly.Instance ? result : result.instance;
-    holder.instance = instance;
-    const initialize = instance.exports._initialize;
-    if (typeof initialize === "function") initialize();
-    const required = [
-      "memory",
-      "malloc",
-      "free",
-      "ds_register",
-      "ds_register_resume",
-      "ds_prover_new",
-      "ds_prover_share",
-      "ds_prover_finish",
-      "ds_verifier_new",
-      "ds_verifier_process",
-      "ds_verifier_finish",
-      "ds_destroy"
-    ];
-    for (const name of required) if (!(name in instance.exports)) throw new SpakeError();
-    const native = {
-      HEAPU8: new Uint8Array(instance.exports.memory.buffer),
-      _malloc: instance.exports.malloc,
-      _free: instance.exports.free,
-      _ds_register: instance.exports.ds_register,
-      _ds_register_resume: instance.exports.ds_register_resume,
-      _ds_prover_new: instance.exports.ds_prover_new,
-      _ds_prover_share: instance.exports.ds_prover_share,
-      _ds_prover_finish: instance.exports.ds_prover_finish,
-      _ds_verifier_new: instance.exports.ds_verifier_new,
-      _ds_verifier_process: instance.exports.ds_verifier_process,
-      _ds_verifier_finish: instance.exports.ds_verifier_finish,
-      _ds_destroy: instance.exports.ds_destroy
-    };
-    Object.defineProperty(native, "HEAPU8", { get: () => new Uint8Array(instance.exports.memory.buffer) });
-    return new _Spake(native);
-  }
-  allocate(length) {
-    if (!Number.isInteger(length) || length <= 0) throw new SpakeError();
-    const pointer = this.native._malloc(length);
-    if (!pointer || pointer > this.native.HEAPU8.length - length) {
-      if (pointer) this.native._free(pointer);
-      throw new SpakeError();
-    }
-    return pointer;
-  }
-  buffers(inputs, outputs, operation) {
-    const lengths = [...inputs.map((value) => value.length), ...outputs];
-    const pointers = [];
-    try {
-      for (const length of lengths) pointers.push(this.allocate(length));
-      inputs.forEach((value, index) => this.native.HEAPU8.set(value, pointers[index]));
-      if (!operation(pointers)) throw new SpakeError();
-      return outputs.map((length, index) => {
-        const pointer = pointers[inputs.length + index];
-        if (pointer === void 0) throw new SpakeError();
-        return this.native.HEAPU8.slice(pointer, pointer + length);
-      });
-    } finally {
-      pointers.forEach((pointer, index) => {
-        this.native.HEAPU8.fill(0, pointer, pointer + lengths[index]);
-        this.native._free(pointer);
-      });
-    }
-  }
-  context(generation) {
-    const generationBytes = encoder2.encode(generation);
-    const prefix = encoder2.encode("dash-cast/spake2plus/v2/room-generation/");
-    if (!generationBytes.length || prefix.length + 4 + generationBytes.length > 256) throw new SpakeError();
-    const result = new Uint8Array(prefix.length + 4 + generationBytes.length);
-    result.set(prefix);
-    new DataView(result.buffer).setUint32(prefix.length, generationBytes.length, false);
-    result.set(generationBytes, prefix.length + 4);
-    return result;
-  }
-  resumeContext(bindingId, generation) {
-    const identity = encoder2.encode(`${bindingId}/${generation}`);
-    const prefix = encoder2.encode("dash-cast/spake2plus/resume/v1/sender-receiver/");
-    if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId) || !generation || prefix.length + 4 + identity.length > 256) throw new SpakeError();
-    const result = new Uint8Array(prefix.length + 4 + identity.length);
-    result.set(prefix);
-    new DataView(result.buffer).setUint32(prefix.length, identity.length, false);
-    result.set(identity, prefix.length + 4);
-    return result;
-  }
-  register(code) {
-    if (!/^\d{6}$/.test(code)) throw new SpakeError();
-    const values = this.buffers([encoder2.encode(code)], [32, 32, 65], (p) => this.native._ds_register(p[0], 6, p[1], 32, p[2], 32, p[3], 65));
-    return { w0: new Secret(values[0]), w1: new Secret(values[1]), registration: values[2] };
-  }
-  registerResume(password) {
-    if (password.length !== 32) throw new SpakeError();
-    const values = this.buffers([password], [32, 32, 65], (p) => this.native._ds_register_resume(p[0], 32, p[1], 32, p[2], 32, p[3], 65));
-    return { w0: new Secret(values[0]), w1: new Secret(values[1]), registration: values[2] };
-  }
-  prover(context, w0, w1) {
-    if (w0.length !== 32 || w1.length !== 32) throw new SpakeError();
-    const [handle] = this.buffers([w0, w1, context], [16], (p) => this.native._ds_prover_new(p[0], 32, p[1], 32, p[2], context.length, p[3], 16));
-    return new Prover(this.native, handle, this.buffers.bind(this));
-  }
-  verifier(context, w0, registration) {
-    if (w0.length !== 32 || registration.length !== 65) throw new SpakeError();
-    const [handle] = this.buffers([w0, registration, context], [16], (p) => this.native._ds_verifier_new(p[0], 32, p[1], 65, p[2], context.length, p[3], 16));
-    return new Verifier(this.native, handle, this.buffers.bind(this));
-  }
-};
-var Session = class {
-  constructor(native, handle, buffers) {
-    this.native = native;
-    this.handle = handle;
-    this.buffers = buffers;
-  }
-  live = true;
-  requireLive() {
-    if (!this.live) throw new SpakeError();
-  }
-  terminal(operation) {
-    this.requireLive();
-    try {
-      return operation();
-    } catch (error) {
-      this.destroy();
-      throw error;
-    } finally {
-      this.live = false;
-      this.handle.fill(0);
-    }
-  }
-  destroy() {
-    if (!this.live) return;
-    try {
-      const pointer = this.native._malloc(SIZE.handle);
-      if (!pointer || pointer > this.native.HEAPU8.length - SIZE.handle) {
-        if (pointer) this.native._free(pointer);
-        throw new SpakeError();
-      }
-      try {
-        this.native.HEAPU8.set(this.handle, pointer);
-        this.native._ds_destroy(pointer, SIZE.handle);
-      } finally {
-        this.native.HEAPU8.fill(0, pointer, pointer + SIZE.handle);
-        this.native._free(pointer);
-      }
-    } finally {
-      this.live = false;
-      this.handle.fill(0);
-    }
-  }
-};
-var Prover = class extends Session {
-  shared = false;
-  share() {
-    this.requireLive();
-    if (this.shared) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    try {
-      const [share] = this.buffers([this.handle], [65], (p) => this.native._ds_prover_share(p[0], 16, p[1], 65));
-      this.shared = true;
-      return share;
-    } catch (error) {
-      this.destroy();
-      throw error;
-    }
-  }
-  finish(share, confirmation) {
-    if (share.length !== 65 || confirmation.length !== 32) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    return this.terminal(() => {
-      const values = this.buffers([this.handle, share, confirmation], [32, 32], (p) => this.native._ds_prover_finish(p[0], 16, p[1], 65, p[2], 32, p[3], 32, p[4], 32));
-      return { confirmation: values[0], key: new Secret(values[1]) };
-    });
-  }
-};
-var Verifier = class extends Session {
-  processed = false;
-  process(share) {
-    this.requireLive();
-    if (this.processed || share.length !== 65) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    try {
-      const values = this.buffers([this.handle, share], [65, 32], (p) => this.native._ds_verifier_process(p[0], 16, p[1], 65, p[2], 65, p[3], 32));
-      this.processed = true;
-      return { share: values[0], confirmation: values[1] };
-    } catch (error) {
-      this.destroy();
-      throw error;
-    }
-  }
-  finish(confirmation) {
-    if (confirmation.length !== 32) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    return this.terminal(() => new Secret(this.buffers([this.handle, confirmation], [32], (p) => this.native._ds_verifier_finish(p[0], 16, p[1], 32, p[2], 32))[0]));
-  }
-};
-
-// src/core/cast/crypto/runtime.ts
-function ownedBuffer(bytes) {
-  const copy = new Uint8Array(bytes.byteLength);
-  copy.set(bytes);
-  return copy.buffer;
-}
-function loadSpake(asset) {
-  return Spake.load(ownedBuffer(asset.bytes), decode(asset.sha256));
-}
-
-// src/core/cast/handshake.ts
-async function deriveSas(shared, transcript) {
-  const material = new Uint8Array(shared.length);
-  material.set(shared);
-  const key = await crypto.subtle.importKey("raw", material.buffer, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  material.fill(0);
-  for (let counter = 0; counter < 256; counter += 1) {
-    const label = new TextEncoder().encode(`dash-secure-webrtc/sas/v1/${counter}`);
-    const input = new Uint8Array(label.length + transcript.length);
-    input.set(label);
-    input.set(transcript, label.length);
-    const output = new Uint8Array(await crypto.subtle.sign("HMAC", key, input));
-    input.fill(0);
-    const value = new DataView(output.buffer).getUint32(0, false);
-    output.fill(0);
-    if (value < 4294e6) return String(value % 1e6).padStart(6, "0");
-  }
-  throw new Error("Unable to derive session authentication code");
-}
-async function complete(shared, transcript, role) {
-  const sas = await deriveSas(shared, transcript);
-  const result = {
-    keys: await deriveDirectionalKeys(shared, transcript, role),
-    sendBinding: await deriveBinding(shared, transcript, role),
-    receiveBinding: await deriveBinding(shared, transcript, role === "sender" ? "receiver" : "sender"),
-    sas
-  };
-  shared.fill(0);
-  return result;
-}
-var ReceiverHandshake = class {
-  constructor(spake, identity) {
-    this.spake = spake;
-    this.identity = identity;
-  }
-  request;
-  challenge;
-  transcript;
-  verifier;
-  createVerifier() {
-    const registration = this.identity.resumePassword ? this.spake.registerResume(this.identity.resumePassword) : this.spake.register(this.identity.authCode);
-    const w0 = registration.w0.bytes();
-    const context = this.identity.resumePassword ? this.spake.resumeContext(this.identity.resumeBindingId ?? "", this.identity.generation) : this.spake.context(this.identity.generation);
-    try {
-      return this.spake.verifier(context, w0, registration.registration);
-    } finally {
-      w0.fill(0);
-      registration.w0.destroy();
-      registration.w1.destroy();
-      registration.registration.fill(0);
-    }
-  }
-  challengeFor(request, count) {
-    var _a;
-    if (this.transcript) throw new Error("Cast verification already started");
-    (_a = this.verifier) == null ? void 0 : _a.destroy();
-    this.verifier = this.createVerifier();
-    this.request = request;
-    this.challenge = createChallenge(count);
-    return { type: "challenge", ...this.challenge };
-  }
-  async process(value) {
-    if (!this.request || !this.challenge || !this.verifier || value.challenge !== this.challenge.challenge || value.share !== this.request.share || value.nonce !== this.request.nonce || this.challenge.expiresAt <= Date.now() || !await verifyProof(decode(value.challenge), this.identity.resumePassword ? this.spake.resumeContext(this.identity.resumeBindingId ?? "", this.identity.generation) : this.spake.context(this.identity.generation), decode(value.share), value.proof, this.challenge.difficulty)) {
-      throw new Error("Invalid cast proof");
-    }
-    const processed = this.verifier.process(decode(value.share));
-    this.transcript = canonicalTranscript({
-      roomId: this.identity.roomCode,
-      generation: this.identity.generation,
-      challenge: this.challenge.challenge,
-      challengeCount: this.challenge.count,
-      difficulty: this.challenge.difficulty,
-      expiresAt: this.challenge.expiresAt,
-      proverNonce: value.nonce,
-      proverShare: value.share,
-      verifierShare: encode(processed.share)
-    });
-    return { type: "verifier", share: encode(processed.share), confirmation: encode(processed.confirmation) };
-  }
-  async finish(value) {
-    if (!this.transcript || !this.verifier) throw new Error("Cast verifier not ready");
-    const secret = this.verifier.finish(decode(value.confirmation));
-    const shared = secret.bytes();
-    secret.destroy();
-    return complete(shared, this.transcript, "receiver");
-  }
-};
-
-// src/core/cast/signaling.ts
-var exact = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
-var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
-var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
-function parseDescription(value, type) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  if (!exact(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
-  return { type, sdp: candidate.sdp };
-}
-function parseIceCandidate(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  const keys = Object.keys(candidate);
-  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
-  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
-  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
-  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
-  return candidate;
-}
-function sendWire(socket, value) {
-  const text = JSON.stringify(value);
-  if (text.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
-  socket.send(text);
-}
-function parseWire(data) {
-  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES) return null;
-  let value;
-  try {
-    value = JSON.parse(data);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || !("type" in value)) return null;
-  const candidate = value;
-  if (candidate.type === "hello" && exact(candidate, ["type", "roomId", "generation", "role"]) && typeof candidate.roomId === "string" && /^\d{4,9}$/.test(candidate.roomId) && typeof candidate.generation === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(candidate.generation) && (candidate.role === "sender" || candidate.role === "receiver")) return candidate;
-  if (candidate.type === "receiver-ready" && exact(candidate, ["type"])) return candidate;
-  if ((candidate.type === "burn" || candidate.type === "recycle") && exact(candidate, ["type", "reclaimToken"]) && typeof candidate.reclaimToken === "string" && /^[A-Za-z0-9_-]{43}$/.test(candidate.reclaimToken)) return candidate;
-  if (candidate.type === "challenge-request" && exact(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) return candidate;
-  if (candidate.type === "challenge" && exact(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) return candidate;
-  if (candidate.type === "prover" && exact(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) return candidate;
-  if (candidate.type === "verifier" && exact(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) return candidate;
-  if (candidate.type === "confirm" && exact(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) return candidate;
-  if (candidate.type === "signal" && exact(candidate, ["type", "signalType", "sequence", "ciphertext"]) && (candidate.signalType === "offer" || candidate.signalType === "answer" || candidate.signalType === "ice") && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && candidate.ciphertext.length <= MAX_CAST_MESSAGE_BYTES && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) return candidate;
-  return null;
-}
-var EncryptedSignaling = class {
-  constructor(socket, keys, role) {
-    this.socket = socket;
-    this.keys = keys;
-    this.role = role;
-  }
-  sent = 1;
-  received = 0;
-  sendQueue = Promise.resolve();
-  receiveQueue = Promise.resolve();
-  applyQueue = Promise.resolve();
-  send(signal) {
-    const pending = this.sendQueue.then(async () => {
-      const type = signal.type;
-      const payload = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
-      const sequence = this.sent;
-      const frame = await encryptSignal(this.keys.send, sequence, payload, type, this.role);
-      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
-      this.sent = sequence + 1;
-    });
-    this.sendQueue = pending.catch(() => void 0);
-    return pending;
-  }
-  receive(value) {
-    const pending = this.receiveQueue.then(async () => {
-      const remote = this.role === "sender" ? "receiver" : "sender";
-      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
-      this.received = opened.sequence;
-      if (value.signalType === "ice") {
-        const candidate = parseIceCandidate(opened.value);
-        if (!candidate) throw new Error("Invalid Cast ICE candidate");
-        return { type: "ice", candidate };
-      }
-      if (value.signalType === "offer") {
-        const offer = opened.value;
-        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
-        const metadata = offer;
-        const description2 = exact(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
-        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
-        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
-      }
-      const description = parseDescription(opened.value, "answer");
-      if (!description) throw new Error("Invalid Cast answer");
-      return { type: "answer", description };
-    });
-    this.receiveQueue = pending.then(() => void 0, () => void 0);
-    return pending;
-  }
-  apply(operation) {
-    const pending = this.applyQueue.then(operation);
-    this.applyQueue = pending.catch(() => void 0);
-    return pending;
-  }
-};
-
-// src/core/cast/resume-binding.ts
-var MAX_CAST_RESUME_LIFETIME_MS = 30 * 24 * 60 * 60 * 1e3;
-
-// src/core/cast/data-message.ts
-var exact2 = (value, keys) => {
-  const actual = Object.keys(value);
-  return actual.length === keys.length && actual.every((key) => keys.includes(key));
-};
-function encoded32(value) {
-  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value)) return false;
-  try {
-    const decoded = decode(value);
-    return decoded.length === 32 && encode(decoded) === value;
-  } catch {
-    return false;
-  }
-}
-function validPresentationEpoch(value) {
-  return Number.isSafeInteger(value) && Number(value) > 0;
-}
-function parseDataMessage(input, now = Date.now()) {
-  let value;
-  try {
-    value = JSON.parse(input);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const message = value;
-  if (message.type === "binding" && exact2(message, ["type", "proof"]) && encoded32(message.proof)) return { type: "binding", proof: message.proof };
-  if (message.type === "resume-binding" && exact2(message, ["type", "bindingId", "resumePassword", "expiresAt"]) && encoded32(message.bindingId) && encoded32(message.resumePassword) && Number.isSafeInteger(message.expiresAt) && Number(message.expiresAt) > now && Number(message.expiresAt) <= now + MAX_CAST_RESUME_LIFETIME_MS) {
-    return message;
-  }
-  if ((message.type === "resume-binding-ack" || message.type === "resume-binding-revoke") && exact2(message, ["type", "bindingId"]) && encoded32(message.bindingId)) return message;
-  if (message.type === "command" && exact2(message, ["type", "command", "epoch"]) && validPresentationEpoch(message.epoch) && message.command && typeof message.command === "object" && !Array.isArray(message.command)) {
-    const command = parseCastCommand(message.command);
-    return command ? { type: "command", command, epoch: message.epoch } : null;
-  }
-  if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact2(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
-  if (message.type === "stream" && exact2(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
-  if (message.type === "sas-decision" && exact2(message, ["type", "accepted", "code"]) && typeof message.accepted === "boolean" && typeof message.code === "string" && /^\d{6}$/.test(message.code)) return message;
-  if (message.type === "sas-ack" && exact2(message, ["type", "code"]) && typeof message.code === "string" && /^\d{6}$/.test(message.code)) return message;
-  return null;
-}
-
-// src/core/cast/session.ts
-var CastAuthenticationError = class extends Error {
-  constructor(cause) {
-    super("Cast authentication failed", { cause });
-    this.name = "CastAuthenticationError";
-  }
-};
-function acceptsIncomingTrack(currentEpoch, offerEpoch) {
-  return validPresentationEpoch(offerEpoch) && offerEpoch >= currentEpoch;
-}
-function ownsActiveStream(currentEpoch, trackEpoch, currentStream, trackStream) {
-  return trackEpoch === currentEpoch && currentStream === trackStream;
-}
-function requiredOptions(options) {
-  var _a;
-  const resume = options.resumePassword !== void 0 || options.resumeBindingId !== void 0;
-  if (!options.generation || (resume ? ((_a = options.resumePassword) == null ? void 0 : _a.length) !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId ?? "") : !options.authCode || !/^\d{6}$/.test(options.authCode))) throw new Error("Secure cast credentials are required");
-  if (options.reclaimToken !== void 0 && !/^[A-Za-z0-9_-]{43}$/.test(options.reclaimToken)) throw new Error("Invalid cast reclaim credential");
-  return { ...options, authCode: options.authCode ?? "", generation: options.generation };
-}
-function socketFor(options, role, onOpen, prepare) {
-  const socket = new WebSocket(options.relayUrl);
-  prepare == null ? void 0 : prepare(socket);
-  socket.onopen = () => {
-    sendWire(socket, { type: "hello", roomId: options.roomCode, generation: options.generation, role });
-    onOpen == null ? void 0 : onOpen(socket);
-  };
-  return socket;
-}
-function peerFor(options) {
-  return new RTCPeerConnection(options.turnUrl ? { iceServers: [{
-    urls: options.turnUrl,
-    ...options.turnUsername ? { username: options.turnUsername } : {},
-    ...options.turnCredential ? { credential: options.turnCredential } : {}
-  }] } : {});
-}
-async function applySignal(peer, secure, signal) {
-  if (signal.type === "ice") await peer.addIceCandidate(signal.candidate);
-  else if (signal.type === "offer") {
-    await peer.setRemoteDescription(signal.description);
-    await peer.setLocalDescription(await peer.createAnswer());
-    await secure.send({ type: "answer", description: peer.localDescription });
-  } else await peer.setRemoteDescription(signal.description);
-}
-function activateChannel(channel, pairing, onBound, onMessage) {
-  let bound = false;
-  channel.onopen = () => channel.send(JSON.stringify({ type: "binding", proof: pairing.sendBinding }));
-  channel.onmessage = ({ data }) => {
-    if (typeof data !== "string") return;
-    const value = parseDataMessage(data);
-    if (!value) return;
-    if (!bound) {
-      if (value.type !== "binding" || value.proof !== pairing.receiveBinding) {
-        channel.close();
-        return;
-      }
-      bound = true;
-      onBound();
-      return;
-    }
-    onMessage(value);
-  };
-}
-function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onResumeRevoke) {
-  const options = requiredOptions(optionsInput);
-  const state = { status: "connecting", command: null, presentationEpoch: 0, screenStream: null, peerCount: 0, error: null };
-  let peer, channel, pendingStream = null;
-  const transceiverEpochs = /* @__PURE__ */ new WeakMap();
-  let closed = false, failures = 0, socketAttempts = 0, socket;
-  let signaling, pairing, applyingOfferEpoch;
-  const emit = () => {
-    if (!closed) onState({ ...state });
-  };
-  const disconnect = () => {
-    if (closed || state.peerCount === 0) return;
-    state.peerCount = 0;
-    state.status = "disconnected";
-    emit();
-    if (!options.resumePassword) socket.close();
-    peer == null ? void 0 : peer.close();
-    peer = void 0;
-    channel = void 0;
-    signaling = void 0;
-    pairing = void 0;
-  };
-  const fail = (error) => {
-    if (error instanceof CastAuthenticationError) failures += 1;
-    state.status = "error";
-    state.error = error instanceof Error ? error.message : String(error);
-    emit();
-    if (failures >= MAX_CRYPTO_FAILURES && options.reclaimToken && socket.readyState === WebSocket.OPEN) {
-      sendWire(socket, { type: "burn", reclaimToken: options.reclaimToken });
-    }
-  };
-  const initialPending = [];
-  let bindReady;
-  socket = socketFor(options, "receiver", (active) => bindReady == null ? void 0 : bindReady(active, initialPending), (active) => {
-    active.onmessage = (event) => initialPending.push(event);
-  });
-  void loadSpake(asset).then((spake) => {
-    const bindSocket = (active, pending) => {
-      let handshake = new ReceiverHandshake(spake, options);
-      let count = 0;
-      sendWire(active, { type: "receiver-ready" });
-      const receive = ({ data }) => {
-        void (async () => {
-          const wire = parseWire(data);
-          if (!wire) throw new Error("Invalid cast message");
-          if (wire.type === "challenge-request") sendWire(active, handshake.challengeFor(wire, ++count));
-          else if (wire.type === "prover") sendWire(active, await handshake.process(wire));
-          else if (wire.type === "confirm") {
-            try {
-              pairing = await handshake.finish(wire);
-              if (options.resumePassword) delete state.sas;
-              else state.sas = pairing.sas;
-            } catch (error) {
-              throw new CastAuthenticationError(error);
-            }
-            peer = peerFor(options);
-            signaling = new EncryptedSignaling(active, pairing.keys, "receiver");
-            peer.onicecandidate = ({ candidate }) => {
-              if (candidate && signaling) void signaling.send({ type: "ice", candidate: candidate.toJSON() }).catch(fail);
-            };
-            peer.onconnectionstatechange = () => {
-              if ((peer == null ? void 0 : peer.connectionState) === "closed" || (peer == null ? void 0 : peer.connectionState) === "failed" || (peer == null ? void 0 : peer.connectionState) === "disconnected") {
-                disconnect();
-                if (options.resumePassword) {
-                  handshake = new ReceiverHandshake(spake, options);
-                  count = 0;
-                }
-              }
-            };
-            peer.ontrack = ({ track, streams, transceiver }) => {
-              queueMicrotask(() => {
-                const trackEpoch = transceiverEpochs.get(transceiver) ?? applyingOfferEpoch;
-                if (trackEpoch === void 0 || !acceptsIncomingTrack(state.presentationEpoch, trackEpoch)) {
-                  track.stop();
-                  return;
-                }
-                const activeStream = streams[0] ?? pendingStream ?? new MediaStream();
-                if (!activeStream.getTracks().includes(track)) activeStream.addTrack(track);
-                pendingStream = activeStream;
-                track.addEventListener("ended", () => {
-                  if (!ownsActiveStream(state.presentationEpoch, trackEpoch, state.screenStream, activeStream)) return;
-                  activeStream.removeTrack(track);
-                  if (activeStream.getTracks().length === 0) {
-                    pendingStream = null;
-                    state.screenStream = null;
-                    state.command = null;
-                    state.status = "paired";
-                    emit();
-                  }
-                }, { once: true });
-                if (trackEpoch !== state.presentationEpoch) return;
-                state.screenStream = activeStream;
-                state.command = null;
-                state.status = "casting";
-                emit();
-              });
-            };
-            peer.ondatachannel = ({ channel: incoming }) => {
-              channel = incoming;
-              if (!pairing) {
-                incoming.close();
-                return;
-              }
-              activateChannel(incoming, pairing, () => {
-                state.peerCount = 1;
-                state.status = "paired";
-                emit();
-              }, (message) => {
-                if (message.type === "resume-binding") {
-                  const persisted = onResumeBinding ? onResumeBinding(message) : Promise.reject(new Error("Cast resume storage is unavailable"));
-                  void persisted.then(() => {
-                    incoming.send(JSON.stringify({ type: "resume-binding-ack", bindingId: message.bindingId }));
-                  }).catch(fail);
-                  return;
-                }
-                if (message.type === "resume-binding-revoke") {
-                  void (onResumeRevoke == null ? void 0 : onResumeRevoke(message.bindingId).catch(fail));
-                  return;
-                }
-                if (message.type === "presentation-start") {
-                  if (message.epoch > state.presentationEpoch) {
-                    state.presentationEpoch = message.epoch;
-                    state.command = null;
-                    state.screenStream = pendingStream;
-                    state.status = "casting";
-                    emit();
-                  }
-                  return;
-                }
-                if (message.type === "stream") {
-                  if (message.epoch !== state.presentationEpoch) return;
-                  if (!message.active) {
-                    state.screenStream = null;
-                    state.command = null;
-                    state.status = "paired";
-                    emit();
-                  } else if (pendingStream) {
-                    state.screenStream = pendingStream;
-                    state.command = null;
-                    state.status = "casting";
-                    emit();
-                  }
-                  return;
-                }
-                if (message.type !== "command" || message.epoch < state.presentationEpoch) return;
-                state.presentationEpoch = message.epoch;
-                state.command = message.command.sourceKind === "idle" ? null : message.command;
-                state.screenStream = null;
-                pendingStream = null;
-                state.status = message.command.sourceKind === "idle" ? "paired" : "casting";
-                emit();
-              });
-              incoming.onclose = disconnect;
-            };
-          } else if (wire.type === "signal" && signaling && peer) {
-            try {
-              const activeSignaling = signaling;
-              const activePeer = peer;
-              const signal = await activeSignaling.receive(wire);
-              if (signal.type === "offer") {
-                applyingOfferEpoch = signal.presentationEpoch;
-                try {
-                  await activePeer.setRemoteDescription(signal.description);
-                } finally {
-                  applyingOfferEpoch = void 0;
-                }
-                for (const transceiver of activePeer.getTransceivers()) transceiverEpochs.set(transceiver, signal.presentationEpoch);
-                await activePeer.setLocalDescription(await activePeer.createAnswer());
-                await activeSignaling.send({ type: "answer", description: activePeer.localDescription });
-              } else await applySignal(activePeer, activeSignaling, signal);
-            } catch (error) {
-              if (error instanceof DOMException && error.name === "OperationError") throw new CastAuthenticationError(error);
-              throw error;
-            }
-          }
-        })().catch(fail);
-      };
-      active.onmessage = receive;
-      active.onclose = (event) => {
-        if (!closed && options.resumePassword && state.peerCount === 0 && event.code === 1008 && socketAttempts < 7) {
-          const delay = 100 * 2 ** socketAttempts++;
-          window.setTimeout(() => {
-            if (closed) return;
-            const retryPending = [];
-            const retry = socketFor(options, "receiver", (active2) => bindSocket(active2, retryPending));
-            retry.onmessage = (event2) => retryPending.push(event2);
-            socket = retry;
-          }, delay);
-          return;
-        }
-        disconnect();
-      };
-      pending.splice(0).forEach(receive);
-    };
-    bindReady = bindSocket;
-    if (socket.readyState === WebSocket.OPEN) bindSocket(socket, initialPending);
-  }).catch(fail);
-  emit();
-  return { close() {
-    closed = true;
-    pendingStream = null;
-    state.screenStream = null;
-    socket == null ? void 0 : socket.close();
-    peer == null ? void 0 : peer.close();
-  }, confirmSas(accepted) {
-    if (!accepted) {
-      channel == null ? void 0 : channel.close();
-      peer == null ? void 0 : peer.close();
-    }
-  }, revokePresenter(epoch) {
-    if ((channel == null ? void 0 : channel.readyState) === "open" && Number.isSafeInteger(epoch) && epoch > 0) channel.send(JSON.stringify({ type: "presenter-revoke", epoch }));
-  } };
-}
-
-// src/plugins/cast-receiver/receiver.ts
-function createPluginReceiver(options, asset, onState, onResumeBinding, onResumeRevoke) {
-  return createCastReceiver(options, (state) => onState({
-    status: state.status,
-    command: state.command,
-    presentationEpoch: state.presentationEpoch,
-    stream: state.screenStream,
-    peerCount: state.peerCount,
-    error: state.error,
-    ...state.sas ? { sas: state.sas } : {},
-    ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
-  }), asset, onResumeBinding, onResumeRevoke);
-}
-
-// src/plugins/cast-receiver/screen-session.ts
-function createScreenSession(context) {
-  const config = readCastConfig(context.config);
-  const state = {
-    status: "connecting",
-    command: null,
-    presentationEpoch: 0,
-    stream: null,
-    peerCount: 0,
-    error: null,
-    roomCode: "",
-    relayUrl: config.relayUrl,
-    senderUrl: config.senderUrl
-  };
-  const listeners = /* @__PURE__ */ new Set();
-  const listeningBindings = /* @__PURE__ */ new Set();
-  const resumeEntries = /* @__PURE__ */ new Map();
-  const connected = /* @__PURE__ */ new Set();
-  const abort = new AbortController();
-  let pairing, presenter, sasOwner, renewal, disposed = false;
-  let lifecycle = Promise.resolve();
-  const publish = (patch) => {
-    if ("sas" in patch && patch.sas === void 0) delete state.sas;
-    if ("sasTrusted" in patch && patch.sasTrusted === void 0) delete state.sasTrusted;
-    Object.assign(state, patch);
-    listeners.forEach((listener) => listener({ ...state }));
-    const hostState = {
-      status: state.status,
-      command: state.command,
-      peerCount: state.peerCount,
-      error: state.error,
-      roomCode: state.roomCode,
-      relayUrl: state.relayUrl,
-      senderUrl: state.senderUrl,
-      ...state.sas ? { sas: state.sas } : {},
-      ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
-    };
-    void context.setCastState(hostState);
-  };
-  const report = (error) => publish({ status: "error", error: error instanceof Error ? error.message : String(error) });
-  const enqueue = (operation) => {
-    lifecycle = lifecycle.then(operation).catch(report);
-  };
-  const aggregate = (entry) => {
-    var _a;
-    const latest = entry.state;
-    const presenting = latest.stream !== null || latest.command !== null && latest.command.sourceKind !== "idle";
-    const stale = latest.presentationEpoch <= entry.revokedEpoch;
-    if (presenting && !stale && (presenter !== entry || presenter.state.presentationEpoch !== latest.presentationEpoch)) {
-      if (presenter) {
-        const revokedEpoch = presenter.state.presentationEpoch;
-        presenter.revokedEpoch = Math.max(presenter.revokedEpoch, revokedEpoch);
-        presenter.state = { ...presenter.state, command: null, stream: null, status: "paired" };
-        (_a = presenter.receiver) == null ? void 0 : _a.revokePresenter(revokedEpoch);
-      }
-      presenter = entry;
-    } else if (presenter === entry && !presenting && latest.presentationEpoch > entry.revokedEpoch) presenter = void 0;
-    const displayed = (presenter == null ? void 0 : presenter.state) ?? latest;
-    const preservesPresenter = Boolean(presenter && presenter !== entry) || stale;
-    const patch = preservesPresenter ? { peerCount: connected.size, roomCode: state.roomCode } : { ...displayed, peerCount: connected.size, roomCode: state.roomCode };
-    if (latest.sas) sasOwner = entry;
-    if (sasOwner === entry && (!latest.sas || latest.peerCount === 0)) sasOwner = void 0;
-    const ownedSas = sasOwner == null ? void 0 : sasOwner.state.sas;
-    if (!ownedSas) {
-      delete state.sas;
-      delete state.sasTrusted;
-    }
-    publish({
-      ...patch,
-      ...ownedSas ? { sas: ownedSas } : {},
-      ...ownedSas && (sasOwner == null ? void 0 : sasOwner.state.sasTrusted) !== void 0 ? { sasTrusted: sasOwner.state.sasTrusted } : {}
-    });
-    context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
-  };
-  const disposeEntry = async (entry) => {
-    var _a;
-    connected.delete(entry);
-    if (pairing === entry) pairing = void 0;
-    if (presenter === entry) presenter = void 0;
-    if (sasOwner === entry) sasOwner = void 0;
-    (_a = entry.receiver) == null ? void 0 : _a.close();
-    publish({
-      peerCount: connected.size,
-      status: connected.size > 0 ? "paired" : "disconnected",
-      ...presenter ? { command: presenter.state.command, stream: presenter.state.stream } : { command: null, stream: null }
-    });
-    await entry.room.close();
-  };
-  const resume = async () => {
-    const bindings = await context.castResume.get();
-    await Promise.all(bindings.map(async (binding) => {
-      if (listeningBindings.has(binding.bindingId)) return;
-      listeningBindings.add(binding.bindingId);
-      const listen = async () => {
-        try {
-          const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
-          const asset = await context.secureWebRtcCryptoAsset();
-          const entry = {
-            room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-            state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
-            connected: false,
-            revokedEpoch: 0
-          };
-          resumeEntries.set(binding.bindingId, entry);
-          entry.receiver = createPluginReceiver(options, asset, (next) => {
-            var _a;
-            entry.state = next;
-            if (next.peerCount > 0 && !entry.connected) {
-              entry.connected = true;
-              connected.add(entry);
-            }
-            if (next.peerCount === 0 && entry.connected) {
-              entry.connected = false;
-              connected.delete(entry);
-              if (presenter === entry) presenter = void 0;
-              resumeEntries.delete(binding.bindingId);
-              listeningBindings.delete(binding.bindingId);
-              (_a = entry.receiver) == null ? void 0 : _a.close();
-              if (!disposed) enqueue(listen);
-            }
-            aggregate(entry);
-          });
-        } catch (error) {
-          if (!disposed && !(error instanceof DOMException && error.name === "AbortError")) enqueue(listen);
-          else listeningBindings.delete(binding.bindingId);
-        }
-      };
-      await listen();
-    }));
-  };
-  const allocate = async () => {
-    if (disposed || pairing) return;
-    const room = await createPairingSession(config.relayUrl, abort.signal, (url) => context.validateNativeOrigin("signaling", url));
-    if (disposed) {
-      await room.close();
-      return;
-    }
-    const asset = await context.secureWebRtcCryptoAsset();
-    const initialState = { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null };
-    const pendingStates = [];
-    const entry = { room, state: initialState, connected: false, revokedEpoch: 0 };
-    const applyState = (next) => {
-      entry.state = next;
-      if (next.peerCount > 0 && !entry.connected) {
-        entry.connected = true;
-        connected.add(entry);
-        if (pairing === entry) {
-          pairing = void 0;
-          clearTimeout(renewal);
-          enqueue(allocate);
-        }
-      }
-      if (next.peerCount === 0 && entry.connected) {
-        entry.connected = false;
-        enqueue(() => disposeEntry(entry));
-        return;
-      }
-      aggregate(entry);
-    };
-    let initialized = false;
-    entry.receiver = createPluginReceiver(room.options, asset, (next) => {
-      if (initialized) applyState(next);
-      else pendingStates.push(next);
-    }, async (binding) => {
-      const receiverBinding = { bindingId: binding.bindingId, resumePassword: binding.resumePassword, expiresAt: binding.expiresAt };
-      const bindings = await context.castResume.get();
-      await context.castResume.replace([...bindings.filter((item) => item.bindingId !== binding.bindingId), receiverBinding]);
-      if (listeningBindings.has(binding.bindingId)) return;
-      listeningBindings.add(binding.bindingId);
-      void createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal).then((options) => {
-        const resumeEntry = {
-          room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-          state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
-          connected: false,
-          revokedEpoch: 0
-        };
-        resumeEntries.set(binding.bindingId, resumeEntry);
-        resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
-          var _a;
-          resumeEntry.state = next;
-          if (next.peerCount > 0 && !resumeEntry.connected) {
-            resumeEntry.connected = true;
-            connected.add(resumeEntry);
-          }
-          if (next.peerCount === 0 && resumeEntry.connected) {
-            resumeEntry.connected = false;
-            connected.delete(resumeEntry);
-            if (presenter === resumeEntry) presenter = void 0;
-            resumeEntries.delete(binding.bindingId);
-            listeningBindings.delete(binding.bindingId);
-            (_a = resumeEntry.receiver) == null ? void 0 : _a.close();
-            enqueue(resume);
-          }
-          aggregate(resumeEntry);
-        }, void 0, (bindingId) => context.castResume.delete(bindingId));
-      }).catch(report);
-    }, (bindingId) => context.castResume.delete(bindingId));
-    pairing = entry;
-    initialized = true;
-    pendingStates.forEach(applyState);
-    if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
-    if (pairing === entry) {
-      clearTimeout(renewal);
-      renewal = setTimeout(() => enqueue(async () => {
-        if (pairing === entry) {
-          await disposeEntry(entry);
-          await allocate();
-        }
-      }), Math.max(1e3, room.expiresAt - Date.now() - 3e4));
-    }
-  };
-  if (!config.relayUrl) report("Configure and approve a signaling origin.");
-  else {
-    enqueue(resume);
-    enqueue(allocate);
-  }
-  return {
-    state,
-    subscribe(listener) {
-      listeners.add(listener);
-      listener({ ...state });
-      return () => listeners.delete(listener);
-    },
-    close() {
-      var _a;
-      disposed = true;
-      abort.abort();
-      clearTimeout(renewal);
-      const entries = /* @__PURE__ */ new Set([...resumeEntries.values(), ...connected, ...pairing ? [pairing] : []]);
-      for (const entry of entries) (_a = entry.receiver) == null ? void 0 : _a.close();
-      resumeEntries.clear();
-      listeningBindings.clear();
-      connected.clear();
-      pairing = void 0;
-      presenter = void 0;
-      sasOwner = void 0;
-      lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => void 0).catch(report);
-      listeners.clear();
-    }
-  };
-}
-
-// src/plugins/cast-receiver/CastWidget.tsx
+// weather/WeatherIcon.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function applyPlayback(media, paused, volume, muted) {
-  media.volume = volume;
-  media.muted = muted;
-  if (paused) media.pause();
-  else void media.play().catch(() => void 0);
+var SUN = "#ffd166";
+var CLOUD = "#c7d0da";
+var RAIN = "#6ba7e8";
+var SNOW = "#e8f0fa";
+var BOLT = "#ffd166";
+function WeatherIcon({ icon, size = 48 }) {
+  const common = { width: size, height: size, viewBox: "0 0 64 64" };
+  switch (icon) {
+    case "clear":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "32", cy: "32", r: "14", fill: SUN }),
+        Array.from({ length: 8 }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "rect",
+          {
+            x: "31",
+            y: "2",
+            width: "2",
+            height: "9",
+            rx: "1",
+            fill: SUN,
+            transform: `rotate(${i * 45} 32 32)`
+          },
+          i
+        ))
+      ] });
+    case "partly":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "24", cy: "24", r: "11", fill: SUN }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "38", cy: "40", rx: "18", ry: "12", fill: CLOUD })
+      ] });
+    case "cloudy":
+    case "fog":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "34", rx: "20", ry: "13", fill: CLOUD }),
+        icon === "fog" && [46, 52].map((y) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("rect", { x: "14", y, width: "36", height: "3", rx: "1.5", fill: CLOUD }, y))
+      ] });
+    case "drizzle":
+    case "rain":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
+        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          "line",
+          {
+            x1: x,
+            y1: "44",
+            x2: x - 4,
+            y2: icon === "rain" ? 56 : 51,
+            stroke: RAIN,
+            strokeWidth: "3",
+            strokeLinecap: "round"
+          },
+          x
+        ))
+      ] });
+    case "snow":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
+        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: x, cy: "50", r: "2.5", fill: SNOW }, x))
+      ] });
+    case "thunder":
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "26", rx: "19", ry: "12", fill: CLOUD }),
+        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("polygon", { points: "30,40 40,40 32,50 38,50 26,62 30,50 24,50", fill: BOLT })
+      ] });
+    default:
+      return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("svg", { ...common, "aria-hidden": true });
+  }
 }
-function CastWidget({ context }) {
-  const config = (0, import_react2.useMemo)(() => readCastConfig(context.config), [context.config]);
-  const [receiver, setReceiver] = (0, import_react2.useState)(() => ({
-    status: "connecting",
-    command: null,
-    presentationEpoch: 0,
-    stream: null,
-    peerCount: 0,
-    error: null,
-    roomCode: "",
-    relayUrl: config.relayUrl,
-    senderUrl: config.senderUrl
+
+// weather/service.ts
+var MAX_FORECAST_DAYS = 16;
+function buildWeatherUrl(config) {
+  const params = new URLSearchParams({
+    latitude: String(config.latitude),
+    longitude: String(config.longitude),
+    current: "temperature_2m,weather_code,wind_speed_10m,is_day",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min",
+    minutely_15: "precipitation,weather_code",
+    forecast_minutely_15: "48",
+    timezone: "auto",
+    timeformat: "unixtime",
+    forecast_days: String(MAX_FORECAST_DAYS),
+    temperature_unit: config.unit
+  });
+  return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+}
+function mapOpenMeteo(raw) {
+  const res = raw;
+  return mapResponse(res);
+}
+function mapResponse(res) {
+  const daily = res.daily.time.map((sec, i) => ({
+    dateMs: sec * 1e3,
+    weatherCode: res.daily.weather_code[i] ?? 0,
+    tempMax: res.daily.temperature_2m_max[i] ?? 0,
+    tempMin: res.daily.temperature_2m_min[i] ?? 0
   }));
-  const videoRef = (0, import_react2.useRef)(null);
-  (0, import_react2.useEffect)(() => {
-    const sessionContext = { ...context, config: { ...config } };
-    const session = createScreenSession(sessionContext);
-    const unsubscribe = session.subscribe(setReceiver);
-    return () => {
-      unsubscribe();
-      session.close();
-    };
-  }, [config.relayUrl, config.senderUrl]);
-  const effectiveConfig = (0, import_react2.useMemo)(() => receiver.command ? { ...config, ...receiver.command } : { ...config, sourceKind: "idle" }, [config, receiver.command]);
-  const target = (0, import_react2.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
-  const paused = effectiveConfig.paused ?? false;
-  const volume = effectiveConfig.volume ?? 1;
-  const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
-  (0, import_react2.useEffect)(() => {
-    const video = videoRef.current;
-    if (!video || !receiver.stream) return;
-    video.srcObject = receiver.stream;
-    applyPlayback(video, paused, volume, effectiveConfig.muted);
-    return () => {
-      video.srcObject = null;
-    };
-  }, [effectiveConfig.muted, paused, receiver.stream, volume]);
-  (0, import_react2.useEffect)(() => {
-    const stream = receiver.stream;
-    if (!stream) return;
-    const tracks = stream.getTracks();
-    const describe = () => {
-      if (tracks.every((track) => track.readyState === "ended")) context.reportStatus("error", "The shared stream ended.");
-      else if (stream.getAudioTracks().length === 0) context.reportStatus("error", "This shared stream has no audio.");
-      else context.reportStatus("ok", "");
-    };
-    tracks.forEach((track) => track.addEventListener("ended", describe));
-    describe();
-    return () => tracks.forEach((track) => track.removeEventListener("ended", describe));
-  }, [context, receiver.stream]);
-  (0, import_react2.useEffect)(() => {
-    const next = receiver.stream ? null : target.kind === "youtube" ? { provider: "youtube", videoId: target.videoId, muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode } : target.kind === "website" ? { provider: "website", url: target.url } : null;
-    const updatePresentation = async () => {
-      await context.setPresentation(next);
-      await context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
-    };
-    void updatePresentation().catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
-    return void 0;
-  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
-  (0, import_react2.useEffect)(() => {
-    const video = videoRef.current;
-    if (video && target.kind === "media") applyPlayback(
-      video,
-      paused,
-      volume,
-      effectiveConfig.muted || effectiveConfig.outputMode === "video-only"
-    );
-  }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
-  if (receiver.stream) return effectiveConfig.outputMode !== "audio-only" && receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty", "aria-label": context.locale.startsWith("de") ? "Audio\xFCbertragung aktiv" : "Audio casting active" });
-  if (target.kind === "youtube" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
-  if (target.kind === "media") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `cast-root cast-active ${effectiveConfig.outputMode === "audio-only" ? "cast-audio-only" : ""}`, "data-overlay": config.overlayMode, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", src: target.url, autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) });
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty" });
-}
-
-// src/plugins/cast-receiver/PairingWidget.tsx
-var import_react4 = __toESM(require_react(), 1);
-
-// src/plugins/cast-receiver/session-store.ts
-var import_react3 = __toESM(require_react(), 1);
-var INITIAL = {
-  status: "connecting",
-  command: null,
-  presentationEpoch: 0,
-  stream: null,
-  peerCount: 0,
-  error: null,
-  roomCode: "",
-  relayUrl: "",
-  senderUrl: ""
-};
-var playbackState = INITIAL;
-function useCastPlayback(context) {
-  const [state, setState] = (0, import_react3.useState)(playbackState);
-  (0, import_react3.useEffect)(() => {
-    let cancelled = false;
-    const refresh = async () => {
-      const next = await context.getCastState();
-      if (!cancelled && next) {
-        playbackState = next;
-        setState(playbackState);
-      }
-    };
-    void refresh();
-    const interval = window.setInterval(() => void refresh(), 200);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [context]);
-  return state;
-}
-
-// src/plugins/cast-receiver/PairingWidget.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-var EN = { title: "Cast pairing", devices: "Connected devices", sas: "Security code" };
-var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te", sas: "Sicherheitscode" };
-function senderLink(senderUrl, relayUrl, roomCode) {
-  if (!senderUrl || !relayUrl || !roomCode) return "";
-  const url = new URL(senderUrl);
-  url.searchParams.set("relay", relayUrl);
-  url.searchParams.set("code", roomCode);
-  return url.href;
-}
-function PairingWidget({ context }) {
-  const receiver = useCastPlayback(context);
-  const config = (0, import_react4.useMemo)(() => readCastConfig(context.config), [context.config]);
-  const strings = context.locale.startsWith("de") ? DE : EN;
-  const [open, setOpen] = (0, import_react4.useState)(false);
-  const [defaultSenderUrl, setDefaultSenderUrl] = (0, import_react4.useState)("");
-  const roomCode = receiver.roomCode;
-  const relayUrl = receiver.relayUrl || config.relayUrl;
-  const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
-  const url = (0, import_react4.useMemo)(
-    () => senderLink(senderUrl, relayUrl, roomCode),
-    [relayUrl, roomCode, senderUrl]
-  );
-  (0, import_react4.useEffect)(() => {
-    if (receiver.senderUrl || config.senderUrl) return;
-    void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
-  }, [config.senderUrl, context, receiver.senderUrl]);
-  (0, import_react4.useEffect)(() => {
-    if (!open) return;
-    void context.setPairingDetails(roomCode && url ? { code: roomCode, url, ...receiver.sas ? { sas: receiver.sas } : {} } : null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
-    return () => {
-      void context.setPairingDetails(null).catch(() => void 0);
-    };
-  }, [context, open, receiver.sas, roomCode, url]);
-  const toggleDetails = () => {
-    const next = !open;
-    setOpen(next);
-    if (!next) void context.setPairingDetails(null);
+  const m = res.minutely_15;
+  const minutely = m ? m.time.map((sec, i) => ({
+    timeMs: sec * 1e3,
+    precipitation: m.precipitation[i] ?? 0,
+    weatherCode: m.weather_code[i] ?? 0
+  })) : [];
+  return {
+    temperature: res.current.temperature_2m,
+    weatherCode: res.current.weather_code,
+    windSpeed: res.current.wind_speed_10m,
+    isDay: res.current.is_day === 1,
+    unitLabel: res.current_units.temperature_2m,
+    utcOffsetSeconds: res.utc_offset_seconds ?? 0,
+    daily,
+    minutely
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
-    "button",
-    {
-      type: "button",
-      className: "cast-pairing-icon",
-      onClick: toggleDetails,
-      disabled: !roomCode,
-      "aria-label": strings.title,
-      title: `${strings.title} \xB7 ${roomCode} \xB7 ${strings.devices}: ${receiver.peerCount}`,
-      children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) })
-    }
-  );
+}
+function weatherCacheKey(config) {
+  return `weather:${config.latitude},${config.longitude},${config.unit}`;
+}
+function nextPrecipEvent(data, nowMs) {
+  const THRESHOLD_MM = 0.1;
+  const upcoming = data.minutely.filter((s) => s.timeMs + 15 * 60 * 1e3 > nowMs);
+  if (upcoming.length === 0) return null;
+  const current = upcoming[0];
+  if (current && current.timeMs <= nowMs && current.precipitation >= THRESHOLD_MM) return null;
+  const event = upcoming.find((s) => s.timeMs > nowMs && s.precipitation >= THRESHOLD_MM);
+  if (!event) return null;
+  return {
+    minutesUntil: Math.max(0, Math.round((event.timeMs - nowMs) / 6e4)),
+    weatherCode: event.weatherCode
+  };
 }
 
-// src/plugins/cast-receiver/styles.ts
-var CAST_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; color: #fff; }
-  body, button { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .wg-plugin-root, .cast-root, .cast-pairing-root { width: 100%; height: 100%; }
-  .cast-root { position: relative; overflow: hidden; }
-  .cast-empty { background: transparent; pointer-events: none; }
-  .cast-active[data-overlay='cover'] { background: #000; }
-  .cast-active[data-overlay='dim'] { background: rgba(0,0,0,0.6); }
-  .cast-active[data-overlay='inline'] { background: transparent; }
-  .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
-  .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
-  .cast-pairing-icon { width: 100%; height: 100%; min-width: 32px; min-height: 32px; display: grid; place-items: center; padding: 7px; border: 0; border-radius: inherit; color: inherit; background: transparent; cursor: pointer; }
-  .cast-pairing-icon:disabled { opacity: .45; cursor: default; }
-  .cast-pairing-icon svg { width: min(100%, 28px); height: min(100%, 28px); fill: currentColor; }
+// weather/types.ts
+var WEATHER_DEFAULT_CONFIG = {
+  latitude: 59.91,
+  longitude: 10.75,
+  locationName: "Oslo",
+  unit: "celsius",
+  forecastDays: 4,
+  showNextEvent: true,
+  showTitle: true,
+  refreshIntervalMinutes: 15
+};
+function toForecastDays(raw) {
+  const n = typeof raw === "string" ? Number(raw) : raw;
+  if (typeof n !== "number" || Number.isNaN(n)) return WEATHER_DEFAULT_CONFIG.forecastDays;
+  return Math.max(1, Math.min(16, Math.round(n)));
+}
+function readWeatherConfig(raw) {
+  return {
+    latitude: typeof raw.latitude === "number" ? raw.latitude : WEATHER_DEFAULT_CONFIG.latitude,
+    longitude: typeof raw.longitude === "number" ? raw.longitude : WEATHER_DEFAULT_CONFIG.longitude,
+    locationName: typeof raw.locationName === "string" ? raw.locationName : WEATHER_DEFAULT_CONFIG.locationName,
+    unit: raw.unit === "fahrenheit" ? "fahrenheit" : "celsius",
+    forecastDays: toForecastDays(raw.forecastDays),
+    showNextEvent: typeof raw.showNextEvent === "boolean" ? raw.showNextEvent : WEATHER_DEFAULT_CONFIG.showNextEvent,
+    showTitle: typeof raw.showTitle === "boolean" ? raw.showTitle : WEATHER_DEFAULT_CONFIG.showTitle,
+    refreshIntervalMinutes: typeof raw.refreshIntervalMinutes === "number" && raw.refreshIntervalMinutes > 0 ? raw.refreshIntervalMinutes : typeof raw.refreshIntervalMinutes === "string" && Number(raw.refreshIntervalMinutes) > 0 ? Number(raw.refreshIntervalMinutes) : WEATHER_DEFAULT_CONFIG.refreshIntervalMinutes
+  };
+}
+
+// weather/locales/de.json
+var de_default = {
+  manifest: {
+    Weather: "Wetter",
+    "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage \xFCber Open-Meteo",
+    "Weather Now": "Aktuelles Wetter",
+    "Current conditions badge": "Aktuelle Wetterbedingungen",
+    "Weather Forecast": "Wettervorhersage",
+    "Multi-day forecast card": "Mehrt\xE4gige Wettervorhersage",
+    Location: "Standort",
+    Display: "Anzeige",
+    "Location name": "Ortsname",
+    Coordinates: "Koordinaten",
+    Latitude: "Breitengrad",
+    Longitude: "L\xE4ngengrad",
+    "Temperature unit": "Temperatureinheit",
+    "Refresh interval": "Aktualisierungsintervall",
+    "5 minutes": "5 Minuten",
+    "15 minutes": "15 Minuten",
+    "30 minutes": "30 Minuten",
+    "60 minutes": "60 Minuten",
+    "Show next precipitation": "N\xE4chsten Niederschlag anzeigen",
+    'A small note like "Rain in 25 min" from the 15-minute nowcast.': "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
+    "Show location name": "Ortsnamen anzeigen",
+    "Turn off to save space \u2014 the widget content already makes it obvious.": "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
+    "Forecast days": "Vorhersagetage",
+    "Number of days to show (1\u201316).": "Anzahl der anzuzeigenden Tage (1\u201316)."
+  },
+  runtime: {
+    "codes.0": "Klar",
+    "codes.1": "\xDCberwiegend klar",
+    "codes.2": "Teilweise bew\xF6lkt",
+    "codes.3": "Bedeckt",
+    "codes.45": "Nebel",
+    "codes.48": "Reifnebel",
+    "codes.51": "Leichter Nieselregen",
+    "codes.53": "Nieselregen",
+    "codes.55": "Starker Nieselregen",
+    "codes.61": "Leichter Regen",
+    "codes.63": "Regen",
+    "codes.65": "Starker Regen",
+    "codes.66": "Gefrierender Regen",
+    "codes.67": "Gefrierender Regen",
+    "codes.71": "Leichter Schneefall",
+    "codes.73": "Schnee",
+    "codes.75": "Starker Schneefall",
+    "codes.77": "Schneegriesel",
+    "codes.80": "Regenschauer",
+    "codes.81": "Regenschauer",
+    "codes.82": "Heftige Schauer",
+    "codes.85": "Schneeschauer",
+    "codes.86": "Schneeschauer",
+    "codes.95": "Gewitter",
+    "codes.96": "Gewitter",
+    "codes.99": "Gewitter",
+    inHours: "in {{count}} Std.",
+    inMinutes: "in {{count}} Min.",
+    loading: "Wetter wird geladen\u2026",
+    loadingForecast: "Vorhersage wird geladen\u2026",
+    nextPrecipitation: "N\xE4chster Niederschlag",
+    now: "jetzt",
+    today: "Heute"
+  }
+};
+
+// weather/translate.ts
+var translations = { de: de_default.runtime };
+function text(locale, key, params = {}, fallback = key) {
+  var _a;
+  const value = (_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key];
+  if (!value) return fallback;
+  return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
+}
+
+// weather/WeatherWidget.tsx
+var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+function formatLeadTime(locale, minutes) {
+  if (minutes < 1) return text(locale, "now");
+  if (minutes < 60) return text(locale, "inMinutes", { count: minutes });
+  const hours = Math.round(minutes / 60);
+  return text(locale, "inHours", { count: hours });
+}
+function WeatherWidget({ context }) {
+  const config = (0, import_react2.useMemo)(() => readWeatherConfig(context.config), [context.config]);
+  const { data, error, refetch } = useWidgetData(context, {
+    key: [weatherCacheKey(config)],
+    fetcher: async () => {
+      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
+      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
+      return mapOpenMeteo(res.data);
+    },
+    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
+    staleMessage: "Offline \u2014 showing last weather",
+    errorMessage: "Weather unavailable"
+  });
+  const containerRef = usePullToRefresh(refetch);
+  if (error && !data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
+  }
+  if (!data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loading") });
+  }
+  const current = describeWeather(data.weatherCode);
+  const nextEvent = config.showNextEvent ? nextPrecipEvent(data, Date.now()) : null;
+  const nextDescription = nextEvent ? describeWeather(nextEvent.weatherCode) : null;
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-current", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: current.icon, size: 64 }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-temp", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-value", children: [
+          Math.round(data.temperature),
+          data.unitLabel
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-desc", children: text(context.locale, `codes.${data.weatherCode}`, {}, current.label) }),
+        config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-loc", children: config.locationName })
+      ] })
+    ] }),
+    nextEvent && nextDescription && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-next", title: text(context.locale, "nextPrecipitation"), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: nextDescription.icon, size: 18 }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-next-text", children: [
+        text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label),
+        " ",
+        formatLeadTime(context.locale, nextEvent.minutesUntil)
+      ] })
+    ] })
+  ] });
+}
+
+// weather/ForecastWidget.tsx
+var import_react4 = __toESM(require_react(), 1);
+var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
+function ForecastWidget({ context }) {
+  const config = (0, import_react4.useMemo)(() => readWeatherConfig(context.config), [context.config]);
+  const { data, error, refetch } = useWidgetData(context, {
+    key: [weatherCacheKey(config)],
+    fetcher: async () => {
+      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
+      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
+      return mapOpenMeteo(res.data);
+    },
+    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
+    staleMessage: "Offline \u2014 showing last forecast",
+    errorMessage: "Forecast unavailable"
+  });
+  const containerRef = usePullToRefresh(refetch);
+  if (error && !data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
+  }
+  if (!data) {
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loadingForecast") });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
+    config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast-header", children: config.locationName }),
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast weather-forecast-full", children: data.daily.slice(0, config.forecastDays).map((day, i) => {
+      const d = describeWeather(day.weatherCode);
+      return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "weather-day", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "weather-dow", children: i === 0 ? text(context.locale, "today") : new Date(day.dateMs).toLocaleDateString(context.locale, { weekday: "short" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(WeatherIcon, { icon: d.icon, size: 32 }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "weather-range", children: [
+          Math.round(day.tempMax),
+          "\xB0 / ",
+          Math.round(day.tempMin),
+          "\xB0"
+        ] })
+      ] }, day.dateMs);
+    }) })
+  ] });
+}
+
+// weather/weather-styles.ts
+var WEATHER_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body { width: 100%; height: 100%; }
+  .wg-plugin-root { width: 100%; height: 100%; }
+  .weather-widget {
+    position: relative; width: 100%; height: 100%; padding: 3% 5%;
+    display: flex; flex-direction: column; justify-content: center;
+    color: #fff; overflow: hidden; container-type: size; box-sizing: border-box;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .weather-loading, .weather-error { display: grid; place-items: center; text-align: center; }
+  .weather-error { color: #ff8080; }
+  .weather-current { display: flex; align-items: center; justify-content: center; gap: min(10cqh,5cqw); height: 100%; }
+  .weather-current svg { width: min(90cqh,30cqw); height: min(90cqh,30cqw); flex-shrink: 0; }
+  .weather-temp { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .weather-value { font-size: min(52cqh,22cqw); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .weather-desc { font-size: min(20cqh,8cqw); color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-loc { font-size: min(17cqh,7cqw); color: rgba(255,255,255,0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-forecast { display: flex; justify-content: space-between; gap: 3%; margin-top: 8px; }
+  .weather-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6%; flex: 1; min-width: 0; }
+  .weather-day svg { width: min(34cqh,60%); height: min(34cqh,60%); }
+  .weather-dow { font-size: min(11cqh,4.5cqw); color: rgba(255,255,255,0.82); }
+  .weather-range { font-size: min(11cqh,4.5cqw); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .weather-forecast-header { font-size: min(12cqh,6cqw); color: rgba(255,255,255,0.82); margin-bottom: 2%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-forecast-full { margin-top: 0; flex: 1; align-items: stretch; }
+  .weather-next {
+    position: absolute; left: 5%; right: 5%; bottom: 4%;
+    display: flex; align-items: center; justify-content: center; gap: 0.4em;
+    color: rgba(255,255,255,0.9);
+  }
+  .weather-next svg { width: min(14cqh,7cqw); height: min(14cqh,7cqw); flex-shrink: 0; }
+  .weather-next-text { font-size: min(13cqh,5.5cqw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `;
 
-// src/plugins/cast-receiver/sandbox.ts
-injectStyle("cast-receiver-style", CAST_SANDBOX_CSS);
+// weather/sandbox.ts
+injectStyle("weather-style", WEATHER_SANDBOX_CSS);
 var sandbox_default = definePlugin({
   widgets: {
-    "cast-receiver.screen": defineReactWidget(CastWidget),
-    "cast-receiver.pairing": defineReactWidget(PairingWidget)
+    "weather.current": defineReactWidget(WeatherWidget),
+    "weather.forecast": defineReactWidget(ForecastWidget)
   }
 });
 export {

@@ -44,12 +44,14 @@ const settings: WidgetSettingField[] = [
     ],
   },
   { key: 'muted', label: 'Start muted', type: 'boolean', section: 'Presentation' },
+  { key: 'autoplay', label: 'Autoplay', type: 'boolean', help: 'Start queued and YouTube presentations automatically.', section: 'Presentation' },
+  { key: 'sasTimeoutSeconds', label: 'Security code timeout (seconds)', type: 'number', help: 'Hide the verification code after 10–300 seconds without trusting automatically.', section: 'Connection' },
 ];
 
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '4.4.7',
+  version: '4.5.1',
   description: 'Remote receiver for YouTube, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
@@ -82,7 +84,7 @@ export const castManifest: PluginManifest = {
       defaultW: 2,
       defaultH: 2,
       defaultZIndex: OVERLAY_Z,
-      defaultConfig: { relayUrl: '', senderUrl: '' },
+      defaultConfig: { relayUrl: '', senderUrl: '', sasTimeoutSeconds: CAST_DEFAULT_CONFIG.sasTimeoutSeconds },
       defaultAppearance: { background: 'glass', backgroundOpacity: 0.55 },
       nativeNetwork: [],
       webRtc: false,

@@ -15,6 +15,14 @@ describe('readCastConfig', () => {
     expect(readCastConfig({ sourceKind: 'spotify' }).sourceKind).toBe('idle');
     expect(readCastConfig({ sourceKind: 'youtube' }).sourceKind).toBe('youtube');
   });
+
+  it('bounds the SAS timeout and defaults to 60 seconds', () => {
+    expect(readCastConfig({}).sasTimeoutSeconds).toBe(60);
+    expect(readCastConfig({ sasTimeoutSeconds: 10 }).sasTimeoutSeconds).toBe(10);
+    expect(readCastConfig({ sasTimeoutSeconds: 300 }).sasTimeoutSeconds).toBe(300);
+    expect(readCastConfig({ sasTimeoutSeconds: 9 }).sasTimeoutSeconds).toBe(60);
+    expect(readCastConfig({ sasTimeoutSeconds: 301 }).sasTimeoutSeconds).toBe(60);
+  });
 });
 
 describe('youTubeVideoId', () => {
@@ -30,6 +38,19 @@ describe('youTubeVideoId', () => {
   it('returns null for junk', () => {
     expect(youTubeVideoId('')).toBeNull();
     expect(youTubeVideoId('not a video')).toBeNull();
+  });
+});
+
+describe('YouTube playlists', () => {
+  it('preserves validated list and index parameters in the embed URL', () => {
+    const target = resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc&index=12' });
+    expect(target).toMatchObject({ kind: 'youtube', videoId: 'dQw4w9WgXcQ', playlistId: 'PL1234567890abc', index: 12 });
+    if (target.kind === 'youtube') expect(target.embedUrl).toContain('list=PL1234567890abc&index=12');
+  });
+  it('drops malformed navigation and rejects lookalike hosts', () => {
+    expect(youTubeVideoId('https://youtube.example/watch?v=dQw4w9WgXcQ')).toBeNull();
+    const url = youTubeEmbedUrl('dQw4w9WgXcQ', false, false);
+    expect(url).toContain('autoplay=0');
   });
 });
 
