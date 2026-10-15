@@ -56,14 +56,15 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     state.queue = next;
     const current = next.items.find((item) => item.id === next.currentItemId);
     const sourceChanged = Boolean(current && (state.command?.sourceKind !== current.command.sourceKind || state.command.sourceUrl !== current.command.sourceUrl));
+    const command = current ? { ...current.command, outputMode: next.outputMode } : null;
     if (current && sourceChanged) {
       authoritativeEpoch += 1; entry.epochOffset = authoritativeEpoch - entry.state.presentationEpoch;
       if (livePresenter) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); livePresenter = undefined; }
-      publish({ queue: next, command: current.command, stream: null, presentationEpoch: authoritativeEpoch, status: 'casting' });
+      publish({ queue: next, command, stream: null, presentationEpoch: authoritativeEpoch, status: 'casting' });
     } else if (!current && next.currentItemId === null && state.command && next.items.length === 0) {
       authoritativeEpoch += 1; livePresenter = undefined;
       publish({ queue: next, command: null, stream: null, presentationEpoch: authoritativeEpoch, status: connected.size ? 'paired' : 'disconnected' });
-    } else publish({ queue: next, ...(current ? { command: current.command } : {}) });
+    } else publish({ queue: next, ...(command ? { command } : {}) });
     broadcastQueue();
   };
   const aggregate = (entry: ReceiverEntry): void => {

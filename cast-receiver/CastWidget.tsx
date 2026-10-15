@@ -22,8 +22,8 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.relayUrl, config.senderUrl]);
   const effectiveConfig = useMemo(() => receiver.command
-    ? { ...config, ...receiver.command }
-    : { ...config, sourceKind: 'idle' as const }, [config, receiver.command]);
+    ? { ...config, ...receiver.command, outputMode: receiver.queue.outputMode }
+    : { ...config, sourceKind: 'idle' as const, outputMode: receiver.queue.outputMode }, [config, receiver.command, receiver.queue.outputMode]);
   const target = useMemo(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   const paused = effectiveConfig.paused ?? false;
   const volume = effectiveConfig.volume ?? 1;

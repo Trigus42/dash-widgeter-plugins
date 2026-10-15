@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
 import { useCastPlayback } from './session-store';
 import { readCastConfig } from './resolve';
@@ -24,6 +24,7 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
   const url = useMemo(() => senderLink(senderUrl, relayUrl, roomCode),
     [relayUrl, roomCode, senderUrl]);
+  const observedReveal = useRef(receiver.pairingReveal);
   useEffect(() => {
     if (receiver.senderUrl || config.senderUrl) return;
     void context.castDefaultSenderUrl().then(setDefaultSenderUrl)
@@ -40,7 +41,9 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
       .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
   }, [context, receiver.sas, receiver.sasTrusted, roomCode, url]);
   useEffect(() => {
-    if (receiver.pairingReveal === 0 || receiver.sas || !roomCode || !url) return;
+    const prior = observedReveal.current;
+    observedReveal.current = receiver.pairingReveal;
+    if (receiver.pairingReveal <= prior || receiver.sas || !roomCode || !url) return;
     void context.setPairingDetails({ code: roomCode, url })
       .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
   }, [context, receiver.pairingReveal, receiver.sas, roomCode, url]);

@@ -24,9 +24,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../../node_modules/react/cjs/react.development.js
+// node_modules/react/cjs/react.development.js
 var require_react_development = __commonJS({
-  "../../node_modules/react/cjs/react.development.js"(exports, module) {
+  "node_modules/react/cjs/react.development.js"(exports, module) {
     "use strict";
     (function() {
       function defineDeprecationWarning(methodName, info) {
@@ -1021,9 +1021,9 @@ var require_react_development = __commonJS({
   }
 });
 
-// ../../node_modules/react/index.js
+// node_modules/react/index.js
 var require_react = __commonJS({
-  "../../node_modules/react/index.js"(exports, module) {
+  "node_modules/react/index.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -1033,9 +1033,9 @@ var require_react = __commonJS({
   }
 });
 
-// ../../node_modules/scheduler/cjs/scheduler.development.js
+// node_modules/scheduler/cjs/scheduler.development.js
 var require_scheduler_development = __commonJS({
-  "../../node_modules/scheduler/cjs/scheduler.development.js"(exports) {
+  "node_modules/scheduler/cjs/scheduler.development.js"(exports) {
     "use strict";
     (function() {
       function performWorkUntilDeadline() {
@@ -1292,9 +1292,9 @@ var require_scheduler_development = __commonJS({
   }
 });
 
-// ../../node_modules/scheduler/index.js
+// node_modules/scheduler/index.js
 var require_scheduler = __commonJS({
-  "../../node_modules/scheduler/index.js"(exports, module) {
+  "node_modules/scheduler/index.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -1304,9 +1304,9 @@ var require_scheduler = __commonJS({
   }
 });
 
-// ../../node_modules/react-dom/cjs/react-dom.development.js
+// node_modules/react-dom/cjs/react-dom.development.js
 var require_react_dom_development = __commonJS({
-  "../../node_modules/react-dom/cjs/react-dom.development.js"(exports) {
+  "node_modules/react-dom/cjs/react-dom.development.js"(exports) {
     "use strict";
     (function() {
       function noop() {
@@ -1559,9 +1559,9 @@ var require_react_dom_development = __commonJS({
   }
 });
 
-// ../../node_modules/react-dom/index.js
+// node_modules/react-dom/index.js
 var require_react_dom = __commonJS({
-  "../../node_modules/react-dom/index.js"(exports, module) {
+  "node_modules/react-dom/index.js"(exports, module) {
     "use strict";
     if (false) {
       checkDCE();
@@ -1572,9 +1572,9 @@ var require_react_dom = __commonJS({
   }
 });
 
-// ../../node_modules/react-dom/cjs/react-dom-client.development.js
+// node_modules/react-dom/cjs/react-dom-client.development.js
 var require_react_dom_client_development = __commonJS({
-  "../../node_modules/react-dom/cjs/react-dom-client.development.js"(exports) {
+  "node_modules/react-dom/cjs/react-dom-client.development.js"(exports) {
     "use strict";
     (function() {
       function findHook(fiber, id) {
@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text2) {
-        if (text2) {
+      function setTextContent(node, text) {
+        if (text) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text2;
+            firstChild.nodeValue = text;
             return;
           }
         }
-        node.textContent = text2;
+        node.textContent = text;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text2) {
-        textInstance.nodeValue = text2;
+      function unhideTextInstance(textInstance, text) {
+        textInstance.nodeValue = text;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
-        if ("" === text2) return null;
+      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
+        if ("" === text) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -23533,9 +23533,9 @@ var require_react_dom_client_development = __commonJS({
   }
 });
 
-// ../../node_modules/react-dom/client.js
+// node_modules/react-dom/client.js
 var require_client = __commonJS({
-  "../../node_modules/react-dom/client.js"(exports, module) {
+  "node_modules/react-dom/client.js"(exports, module) {
     "use strict";
     if (false) {
       checkDCE();
@@ -23546,9 +23546,9 @@ var require_client = __commonJS({
   }
 });
 
-// ../../node_modules/pulltorefreshjs/dist/index.umd.js
+// node_modules/pulltorefreshjs/dist/index.umd.js
 var require_index_umd = __commonJS({
-  "../../node_modules/pulltorefreshjs/dist/index.umd.js"(exports, module) {
+  "node_modules/pulltorefreshjs/dist/index.umd.js"(exports, module) {
     "use strict";
     (function(global, factory) {
       typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = global || self, global.PullToRefresh = factory());
@@ -23880,9 +23880,9 @@ var require_index_umd = __commonJS({
   }
 });
 
-// ../../node_modules/react/cjs/react-jsx-runtime.development.js
+// node_modules/react/cjs/react-jsx-runtime.development.js
 var require_react_jsx_runtime_development = __commonJS({
-  "../../node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
+  "node_modules/react/cjs/react-jsx-runtime.development.js"(exports) {
     "use strict";
     (function() {
       function getComponentNameFromType(type) {
@@ -24151,9 +24151,9 @@ var require_react_jsx_runtime_development = __commonJS({
   }
 });
 
-// ../../node_modules/react/jsx-runtime.js
+// node_modules/react/jsx-runtime.js
 var require_jsx_runtime = __commonJS({
-  "../../node_modules/react/jsx-runtime.js"(exports, module) {
+  "node_modules/react/jsx-runtime.js"(exports, module) {
     "use strict";
     if (false) {
       module.exports = null;
@@ -24163,7 +24163,7 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// ../sandbox/sdk.ts
+// src/sandbox/sdk.ts
 function definePlugin(module) {
   return module;
 }
@@ -24175,7 +24175,7 @@ function injectStyle(id, css) {
   document.head.appendChild(style);
 }
 
-// ../sandbox/react.tsx
+// src/sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var import_pulltorefreshjs = __toESM(require_index_umd(), 1);
@@ -24207,465 +24207,142 @@ function defineReactWidget(Component) {
     }
   };
 }
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
-}
-function usePullToRefresh(onRefresh) {
-  const containerRef = (0, import_react.useRef)(null);
-  (0, import_react.useEffect)(() => {
-    const el = containerRef.current;
-    if (!el || typeof window === "undefined") return;
-    let style = document.getElementById("wg-pull-to-refresh-style");
-    if (!style) {
-      style = document.createElement("style");
-      style.id = "wg-pull-to-refresh-style";
-      style.textContent = ".ptr--text,.ptr--icon{color:rgba(255,255,255,.72)!important}";
-      document.head.appendChild(style);
-    }
-    const ptr = import_pulltorefreshjs.default.init({
-      mainElement: el,
-      triggerElement: el,
-      shouldPullToRefresh: () => el.scrollTop <= 0,
-      onRefresh() {
-        return Promise.resolve(onRefresh());
-      },
-      distThreshold: 45,
-      distMax: 65,
-      distReload: 35
-    });
-    return () => {
-      ptr.destroy();
-    };
-  }, [onRefresh]);
-  return containerRef;
-}
 
-// weather/WeatherWidget.tsx
+// src/plugins/clock/ClockWidget.tsx
 var import_react2 = __toESM(require_react(), 1);
 
-// weather/wmo.ts
-var WMO = {
-  0: { label: "Clear sky", icon: "clear" },
-  1: { label: "Mainly clear", icon: "partly" },
-  2: { label: "Partly cloudy", icon: "partly" },
-  3: { label: "Overcast", icon: "cloudy" },
-  45: { label: "Fog", icon: "fog" },
-  48: { label: "Rime fog", icon: "fog" },
-  51: { label: "Light drizzle", icon: "drizzle" },
-  53: { label: "Drizzle", icon: "drizzle" },
-  55: { label: "Dense drizzle", icon: "drizzle" },
-  61: { label: "Slight rain", icon: "rain" },
-  63: { label: "Rain", icon: "rain" },
-  65: { label: "Heavy rain", icon: "rain" },
-  66: { label: "Freezing rain", icon: "rain" },
-  67: { label: "Freezing rain", icon: "rain" },
-  71: { label: "Slight snow", icon: "snow" },
-  73: { label: "Snow", icon: "snow" },
-  75: { label: "Heavy snow", icon: "snow" },
-  77: { label: "Snow grains", icon: "snow" },
-  80: { label: "Rain showers", icon: "rain" },
-  81: { label: "Rain showers", icon: "rain" },
-  82: { label: "Violent showers", icon: "rain" },
-  85: { label: "Snow showers", icon: "snow" },
-  86: { label: "Snow showers", icon: "snow" },
-  95: { label: "Thunderstorm", icon: "thunder" },
-  96: { label: "Thunderstorm", icon: "thunder" },
-  99: { label: "Thunderstorm", icon: "thunder" }
+// src/plugins/clock/types.ts
+var CLOCK_DEFAULT_CONFIG = {
+  use24Hour: true,
+  showSeconds: false,
+  showDate: true,
+  dateStyle: "full",
+  fontWeight: 700
 };
-var FALLBACK = { label: "Unknown", icon: "cloudy" };
-function describeWeather(code) {
-  return WMO[code] ?? FALLBACK;
-}
-
-// weather/WeatherIcon.tsx
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-var SUN = "#ffd166";
-var CLOUD = "#c7d0da";
-var RAIN = "#6ba7e8";
-var SNOW = "#e8f0fa";
-var BOLT = "#ffd166";
-function WeatherIcon({ icon, size = 48 }) {
-  const common = { width: size, height: size, viewBox: "0 0 64 64" };
-  switch (icon) {
-    case "clear":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "32", cy: "32", r: "14", fill: SUN }),
-        Array.from({ length: 8 }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-          "rect",
-          {
-            x: "31",
-            y: "2",
-            width: "2",
-            height: "9",
-            rx: "1",
-            fill: SUN,
-            transform: `rotate(${i * 45} 32 32)`
-          },
-          i
-        ))
-      ] });
-    case "partly":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "24", cy: "24", r: "11", fill: SUN }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "38", cy: "40", rx: "18", ry: "12", fill: CLOUD })
-      ] });
-    case "cloudy":
-    case "fog":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "34", rx: "20", ry: "13", fill: CLOUD }),
-        icon === "fog" && [46, 52].map((y) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("rect", { x: "14", y, width: "36", height: "3", rx: "1.5", fill: CLOUD }, y))
-      ] });
-    case "drizzle":
-    case "rain":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
-        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-          "line",
-          {
-            x1: x,
-            y1: "44",
-            x2: x - 4,
-            y2: icon === "rain" ? 56 : 51,
-            stroke: RAIN,
-            strokeWidth: "3",
-            strokeLinecap: "round"
-          },
-          x
-        ))
-      ] });
-    case "snow":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
-        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: x, cy: "50", r: "2.5", fill: SNOW }, x))
-      ] });
-    case "thunder":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "26", rx: "19", ry: "12", fill: CLOUD }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("polygon", { points: "30,40 40,40 32,50 38,50 26,62 30,50 24,50", fill: BOLT })
-      ] });
-    default:
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("svg", { ...common, "aria-hidden": true });
-  }
-}
-
-// weather/service.ts
-var MAX_FORECAST_DAYS = 16;
-function buildWeatherUrl(config) {
-  const params = new URLSearchParams({
-    latitude: String(config.latitude),
-    longitude: String(config.longitude),
-    current: "temperature_2m,weather_code,wind_speed_10m,is_day",
-    daily: "weather_code,temperature_2m_max,temperature_2m_min",
-    minutely_15: "precipitation,weather_code",
-    forecast_minutely_15: "48",
-    timezone: "auto",
-    timeformat: "unixtime",
-    forecast_days: String(MAX_FORECAST_DAYS),
-    temperature_unit: config.unit
-  });
-  return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
-}
-function mapOpenMeteo(raw) {
-  const res = raw;
-  return mapResponse(res);
-}
-function mapResponse(res) {
-  const daily = res.daily.time.map((sec, i) => ({
-    dateMs: sec * 1e3,
-    weatherCode: res.daily.weather_code[i] ?? 0,
-    tempMax: res.daily.temperature_2m_max[i] ?? 0,
-    tempMin: res.daily.temperature_2m_min[i] ?? 0
-  }));
-  const m = res.minutely_15;
-  const minutely = m ? m.time.map((sec, i) => ({
-    timeMs: sec * 1e3,
-    precipitation: m.precipitation[i] ?? 0,
-    weatherCode: m.weather_code[i] ?? 0
-  })) : [];
-  return {
-    temperature: res.current.temperature_2m,
-    weatherCode: res.current.weather_code,
-    windSpeed: res.current.wind_speed_10m,
-    isDay: res.current.is_day === 1,
-    unitLabel: res.current_units.temperature_2m,
-    utcOffsetSeconds: res.utc_offset_seconds ?? 0,
-    daily,
-    minutely
-  };
-}
-function weatherCacheKey(config) {
-  return `weather:${config.latitude},${config.longitude},${config.unit}`;
-}
-function nextPrecipEvent(data, nowMs) {
-  const THRESHOLD_MM = 0.1;
-  const upcoming = data.minutely.filter((s) => s.timeMs + 15 * 60 * 1e3 > nowMs);
-  if (upcoming.length === 0) return null;
-  const current = upcoming[0];
-  if (current && current.timeMs <= nowMs && current.precipitation >= THRESHOLD_MM) return null;
-  const event = upcoming.find((s) => s.timeMs > nowMs && s.precipitation >= THRESHOLD_MM);
-  if (!event) return null;
-  return {
-    minutesUntil: Math.max(0, Math.round((event.timeMs - nowMs) / 6e4)),
-    weatherCode: event.weatherCode
-  };
-}
-
-// weather/types.ts
-var WEATHER_DEFAULT_CONFIG = {
-  latitude: 59.91,
-  longitude: 10.75,
-  locationName: "Oslo",
-  unit: "celsius",
-  forecastDays: 4,
-  showNextEvent: true,
-  showTitle: true,
-  refreshIntervalMinutes: 15
-};
-function toForecastDays(raw) {
+function clampNumber(raw, fallback, min, max) {
   const n = typeof raw === "string" ? Number(raw) : raw;
-  if (typeof n !== "number" || Number.isNaN(n)) return WEATHER_DEFAULT_CONFIG.forecastDays;
-  return Math.max(1, Math.min(16, Math.round(n)));
+  return typeof n === "number" && !Number.isNaN(n) ? Math.max(min, Math.min(max, n)) : fallback;
 }
-function readWeatherConfig(raw) {
+function readClockConfig(raw) {
   return {
-    latitude: typeof raw.latitude === "number" ? raw.latitude : WEATHER_DEFAULT_CONFIG.latitude,
-    longitude: typeof raw.longitude === "number" ? raw.longitude : WEATHER_DEFAULT_CONFIG.longitude,
-    locationName: typeof raw.locationName === "string" ? raw.locationName : WEATHER_DEFAULT_CONFIG.locationName,
-    unit: raw.unit === "fahrenheit" ? "fahrenheit" : "celsius",
-    forecastDays: toForecastDays(raw.forecastDays),
-    showNextEvent: typeof raw.showNextEvent === "boolean" ? raw.showNextEvent : WEATHER_DEFAULT_CONFIG.showNextEvent,
-    showTitle: typeof raw.showTitle === "boolean" ? raw.showTitle : WEATHER_DEFAULT_CONFIG.showTitle,
-    refreshIntervalMinutes: typeof raw.refreshIntervalMinutes === "number" && raw.refreshIntervalMinutes > 0 ? raw.refreshIntervalMinutes : typeof raw.refreshIntervalMinutes === "string" && Number(raw.refreshIntervalMinutes) > 0 ? Number(raw.refreshIntervalMinutes) : WEATHER_DEFAULT_CONFIG.refreshIntervalMinutes
+    use24Hour: typeof raw.use24Hour === "boolean" ? raw.use24Hour : CLOCK_DEFAULT_CONFIG.use24Hour,
+    showSeconds: typeof raw.showSeconds === "boolean" ? raw.showSeconds : CLOCK_DEFAULT_CONFIG.showSeconds,
+    showDate: typeof raw.showDate === "boolean" ? raw.showDate : CLOCK_DEFAULT_CONFIG.showDate,
+    dateStyle: raw.dateStyle === "weekday" ? "weekday" : "full",
+    fontWeight: clampNumber(raw.fontWeight, CLOCK_DEFAULT_CONFIG.fontWeight, 100, 900)
   };
 }
 
-// weather/locales/de.json
-var de_default = {
-  manifest: {
-    Weather: "Wetter",
-    "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage \xFCber Open-Meteo",
-    "Weather Now": "Aktuelles Wetter",
-    "Current conditions badge": "Aktuelle Wetterbedingungen",
-    "Weather Forecast": "Wettervorhersage",
-    "Multi-day forecast card": "Mehrt\xE4gige Wettervorhersage",
-    Location: "Standort",
-    Display: "Anzeige",
-    "Location name": "Ortsname",
-    Coordinates: "Koordinaten",
-    Latitude: "Breitengrad",
-    Longitude: "L\xE4ngengrad",
-    "Temperature unit": "Temperatureinheit",
-    "Refresh interval": "Aktualisierungsintervall",
-    "5 minutes": "5 Minuten",
-    "15 minutes": "15 Minuten",
-    "30 minutes": "30 Minuten",
-    "60 minutes": "60 Minuten",
-    "Show next precipitation": "N\xE4chsten Niederschlag anzeigen",
-    'A small note like "Rain in 25 min" from the 15-minute nowcast.': "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
-    "Show location name": "Ortsnamen anzeigen",
-    "Turn off to save space \u2014 the widget content already makes it obvious.": "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
-    "Forecast days": "Vorhersagetage",
-    "Number of days to show (1\u201316).": "Anzahl der anzuzeigenden Tage (1\u201316)."
-  },
-  runtime: {
-    "codes.0": "Klar",
-    "codes.1": "\xDCberwiegend klar",
-    "codes.2": "Teilweise bew\xF6lkt",
-    "codes.3": "Bedeckt",
-    "codes.45": "Nebel",
-    "codes.48": "Reifnebel",
-    "codes.51": "Leichter Nieselregen",
-    "codes.53": "Nieselregen",
-    "codes.55": "Starker Nieselregen",
-    "codes.61": "Leichter Regen",
-    "codes.63": "Regen",
-    "codes.65": "Starker Regen",
-    "codes.66": "Gefrierender Regen",
-    "codes.67": "Gefrierender Regen",
-    "codes.71": "Leichter Schneefall",
-    "codes.73": "Schnee",
-    "codes.75": "Starker Schneefall",
-    "codes.77": "Schneegriesel",
-    "codes.80": "Regenschauer",
-    "codes.81": "Regenschauer",
-    "codes.82": "Heftige Schauer",
-    "codes.85": "Schneeschauer",
-    "codes.86": "Schneeschauer",
-    "codes.95": "Gewitter",
-    "codes.96": "Gewitter",
-    "codes.99": "Gewitter",
-    inHours: "in {{count}} Std.",
-    inMinutes: "in {{count}} Min.",
-    loading: "Wetter wird geladen\u2026",
-    loadingForecast: "Vorhersage wird geladen\u2026",
-    nextPrecipitation: "N\xE4chster Niederschlag",
-    now: "jetzt",
-    today: "Heute"
-  }
-};
-
-// weather/translate.ts
-var translations = { de: de_default.runtime };
-function text(locale, key, params = {}, fallback = key) {
-  var _a;
-  const value = (_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key];
-  if (!value) return fallback;
-  return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
+// src/plugins/clock/format.ts
+function formatClock(now, config, locale) {
+  const timeOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: !config.use24Hour
+  };
+  if (config.showSeconds) timeOptions.second = "2-digit";
+  const time = new Intl.DateTimeFormat(locale, timeOptions).format(now);
+  const dateOptions = config.dateStyle === "weekday" ? { weekday: "long" } : { weekday: "long", month: "short", day: "numeric" };
+  const date = config.showDate ? new Intl.DateTimeFormat(locale, dateOptions).format(now) : "";
+  return { time, date };
 }
 
-// weather/WeatherWidget.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-function formatLeadTime(locale, minutes) {
-  if (minutes < 1) return text(locale, "now");
-  if (minutes < 60) return text(locale, "inMinutes", { count: minutes });
-  const hours = Math.round(minutes / 60);
-  return text(locale, "inHours", { count: hours });
+// src/plugins/clock/fit.ts
+var MIN_FONT_PX = 12;
+var TIME_HEIGHT_SHARE = 0.7;
+var DATE_HEIGHT_SHARE = 0.22;
+function fittedFontSize(heightBudgetPx, measuredWidthPx, availWidthPx) {
+  const scaled = measuredWidthPx > availWidthPx ? heightBudgetPx * (availWidthPx / measuredWidthPx) : heightBudgetPx;
+  return Math.max(MIN_FONT_PX, Math.floor(scaled));
 }
-function WeatherWidget({ context }) {
-  const config = (0, import_react2.useMemo)(() => readWeatherConfig(context.config), [context.config]);
-  const { data, error, refetch } = useWidgetData(context, {
-    key: [weatherCacheKey(config)],
-    fetcher: async () => {
-      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
-      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
-      return mapOpenMeteo(res.data);
-    },
-    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
-    staleMessage: "Offline \u2014 showing last weather",
-    errorMessage: "Weather unavailable"
-  });
-  const containerRef = usePullToRefresh(refetch);
-  if (error && !data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
-  }
-  if (!data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loading") });
-  }
-  const current = describeWeather(data.weatherCode);
-  const nextEvent = config.showNextEvent ? nextPrecipEvent(data, Date.now()) : null;
-  const nextDescription = nextEvent ? describeWeather(nextEvent.weatherCode) : null;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-current", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: current.icon, size: 64 }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-temp", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-value", children: [
-          Math.round(data.temperature),
-          data.unitLabel
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-desc", children: text(context.locale, `codes.${data.weatherCode}`, {}, current.label) }),
-        config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-loc", children: config.locationName })
-      ] })
-    ] }),
-    nextEvent && nextDescription && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-next", title: text(context.locale, "nextPrecipitation"), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: nextDescription.icon, size: 18 }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-next-text", children: [
-        text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label),
-        " ",
-        formatLeadTime(context.locale, nextEvent.minutesUntil)
-      ] })
-    ] })
+function fitLine(el, heightBudgetPx, availWidthPx) {
+  el.style.fontSize = `${heightBudgetPx}px`;
+  el.style.fontSize = `${fittedFontSize(heightBudgetPx, el.scrollWidth, availWidthPx)}px`;
+}
+function fitClock(widget, timeEl, dateEl) {
+  const style = getComputedStyle(widget);
+  const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+  const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+  const availW = widget.clientWidth - padX;
+  const availH = widget.clientHeight - padY;
+  if (availW <= 0 || availH <= 0) return;
+  const hasDate = Boolean(dateEl);
+  fitLine(timeEl, availH * (hasDate ? TIME_HEIGHT_SHARE : 0.92), availW);
+  if (dateEl) fitLine(dateEl, availH * DATE_HEIGHT_SHARE, availW);
+}
+
+// src/plugins/clock/ClockWidget.tsx
+var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+function ClockWidget({ context }) {
+  const config = (0, import_react2.useMemo)(() => readClockConfig(context.config), [context.config]);
+  const [now, setNow] = (0, import_react2.useState)(() => /* @__PURE__ */ new Date());
+  (0, import_react2.useEffect)(() => {
+    let timer;
+    const schedule = () => {
+      clearTimeout(timer);
+      if (document.hidden) return;
+      const period = config.showSeconds ? 1e3 : 6e4;
+      timer = setTimeout(() => {
+        setNow(/* @__PURE__ */ new Date());
+        schedule();
+      }, period - Date.now() % period);
+    };
+    schedule();
+    document.addEventListener("visibilitychange", schedule);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", schedule);
+    };
+  }, [config.showSeconds]);
+  const { time, date } = formatClock(now, config, context.locale);
+  const showDate = config.showDate && Boolean(date);
+  const widgetRef = (0, import_react2.useRef)(null);
+  const timeRef = (0, import_react2.useRef)(null);
+  const dateRef = (0, import_react2.useRef)(null);
+  (0, import_react2.useLayoutEffect)(() => {
+    const widget = widgetRef.current;
+    const timeEl = timeRef.current;
+    if (!widget || !timeEl) return;
+    const fit = () => fitClock(widget, timeEl, showDate ? dateRef.current : null);
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(widget);
+    return () => observer.disconnect();
+  }, [time, date, showDate]);
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "clock-widget", ref: widgetRef, style: { fontWeight: config.fontWeight }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "clock-time", ref: timeRef, style: { fontWeight: config.fontWeight }, children: time }),
+    showDate && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "clock-date", ref: dateRef, children: date })
   ] });
 }
 
-// weather/ForecastWidget.tsx
-var import_react4 = __toESM(require_react(), 1);
-var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ForecastWidget({ context }) {
-  const config = (0, import_react4.useMemo)(() => readWeatherConfig(context.config), [context.config]);
-  const { data, error, refetch } = useWidgetData(context, {
-    key: [weatherCacheKey(config)],
-    fetcher: async () => {
-      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
-      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
-      return mapOpenMeteo(res.data);
-    },
-    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
-    staleMessage: "Offline \u2014 showing last forecast",
-    errorMessage: "Forecast unavailable"
-  });
-  const containerRef = usePullToRefresh(refetch);
-  if (error && !data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
-  }
-  if (!data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loadingForecast") });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
-    config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast-header", children: config.locationName }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast weather-forecast-full", children: data.daily.slice(0, config.forecastDays).map((day, i) => {
-      const d = describeWeather(day.weatherCode);
-      return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "weather-day", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "weather-dow", children: i === 0 ? text(context.locale, "today") : new Date(day.dateMs).toLocaleDateString(context.locale, { weekday: "short" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(WeatherIcon, { icon: d.icon, size: 32 }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "weather-range", children: [
-          Math.round(day.tempMax),
-          "\xB0 / ",
-          Math.round(day.tempMin),
-          "\xB0"
-        ] })
-      ] }, day.dateMs);
-    }) })
-  ] });
-}
-
-// weather/weather-styles.ts
-var WEATHER_SANDBOX_CSS = `
+// src/plugins/clock/clock-styles.ts
+var CLOCK_SANDBOX_CSS = `
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
   body { width: 100%; height: 100%; }
   .wg-plugin-root { width: 100%; height: 100%; }
-  .weather-widget {
-    position: relative; width: 100%; height: 100%; padding: 3% 5%;
-    display: flex; flex-direction: column; justify-content: center;
-    color: #fff; overflow: hidden; container-type: size; box-sizing: border-box;
+  .clock-widget {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.04em; padding: 2% 4%;
+    box-sizing: border-box; overflow: hidden; text-align: center; color: #fff;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   }
-  .weather-loading, .weather-error { display: grid; place-items: center; text-align: center; }
-  .weather-error { color: #ff8080; }
-  .weather-current { display: flex; align-items: center; justify-content: center; gap: min(10cqh,5cqw); height: 100%; }
-  .weather-current svg { width: min(90cqh,30cqw); height: min(90cqh,30cqw); flex-shrink: 0; }
-  .weather-temp { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-  .weather-value { font-size: min(52cqh,22cqw); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-  .weather-desc { font-size: min(20cqh,8cqw); color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .weather-loc { font-size: min(17cqh,7cqw); color: rgba(255,255,255,0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .weather-forecast { display: flex; justify-content: space-between; gap: 3%; margin-top: 8px; }
-  .weather-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6%; flex: 1; min-width: 0; }
-  .weather-day svg { width: min(34cqh,60%); height: min(34cqh,60%); }
-  .weather-dow { font-size: min(11cqh,4.5cqw); color: rgba(255,255,255,0.82); }
-  .weather-range { font-size: min(11cqh,4.5cqw); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .weather-forecast-header { font-size: min(12cqh,6cqw); color: rgba(255,255,255,0.82); margin-bottom: 2%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .weather-forecast-full { margin-top: 0; flex: 1; align-items: stretch; }
-  .weather-next {
-    position: absolute; left: 5%; right: 5%; bottom: 4%;
-    display: flex; align-items: center; justify-content: center; gap: 0.4em;
-    color: rgba(255,255,255,0.9);
+  .clock-time {
+    font-weight: 700; line-height: 0.92; letter-spacing: 0.01em;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.45);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .weather-next svg { width: min(14cqh,7cqw); height: min(14cqh,7cqw); flex-shrink: 0; }
-  .weather-next-text { font-size: min(13cqh,5.5cqw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .clock-date {
+    font-weight: 300; line-height: 1;
+    color: rgba(255,255,255,0.82); text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    white-space: nowrap;
+  }
 `;
 
-// weather/sandbox.ts
-injectStyle("weather-style", WEATHER_SANDBOX_CSS);
+// src/plugins/clock/sandbox.ts
+injectStyle("clock-style", CLOCK_SANDBOX_CSS);
 var sandbox_default = definePlugin({
   widgets: {
-    "weather.current": defineReactWidget(WeatherWidget),
-    "weather.forecast": defineReactWidget(ForecastWidget)
+    "clock.time": defineReactWidget(ClockWidget)
   }
 });
 export {

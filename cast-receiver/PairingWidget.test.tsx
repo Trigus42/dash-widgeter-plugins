@@ -41,4 +41,13 @@ describe('PairingWidget', () => {
     await waitFor(() => expect(setPairingDetails).toHaveBeenCalledTimes(1));
     expect(setPairingDetails).toHaveBeenLastCalledWith(expect.objectContaining({ code: '1234567890' }));
   });
+
+  it('does not reopen a persisted reveal when the widget remounts', async () => {
+    mocks.useCastPlayback.mockReturnValue({ ...baseState, sasTrusted: true, pairingReveal: 4 });
+    const ctx = context(); const setPairingDetails = vi.fn(() => Promise.resolve());
+    ctx.setPairingDetails = setPairingDetails;
+    render(<PairingWidget context={ctx} />);
+    await Promise.resolve();
+    expect(setPairingDetails).not.toHaveBeenCalled();
+  });
 });
