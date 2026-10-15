@@ -74,6 +74,26 @@ describe('screen session room lifecycle', () => {
     expect(session.state.sasTrusted).toBe(true); session.close();
   });
 
+  it('ignores a dismissal token left by a previous SAS dialog', async () => {
+    vi.useFakeTimers();
+    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValueOnce(pairing);
+    let callback: ((state: Record<string, unknown>) => void) | undefined;
+    const receiver = { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
+      callback = onState; return receiver;
+    });
+    const getCastState = vi.fn(() => Promise.resolve({ dismissSas: 123 }));
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), getCastState,
+      reportStatus: vi.fn() } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(callback).toBeTypeOf('function'));
+    callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
+    await vi.advanceTimersByTimeAsync(201);
+    expect(receiver.confirmSas).not.toHaveBeenCalled();
+    expect(session.state.sas).toBe('654321');
+    session.close();
+  });
   it('keeps another connected room alive when one receiver disconnects', async () => {
     const rooms = ['1111111111', '2222222222', '3333333333'].map((roomCode) => ({
       roomCode, expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()),

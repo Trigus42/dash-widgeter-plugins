@@ -29,6 +29,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   let authoritativeEpoch = 0;
   let lifecycle: Promise<void> = Promise.resolve();
   let observedDismissSas: unknown;
+  let dismissalInitialized = false;
   const publish = (patch: Partial<ScreenSession['state']>): void => {
     if ('sas' in patch && patch.sas === undefined) delete state.sas;
     if ('sasTrusted' in patch && patch.sasTrusted === undefined) delete state.sasTrusted;
@@ -44,6 +45,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
     void context.getCastState().then((hostState) => {
       const dismissed = hostState?.dismissSas;
+      if (!dismissalInitialized) { dismissalInitialized = true; observedDismissSas = dismissed; return; }
       if (dismissed === undefined || dismissed === observedDismissSas) return;
       observedDismissSas = dismissed;
       if (!sasOwner) return;
