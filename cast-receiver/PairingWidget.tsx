@@ -25,11 +25,17 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const url = useMemo(() => senderLink(senderUrl, relayUrl, roomCode),
     [relayUrl, roomCode, senderUrl]);
   const observedReveal = useRef(receiver.pairingReveal);
+  const observedDismissal = useRef(receiver.dismissSas);
   useEffect(() => {
     if (receiver.senderUrl || config.senderUrl) return;
     void context.castDefaultSenderUrl().then(setDefaultSenderUrl)
       .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
   }, [config.senderUrl, context, receiver.senderUrl]);
+  useEffect(() => {
+    if (!receiver.dismissSas || receiver.dismissSas === observedDismissal.current || !receiver.sas) return;
+    observedDismissal.current = receiver.dismissSas;
+    void context.dismissCastSas();
+  }, [context, receiver]);
   useEffect(() => {
     if (receiver.sasTrusted !== true || receiver.pairingReveal !== 0) return;
     void context.setPairingDetails(null)
@@ -40,6 +46,11 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
     void context.setPairingDetails({ code: roomCode, url, sas: receiver.sas })
       .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
   }, [context, receiver.sas, receiver.sasTrusted, roomCode, url]);
+  useEffect(() => {
+    if (receiver.pairingVisible !== false || receiver.sas) return;
+    void context.setPairingDetails(null)
+      .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
+  }, [context, receiver.pairingVisible, receiver.sas]);
   useEffect(() => {
     const prior = observedReveal.current;
     observedReveal.current = receiver.pairingReveal;

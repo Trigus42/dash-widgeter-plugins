@@ -38,7 +38,7 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
   };
 }
 
-export interface YouTubeTarget { videoId: string; playlistId?: string; index?: number }
+export interface YouTubeTarget { videoId?: string; playlistId?: string; index?: number }
 
 /** Parse a YouTube id/URL while preserving only validated playlist navigation. */
 export function parseYouTubeTarget(input: string): YouTubeTarget | null {
@@ -46,16 +46,18 @@ export function parseYouTubeTarget(input: string): YouTubeTarget | null {
   if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return { videoId: trimmed };
   let url: URL;
   try { url = new URL(trimmed); } catch { return null; }
-  if (!['www.youtube.com', 'youtube.com', 'm.youtube.com', 'youtu.be', 'www.youtube-nocookie.com'].includes(url.hostname)) return null;
+  if (!['www.youtube.com', 'youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtube-nocookie.com'].includes(url.hostname)) return null;
+  if (url.protocol !== 'https:') return null;
   const path = url.pathname.split('/').filter(Boolean);
   const candidate = url.hostname === 'youtu.be' ? path[0]
     : path[0] === 'embed' || path[0] === 'shorts' ? path[1] : url.searchParams.get('v');
-  if (!candidate || !/^[A-Za-z0-9_-]{11}$/.test(candidate)) return null;
+  const videoId = candidate && /^[A-Za-z0-9_-]{11}$/.test(candidate) ? candidate : undefined;
   const playlist = url.searchParams.get('list');
   const playlistId = playlist && /^[A-Za-z0-9_-]{10,80}$/.test(playlist) ? playlist : undefined;
+  if (!videoId && !playlistId) return null;
   const rawIndex = url.searchParams.get('index'); const parsedIndex = rawIndex ? Number(rawIndex) : undefined;
   const index = playlistId && Number.isSafeInteger(parsedIndex) && parsedIndex! >= 1 && parsedIndex! <= 10_000 ? parsedIndex : undefined;
-  return { videoId: candidate, ...(playlistId ? { playlistId } : {}), ...(index ? { index } : {}) };
+  return { ...(videoId ? { videoId } : {}), ...(playlistId ? { playlistId } : {}), ...(index ? { index } : {}) };
 }
 
 export function youTubeVideoId(input: string): string | null { return parseYouTubeTarget(input)?.videoId ?? null; }
@@ -79,14 +81,15 @@ export type CastTarget =
   | { kind: 'idle' }
   | { kind: 'website'; url: string }
   | { kind: 'media'; url: string }
-  | { kind: 'youtube'; videoId: string; embedUrl: string; playlistId?: string; index?: number };
+  | { kind: 'youtube'; videoId?: string; embedUrl: string; playlistId?: string; index?: number };
 
 /** Privacy-friendly YouTube embed with bounded playlist navigation. */
 export function youTubeEmbedUrl(target: string | YouTubeTarget, muted: boolean, autoplay = true): string {
   const parsed = typeof target === 'string' ? { videoId: target } : target;
   const params = new URLSearchParams({ autoplay: autoplay ? '1' : '0', mute: muted ? '1' : '0', rel: '0', modestbranding: '1', playsinline: '1' });
-  if (parsed.playlistId) { params.set('list', parsed.playlistId); if (parsed.index) params.set('index', String(parsed.index)); }
-  return `https://www.youtube-nocookie.com/embed/${parsed.videoId}?${params.toString()}`;
+  if (parsed.playlistId) { params.set('listType', 'playlist'); params.set('list', parsed.playlistId); if (parsed.index) params.set('index', String(parsed.index - 1)); }
+  const resource = parsed.videoId ?? 'videoseries';
+  return `https://www.youtube-nocookie.com/embed/${resource}?${params.toString()}`;
 }
 
 export function resolveCastTarget(config: CastConfig): CastTarget {

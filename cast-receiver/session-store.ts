@@ -7,6 +7,8 @@ export interface CastSessionState extends ReceiverState {
   relayUrl: string;
   senderUrl: string;
   pairingReveal: number;
+  pairingVisible?: boolean;
+  dismissSas?: number;
 }
 
 const INITIAL: CastSessionState = {

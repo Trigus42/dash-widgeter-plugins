@@ -51,7 +51,7 @@ const settings: WidgetSettingField[] = [
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '4.5.2',
+  version: '4.6.0',
   description: 'Remote receiver for YouTube, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',

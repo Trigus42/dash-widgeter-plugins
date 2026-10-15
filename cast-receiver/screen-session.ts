@@ -7,7 +7,7 @@ import { createPluginReceiver, type PluginReceiver, type ReceiverState } from '.
 import { readCastConfig } from './resolve';
 
 export interface ScreenSession {
-  state: ReceiverState & { roomCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number };
+  state: ReceiverState & { roomCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number; pairingVisible: boolean };
   subscribe(listener: (state: ScreenSession['state']) => void): () => void;
   confirmSas(accepted: boolean): void;
   close(): void;
@@ -19,7 +19,7 @@ type TimerHandle = number | NodeJS.Timeout;
 export function createScreenSession(context: GuestWidgetContext): ScreenSession {
   const config = readCastConfig(context.config);
   const state: ScreenSession['state'] = { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null,
-    roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0 };
+    roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0, pairingVisible: false };
   const listeners = new Set<(state: ScreenSession['state']) => void>();
   const listeningBindings = new Set<string>();
   const resumeEntries = new Map<string, ReceiverEntry>();
@@ -28,31 +28,52 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   let pairing: ReceiverEntry | undefined, livePresenter: ReceiverEntry | undefined, sasOwner: ReceiverEntry | undefined, renewal: TimerHandle | undefined, sasTimer: TimerHandle | undefined, disposed = false;
   let authoritativeEpoch = 0;
   let lifecycle: Promise<void> = Promise.resolve();
+  let observedDismissSas: unknown;
   const publish = (patch: Partial<ScreenSession['state']>): void => {
     if ('sas' in patch && patch.sas === undefined) delete state.sas;
     if ('sasTrusted' in patch && patch.sasTrusted === undefined) delete state.sasTrusted;
     if (state.sasTrusted === true && patch.sasTrusted === undefined) delete patch.sasTrusted;
     Object.assign(state, patch); listeners.forEach((listener) => listener({ ...state }));
     const hostState = { status: state.status, command: state.command, presentationEpoch: state.presentationEpoch, peerCount: state.peerCount, error: state.error,
-      roomCode: state.roomCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, pairingReveal: state.pairingReveal, ...(state.sas ? { sas: state.sas } : {}),
-      ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
+      roomCode: state.roomCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, pairingReveal: state.pairingReveal, pairingVisible: state.pairingVisible,
+      ...(state.sas ? { sas: state.sas } : {}), ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
     void context.setCastState(hostState);
   };
   const report = (error: unknown): void => publish({ status: 'error', error: error instanceof Error ? error.message : String(error) });
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
+  const dismissalInterval = context.getCastState ? window.setInterval(() => {
+    void context.getCastState().then((hostState) => {
+      const dismissed = hostState?.dismissSas;
+      if (dismissed === undefined || dismissed === observedDismissSas) return;
+      observedDismissSas = dismissed;
+      if (!sasOwner) return;
+      const entry = sasOwner;
+      sasOwner = undefined;
+      clearTimeout(sasTimer);
+      entry.receiver?.confirmSas(false);
+      entry.trusted = false;
+      delete state.sas;
+      delete state.sasTrusted;
+      publish({});
+    }).catch(report);
+  }, 200) : undefined;
   const applyConnection = (entry: ReceiverEntry, expectedGeneration: string, event: { generation: string; trusted: boolean }): void => {
     if (event.generation !== expectedGeneration) return;
     entry.trusted = event.trusted;
-    if (event.trusted) { delete state.sas; publish({ sasTrusted: true }); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false }); }
+    if (event.trusted) { delete state.sas; publish({ sasTrusted: true }); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
   };
   const broadcastQueue = (conflictEntry?: ReceiverEntry): void => {
-    for (const entry of connected) if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: entry === conflictEntry });
+    for (const entry of connected) if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: entry === conflictEntry, pairingVisible: state.pairingVisible });
   };
   const authenticatedMessage = (entry: ReceiverEntry) => (message: Extract<DataMessage, { type: 'queue-mutation' | 'pair-display-request' }>, send: (outgoing: DataMessage) => void): void => {
     if (!entry.trusted) return;
-    if (message.type === 'pair-display-request') { publish({ pairingReveal: state.pairingReveal + 1 }); return; }
+    if (message.type === 'pair-display-request') {
+      publish({ pairingVisible: message.visible, pairingReveal: message.visible ? state.pairingReveal + 1 : state.pairingReveal });
+      broadcastQueue();
+      return;
+    }
     const next = applyCastQueueMutation(state.queue, message.mutation);
-    if (!next) { send({ type: 'queue-snapshot', snapshot: state.queue, conflict: true }); return; }
+    if (!next) { send({ type: 'queue-snapshot', snapshot: state.queue, conflict: true, pairingVisible: state.pairingVisible }); return; }
     state.queue = next;
     const current = next.items.find((item) => item.id === next.currentItemId);
     const sourceChanged = Boolean(current && (state.command?.sourceKind !== current.command.sourceKind || state.command.sourceUrl !== current.command.sourceUrl));
@@ -120,7 +141,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           resumeEntries.set(binding.bindingId, entry);
           entry.receiver = createPluginReceiver(options, asset, (next) => {
             entry.state = next;
-            if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false }); }
+            if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
             if (next.peerCount === 0 && entry.connected) {
               entry.connected = false; connected.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
               if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
@@ -148,7 +169,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     const applyState = (next: ReceiverState): void => {
       entry.state = next;
       if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry);
-        if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false });
+        if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
         if (pairing === entry) { pairing = undefined; clearTimeout(renewal); enqueue(allocate); } }
       if (next.peerCount === 0 && entry.connected) {
         entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
@@ -170,7 +191,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         resumeEntries.set(binding.bindingId, resumeEntry);
         resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
           resumeEntry.state = next;
-          if (next.peerCount > 0 && !resumeEntry.connected) { resumeEntry.connected = true; connected.add(resumeEntry); resumeEntry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false }); }
+          if (next.peerCount > 0 && !resumeEntry.connected) { resumeEntry.connected = true; connected.add(resumeEntry); resumeEntry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
           if (next.peerCount === 0 && resumeEntry.connected) {
             resumeEntry.connected = false; connected.delete(resumeEntry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
             if (sasOwner === resumeEntry) { sasOwner = undefined; clearTimeout(sasTimer); }
@@ -194,7 +215,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   if (!config.relayUrl) report('Configure and approve a signaling origin.'); else { enqueue(resume); enqueue(allocate); }
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
     confirmSas(accepted) { if (!sasOwner) return; const entry = sasOwner; entry.receiver?.confirmSas(accepted); sasOwner = undefined; clearTimeout(sasTimer); delete state.sas; delete state.sasTrusted; publish({}); },
-    close() { disposed = true; abort.abort(); clearTimeout(renewal); clearTimeout(sasTimer); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
+    close() { disposed = true; abort.abort(); clearInterval(dismissalInterval); clearTimeout(renewal); clearTimeout(sasTimer); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
       for (const entry of entries) entry.receiver?.close();
       resumeEntries.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => undefined).catch(report); listeners.clear(); } };
 }

@@ -132,11 +132,11 @@ describe('screen session room lifecycle', () => {
     const options = { relayUrl: 'https://relay.example', roomCode: 'room', authCode: 'code', generation: 'expected-generation' };
     const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
-    let message: ((value: { type: string; mutation?: object }) => void) | undefined;
+    let message: ((value: { type: string; mutation?: object; visible?: boolean }) => void) | undefined;
     let connection: ((event: { generation: string; trusted: boolean }) => void) | undefined;
     const send = vi.fn();
     mocks.createPluginReceiver.mockImplementation((_options, _asset, _state, _binding, _revoke,
-      onMessage: (value: { type: string; mutation?: object }, outgoing: (message: object) => void) => void,
+      onMessage: (value: { type: string; mutation?: object; visible?: boolean }, outgoing: (message: object) => void) => void,
       onConnection: (event: { generation: string; trusted: boolean }) => void) => {
       message = (value) => { onMessage(value, send); }; connection = onConnection;
       connection?.({ generation: 'wrong-generation', trusted: true });
@@ -147,11 +147,11 @@ describe('screen session room lifecycle', () => {
     const session = createScreenSession(context); await vi.waitFor(() => expect(message).toBeTypeOf('function'));
     const command = { sourceKind: 'website', sourceUrl: 'https://example.test', muted: false, outputMode: 'audio-video' };
     const mutation = { type: 'queue-add', item: { id: '0123456789abcdef', command }, expectedRevision: 0 };
-    message?.({ type: 'pair-display-request' }); message?.({ type: 'queue-mutation', mutation });
+    message?.({ type: 'pair-display-request', visible: true }); message?.({ type: 'queue-mutation', mutation });
     expect(session.state.pairingReveal).toBe(0); expect(session.state.queue.revision).toBe(0); expect(send).not.toHaveBeenCalled();
     connection?.({ generation: 'wrong-generation', trusted: true }); message?.({ type: 'queue-mutation', mutation });
     expect(session.state.queue.revision).toBe(0);
-    connection?.({ generation: options.generation, trusted: true }); message?.({ type: 'pair-display-request' }); message?.({ type: 'queue-mutation', mutation });
+    connection?.({ generation: options.generation, trusted: true }); message?.({ type: 'pair-display-request', visible: true }); message?.({ type: 'queue-mutation', mutation });
     expect(session.state.pairingReveal).toBe(1); expect(session.state.queue.revision).toBe(1); expect(send).toHaveBeenCalledWith(expect.objectContaining({ type: 'queue-snapshot' }));
     session.close();
   });
@@ -181,7 +181,7 @@ describe('screen session room lifecycle', () => {
     expect(session.state).toMatchObject({ command: before.command, presentationEpoch: before.epoch, queue: before.queue });
     callbacks[1]!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null });
     messages[1]!({ type: 'queue-mutation', mutation: { type: 'queue-play', itemId: '0123456789abcdef', expectedRevision: 1 } });
-    expect(session.state.queue.revision).toBe(2); expect(session.state.command).toEqual(command); session.close();
+    expect(session.state.queue.revision).toBe(2); expect(session.state.command).toEqual({ ...command, paused: false }); session.close();
   });
   it('ignores revoked epochs and permits a genuinely newer A epoch to reacquire', async () => {
     const rooms = ['1111111111', '2222222222'].map((roomCode) => ({

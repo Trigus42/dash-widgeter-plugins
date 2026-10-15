@@ -24263,16 +24263,18 @@ function parseYouTubeTarget(input) {
   } catch {
     return null;
   }
-  if (!["www.youtube.com", "youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(url.hostname)) return null;
+  if (!["www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(url.hostname)) return null;
+  if (url.protocol !== "https:") return null;
   const path = url.pathname.split("/").filter(Boolean);
   const candidate = url.hostname === "youtu.be" ? path[0] : path[0] === "embed" || path[0] === "shorts" ? path[1] : url.searchParams.get("v");
-  if (!candidate || !/^[A-Za-z0-9_-]{11}$/.test(candidate)) return null;
+  const videoId = candidate && /^[A-Za-z0-9_-]{11}$/.test(candidate) ? candidate : void 0;
   const playlist = url.searchParams.get("list");
   const playlistId = playlist && /^[A-Za-z0-9_-]{10,80}$/.test(playlist) ? playlist : void 0;
+  if (!videoId && !playlistId) return null;
   const rawIndex = url.searchParams.get("index");
   const parsedIndex = rawIndex ? Number(rawIndex) : void 0;
   const index = playlistId && Number.isSafeInteger(parsedIndex) && parsedIndex >= 1 && parsedIndex <= 1e4 ? parsedIndex : void 0;
-  return { videoId: candidate, ...playlistId ? { playlistId } : {}, ...index ? { index } : {} };
+  return { ...videoId ? { videoId } : {}, ...playlistId ? { playlistId } : {}, ...index ? { index } : {} };
 }
 function isHttpsUrl(value) {
   try {
@@ -24285,10 +24287,12 @@ function youTubeEmbedUrl(target, muted, autoplay = true) {
   const parsed = typeof target === "string" ? { videoId: target } : target;
   const params = new URLSearchParams({ autoplay: autoplay ? "1" : "0", mute: muted ? "1" : "0", rel: "0", modestbranding: "1", playsinline: "1" });
   if (parsed.playlistId) {
+    params.set("listType", "playlist");
     params.set("list", parsed.playlistId);
-    if (parsed.index) params.set("index", String(parsed.index));
+    if (parsed.index) params.set("index", String(parsed.index - 1));
   }
-  return `https://www.youtube-nocookie.com/embed/${parsed.videoId}?${params.toString()}`;
+  const resource = parsed.videoId ?? "videoseries";
+  return `https://www.youtube-nocookie.com/embed/${resource}?${params.toString()}`;
 }
 function resolveCastTarget(config) {
   if (config.sourceKind === "idle") return { kind: "idle" };
@@ -25566,6 +25570,9 @@ function parseCastQueueMutation(value) {
   if (candidate.type === "queue-remove" || candidate.type === "queue-play") {
     return hasOnly(candidate, ["type", "itemId", "expectedRevision"]) && itemId(candidate.itemId) ? { type: candidate.type, itemId: candidate.itemId, expectedRevision } : null;
   }
+  if (candidate.type === "queue-paused" && hasOnly(candidate, ["type", "paused", "expectedRevision"]) && typeof candidate.paused === "boolean") {
+    return { type: candidate.type, paused: candidate.paused, expectedRevision };
+  }
   if (candidate.type === "queue-move") {
     return hasOnly(candidate, ["type", "itemId", "index", "expectedRevision"]) && itemId(candidate.itemId) && Number.isSafeInteger(candidate.index) && candidate.index >= 0 && candidate.index < MAX_CAST_QUEUE_ITEMS ? { type: candidate.type, itemId: candidate.itemId, index: candidate.index, expectedRevision } : null;
   }
@@ -25621,14 +25628,21 @@ function applyCastQueueMutation(state, mutation) {
     if (!item) return null;
     items.splice(Math.min(mutation.index, items.length), 0, item);
   } else if (mutation.type === "queue-play") {
-    if (!items.some((item) => item.id === mutation.itemId)) return null;
+    const index = items.findIndex((item) => item.id === mutation.itemId);
+    if (index < 0) return null;
     currentItemId = mutation.itemId;
+    items = items.map((item, itemIndex) => itemIndex === index ? { ...item, command: { ...item.command, paused: false } } : item);
+  } else if (mutation.type === "queue-paused") {
+    const index = items.findIndex((item) => item.id === currentItemId);
+    if (index < 0) return null;
+    items = items.map((item, itemIndex) => itemIndex === index ? { ...item, command: { ...item.command, paused: mutation.paused } } : item);
   } else if (mutation.type === "queue-next" || mutation.type === "queue-previous") {
     if (!items.length) return null;
     const found = items.findIndex((item) => item.id === currentItemId);
     const index = found < 0 ? mutation.type === "queue-next" ? -1 : 0 : found;
     const delta = mutation.type === "queue-next" ? 1 : -1;
     currentItemId = ((_b = items[(index + delta + items.length) % items.length]) == null ? void 0 : _b.id) ?? null;
+    items = items.map((item) => item.id === currentItemId ? { ...item, command: { ...item.command, paused: false } } : item);
   } else if (mutation.type === "queue-clear") {
     items = [];
     currentItemId = null;
@@ -26282,11 +26296,11 @@ function parseDataMessage(input, now = Date.now()) {
     const mutation = parseCastQueueMutation(message.mutation);
     return mutation ? { type: "queue-mutation", mutation } : null;
   }
-  if (message.type === "queue-snapshot" && exact2(message, ["type", "snapshot", "conflict"]) && typeof message.conflict === "boolean") {
+  if (message.type === "queue-snapshot" && exact2(message, ["type", "snapshot", "conflict", "pairingVisible"]) && typeof message.conflict === "boolean" && typeof message.pairingVisible === "boolean") {
     const snapshot = parseCastQueueSnapshot(message.snapshot);
-    return snapshot ? { type: "queue-snapshot", snapshot, conflict: message.conflict } : null;
+    return snapshot ? { type: "queue-snapshot", snapshot, conflict: message.conflict, pairingVisible: message.pairingVisible } : null;
   }
-  if (message.type === "pair-display-request" && exact2(message, ["type"])) return { type: "pair-display-request" };
+  if (message.type === "pair-display-request" && exact2(message, ["type", "visible"]) && typeof message.visible === "boolean") return { type: "pair-display-request", visible: message.visible };
   return null;
 }
 
@@ -26673,7 +26687,8 @@ function createScreenSession(context) {
     relayUrl: config.relayUrl,
     senderUrl: config.senderUrl,
     queue: createCastQueueSnapshot(config.autoplay),
-    pairingReveal: 0
+    pairingReveal: 0,
+    pairingVisible: false
   };
   const listeners = /* @__PURE__ */ new Set();
   const listeningBindings = /* @__PURE__ */ new Set();
@@ -26684,6 +26699,7 @@ function createScreenSession(context) {
   let pairing, livePresenter, sasOwner, renewal, sasTimer, disposed = false;
   let authoritativeEpoch = 0;
   let lifecycle = Promise.resolve();
+  let observedDismissSas;
   const publish = (patch) => {
     if ("sas" in patch && patch.sas === void 0) delete state.sas;
     if ("sasTrusted" in patch && patch.sasTrusted === void 0) delete state.sasTrusted;
@@ -26700,6 +26716,7 @@ function createScreenSession(context) {
       relayUrl: state.relayUrl,
       senderUrl: state.senderUrl,
       pairingReveal: state.pairingReveal,
+      pairingVisible: state.pairingVisible,
       ...state.sas ? { sas: state.sas } : {},
       ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
     };
@@ -26709,6 +26726,23 @@ function createScreenSession(context) {
   const enqueue = (operation) => {
     lifecycle = lifecycle.then(operation).catch(report);
   };
+  const dismissalInterval = window.setInterval(() => {
+    void context.getCastState().then((hostState) => {
+      var _a;
+      const dismissed = hostState == null ? void 0 : hostState.dismissSas;
+      if (dismissed === void 0 || dismissed === observedDismissSas) return;
+      observedDismissSas = dismissed;
+      if (!sasOwner) return;
+      const entry = sasOwner;
+      sasOwner = void 0;
+      clearTimeout(sasTimer);
+      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(false);
+      entry.trusted = false;
+      delete state.sas;
+      delete state.sasTrusted;
+      publish({});
+    }).catch(report);
+  }, 200);
   const applyConnection = (entry, expectedGeneration, event) => {
     var _a, _b;
     if (event.generation !== expectedGeneration) return;
@@ -26716,23 +26750,24 @@ function createScreenSession(context) {
     if (event.trusted) {
       delete state.sas;
       publish({ sasTrusted: true });
-      (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
+      (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
     }
   };
   const broadcastQueue = (conflictEntry) => {
     var _a, _b;
-    for (const entry of connected) if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: entry === conflictEntry });
+    for (const entry of connected) if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: entry === conflictEntry, pairingVisible: state.pairingVisible });
   };
   const authenticatedMessage = (entry) => (message, send) => {
     var _a, _b;
     if (!entry.trusted) return;
     if (message.type === "pair-display-request") {
-      publish({ pairingReveal: state.pairingReveal + 1 });
+      publish({ pairingVisible: message.visible, pairingReveal: message.visible ? state.pairingReveal + 1 : state.pairingReveal });
+      broadcastQueue();
       return;
     }
     const next = applyCastQueueMutation(state.queue, message.mutation);
     if (!next) {
-      send({ type: "queue-snapshot", snapshot: state.queue, conflict: true });
+      send({ type: "queue-snapshot", snapshot: state.queue, conflict: true, pairingVisible: state.pairingVisible });
       return;
     }
     state.queue = next;
@@ -26849,7 +26884,7 @@ function createScreenSession(context) {
             if (next.peerCount > 0 && !entry.connected) {
               entry.connected = true;
               connected.add(entry);
-              (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
+              (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
             }
             if (next.peerCount === 0 && entry.connected) {
               entry.connected = false;
@@ -26898,7 +26933,7 @@ function createScreenSession(context) {
       if (next.peerCount > 0 && !entry.connected) {
         entry.connected = true;
         connected.add(entry);
-        if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
+        if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
         if (pairing === entry) {
           pairing = void 0;
           clearTimeout(renewal);
@@ -26945,7 +26980,7 @@ function createScreenSession(context) {
           if (next.peerCount > 0 && !resumeEntry.connected) {
             resumeEntry.connected = true;
             connected.add(resumeEntry);
-            (_b = (_a = resumeEntry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false });
+            (_b = (_a = resumeEntry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
           }
           if (next.peerCount === 0 && resumeEntry.connected) {
             resumeEntry.connected = false;
@@ -27022,6 +27057,7 @@ function createScreenSession(context) {
       var _a;
       disposed = true;
       abort.abort();
+      clearInterval(dismissalInterval);
       clearTimeout(renewal);
       clearTimeout(sasTimer);
       const entries = /* @__PURE__ */ new Set([...resumeEntries.values(), ...connected, ...pairing ? [pairing] : []]);
@@ -27059,7 +27095,8 @@ function CastWidget({ context }) {
     relayUrl: config.relayUrl,
     senderUrl: config.senderUrl,
     queue: createCastQueueSnapshot(config.autoplay),
-    pairingReveal: 0
+    pairingReveal: 0,
+    pairingVisible: false
   }));
   const videoRef = (0, import_react2.useRef)(null);
   (0, import_react2.useEffect)(() => {
@@ -27101,7 +27138,7 @@ function CastWidget({ context }) {
   (0, import_react2.useEffect)(() => {
     const next = receiver.stream ? null : target.kind === "youtube" ? {
       provider: "youtube",
-      videoId: target.videoId,
+      ...target.videoId ? { videoId: target.videoId } : {},
       muted: effectiveConfig.muted,
       paused,
       volume,
@@ -27194,10 +27231,16 @@ function PairingWidget({ context }) {
     [relayUrl, roomCode, senderUrl]
   );
   const observedReveal = (0, import_react4.useRef)(receiver.pairingReveal);
+  const observedDismissal = (0, import_react4.useRef)(receiver.dismissSas);
   (0, import_react4.useEffect)(() => {
     if (receiver.senderUrl || config.senderUrl) return;
     void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
   }, [config.senderUrl, context, receiver.senderUrl]);
+  (0, import_react4.useEffect)(() => {
+    if (!receiver.dismissSas || receiver.dismissSas === observedDismissal.current || !receiver.sas) return;
+    observedDismissal.current = receiver.dismissSas;
+    void context.dismissCastSas();
+  }, [context, receiver]);
   (0, import_react4.useEffect)(() => {
     if (receiver.sasTrusted !== true || receiver.pairingReveal !== 0) return;
     void context.setPairingDetails(null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
@@ -27206,6 +27249,10 @@ function PairingWidget({ context }) {
     if (!receiver.sas || receiver.sasTrusted === true || !roomCode || !url) return;
     void context.setPairingDetails({ code: roomCode, url, sas: receiver.sas }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
   }, [context, receiver.sas, receiver.sasTrusted, roomCode, url]);
+  (0, import_react4.useEffect)(() => {
+    if (receiver.pairingVisible !== false || receiver.sas) return;
+    void context.setPairingDetails(null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [context, receiver.pairingVisible, receiver.sas]);
   (0, import_react4.useEffect)(() => {
     const prior = observedReveal.current;
     observedReveal.current = receiver.pairingReveal;

@@ -45,7 +45,23 @@ describe('YouTube playlists', () => {
   it('preserves validated list and index parameters in the embed URL', () => {
     const target = resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc&index=12' });
     expect(target).toMatchObject({ kind: 'youtube', videoId: 'dQw4w9WgXcQ', playlistId: 'PL1234567890abc', index: 12 });
-    if (target.kind === 'youtube') expect(target.embedUrl).toContain('list=PL1234567890abc&index=12');
+    if (target.kind === 'youtube') { expect(target.embedUrl).toContain('list=PL1234567890abc'); expect(target.embedUrl).toContain('index=11'); }
+  });
+  it('resolves playlist-only URLs with zero-based provider indexes', () => {
+    const target = resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://www.youtube.com/playlist?list=PL1234567890abc&index=12' });
+    expect(target).toMatchObject({ kind: 'youtube', playlistId: 'PL1234567890abc', index: 12 });
+    if (target.kind === 'youtube') {
+      expect(target.videoId).toBeUndefined();
+      expect(target.embedUrl).toContain('/embed/videoseries?');
+      expect(target.embedUrl).toContain('listType=playlist');
+      expect(target.embedUrl).toContain('index=11');
+    }
+  });
+  it('normalizes YouTube Music watch URLs and rejects insecure or lookalike hosts', () => {
+    expect(resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc' }))
+      .toMatchObject({ kind: 'youtube', videoId: 'dQw4w9WgXcQ', playlistId: 'PL1234567890abc' });
+    expect(resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'http://music.youtube.com/watch?v=dQw4w9WgXcQ' })).toEqual({ kind: 'idle' });
+    expect(resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://music.youtube.com.example/watch?v=dQw4w9WgXcQ' })).toEqual({ kind: 'idle' });
   });
   it('drops malformed navigation and rejects lookalike hosts', () => {
     expect(youTubeVideoId('https://youtube.example/watch?v=dQw4w9WgXcQ')).toBeNull();
