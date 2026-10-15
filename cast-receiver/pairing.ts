@@ -1,4 +1,5 @@
 import { generateAuthCode, type CastSessionOptions } from '@/cast-protocol';
+import { parseCastRelayUrl } from '@/core/cast/setup-url';
 
 interface CreatedRoom { roomId: string; reclaimToken: string; generation: string; expiresAt: number; websocketUrl: string }
 
@@ -13,8 +14,7 @@ export interface PairingSession {
 }
 
 export async function createPairingSession(baseUrl: string, signal: AbortSignal, validateOrigin: (url: string) => Promise<void>): Promise<PairingSession> {
-  const base = new URL(baseUrl);
-  if (base.username || base.password || base.search || base.hash) throw new Error('Invalid signaling URL');
+  const base = parseCastRelayUrl(baseUrl, 'http');
   const response = await fetch(new URL('/room', base), { method: 'POST', signal });
   if (!response.ok) throw new Error(`Signaling service rejected room (${response.status})`);
   const value: unknown = await response.json();
@@ -22,8 +22,11 @@ export async function createPairingSession(baseUrl: string, signal: AbortSignal,
   const room = value as Record<string, unknown>;
   if (typeof room.roomId !== 'string' || !/^\d{4,}$/.test(room.roomId) || typeof room.reclaimToken !== 'string'
     || !/^[A-Za-z0-9_-]{43}$/.test(room.reclaimToken) || typeof room.generation !== 'string' || typeof room.expiresAt !== 'number' || room.expiresAt <= Date.now()
-    || typeof room.websocketUrl !== 'string' || !/^wss?:\/\//.test(room.websocketUrl)) throw new Error('Cast signaling service returned an invalid room');
-  const created = room as unknown as CreatedRoom; await validateOrigin(created.websocketUrl);
+    || typeof room.websocketUrl !== 'string') throw new Error('Cast signaling service returned an invalid room');
+  const created = room as unknown as CreatedRoom;
+  try { parseCastRelayUrl(created.websocketUrl, 'websocket'); }
+  catch { throw new Error('Cast signaling service returned an invalid room'); }
+  await validateOrigin(created.websocketUrl);
   const authCode = generateAuthCode();
   return { options: { relayUrl: created.websocketUrl, roomCode: created.roomId, authCode, generation: created.generation, reclaimToken: created.reclaimToken }, roomCode: `${created.roomId}${authCode}`,
     authCode, generation: created.generation, expiresAt: created.expiresAt,
