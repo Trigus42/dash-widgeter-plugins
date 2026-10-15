@@ -101,6 +101,33 @@ describe('screen session room lifecycle', () => {
     for (const call of setCastState.mock.calls) expect(() => structuredClone(call[0])).not.toThrow();
     session.close();
   });
+  it('keeps a trusted fresh-pair receiver alive while allocating the next pairing room', async () => {
+    const rooms = ['1111111111', '2222222222'].map((roomCode, index) => ({
+      roomCode, expiresAt: Date.now() + 60_000, options: { generation: `generation-${index}` }, close: vi.fn(() => Promise.resolve()),
+    }));
+    mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
+    const states: Array<(state: Record<string, unknown>) => void> = [];
+    const messages: Array<(message: { type: string; mutation?: object }) => void> = [];
+    const connections: Array<(event: { generation: string; trusted: boolean }) => void> = [];
+    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void,
+      _binding, _revoke, onMessage: (message: { type: string; mutation?: object }, send: () => void) => void,
+      onConnection: (event: { generation: string; trusted: boolean }) => void) => {
+      const index = states.length; states.push(onState); messages.push((message) => onMessage(message, vi.fn())); connections.push(onConnection); return receivers[index];
+    });
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(states).toHaveLength(1));
+    states[0]!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null });
+    connections[0]!({ generation: 'generation-0', trusted: true });
+    await vi.waitFor(() => expect(states).toHaveLength(2));
+    expect(receivers[0]!.close).not.toHaveBeenCalled(); expect(rooms[0]!.close).not.toHaveBeenCalled(); expect(session.state.peerCount).toBe(1);
+    const command = { sourceKind: 'website', sourceUrl: 'https://example.test', muted: false, outputMode: 'audio-video' };
+    messages[0]!({ type: 'queue-mutation', mutation: { type: 'queue-add', item: { id: '0123456789abcdef', command }, expectedRevision: 0 } });
+    expect(session.state.queue.revision).toBe(1);
+    states[0]!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null });
+    expect(session.state.peerCount).toBe(1); expect(receivers[0]!.close).not.toHaveBeenCalled(); session.close();
+  });
   it('accepts authenticated messages only after the exact receiver generation is trusted', async () => {
     const options = { relayUrl: 'https://relay.example', roomCode: 'room', authCode: 'code', generation: 'expected-generation' };
     const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options, close: vi.fn(() => Promise.resolve()) };

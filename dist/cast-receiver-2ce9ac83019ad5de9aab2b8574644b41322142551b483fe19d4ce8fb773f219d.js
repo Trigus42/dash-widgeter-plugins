@@ -26349,10 +26349,16 @@ function activateChannel(channel, pairing, onBound, onMessage) {
     onMessage(value);
   };
 }
-function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
+function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection, onDiagnostic) {
   const options = requiredOptions(optionsInput);
   const state = { status: "connecting", command: null, presentationEpoch: 0, screenStream: null, peerCount: 0, error: null };
   let peer, channel, pendingStream = null;
+  const diagnostic = (event) => {
+    try {
+      onDiagnostic == null ? void 0 : onDiagnostic(event);
+    } catch {
+    }
+  };
   const transceiverEpochs = /* @__PURE__ */ new WeakMap();
   let closed = false, failures = 0, socketAttempts = 0, socket;
   let signaling, pairing, applyingOfferEpoch, activeHandshake;
@@ -26471,6 +26477,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
               });
             };
             peer.ondatachannel = ({ channel: incoming }) => {
+              diagnostic({ type: "channel-open" });
               channel = incoming;
               if (!pairing) {
                 incoming.close();
@@ -26486,6 +26493,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
                 if (trusted) {
                   state.sasTrusted = true;
                   onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
+                  diagnostic({ type: "trusted-callback", trusted: true });
                 }
                 emit();
               }, (message) => {
@@ -26503,6 +26511,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
                   return;
                 }
                 if (message.type === "sas-confirm") {
+                  diagnostic({ type: "sas-confirm", generationMatch: message.generation === options.generation, trusted });
                   if (trusted || message.generation !== options.generation || !state.sas) {
                     incoming.close();
                     return;
@@ -26517,12 +26526,14 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
                     if (pending2) send({ type: "resume-binding-ack", bindingId: pending2.bindingId });
                     send({ type: "sas-ack", generation: options.generation });
                     onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
+                    diagnostic({ type: "trusted-callback", trusted: true });
                     emit();
                   }).catch(fail);
                   return;
                 }
                 if (!trusted) return;
                 if (message.type === "queue-mutation" || message.type === "pair-display-request") {
+                  if (message.type === "queue-mutation") diagnostic({ type: "queue-mutation-received", trusted });
                   onAuthenticatedMessage == null ? void 0 : onAuthenticatedMessage(message, send);
                   return;
                 }
@@ -26559,7 +26570,10 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
                 state.status = message.command.sourceKind === "idle" ? "paired" : "casting";
                 emit();
               });
-              incoming.onclose = disconnect;
+              incoming.onclose = () => {
+                diagnostic({ type: "disconnect" });
+                disconnect();
+              };
             };
           } else if (wire.type === "signal" && signaling && peer) {
             try {
@@ -26641,7 +26655,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
 }
 
 // cast-receiver/receiver.ts
-function createPluginReceiver(options, asset, onState, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
+function createPluginReceiver(options, asset, onState, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection, onDiagnostic) {
   return createCastReceiver(options, (state) => onState({
     status: state.status,
     command: state.command,
@@ -26651,7 +26665,7 @@ function createPluginReceiver(options, asset, onState, onResumeBinding, onResume
     error: state.error,
     ...state.sas ? { sas: state.sas } : {},
     ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
-  }), asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection);
+  }), asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection, onDiagnostic);
 }
 
 // cast-receiver/screen-session.ts
