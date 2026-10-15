@@ -26700,6 +26700,7 @@ function createScreenSession(context) {
   let authoritativeEpoch = 0;
   let lifecycle = Promise.resolve();
   let observedDismissSas;
+  let dismissalInitialized = false;
   const publish = (patch) => {
     if ("sas" in patch && patch.sas === void 0) delete state.sas;
     if ("sasTrusted" in patch && patch.sasTrusted === void 0) delete state.sasTrusted;
@@ -26726,10 +26727,15 @@ function createScreenSession(context) {
   const enqueue = (operation) => {
     lifecycle = lifecycle.then(operation).catch(report);
   };
-  const dismissalInterval = window.setInterval(() => {
+  const dismissalInterval = context.getCastState ? window.setInterval(() => {
     void context.getCastState().then((hostState) => {
       var _a;
       const dismissed = hostState == null ? void 0 : hostState.dismissSas;
+      if (!dismissalInitialized) {
+        dismissalInitialized = true;
+        observedDismissSas = dismissed;
+        return;
+      }
       if (dismissed === void 0 || dismissed === observedDismissSas) return;
       observedDismissSas = dismissed;
       if (!sasOwner) return;
@@ -26742,7 +26748,7 @@ function createScreenSession(context) {
       delete state.sasTrusted;
       publish({});
     }).catch(report);
-  }, 200);
+  }, 200) : void 0;
   const applyConnection = (entry, expectedGeneration, event) => {
     var _a, _b;
     if (event.generation !== expectedGeneration) return;
