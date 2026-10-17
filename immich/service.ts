@@ -7,13 +7,17 @@ import type {
   ImmichConfig,
   SelectOption,
 } from './types';
+import {
+  fetchAssetAlbumsHelper,
+  fetchFaceBoxHelper,
+  fetchMemoriesHelper,
+  listAlbumsHelper,
+  listPeopleHelper,
+  listTagsHelper,
+} from './service-helpers';
 
 interface MetadataEnvelope {
   assets?: { items?: ImmichAsset[] };
-}
-interface MemoryResponse {
-  data?: { year?: number };
-  assets?: ImmichAsset[];
 }
 
 const PROXY = 'always' as const;
@@ -190,36 +194,12 @@ export class ImmichService {
   }
 
   private async fetchMemories(): Promise<ImmichAsset[]> {
-    const today = new Date().toISOString().slice(0, 10);
-    const res = await this.req<MemoryResponse[]>({
-      url: `${this.base}/memories?for=${today}`,
-      method: 'GET',
-      headers: this.jsonHeaders,
-      proxy: PROXY,
-    });
-    if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
-    const now = new Date().getFullYear();
-    const items = (res.data ?? []).flatMap((memory) => {
-      const years = memory.data?.year ? now - memory.data.year : 0;
-      const title = years > 0 ? `${years} year${years > 1 ? 's' : ''} ago` : 'Memory';
-      return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
-    });
+    const items = await fetchMemoriesHelper(this.req.bind(this), `${this.base}/memories`, this.jsonHeaders);
     return this.postProcessAssets(items);
   }
 
-  async fetchAssetAlbums(assetId: string): Promise<string[]> {
-    try {
-      const res = await this.req<Array<{ id: string; albumName: string }>>({
-        url: `${this.base}/albums?assetId=${assetId}`,
-        method: 'GET',
-        headers: this.jsonHeaders,
-        proxy: PROXY,
-      });
-      if (!res.ok || !Array.isArray(res.data)) return [];
-      return res.data.map((a) => a.albumName).filter(Boolean);
-    } catch {
-      return [];
-    }
+  fetchAssetAlbums(assetId: string): Promise<string[]> {
+    return fetchAssetAlbumsHelper(this.req.bind(this), `${this.base}/albums?assetId=${assetId}`, this.jsonHeaders);
   }
 
   /**
@@ -241,63 +221,19 @@ export class ImmichService {
   }
 
   /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
-  async fetchFaceBox(assetId: string): Promise<FaceBox | null> {
-    const res = await this.req<
-      Array<{
-        boundingBoxX1: number;
-        boundingBoxX2: number;
-        boundingBoxY1: number;
-        boundingBoxY2: number;
-        imageWidth: number;
-        imageHeight: number;
-      }>
-    >({
-      url: `${this.base}/faces?id=${assetId}`,
-      method: 'GET',
-      headers: this.jsonHeaders,
-      proxy: PROXY,
-    });
-    if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
-    const f = res.data[0];
-    if (!f || !f.imageWidth || !f.imageHeight) return null;
-    return {
-      cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
-      cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight,
-    };
+  fetchFaceBox(assetId: string): Promise<FaceBox | null> {
+    return fetchFaceBoxHelper(this.req.bind(this), `${this.base}/faces?id=${assetId}`, this.jsonHeaders);
   }
 
-  async listAlbums(): Promise<SelectOption[]> {
-    const res = await this.req<Array<{ id: string; albumName: string }>>({
-      url: `${this.base}/albums`,
-      method: 'GET',
-      headers: this.jsonHeaders,
-      proxy: PROXY,
-    });
-    if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
-    return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
+  listAlbums(): Promise<SelectOption[]> {
+    return listAlbumsHelper(this.req.bind(this), `${this.base}/albums`, this.jsonHeaders);
   }
 
-  async listPeople(): Promise<SelectOption[]> {
-    const res = await this.req<{ people?: Array<{ id: string; name: string }> }>({
-      url: `${this.base}/people?withHidden=false`,
-      method: 'GET',
-      headers: this.jsonHeaders,
-      proxy: PROXY,
-    });
-    if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
-    return (res.data.people ?? [])
-      .filter((p) => p.name)
-      .map((p) => ({ label: p.name, value: p.id }));
+  listPeople(): Promise<SelectOption[]> {
+    return listPeopleHelper(this.req.bind(this), `${this.base}/people?withHidden=false`, this.jsonHeaders);
   }
 
-  async listTags(): Promise<SelectOption[]> {
-    const res = await this.req<Array<{ id: string; value: string }>>({
-      url: `${this.base}/tags`,
-      method: 'GET',
-      headers: this.jsonHeaders,
-      proxy: PROXY,
-    });
-    if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
-    return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
+  listTags(): Promise<SelectOption[]> {
+    return listTagsHelper(this.req.bind(this), `${this.base}/tags`, this.jsonHeaders);
   }
 }

@@ -25508,7 +25508,8 @@ function concat(a, b) {
 async function encryptSignal(key, sequence, message, type = "offer", direction = "sender") {
   await Promise.resolve();
   const plaintext = encoder.encode(JSON.stringify(message));
-  return { sequence, ciphertext: encode(castAesGcmEncrypt(key, sequenceIv(sequence), plaintext, aad(direction, type, sequence))) };
+  const ciphertext = encode(castAesGcmEncrypt(key, sequenceIv(sequence), plaintext, aad(direction, type, sequence)));
+  return { sequence, ciphertext };
 }
 async function decryptSignal(key, frame, lastSequence, type = "offer", direction = "sender") {
   if (!Number.isSafeInteger(frame.sequence) || frame.sequence !== lastSequence + 1) throw new Error("Replayed or out-of-order signaling frame");
@@ -25705,21 +25706,36 @@ async function createPairingSession(baseUrl, signal, validateOrigin) {
   await validateOrigin(created.websocketUrl);
   const authCode = generateAuthCode();
   return {
-    options: { relayUrl: created.websocketUrl, roomCode: created.roomId, authCode, generation: created.generation, reclaimToken: created.reclaimToken },
+    options: {
+      relayUrl: created.websocketUrl,
+      roomCode: created.roomId,
+      authCode,
+      generation: created.generation,
+      reclaimToken: created.reclaimToken
+    },
     roomCode: `${created.roomId}${authCode}`,
     authCode,
     generation: created.generation,
     expiresAt: created.expiresAt,
     async renew() {
-      const renewal = await fetch(new URL(`/room/${created.roomId}`, base), { method: "POST", headers: { authorization: `Bearer ${created.reclaimToken}` }, signal });
+      const renewal = await fetch(new URL(`/room/${created.roomId}`, base), {
+        method: "POST",
+        headers: { authorization: `Bearer ${created.reclaimToken}` },
+        signal
+      });
       if (!renewal.ok) throw new Error(`Signaling renewal failed (${renewal.status})`);
       const value2 = await renewal.json();
-      if (!value2 || typeof value2 !== "object" || !("expiresAt" in value2) || typeof value2.expiresAt !== "number" || value2.expiresAt <= Date.now()) throw new Error("Signaling renewal returned invalid expiry");
+      if (!value2 || typeof value2 !== "object" || !("expiresAt" in value2) || typeof value2.expiresAt !== "number" || value2.expiresAt <= Date.now()) {
+        throw new Error("Signaling renewal returned invalid expiry");
+      }
       created.expiresAt = value2.expiresAt;
       return created.expiresAt;
     },
     async close() {
-      const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), { method: "DELETE", headers: { authorization: `Bearer ${created.reclaimToken}` } });
+      const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${created.reclaimToken}` }
+      });
       if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
     }
   };
@@ -25754,6 +25770,252 @@ async function createResumeSession(relayUrl, bindingId, resumePassword, signal) 
     generation: room.generation,
     resumeBindingId: bindingId,
     resumePassword
+  };
+}
+
+// src/core/cast/resume-binding.ts
+var MAX_CAST_RESUME_LIFETIME_MS = 30 * 24 * 60 * 60 * 1e3;
+
+// src/core/cast/data-message.ts
+var exact = (value, keys) => {
+  const actual = Object.keys(value);
+  return actual.length === keys.length && actual.every((key) => keys.includes(key));
+};
+function encoded32(value) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value)) return false;
+  try {
+    const decoded = decode(value);
+    return decoded.length === 32 && encode(decoded) === value;
+  } catch {
+    return false;
+  }
+}
+function validPresentationEpoch(value) {
+  return Number.isSafeInteger(value) && Number(value) > 0;
+}
+function parseDataMessage(input, now = Date.now()) {
+  let value;
+  try {
+    value = JSON.parse(input);
+  } catch {
+    return null;
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const message = value;
+  if (message.type === "binding" && exact(message, ["type", "proof"]) && encoded32(message.proof)) return { type: "binding", proof: message.proof };
+  if (message.type === "resume-binding" && exact(message, ["type", "bindingId", "resumePassword", "expiresAt"]) && encoded32(message.bindingId) && encoded32(message.resumePassword) && Number.isSafeInteger(message.expiresAt) && Number(message.expiresAt) > now && Number(message.expiresAt) <= now + MAX_CAST_RESUME_LIFETIME_MS) {
+    return message;
+  }
+  if ((message.type === "resume-binding-ack" || message.type === "resume-binding-revoke") && exact(message, ["type", "bindingId"]) && encoded32(message.bindingId)) return message;
+  if (message.type === "command" && exact(message, ["type", "command", "epoch"]) && validPresentationEpoch(message.epoch) && message.command && typeof message.command === "object" && !Array.isArray(message.command)) {
+    const command = parseCastCommand(message.command);
+    return command ? { type: "command", command, epoch: message.epoch } : null;
+  }
+  if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
+  if (message.type === "stream" && exact(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
+  if ((message.type === "sas-confirm" || message.type === "sas-ack") && exact(message, ["type", "generation"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) return message;
+  if (message.type === "queue-mutation" && exact(message, ["type", "mutation"])) {
+    const mutation = parseCastQueueMutation(message.mutation);
+    return mutation ? { type: "queue-mutation", mutation } : null;
+  }
+  if (message.type === "queue-snapshot" && exact(message, ["type", "snapshot", "conflict", "pairingVisible"]) && typeof message.conflict === "boolean" && typeof message.pairingVisible === "boolean") {
+    const snapshot = parseCastQueueSnapshot(message.snapshot);
+    return snapshot ? { type: "queue-snapshot", snapshot, conflict: message.conflict, pairingVisible: message.pairingVisible } : null;
+  }
+  if (message.type === "pair-display-request" && exact(message, ["type", "visible"]) && typeof message.visible === "boolean") return { type: "pair-display-request", visible: message.visible };
+  return null;
+}
+
+// src/core/cast/presentation-epoch.ts
+var CastAuthenticationError = class extends Error {
+  code = "CAST_AUTHENTICATION_FAILED";
+  constructor(cause) {
+    super("Cast authentication failed", { cause });
+    this.name = "CastAuthenticationError";
+  }
+};
+function acceptsIncomingTrack(currentEpoch, offerEpoch) {
+  return validPresentationEpoch(offerEpoch) && offerEpoch >= currentEpoch;
+}
+function ownsActiveStream(currentEpoch, trackEpoch, currentStream, trackStream) {
+  return trackEpoch === currentEpoch && currentStream === trackStream;
+}
+
+// src/core/cast/signaling.ts
+var exact2 = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
+var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
+var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
+function parseDescription(value, type) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value;
+  if (!exact2(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
+  return { type, sdp: candidate.sdp };
+}
+function parseIceCandidate(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value;
+  const keys = Object.keys(candidate);
+  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
+  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
+  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
+  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
+  return candidate;
+}
+function sendWire(socket, value) {
+  const text = JSON.stringify(value);
+  if (text.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
+  socket.send(text);
+}
+function parseWire(data) {
+  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES) return null;
+  let value;
+  try {
+    value = JSON.parse(data);
+  } catch {
+    return null;
+  }
+  if (!value || typeof value !== "object" || !("type" in value)) return null;
+  const candidate = value;
+  if (candidate.type === "hello" && exact2(candidate, ["type", "roomId", "generation", "role"]) && typeof candidate.roomId === "string" && /^\d{4,9}$/.test(candidate.roomId) && typeof candidate.generation === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(candidate.generation) && (candidate.role === "sender" || candidate.role === "receiver")) return candidate;
+  if (candidate.type === "receiver-ready" && exact2(candidate, ["type"])) return candidate;
+  if ((candidate.type === "burn" || candidate.type === "recycle") && exact2(candidate, ["type", "reclaimToken"]) && typeof candidate.reclaimToken === "string" && /^[A-Za-z0-9_-]{43}$/.test(candidate.reclaimToken)) return candidate;
+  if (candidate.type === "challenge-request" && exact2(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) return candidate;
+  if (candidate.type === "challenge" && exact2(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) return candidate;
+  if (candidate.type === "prover" && exact2(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) return candidate;
+  if (candidate.type === "verifier" && exact2(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) return candidate;
+  if (candidate.type === "confirm" && exact2(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) return candidate;
+  if (candidate.type === "signal" && exact2(candidate, ["type", "signalType", "sequence", "ciphertext"]) && (candidate.signalType === "offer" || candidate.signalType === "answer" || candidate.signalType === "ice") && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && candidate.ciphertext.length <= MAX_CAST_MESSAGE_BYTES && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) return candidate;
+  return null;
+}
+var EncryptedSignaling = class {
+  constructor(socket, keys, role) {
+    this.socket = socket;
+    this.keys = keys;
+    this.role = role;
+  }
+  sent = 1;
+  received = 0;
+  sendQueue = Promise.resolve();
+  receiveQueue = Promise.resolve();
+  applyQueue = Promise.resolve();
+  closed = false;
+  close() {
+    if (this.closed) return;
+    this.closed = true;
+    destroyDirectionalKeys(this.keys);
+  }
+  send(signal) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.sendQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      const type = signal.type;
+      const payload = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
+      const sequence = this.sent;
+      const frame = await encryptSignal(this.keys.send, sequence, payload, type, this.role);
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
+      this.sent = sequence + 1;
+    });
+    this.sendQueue = pending.catch(() => void 0);
+    return pending;
+  }
+  receive(value) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.receiveQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      const remote = this.role === "sender" ? "receiver" : "sender";
+      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      this.received = opened.sequence;
+      if (value.signalType === "ice") {
+        const candidate = parseIceCandidate(opened.value);
+        if (!candidate) throw new Error("Invalid Cast ICE candidate");
+        return { type: "ice", candidate };
+      }
+      if (value.signalType === "offer") {
+        const offer = opened.value;
+        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
+        const metadata = offer;
+        const description2 = exact2(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
+        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
+        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
+      }
+      const description = parseDescription(opened.value, "answer");
+      if (!description) throw new Error("Invalid Cast answer");
+      return { type: "answer", description };
+    });
+    this.receiveQueue = pending.then(() => void 0, () => void 0);
+    return pending;
+  }
+  apply(operation) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.applyQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      await operation();
+    });
+    this.applyQueue = pending.catch(() => void 0);
+    return pending;
+  }
+};
+
+// src/core/cast/channel-connection.ts
+function requiredOptions(options) {
+  var _a;
+  const resume = options.resumePassword !== void 0 || options.resumeBindingId !== void 0;
+  if (!options.generation || options.generation.length > 128 || (resume ? ((_a = options.resumePassword) == null ? void 0 : _a.length) !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId ?? "") : !options.authCode || !/^\d{6}$/.test(options.authCode))) {
+    throw new Error("Secure cast credentials are required");
+  }
+  if (options.reclaimToken !== void 0 && !/^[A-Za-z0-9_-]{43}$/.test(options.reclaimToken)) {
+    throw new Error("Invalid cast reclaim credential");
+  }
+  return { ...options, authCode: options.authCode ?? "", generation: options.generation };
+}
+function socketFor(options, role, onOpen, prepare) {
+  const socket = new WebSocket(options.relayUrl);
+  prepare == null ? void 0 : prepare(socket);
+  socket.onopen = () => {
+    sendWire(socket, { type: "hello", roomId: options.roomCode, generation: options.generation, role });
+    onOpen == null ? void 0 : onOpen(socket);
+  };
+  return socket;
+}
+function peerFor(options) {
+  return new RTCPeerConnection(options.turnUrl ? {
+    iceServers: [{
+      urls: options.turnUrl,
+      ...options.turnUsername ? { username: options.turnUsername } : {},
+      ...options.turnCredential ? { credential: options.turnCredential } : {}
+    }]
+  } : {});
+}
+async function applySignal(peer, secure, signal) {
+  if (signal.type === "ice") {
+    await peer.addIceCandidate(signal.candidate);
+  } else if (signal.type === "offer") {
+    await peer.setRemoteDescription(signal.description);
+    await peer.setLocalDescription(await peer.createAnswer());
+    await secure.send({ type: "answer", description: peer.localDescription });
+  } else {
+    await peer.setRemoteDescription(signal.description);
+  }
+}
+function activateChannel(channel, pairing, onBound, onMessage) {
+  let bound = false;
+  channel.onopen = () => channel.send(JSON.stringify({ type: "binding", proof: pairing.sendBinding }));
+  channel.onmessage = ({ data }) => {
+    if (typeof data !== "string") return;
+    const value = parseDataMessage(data);
+    if (!value) return;
+    if (!bound) {
+      if (value.type !== "binding" || value.proof !== pairing.receiveBinding) {
+        channel.close();
+        return;
+      }
+      bound = true;
+      onBound();
+      return;
+    }
+    onMessage(value);
   };
 }
 
@@ -26134,247 +26396,22 @@ var ReceiverHandshake = class {
   }
 };
 
-// src/core/cast/signaling.ts
-var exact = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
-var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
-var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
-function parseDescription(value, type) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  if (!exact(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
-  return { type, sdp: candidate.sdp };
-}
-function parseIceCandidate(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  const keys = Object.keys(candidate);
-  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
-  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
-  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
-  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
-  return candidate;
-}
-function sendWire(socket, value) {
-  const text = JSON.stringify(value);
-  if (text.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
-  socket.send(text);
-}
-function parseWire(data) {
-  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES) return null;
-  let value;
-  try {
-    value = JSON.parse(data);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || !("type" in value)) return null;
-  const candidate = value;
-  if (candidate.type === "hello" && exact(candidate, ["type", "roomId", "generation", "role"]) && typeof candidate.roomId === "string" && /^\d{4,9}$/.test(candidate.roomId) && typeof candidate.generation === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(candidate.generation) && (candidate.role === "sender" || candidate.role === "receiver")) return candidate;
-  if (candidate.type === "receiver-ready" && exact(candidate, ["type"])) return candidate;
-  if ((candidate.type === "burn" || candidate.type === "recycle") && exact(candidate, ["type", "reclaimToken"]) && typeof candidate.reclaimToken === "string" && /^[A-Za-z0-9_-]{43}$/.test(candidate.reclaimToken)) return candidate;
-  if (candidate.type === "challenge-request" && exact(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) return candidate;
-  if (candidate.type === "challenge" && exact(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) return candidate;
-  if (candidate.type === "prover" && exact(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) return candidate;
-  if (candidate.type === "verifier" && exact(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) return candidate;
-  if (candidate.type === "confirm" && exact(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) return candidate;
-  if (candidate.type === "signal" && exact(candidate, ["type", "signalType", "sequence", "ciphertext"]) && (candidate.signalType === "offer" || candidate.signalType === "answer" || candidate.signalType === "ice") && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && candidate.ciphertext.length <= MAX_CAST_MESSAGE_BYTES && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) return candidate;
-  return null;
-}
-var EncryptedSignaling = class {
-  constructor(socket, keys, role) {
-    this.socket = socket;
-    this.keys = keys;
-    this.role = role;
-  }
-  sent = 1;
-  received = 0;
-  sendQueue = Promise.resolve();
-  receiveQueue = Promise.resolve();
-  applyQueue = Promise.resolve();
-  closed = false;
-  close() {
-    if (this.closed) return;
-    this.closed = true;
-    destroyDirectionalKeys(this.keys);
-  }
-  send(signal) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.sendQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      const type = signal.type;
-      const payload = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
-      const sequence = this.sent;
-      const frame = await encryptSignal(this.keys.send, sequence, payload, type, this.role);
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
-      this.sent = sequence + 1;
-    });
-    this.sendQueue = pending.catch(() => void 0);
-    return pending;
-  }
-  receive(value) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.receiveQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      const remote = this.role === "sender" ? "receiver" : "sender";
-      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      this.received = opened.sequence;
-      if (value.signalType === "ice") {
-        const candidate = parseIceCandidate(opened.value);
-        if (!candidate) throw new Error("Invalid Cast ICE candidate");
-        return { type: "ice", candidate };
-      }
-      if (value.signalType === "offer") {
-        const offer = opened.value;
-        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
-        const metadata = offer;
-        const description2 = exact(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
-        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
-        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
-      }
-      const description = parseDescription(opened.value, "answer");
-      if (!description) throw new Error("Invalid Cast answer");
-      return { type: "answer", description };
-    });
-    this.receiveQueue = pending.then(() => void 0, () => void 0);
-    return pending;
-  }
-  apply(operation) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.applyQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      await operation();
-    });
-    this.applyQueue = pending.catch(() => void 0);
-    return pending;
-  }
-};
-
-// src/core/cast/resume-binding.ts
-var MAX_CAST_RESUME_LIFETIME_MS = 30 * 24 * 60 * 60 * 1e3;
-
-// src/core/cast/data-message.ts
-var exact2 = (value, keys) => {
-  const actual = Object.keys(value);
-  return actual.length === keys.length && actual.every((key) => keys.includes(key));
-};
-function encoded32(value) {
-  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value)) return false;
-  try {
-    const decoded = decode(value);
-    return decoded.length === 32 && encode(decoded) === value;
-  } catch {
-    return false;
-  }
-}
-function validPresentationEpoch(value) {
-  return Number.isSafeInteger(value) && Number(value) > 0;
-}
-function parseDataMessage(input, now = Date.now()) {
-  let value;
-  try {
-    value = JSON.parse(input);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const message = value;
-  if (message.type === "binding" && exact2(message, ["type", "proof"]) && encoded32(message.proof)) return { type: "binding", proof: message.proof };
-  if (message.type === "resume-binding" && exact2(message, ["type", "bindingId", "resumePassword", "expiresAt"]) && encoded32(message.bindingId) && encoded32(message.resumePassword) && Number.isSafeInteger(message.expiresAt) && Number(message.expiresAt) > now && Number(message.expiresAt) <= now + MAX_CAST_RESUME_LIFETIME_MS) {
-    return message;
-  }
-  if ((message.type === "resume-binding-ack" || message.type === "resume-binding-revoke") && exact2(message, ["type", "bindingId"]) && encoded32(message.bindingId)) return message;
-  if (message.type === "command" && exact2(message, ["type", "command", "epoch"]) && validPresentationEpoch(message.epoch) && message.command && typeof message.command === "object" && !Array.isArray(message.command)) {
-    const command = parseCastCommand(message.command);
-    return command ? { type: "command", command, epoch: message.epoch } : null;
-  }
-  if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact2(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
-  if (message.type === "stream" && exact2(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
-  if ((message.type === "sas-confirm" || message.type === "sas-ack") && exact2(message, ["type", "generation"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) return message;
-  if (message.type === "queue-mutation" && exact2(message, ["type", "mutation"])) {
-    const mutation = parseCastQueueMutation(message.mutation);
-    return mutation ? { type: "queue-mutation", mutation } : null;
-  }
-  if (message.type === "queue-snapshot" && exact2(message, ["type", "snapshot", "conflict", "pairingVisible"]) && typeof message.conflict === "boolean" && typeof message.pairingVisible === "boolean") {
-    const snapshot = parseCastQueueSnapshot(message.snapshot);
-    return snapshot ? { type: "queue-snapshot", snapshot, conflict: message.conflict, pairingVisible: message.pairingVisible } : null;
-  }
-  if (message.type === "pair-display-request" && exact2(message, ["type", "visible"]) && typeof message.visible === "boolean") return { type: "pair-display-request", visible: message.visible };
-  return null;
-}
-
-// src/core/cast/session.ts
-var CastAuthenticationError = class extends Error {
-  code = "CAST_AUTHENTICATION_FAILED";
-  constructor(cause) {
-    super("Cast authentication failed", { cause });
-    this.name = "CastAuthenticationError";
-  }
-};
-function acceptsIncomingTrack(currentEpoch, offerEpoch) {
-  return validPresentationEpoch(offerEpoch) && offerEpoch >= currentEpoch;
-}
-function ownsActiveStream(currentEpoch, trackEpoch, currentStream, trackStream) {
-  return trackEpoch === currentEpoch && currentStream === trackStream;
-}
-function requiredOptions(options) {
-  var _a;
-  const resume = options.resumePassword !== void 0 || options.resumeBindingId !== void 0;
-  if (!options.generation || options.generation.length > 128 || (resume ? ((_a = options.resumePassword) == null ? void 0 : _a.length) !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId ?? "") : !options.authCode || !/^\d{6}$/.test(options.authCode))) throw new Error("Secure cast credentials are required");
-  if (options.reclaimToken !== void 0 && !/^[A-Za-z0-9_-]{43}$/.test(options.reclaimToken)) throw new Error("Invalid cast reclaim credential");
-  return { ...options, authCode: options.authCode ?? "", generation: options.generation };
-}
-function socketFor(options, role, onOpen, prepare) {
-  const socket = new WebSocket(options.relayUrl);
-  prepare == null ? void 0 : prepare(socket);
-  socket.onopen = () => {
-    sendWire(socket, { type: "hello", roomId: options.roomCode, generation: options.generation, role });
-    onOpen == null ? void 0 : onOpen(socket);
-  };
-  return socket;
-}
-function peerFor(options) {
-  return new RTCPeerConnection(options.turnUrl ? { iceServers: [{
-    urls: options.turnUrl,
-    ...options.turnUsername ? { username: options.turnUsername } : {},
-    ...options.turnCredential ? { credential: options.turnCredential } : {}
-  }] } : {});
-}
-async function applySignal(peer, secure, signal) {
-  if (signal.type === "ice") await peer.addIceCandidate(signal.candidate);
-  else if (signal.type === "offer") {
-    await peer.setRemoteDescription(signal.description);
-    await peer.setLocalDescription(await peer.createAnswer());
-    await secure.send({ type: "answer", description: peer.localDescription });
-  } else await peer.setRemoteDescription(signal.description);
-}
-function activateChannel(channel, pairing, onBound, onMessage) {
-  let bound = false;
-  channel.onopen = () => channel.send(JSON.stringify({ type: "binding", proof: pairing.sendBinding }));
-  channel.onmessage = ({ data }) => {
-    if (typeof data !== "string") return;
-    const value = parseDataMessage(data);
-    if (!value) return;
-    if (!bound) {
-      if (value.type !== "binding" || value.proof !== pairing.receiveBinding) {
-        channel.close();
-        return;
-      }
-      bound = true;
-      onBound();
-      return;
-    }
-    onMessage(value);
-  };
-}
+// src/core/cast/receiver-session.ts
 function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
   const options = requiredOptions(optionsInput);
   const state = { status: "connecting", command: null, presentationEpoch: 0, screenStream: null, peerCount: 0, error: null };
-  let peer, channel, pendingStream = null;
+  let peer;
+  let channel;
+  let pendingStream = null;
   const transceiverEpochs = /* @__PURE__ */ new WeakMap();
-  let closed = false, failures = 0, socketAttempts = 0, socket;
-  let signaling, pairing, applyingOfferEpoch, activeHandshake;
+  let closed = false;
+  let failures = 0;
+  let socketAttempts = 0;
+  let socket;
+  let signaling;
+  let pairing;
+  let applyingOfferEpoch;
+  let activeHandshake;
   let trusted = Boolean(options.resumePassword);
   let provisionalBinding;
   const emit = () => {
@@ -26412,9 +26449,14 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
   };
   const initialPending = [];
   let bindReady;
-  socket = socketFor(options, "receiver", (active) => bindReady == null ? void 0 : bindReady(active, initialPending), (active) => {
-    active.onmessage = (event) => initialPending.push(event);
-  });
+  socket = socketFor(
+    options,
+    "receiver",
+    (active) => bindReady == null ? void 0 : bindReady(active, initialPending),
+    (active) => {
+      active.onmessage = (event) => initialPending.push(event);
+    }
+  );
   void loadSpake(asset).then((spake) => {
     const bindSocket = (active, pending) => {
       let handshake = new ReceiverHandshake(spake, options);
@@ -26425,9 +26467,11 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
         void (async () => {
           const wire = parseWire(data);
           if (!wire) throw new Error("Invalid cast message");
-          if (wire.type === "challenge-request") sendWire(active, handshake.challengeFor(wire, ++count));
-          else if (wire.type === "prover") sendWire(active, await handshake.process(wire));
-          else if (wire.type === "confirm") {
+          if (wire.type === "challenge-request") {
+            sendWire(active, handshake.challengeFor(wire, ++count));
+          } else if (wire.type === "prover") {
+            sendWire(active, await handshake.process(wire));
+          } else if (wire.type === "confirm") {
             let result;
             try {
               result = await handshake.finish(wire);
@@ -26498,86 +26542,91 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
               const send = (outgoing) => {
                 if (incoming.readyState === "open") incoming.send(JSON.stringify(outgoing));
               };
-              activateChannel(incoming, pairing, () => {
-                state.peerCount = 1;
-                state.status = "paired";
-                trusted = Boolean(options.resumePassword);
-                if (trusted) {
-                  state.sasTrusted = true;
-                  onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
-                }
-                emit();
-              }, (message) => {
-                if (message.type === "resume-binding") {
-                  if (!trusted) {
-                    provisionalBinding = message;
-                    return;
-                  }
-                  const persisted = onResumeBinding ? onResumeBinding(message) : Promise.reject(new Error("Cast resume storage is unavailable"));
-                  void persisted.then(() => send({ type: "resume-binding-ack", bindingId: message.bindingId })).catch(fail);
-                  return;
-                }
-                if (message.type === "resume-binding-revoke") {
-                  if (trusted) void (onResumeRevoke == null ? void 0 : onResumeRevoke(message.bindingId).catch(fail));
-                  return;
-                }
-                if (message.type === "sas-confirm") {
-                  if (trusted || message.generation !== options.generation || !state.sas) {
-                    incoming.close();
-                    return;
-                  }
-                  trusted = true;
-                  state.sasTrusted = true;
-                  delete state.sas;
-                  const pending2 = provisionalBinding;
-                  provisionalBinding = void 0;
-                  const persisted = pending2 && onResumeBinding ? onResumeBinding(pending2) : Promise.resolve();
-                  void persisted.then(() => {
-                    if (pending2) send({ type: "resume-binding-ack", bindingId: pending2.bindingId });
-                    send({ type: "sas-ack", generation: options.generation });
+              activateChannel(
+                incoming,
+                pairing,
+                () => {
+                  state.peerCount = 1;
+                  state.status = "paired";
+                  trusted = Boolean(options.resumePassword);
+                  if (trusted) {
+                    state.sasTrusted = true;
                     onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
-                    emit();
-                  }).catch(fail);
-                  return;
-                }
-                if (!trusted) return;
-                if (message.type === "queue-mutation" || message.type === "pair-display-request") {
-                  onAuthenticatedMessage == null ? void 0 : onAuthenticatedMessage(message, send);
-                  return;
-                }
-                if (message.type === "presentation-start") {
-                  if (message.epoch > state.presentationEpoch) {
-                    state.presentationEpoch = message.epoch;
-                    state.command = null;
-                    state.screenStream = pendingStream;
-                    state.status = "casting";
-                    emit();
                   }
-                  return;
-                }
-                if (message.type === "stream") {
-                  if (message.epoch !== state.presentationEpoch) return;
-                  if (!message.active) {
-                    state.screenStream = null;
-                    state.command = null;
-                    state.status = "paired";
-                    emit();
-                  } else if (pendingStream) {
-                    state.screenStream = pendingStream;
-                    state.command = null;
-                    state.status = "casting";
-                    emit();
+                  emit();
+                },
+                (message) => {
+                  if (message.type === "resume-binding") {
+                    if (!trusted) {
+                      provisionalBinding = message;
+                      return;
+                    }
+                    const persisted = onResumeBinding ? onResumeBinding(message) : Promise.reject(new Error("Cast resume storage is unavailable"));
+                    void persisted.then(() => send({ type: "resume-binding-ack", bindingId: message.bindingId })).catch(fail);
+                    return;
                   }
-                  return;
+                  if (message.type === "resume-binding-revoke") {
+                    if (trusted) void (onResumeRevoke == null ? void 0 : onResumeRevoke(message.bindingId).catch(fail));
+                    return;
+                  }
+                  if (message.type === "sas-confirm") {
+                    if (trusted || message.generation !== options.generation || !state.sas) {
+                      incoming.close();
+                      return;
+                    }
+                    trusted = true;
+                    state.sasTrusted = true;
+                    delete state.sas;
+                    const pending2 = provisionalBinding;
+                    provisionalBinding = void 0;
+                    const persisted = pending2 && onResumeBinding ? onResumeBinding(pending2) : Promise.resolve();
+                    void persisted.then(() => {
+                      if (pending2) send({ type: "resume-binding-ack", bindingId: pending2.bindingId });
+                      send({ type: "sas-ack", generation: options.generation });
+                      onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
+                      emit();
+                    }).catch(fail);
+                    return;
+                  }
+                  if (!trusted) return;
+                  if (message.type === "queue-mutation" || message.type === "pair-display-request") {
+                    onAuthenticatedMessage == null ? void 0 : onAuthenticatedMessage(message, send);
+                    return;
+                  }
+                  if (message.type === "presentation-start") {
+                    if (message.epoch > state.presentationEpoch) {
+                      state.presentationEpoch = message.epoch;
+                      state.command = null;
+                      state.screenStream = pendingStream;
+                      state.status = "casting";
+                      emit();
+                    }
+                    return;
+                  }
+                  if (message.type === "stream") {
+                    if (message.epoch !== state.presentationEpoch) return;
+                    if (!message.active) {
+                      state.screenStream = null;
+                      state.command = null;
+                      state.status = "paired";
+                      emit();
+                    } else if (pendingStream) {
+                      state.screenStream = pendingStream;
+                      state.command = null;
+                      state.status = "casting";
+                      emit();
+                    }
+                    return;
+                  }
+                  if (message.type !== "command" || message.epoch < state.presentationEpoch) return;
+                  state.presentationEpoch = message.epoch;
+                  state.command = message.command.sourceKind === "idle" ? null : message.command;
+                  state.screenStream = null;
+                  pendingStream = null;
+                  state.status = message.command.sourceKind === "idle" ? "paired" : "casting";
+                  emit();
                 }
-                if (message.type !== "command" || message.epoch < state.presentationEpoch) return;
-                state.presentationEpoch = message.epoch;
-                state.command = message.command.sourceKind === "idle" ? null : message.command;
-                state.screenStream = null;
-                pendingStream = null;
-                state.status = message.command.sourceKind === "idle" ? "paired" : "casting";
-                emit();
-              });
+              );
               incoming.onclose = disconnect;
             };
           } else if (wire.type === "signal" && signaling && peer) {
@@ -26592,10 +26641,14 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
                 } finally {
                   applyingOfferEpoch = void 0;
                 }
-                for (const transceiver of activePeer.getTransceivers()) transceiverEpochs.set(transceiver, signal.presentationEpoch);
+                for (const transceiver of activePeer.getTransceivers()) {
+                  transceiverEpochs.set(transceiver, signal.presentationEpoch);
+                }
                 await activePeer.setLocalDescription(await activePeer.createAnswer());
                 await activeSignaling.send({ type: "answer", description: activePeer.localDescription });
-              } else await applySignal(activePeer, activeSignaling, signal);
+              } else {
+                await applySignal(activePeer, activeSignaling, signal);
+              }
             } catch (error) {
               if (error instanceof DOMException && error.name === "OperationError") throw new CastAuthenticationError(error);
               throw error;
@@ -26612,8 +26665,8 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
           window.setTimeout(() => {
             if (closed) return;
             const retryPending = [];
-            const retry = socketFor(options, "receiver", (active2) => bindSocket(active2, retryPending));
-            retry.onmessage = (event2) => retryPending.push(event2);
+            const retry = socketFor(options, "receiver", (retrySocket) => bindSocket(retrySocket, retryPending));
+            retry.onmessage = (retryEvent) => retryPending.push(retryEvent);
             socket = retry;
           }, delay);
           return;
@@ -26626,37 +26679,44 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
     if (socket.readyState === WebSocket.OPEN) bindSocket(socket, initialPending);
   }).catch(fail);
   emit();
-  return { close() {
-    provisionalBinding = void 0;
-    if (trusted) onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: false });
-    trusted = false;
-    closed = true;
-    pendingStream = null;
-    state.screenStream = null;
-    activeHandshake == null ? void 0 : activeHandshake.destroy();
-    activeHandshake = void 0;
-    signaling == null ? void 0 : signaling.close();
-    signaling = void 0;
-    pairing = void 0;
-    socket == null ? void 0 : socket.close();
-    peer == null ? void 0 : peer.close();
-  }, confirmSas(accepted) {
-    if (!accepted) {
+  return {
+    close() {
       provisionalBinding = void 0;
+      if (trusted) onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: false });
       trusted = false;
+      closed = true;
+      pendingStream = null;
+      state.screenStream = null;
       activeHandshake == null ? void 0 : activeHandshake.destroy();
       activeHandshake = void 0;
       signaling == null ? void 0 : signaling.close();
       signaling = void 0;
       pairing = void 0;
-      channel == null ? void 0 : channel.close();
+      socket == null ? void 0 : socket.close();
       peer == null ? void 0 : peer.close();
+    },
+    confirmSas(accepted) {
+      if (!accepted) {
+        provisionalBinding = void 0;
+        trusted = false;
+        activeHandshake == null ? void 0 : activeHandshake.destroy();
+        activeHandshake = void 0;
+        signaling == null ? void 0 : signaling.close();
+        signaling = void 0;
+        pairing = void 0;
+        channel == null ? void 0 : channel.close();
+        peer == null ? void 0 : peer.close();
+      }
+    },
+    revokePresenter(epoch) {
+      if (trusted && (channel == null ? void 0 : channel.readyState) === "open" && Number.isSafeInteger(epoch) && epoch > 0) {
+        channel.send(JSON.stringify({ type: "presenter-revoke", epoch }));
+      }
+    },
+    send(message) {
+      if (trusted && (channel == null ? void 0 : channel.readyState) === "open") channel.send(JSON.stringify(message));
     }
-  }, revokePresenter(epoch) {
-    if (trusted && (channel == null ? void 0 : channel.readyState) === "open" && Number.isSafeInteger(epoch) && epoch > 0) channel.send(JSON.stringify({ type: "presenter-revoke", epoch }));
-  }, send(message) {
-    if (trusted && (channel == null ? void 0 : channel.readyState) === "open") channel.send(JSON.stringify(message));
-  } };
+  };
 }
 
 // src/plugins/cast-receiver/receiver.ts

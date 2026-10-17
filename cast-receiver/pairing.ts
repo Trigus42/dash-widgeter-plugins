@@ -28,8 +28,38 @@ export async function createPairingSession(baseUrl: string, signal: AbortSignal,
   catch { throw new Error('Cast signaling service returned an invalid room'); }
   await validateOrigin(created.websocketUrl);
   const authCode = generateAuthCode();
-  return { options: { relayUrl: created.websocketUrl, roomCode: created.roomId, authCode, generation: created.generation, reclaimToken: created.reclaimToken }, roomCode: `${created.roomId}${authCode}`,
-    authCode, generation: created.generation, expiresAt: created.expiresAt,
-    async renew() { const renewal = await fetch(new URL(`/room/${created.roomId}`, base), { method: 'POST', headers: { authorization: `Bearer ${created.reclaimToken}` }, signal }); if (!renewal.ok) throw new Error(`Signaling renewal failed (${renewal.status})`); const value: unknown = await renewal.json(); if (!value || typeof value !== 'object' || !('expiresAt' in value) || typeof value.expiresAt !== 'number' || value.expiresAt <= Date.now()) throw new Error('Signaling renewal returned invalid expiry'); created.expiresAt = value.expiresAt; return created.expiresAt; },
-    async close() { const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), { method: 'DELETE', headers: { authorization: `Bearer ${created.reclaimToken}` } }); if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`); } };
+  return {
+    options: {
+      relayUrl: created.websocketUrl,
+      roomCode: created.roomId,
+      authCode,
+      generation: created.generation,
+      reclaimToken: created.reclaimToken,
+    },
+    roomCode: `${created.roomId}${authCode}`,
+    authCode,
+    generation: created.generation,
+    expiresAt: created.expiresAt,
+    async renew() {
+      const renewal = await fetch(new URL(`/room/${created.roomId}`, base), {
+        method: 'POST',
+        headers: { authorization: `Bearer ${created.reclaimToken}` },
+        signal,
+      });
+      if (!renewal.ok) throw new Error(`Signaling renewal failed (${renewal.status})`);
+      const value: unknown = await renewal.json();
+      if (!value || typeof value !== 'object' || !('expiresAt' in value) || typeof value.expiresAt !== 'number' || value.expiresAt <= Date.now()) {
+        throw new Error('Signaling renewal returned invalid expiry');
+      }
+      created.expiresAt = value.expiresAt;
+      return created.expiresAt;
+    },
+    async close() {
+      const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), {
+        method: 'DELETE',
+        headers: { authorization: `Bearer ${created.reclaimToken}` },
+      });
+      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
+    },
+  };
 }
