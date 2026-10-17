@@ -50,4 +50,31 @@ describe('PairingWidget', () => {
     await Promise.resolve();
     expect(setPairingDetails).not.toHaveBeenCalled();
   });
+
+  it('renders a localized icon-only control and reflects connection health', () => {
+    mocks.useCastPlayback.mockReturnValue({ ...baseState, peerCount: 0 });
+    const ctx = context(); ctx.locale = 'de';
+    const view = render(<PairingWidget context={ctx} />);
+    const button = view.getByRole('button', { name: 'Cast-Kopplung. Verbundene Geräte: 0' });
+    expect(button.getAttribute('title')).toBe('Cast-Kopplung. Verbundene Geräte: 0');
+    expect(button.textContent).toBe('');
+    const dot = button.querySelector('.cast-pairing-status');
+    expect(dot?.getAttribute('aria-hidden')).toBe('true');
+    expect(dot?.classList.contains('cast-pairing-status-connected')).toBe(false);
+
+    mocks.useCastPlayback.mockReturnValue({ ...baseState, peerCount: 2 });
+    view.rerender(<PairingWidget context={ctx} />);
+    expect(view.getByRole('button', { name: 'Cast-Kopplung. Verbundene Geräte: 2' })
+      .querySelector('.cast-pairing-status')?.classList.contains('cast-pairing-status-connected')).toBe(true);
+  });
+
+  it('keeps the launch click behavior unchanged', () => {
+    mocks.useCastPlayback.mockReturnValue(baseState);
+    const ctx = context();
+    render(<PairingWidget context={ctx} />);
+    fireEvent.click(document.querySelector('.cast-pairing-button') as HTMLButtonElement);
+    expect(ctx.setPairingDetails).toHaveBeenCalledWith(expect.objectContaining({ code: '1234567890' }));
+    const details = vi.mocked(ctx.setPairingDetails).mock.calls[0]?.[0];
+    expect(details && 'url' in details ? details.url : '').toMatch(/^https:\/\/sender\.example\/cast#[A-Za-z0-9_-]+$/);
+  });
 });

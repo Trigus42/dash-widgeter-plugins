@@ -27432,6 +27432,56 @@ function CastWidget({ context }) {
 // src/plugins/cast-receiver/widgets/PairingWidget.tsx
 var import_react4 = __toESM(require_react(), 1);
 
+// src/core/cast/setup/pairing-url.ts
+var VERSION = 1;
+var FLAG_RELAY = 1;
+var FLAG_HTTPS = 2;
+var HEADER_LENGTH = 6;
+var MAX_AUTHORITY_BYTES = 255;
+function encodeBase64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function parseCode(code) {
+  if (!/^\d{10}$/.test(code)) throw new TypeError("Cast pairing code must contain exactly 10 digits.");
+  const numeric = Number(code);
+  if (!Number.isSafeInteger(numeric) || numeric > 4294967295) throw new TypeError("Cast pairing code exceeds its binary representation.");
+  return numeric;
+}
+function parseRelay(value) {
+  if (value.length > 2048) throw new TypeError("Cast relay URL is too long.");
+  const relay = new URL(value);
+  if (relay.protocol !== "http:" && relay.protocol !== "https:" || relay.username || relay.password || relay.pathname !== "/" || relay.search || relay.hash) {
+    throw new TypeError("Cast relay must be an HTTP or HTTPS origin.");
+  }
+  return relay;
+}
+function encodeCastPairingPayload(roomCode, relayUrl, senderOrigin) {
+  const code = parseCode(roomCode);
+  const relay = parseRelay(relayUrl);
+  const sender = parseRelay(senderOrigin);
+  const hasRelay = relay.origin !== sender.origin;
+  const authority = hasRelay ? new TextEncoder().encode(relay.host) : new Uint8Array();
+  if (authority.length > MAX_AUTHORITY_BYTES) throw new TypeError("Cast relay authority is too long.");
+  const bytes = new Uint8Array(HEADER_LENGTH + (hasRelay ? 2 + authority.length : 0));
+  bytes[0] = VERSION;
+  bytes[1] = (hasRelay ? FLAG_RELAY : 0) | (hasRelay && relay.protocol === "https:" ? FLAG_HTTPS : 0);
+  new DataView(bytes.buffer).setUint32(2, code);
+  if (hasRelay) {
+    new DataView(bytes.buffer).setUint16(HEADER_LENGTH, authority.length);
+    bytes.set(authority, HEADER_LENGTH + 2);
+  }
+  return encodeBase64Url(bytes);
+}
+function createCastPairingUrl(senderUrl, relayUrl, roomCode) {
+  const sender = new URL(senderUrl);
+  if (sender.protocol !== "http:" && sender.protocol !== "https:" || sender.username || sender.password || sender.search || sender.hash) throw new TypeError("Invalid Cast sender URL.");
+  sender.pathname = "/cast";
+  sender.hash = encodeCastPairingPayload(roomCode, relayUrl, sender.origin);
+  return sender.href;
+}
+
 // src/plugins/cast-receiver/session/session-store.ts
 var import_react3 = __toESM(require_react(), 1);
 var INITIAL = {
@@ -27474,10 +27524,7 @@ var EN = { title: "Cast pairing", devices: "Connected devices", sas: "Security c
 var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te", sas: "Sicherheitscode" };
 function senderLink(senderUrl, relayUrl, roomCode) {
   if (!senderUrl || !relayUrl || !roomCode) return "";
-  const url = new URL(senderUrl);
-  url.searchParams.set("relay", relayUrl);
-  url.searchParams.set("code", roomCode);
-  return url.href;
+  return createCastPairingUrl(senderUrl, relayUrl, roomCode);
 }
 function PairingWidget({ context }) {
   const receiver = useCastPlayback(context);
@@ -27523,6 +27570,8 @@ function PairingWidget({ context }) {
   const showDetails = () => {
     if (roomCode && url) void context.setPairingDetails({ code: roomCode, url, ...receiver.sas ? { sas: receiver.sas } : {} }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
   };
+  const label = `${strings.title}. ${strings.devices}: ${receiver.peerCount}`;
+  const connected = receiver.peerCount > 0;
   return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
     "button",
     {
@@ -27530,11 +27579,11 @@ function PairingWidget({ context }) {
       className: "cast-pairing-button",
       onClick: showDetails,
       disabled: !roomCode,
-      "aria-label": `${strings.title}. ${strings.devices}: ${receiver.peerCount}`,
+      "aria-label": label,
+      title: label,
       children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: strings.title }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("strong", { children: receiver.peerCount })
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `cast-pairing-status ${connected ? "cast-pairing-status-connected" : ""}`, "aria-hidden": "true" })
       ]
     }
   );
@@ -27552,12 +27601,13 @@ var CAST_SANDBOX_CSS = `
   .cast-active[data-overlay='inline'] { background: transparent; }
   .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
   .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
-  .cast-pairing-button { width: 100%; height: 100%; min-width: 48px; min-height: 48px; display: grid; grid-template-columns: 24px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 8px 12px; border: 0; border-radius: inherit; color: inherit; background: transparent; cursor: pointer; font-size: 16px; text-align: left; }
+  .cast-pairing-button { position: relative; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: grid; place-items: center; padding: 10px; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; }
+  .cast-pairing-button:hover:not(:disabled) { background: rgba(255,255,255,.08); }
   .cast-pairing-button:disabled { opacity: .45; cursor: default; }
-  .cast-pairing-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
-  .cast-pairing-button span { min-width: 0; overflow-wrap: anywhere; }
+  .cast-pairing-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; background: rgba(255,255,255,.08); }
   .cast-pairing-button svg { width: 24px; height: 24px; fill: currentColor; }
-  .cast-pairing-button strong { font-size: 14px; }
+  .cast-pairing-status { position: absolute; inset-block-start: 7px; inset-inline-end: 7px; width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; background: #9ca3af; }
+  .cast-pairing-status-connected { background: #22c55e; }
 `;
 
 // src/plugins/cast-receiver/sandbox.ts

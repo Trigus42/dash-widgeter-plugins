@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
+import { createCastPairingUrl } from '@/core/cast/setup/pairing-url';
 import { useCastPlayback } from '../session/session-store';
 import { readCastConfig } from '../config/resolve';
 const EN = { title: 'Cast pairing', devices: 'Connected devices', sas: 'Security code' };
@@ -8,10 +9,7 @@ const DE = { title: 'Cast-Kopplung', devices: 'Verbundene Geräte', sas: 'Sicher
 
 function senderLink(senderUrl: string, relayUrl: string, roomCode: string): string {
   if (!senderUrl || !relayUrl || !roomCode) return '';
-  const url = new URL(senderUrl);
-  url.searchParams.set('relay', relayUrl);
-  url.searchParams.set('code', roomCode);
-  return url.href;
+  return createCastPairingUrl(senderUrl, relayUrl, roomCode);
 }
 
 export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element {
@@ -62,9 +60,11 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
     if (roomCode && url) void context.setPairingDetails({ code: roomCode, url, ...(receiver.sas ? { sas: receiver.sas } : {}) })
       .catch((error: unknown) => context.reportStatus('error', error instanceof Error ? error.message : String(error)));
   };
+  const label = `${strings.title}. ${strings.devices}: ${receiver.peerCount}`;
+  const connected = receiver.peerCount > 0;
   return <button type="button" className="cast-pairing-button" onClick={showDetails} disabled={!roomCode}
-    aria-label={`${strings.title}. ${strings.devices}: ${receiver.peerCount}`}>
+    aria-label={label} title={label}>
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" /></svg>
-    <span>{strings.title}</span><strong>{receiver.peerCount}</strong>
+    <span className={`cast-pairing-status ${connected ? 'cast-pairing-status-connected' : ''}`} aria-hidden="true" />
   </button>;
 }
