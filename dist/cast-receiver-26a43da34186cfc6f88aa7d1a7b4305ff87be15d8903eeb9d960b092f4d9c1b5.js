@@ -25830,7 +25830,14 @@ function parseDataMessage(input, now = Date.now()) {
   }
   if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
   if (message.type === "stream" && exact(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
-  if ((message.type === "sas-confirm" || message.type === "sas-ack") && exact(message, ["type", "generation"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) return message;
+  if (message.type === "sas-confirm" && exact(message, message.binding === void 0 ? ["type", "generation"] : ["type", "generation", "binding"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) {
+    if (message.binding === void 0) return { type: "sas-confirm", generation: message.generation };
+    if (!message.binding || typeof message.binding !== "object" || Array.isArray(message.binding)) return null;
+    const binding = message.binding;
+    if (!exact(binding, ["bindingId", "resumePassword", "expiresAt"]) || !encoded32(binding.bindingId) || !encoded32(binding.resumePassword) || !Number.isSafeInteger(binding.expiresAt) || Number(binding.expiresAt) <= now || Number(binding.expiresAt) > now + MAX_CAST_RESUME_LIFETIME_MS) return null;
+    return { type: "sas-confirm", generation: message.generation, binding };
+  }
+  if (message.type === "sas-ack" && exact(message, ["type", "generation"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) return message;
   if (message.type === "queue-mutation" && exact(message, ["type", "mutation"])) {
     const mutation = parseCastQueueMutation(message.mutation);
     return mutation ? { type: "queue-mutation", mutation } : null;
@@ -26418,7 +26425,7 @@ function handleReceiverDataMessage(message, ctx) {
   var _a, _b;
   if (message.type === "resume-binding") {
     if (!ctx.trusted) {
-      ctx.setProvisionalBinding(message);
+      ctx.closeChannel();
       return;
     }
     const persisted = ctx.onResumeBinding ? ctx.onResumeBinding(message) : Promise.reject(new Error("Cast resume storage is unavailable"));
@@ -26434,15 +26441,14 @@ function handleReceiverDataMessage(message, ctx) {
       ctx.closeChannel();
       return;
     }
-    ctx.setTrusted(true);
-    ctx.state.sasTrusted = true;
-    delete ctx.state.sas;
-    const pending = ctx.provisionalBinding;
-    ctx.setProvisionalBinding(void 0);
-    const persisted = pending && ctx.onResumeBinding ? ctx.onResumeBinding(pending) : Promise.resolve();
+    const pending = message.binding;
+    const persisted = pending ? ctx.onResumeBinding ? ctx.onResumeBinding(pending) : Promise.reject(new Error("Cast resume storage is unavailable")) : Promise.resolve();
     void persisted.then(() => {
       var _a2;
       if (pending) ctx.send({ type: "resume-binding-ack", bindingId: pending.bindingId });
+      ctx.setTrusted(true);
+      ctx.state.sasTrusted = true;
+      delete ctx.state.sas;
       ctx.send({ type: "sas-ack", generation: ctx.options.generation });
       (_a2 = ctx.onConnection) == null ? void 0 : _a2.call(ctx, { generation: ctx.options.generation, trusted: true });
       ctx.emit();
@@ -26630,8 +26636,6 @@ async function processReceiverWireMessage(data, ctx) {
             trusted: ctx.getTrusted(),
             setTrusted: ctx.setTrusted,
             options: ctx.options,
-            provisionalBinding: ctx.getProvisionalBinding(),
-            setProvisionalBinding: ctx.setProvisionalBinding,
             pendingStream: ctx.getPendingStream(),
             setPendingStream: ctx.setPendingStream,
             emit: ctx.emit,
@@ -26665,7 +26669,6 @@ async function processReceiverWireMessage(data, ctx) {
 // src/core/cast/session/receiver/receiver-teardown.ts
 function closeReceiver(ctx) {
   var _a, _b, _c, _d, _e, _f, _g, _h;
-  ctx.setProvisionalBinding(void 0);
   if (ctx.getTrusted()) (_a = ctx.onConnection) == null ? void 0 : _a.call(ctx, { generation: ctx.generation, trusted: false });
   ctx.setTrusted(false);
   (_b = ctx.setClosed) == null ? void 0 : _b.call(ctx, true);
@@ -26681,7 +26684,6 @@ function closeReceiver(ctx) {
 }
 function rejectReceiverSas(ctx) {
   var _a, _b, _c, _d;
-  ctx.setProvisionalBinding(void 0);
   ctx.setTrusted(false);
   (_a = ctx.getActiveHandshake()) == null ? void 0 : _a.destroy();
   ctx.setActiveHandshake(void 0);
@@ -26720,13 +26722,11 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
   let activeHandshake;
   let trusted = Boolean(options.resumePassword);
   const listening = Promise.withResolvers();
-  let provisionalBinding;
   const emit = () => {
     if (!closed) onState({ ...state });
   };
   const disconnect = () => {
     if (closed || state.peerCount === 0) return;
-    provisionalBinding = void 0;
     trusted = false;
     onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: false });
     state.peerCount = 0;
@@ -26802,10 +26802,6 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
         setTrusted: (t) => {
           trusted = t;
         },
-        getProvisionalBinding: () => provisionalBinding,
-        setProvisionalBinding: (b) => {
-          provisionalBinding = b;
-        },
         getPendingStream: () => pendingStream,
         setPendingStream: (s) => {
           pendingStream = s;
@@ -26850,10 +26846,6 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
   }).catch(fail);
   emit();
   const tearDownContext = {
-    getProvisionalBinding: () => provisionalBinding,
-    setProvisionalBinding: (b) => {
-      provisionalBinding = b;
-    },
     getTrusted: () => trusted,
     setTrusted: (t) => {
       trusted = t;
