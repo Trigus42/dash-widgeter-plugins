@@ -25757,6 +25757,7 @@ async function resumeLookup(relayUrl, bindingId, signal) {
   try {
     response = await fetch(new URL(`resume/${bindingId}`, base), { method: "POST", ...signal ? { signal } : {} });
   } catch (error) {
+    if (signal == null ? void 0 : signal.aborted) throw error;
     throw new CastResumeLookupError(error instanceof Error ? error.message : "Cast resume lookup failed", "transient");
   }
   if (response.status === 404 || response.status === 410) throw new CastResumeLookupError("Cast resume binding is unavailable", "not-found");
@@ -27432,51 +27433,859 @@ function CastWidget({ context }) {
 // src/plugins/cast-receiver/widgets/PairingWidget.tsx
 var import_react4 = __toESM(require_react(), 1);
 
+// src/vendor/asn1-per-ts/BitBuffer.ts
+var BitBuffer = class _BitBuffer {
+  _data;
+  _bitLength;
+  _offset;
+  constructor(data, bitLength, offset) {
+    this._data = data;
+    this._bitLength = bitLength;
+    this._offset = offset;
+  }
+  /** Allocate a writable buffer with optional initial byte capacity. */
+  static alloc(initialByteCapacity = 256) {
+    return new _BitBuffer(new Uint8Array(initialByteCapacity), 0, 0);
+  }
+  /** Wrap existing bytes as a buffer for reading. */
+  static from(data, bitLength) {
+    const bl = bitLength ?? data.length * 8;
+    const copy = new Uint8Array(data);
+    return new _BitBuffer(copy, bl, 0);
+  }
+  /** Parse a binary string ('0' and '1' characters) into a buffer. */
+  static fromBinaryString(bits) {
+    const buf = _BitBuffer.alloc(Math.ceil(bits.length / 8) || 1);
+    for (const ch of bits) {
+      if (ch !== "0" && ch !== "1") {
+        throw new Error(`Invalid binary character: '${ch}'`);
+      }
+      buf.writeBit(ch === "1" ? 1 : 0);
+    }
+    buf.reset();
+    return buf;
+  }
+  /** Total number of valid bits. */
+  get bitLength() {
+    return this._bitLength;
+  }
+  /** Current cursor position in bits. */
+  get offset() {
+    return this._offset;
+  }
+  /** Bits remaining from cursor to end. */
+  get remaining() {
+    return this._bitLength - this._offset;
+  }
+  /** Write a single bit. */
+  writeBit(bit) {
+    this.ensureCapacity(this._offset + 1);
+    const byteIndex = this._offset >> 3;
+    const bitIndex = 7 - (this._offset & 7);
+    const currentByte = this._data[byteIndex] ?? 0;
+    if (bit) {
+      this._data[byteIndex] = currentByte | 1 << bitIndex;
+    } else {
+      this._data[byteIndex] = currentByte & ~(1 << bitIndex);
+    }
+    this._offset++;
+    if (this._offset > this._bitLength) {
+      this._bitLength = this._offset;
+    }
+  }
+  /** Read a single bit. */
+  readBit() {
+    if (this._offset >= this._bitLength) {
+      throw new Error("BitBuffer: read past end of buffer");
+    }
+    const byteIndex = this._offset >> 3;
+    const bitIndex = 7 - (this._offset & 7);
+    this._offset++;
+    return (this._data[byteIndex] ?? 0) >> bitIndex & 1;
+  }
+  /**
+   * Write the lowest `count` bits of `value` (MSB first).
+   * @param value  unsigned integer (0..2^32-1)
+   * @param count  number of bits to write (0..32)
+   */
+  writeBits(value, count) {
+    if (count === 0) return;
+    if (count < 0 || count > 32) {
+      throw new Error(`writeBits: count must be 0..32, got ${count}`);
+    }
+    for (let i = count - 1; i >= 0; i--) {
+      this.writeBit(value >> i & 1);
+    }
+  }
+  /**
+   * Read `count` bits and return as unsigned integer.
+   * @param count  number of bits to read (0..32)
+   */
+  readBits(count) {
+    if (count === 0) return 0;
+    if (count < 0 || count > 32) {
+      throw new Error(`readBits: count must be 0..32, got ${count}`);
+    }
+    let result = 0;
+    for (let i = 0; i < count; i++) {
+      result = result << 1 | this.readBit();
+    }
+    return result >>> 0;
+  }
+  /** Write arbitrary-width bits from a bigint value (MSB first). */
+  writeBigBits(value, count) {
+    if (count === 0) return;
+    for (let i = count - 1; i >= 0; i--) {
+      this.writeBit(Number(value >> BigInt(i) & 1n));
+    }
+  }
+  /** Read arbitrary-width bits into a bigint. */
+  readBigBits(count) {
+    if (count === 0) return 0n;
+    let result = 0n;
+    for (let i = 0; i < count; i++) {
+      result = result << 1n | BigInt(this.readBit());
+    }
+    return result;
+  }
+  /** Write raw bytes (each byte = 8 bits). */
+  writeOctets(data) {
+    for (let i = 0; i < data.length; i++) {
+      this.writeBits(data[i] ?? 0, 8);
+    }
+  }
+  /**
+   * Write exactly `bitLength` bits from a left-aligned byte array.
+   * This is the inverse of extractBits(): the source bits are
+   * packed MSB-first starting from bit 0 of data[0].
+   */
+  writeRawBits(data, bitLength) {
+    if (bitLength === 0) return;
+    if (bitLength < 0 || bitLength > data.length * 8) {
+      throw new Error(
+        `writeRawBits: bitLength (${bitLength}) out of range [0, ${data.length * 8}]`
+      );
+    }
+    for (let i = 0; i < bitLength; i++) {
+      const byteIndex = i >> 3;
+      const bitIndex = 7 - (i & 7);
+      const bit = (data[byteIndex] ?? 0) >> bitIndex & 1;
+      this.writeBit(bit);
+    }
+  }
+  /** Read raw bytes. */
+  readOctets(byteCount) {
+    const result = new Uint8Array(byteCount);
+    for (let i = 0; i < byteCount; i++) {
+      result[i] = this.readBits(8);
+    }
+    return result;
+  }
+  /** Return compact Uint8Array with trailing bits zero-padded. */
+  toUint8Array() {
+    const byteLen = Math.ceil(this._bitLength / 8);
+    return this._data.slice(0, byteLen);
+  }
+  /** Return binary string representation. */
+  toBinaryString() {
+    let result = "";
+    const savedOffset = this._offset;
+    this._offset = 0;
+    for (let i = 0; i < this._bitLength; i++) {
+      result += this.readBit().toString();
+    }
+    this._offset = savedOffset;
+    return result;
+  }
+  /** Return hex string representation. */
+  toHex() {
+    const bytes = this.toUint8Array();
+    return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  /**
+   * Extract a range of bits into a new byte-aligned Uint8Array.
+   *
+   * The extracted bits are left-aligned in the output: bit 0 of the result
+   * corresponds to bit `startBit` of the source. Trailing bits in the last
+   * byte are zero-padded.
+   */
+  extractBits(startBit, bitCount) {
+    if (bitCount === 0) return new Uint8Array(0);
+    const out = _BitBuffer.alloc(Math.ceil(bitCount / 8));
+    for (let i = 0; i < bitCount; i++) {
+      const srcByte = startBit + i >> 3;
+      const srcBitIdx = 7 - (startBit + i & 7);
+      const bit = (this._data[srcByte] ?? 0) >> srcBitIdx & 1;
+      out.writeBit(bit);
+    }
+    return out.toUint8Array();
+  }
+  /** Reset cursor to 0. */
+  reset() {
+    this._offset = 0;
+  }
+  /** Seek to absolute bit offset. */
+  seek(bitOffset) {
+    if (bitOffset < 0 || bitOffset > this._bitLength) {
+      throw new Error(`seek: offset ${bitOffset} out of range [0, ${this._bitLength}]`);
+    }
+    this._offset = bitOffset;
+  }
+  ensureCapacity(bitsNeeded) {
+    const bytesNeeded = Math.ceil(bitsNeeded / 8);
+    if (bytesNeeded <= this._data.length) return;
+    let newSize = this._data.length;
+    while (newSize < bytesNeeded) {
+      newSize *= 2;
+    }
+    const newData = new Uint8Array(newSize);
+    newData.set(this._data);
+    this._data = newData;
+  }
+};
+
+// src/vendor/asn1-per-ts/RawBytes.ts
+var RawBytes = class {
+  data;
+  bitLength;
+  constructor(data, bitLength) {
+    this.data = data;
+    this.bitLength = bitLength ?? data.length * 8;
+    if (this.bitLength < 0) {
+      throw new Error(`RawBytes: bitLength must be non-negative, got ${this.bitLength}`);
+    }
+    if (this.bitLength > data.length * 8) {
+      throw new Error(
+        `RawBytes: bitLength (${this.bitLength}) exceeds data capacity (${data.length * 8} bits)`
+      );
+    }
+  }
+};
+function isRawBytes(value) {
+  return value instanceof RawBytes;
+}
+
+// src/vendor/asn1-per-ts/helpers.ts
+function constrainedWholeNumberBitCount(min, max) {
+  const range = max - min + 1;
+  if (range <= 0) throw new Error(`Invalid constraint: min=${min} > max=${max}`);
+  return range === 1 ? 0 : Math.ceil(Math.log2(range));
+}
+function encodeConstrainedWholeNumber(buffer, value, min, max) {
+  if (value < min || value > max) {
+    throw new Error(`Value ${value} out of constrained range [${min}, ${max}]`);
+  }
+  buffer.writeBits(value - min, constrainedWholeNumberBitCount(min, max));
+}
+function decodeConstrainedWholeNumber(buffer, min, max) {
+  return buffer.readBits(constrainedWholeNumberBitCount(min, max)) + min;
+}
+function encodeUnconstrainedLength(buffer, length) {
+  if (length < 0) throw new Error(`Length must be non-negative, got ${length}`);
+  if (length < 128) {
+    buffer.writeBit(0);
+    buffer.writeBits(length, 7);
+  } else if (length < 16384) {
+    buffer.writeBits(2, 2);
+    buffer.writeBits(length, 14);
+  } else {
+    throw new Error(`Length ${length} >= 16384 requires fragmented encoding`);
+  }
+}
+function decodeUnconstrainedLength(buffer) {
+  if (buffer.readBit() === 0) return buffer.readBits(7);
+  if (buffer.readBit() === 0) return buffer.readBits(14);
+  throw new Error("Fragmented length determinant decoding is not supported");
+}
+function encodeConstrainedLength(buffer, length, min, max) {
+  if (length < min || length > max) throw new Error(`Length ${length} out of range [${min}, ${max}]`);
+  if (max - min + 1 <= 65536) encodeConstrainedWholeNumber(buffer, length, min, max);
+  else encodeUnconstrainedLength(buffer, length);
+}
+function decodeConstrainedLength(buffer, min, max) {
+  return max - min + 1 <= 65536 ? decodeConstrainedWholeNumber(buffer, min, max) : decodeUnconstrainedLength(buffer);
+}
+function encodeNormallySmallNumber(buffer, value) {
+  if (value < 0) throw new Error(`Normally small number must be non-negative, got ${value}`);
+  if (value < 64) {
+    buffer.writeBit(0);
+    buffer.writeBits(value, 6);
+  } else {
+    buffer.writeBit(1);
+    encodeSemiConstrainedWholeNumber(buffer, value, 0);
+  }
+}
+function decodeNormallySmallNumber(buffer) {
+  return buffer.readBit() === 0 ? buffer.readBits(6) : decodeSemiConstrainedWholeNumber(buffer, 0);
+}
+function encodeSemiConstrainedWholeNumber(buffer, value, min) {
+  if (value < min) throw new Error(`Value ${value} below minimum ${min}`);
+  const bytes = unsignedIntegerToBytes(value - min);
+  encodeUnconstrainedLength(buffer, bytes.length);
+  buffer.writeOctets(bytes);
+}
+function decodeSemiConstrainedWholeNumber(buffer, min) {
+  return bytesToUnsignedInteger(buffer.readOctets(decodeUnconstrainedLength(buffer))) + min;
+}
+function encodeUnconstrainedWholeNumber(buffer, value) {
+  const bytes = signedIntegerToBytes(value);
+  encodeUnconstrainedLength(buffer, bytes.length);
+  buffer.writeOctets(bytes);
+}
+function decodeUnconstrainedWholeNumber(buffer) {
+  return bytesToSignedInteger(buffer.readOctets(decodeUnconstrainedLength(buffer)));
+}
+function unsignedIntegerToBytes(value) {
+  if (value === 0) return new Uint8Array([0]);
+  const bytes = [];
+  for (let remaining = value; remaining > 0; remaining = Math.floor(remaining / 256)) {
+    bytes.unshift(remaining & 255);
+  }
+  return new Uint8Array(bytes);
+}
+function bytesToUnsignedInteger(bytes) {
+  let value = 0;
+  for (const byte of bytes) value = value * 256 + byte;
+  return value;
+}
+function signedIntegerToBytes(value) {
+  if (value >= 0) {
+    const bytes2 = unsignedIntegerToBytes(value);
+    if (((bytes2[0] ?? 0) & 128) === 0) return bytes2;
+    const prefixed = new Uint8Array(bytes2.length + 1);
+    prefixed.set(bytes2, 1);
+    return prefixed;
+  }
+  const bytes = [];
+  let remaining = BigInt(value);
+  do {
+    bytes.unshift(Number(remaining & 0xffn));
+    remaining >>= 8n;
+  } while (remaining !== -1n || ((bytes[0] ?? 0) & 128) === 0);
+  return new Uint8Array(bytes);
+}
+function bytesToSignedInteger(bytes) {
+  if (bytes.length === 0) return 0;
+  let value = 0n;
+  for (const byte of bytes) value = value * 256n + BigInt(byte);
+  if (((bytes[0] ?? 0) & 128) !== 0) value -= 1n << BigInt(bytes.length * 8);
+  return Number(value);
+}
+function encodeValue(buffer, codec, value) {
+  if (isRawBytes(value)) buffer.writeRawBits(value.data, value.bitLength);
+  else codec.encode(buffer, value);
+}
+
+// src/vendor/asn1-per-ts/integer-helpers.ts
+function assertSafeInteger(value, name) {
+  if (!Number.isSafeInteger(value)) {
+    throw new Error(`${name} must be a safe integer, got ${value}`);
+  }
+}
+function constrainedBitCount(min, max) {
+  assertSafeInteger(min, "Minimum");
+  assertSafeInteger(max, "Maximum");
+  const range = BigInt(max) - BigInt(min) + 1n;
+  if (range <= 0n) throw new Error(`Invalid constraint: min=${min} > max=${max}`);
+  if (range === 1n) return 0;
+  return (range - 1n).toString(2).length;
+}
+function encodeConstrainedInteger(buffer, value, min, max) {
+  assertSafeInteger(value, "Value");
+  const bitCount = constrainedBitCount(min, max);
+  if (value < min || value > max) {
+    throw new Error(`Value ${value} out of constrained range [${min}, ${max}]`);
+  }
+  buffer.writeBigBits(BigInt(value) - BigInt(min), bitCount);
+}
+function decodeConstrainedInteger(buffer, min, max) {
+  const bitCount = constrainedBitCount(min, max);
+  const value = buffer.readBigBits(bitCount) + BigInt(min);
+  if (value > BigInt(max)) {
+    throw new Error(`Decoded value ${value} out of constrained range [${min}, ${max}]`);
+  }
+  const result = Number(value);
+  assertSafeInteger(result, "Decoded value");
+  return result;
+}
+function bigintToUnsignedBytes(value) {
+  if (value === 0n) return new Uint8Array([0]);
+  const bytes = [];
+  for (let remaining = value; remaining > 0n; remaining >>= 8n) {
+    bytes.unshift(Number(remaining & 0xffn));
+  }
+  return new Uint8Array(bytes);
+}
+function encodeSemiConstrainedInteger(buffer, value, min) {
+  assertSafeInteger(value, "Value");
+  assertSafeInteger(min, "Minimum");
+  if (value < min) throw new Error(`Value ${value} below minimum ${min}`);
+  const bytes = bigintToUnsignedBytes(BigInt(value) - BigInt(min));
+  encodeUnconstrainedLength(buffer, bytes.length);
+  buffer.writeOctets(bytes);
+}
+function decodeSemiConstrainedInteger(buffer, min) {
+  assertSafeInteger(min, "Minimum");
+  const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
+  let offset = 0n;
+  for (const byte of bytes) offset = offset * 256n + BigInt(byte);
+  const value = offset + BigInt(min);
+  const result = Number(value);
+  assertSafeInteger(result, "Decoded value");
+  return result;
+}
+
+// src/vendor/asn1-per-ts/codecs/IntegerCodec.ts
+var IntegerCodec = class {
+  constraints;
+  constructor(constraints = {}) {
+    if (constraints.min !== void 0) assertSafeInteger(constraints.min, "Minimum");
+    if (constraints.max !== void 0) assertSafeInteger(constraints.max, "Maximum");
+    if (constraints.min !== void 0 && constraints.max !== void 0) {
+      constrainedBitCount(constraints.min, constraints.max);
+    }
+    this.constraints = constraints;
+  }
+  get constraintType() {
+    if (this.constraints.min !== void 0 && this.constraints.max !== void 0) {
+      return "constrained";
+    }
+    return this.constraints.min !== void 0 ? "semi-constrained" : "unconstrained";
+  }
+  get bitWidth() {
+    const { min, max } = this.constraints;
+    return min !== void 0 && max !== void 0 ? constrainedBitCount(min, max) : void 0;
+  }
+  encode(buffer, value) {
+    assertSafeInteger(value, "Value");
+    const { min, max, extensible } = this.constraints;
+    if (min !== void 0 && max !== void 0) {
+      if (extensible && (value < min || value > max)) {
+        buffer.writeBit(1);
+        encodeUnconstrainedWholeNumber(buffer, value);
+      } else {
+        if (extensible) buffer.writeBit(0);
+        encodeConstrainedInteger(buffer, value, min, max);
+      }
+    } else if (min !== void 0) {
+      encodeSemiConstrainedInteger(buffer, value, min);
+    } else {
+      encodeUnconstrainedWholeNumber(buffer, value);
+    }
+  }
+  decode(buffer) {
+    const { min, max, extensible } = this.constraints;
+    let value;
+    if (min !== void 0 && max !== void 0) {
+      value = extensible && buffer.readBit() === 1 ? decodeUnconstrainedWholeNumber(buffer) : decodeConstrainedInteger(buffer, min, max);
+    } else if (min !== void 0) {
+      value = decodeSemiConstrainedInteger(buffer, min);
+    } else {
+      value = decodeUnconstrainedWholeNumber(buffer);
+    }
+    assertSafeInteger(value, "Decoded value");
+    return value;
+  }
+};
+
+// src/vendor/asn1-per-ts/codecs/EnumeratedCodec.ts
+var EnumeratedCodec = class {
+  rootValues;
+  extValues;
+  _extensible;
+  rootIndexMap;
+  extIndexMap;
+  constructor(options) {
+    if (options.values.length === 0) {
+      throw new Error("Enumerated type must have at least one root value");
+    }
+    this.rootValues = options.values;
+    this.extValues = options.extensionValues ?? [];
+    this._extensible = options.extensionValues !== void 0;
+    this.rootIndexMap = new Map(options.values.map((v, i) => [v, i]));
+    this.extIndexMap = new Map(this.extValues.map((v, i) => [v, i]));
+  }
+  get extensible() {
+    return this._extensible;
+  }
+  encode(buffer, value) {
+    const rootIdx = this.rootIndexMap.get(value);
+    if (this.extensible) {
+      if (rootIdx !== void 0) {
+        buffer.writeBit(0);
+        encodeConstrainedWholeNumber(buffer, rootIdx, 0, this.rootValues.length - 1);
+      } else {
+        const extIdx = this.extIndexMap.get(value);
+        if (extIdx === void 0) {
+          throw new Error(`Unknown enumerated value: '${value}'`);
+        }
+        buffer.writeBit(1);
+        encodeNormallySmallNumber(buffer, extIdx);
+      }
+    } else {
+      if (rootIdx === void 0) {
+        throw new Error(`Unknown enumerated value: '${value}'`);
+      }
+      encodeConstrainedWholeNumber(buffer, rootIdx, 0, this.rootValues.length - 1);
+    }
+  }
+  decode(buffer) {
+    if (this.extensible) {
+      const extBit = buffer.readBit();
+      if (extBit === 0) {
+        const idx3 = decodeConstrainedWholeNumber(buffer, 0, this.rootValues.length - 1);
+        const value3 = this.rootValues[idx3];
+        if (value3 === void 0) throw new Error(`Root index ${idx3} out of range for enumerated type`);
+        return value3;
+      }
+      const idx2 = decodeNormallySmallNumber(buffer);
+      const value2 = this.extValues[idx2];
+      if (value2 === void 0) {
+        throw new Error(`Extension index ${idx2} out of range for enumerated type`);
+      }
+      return value2;
+    }
+    const idx = decodeConstrainedWholeNumber(buffer, 0, this.rootValues.length - 1);
+    const value = this.rootValues[idx];
+    if (value === void 0) throw new Error(`Root index ${idx} out of range for enumerated type`);
+    return value;
+  }
+};
+
+// src/vendor/asn1-per-ts/codecs/NullCodec.ts
+var NullCodec = class {
+  encode(_buffer, _value) {
+  }
+  decode(_buffer) {
+    return null;
+  }
+};
+
+// src/vendor/asn1-per-ts/codecs/ChoiceCodec.ts
+var ChoiceCodec = class {
+  alternatives;
+  extensionAlternatives;
+  extensible;
+  constructor(options) {
+    if (options.alternatives.length === 0) throw new Error("CHOICE must have at least one alternative");
+    this.alternatives = options.alternatives;
+    this.extensionAlternatives = options.extensionAlternatives ?? [];
+    this.extensible = options.extensionAlternatives !== void 0;
+  }
+  encode(buffer, value) {
+    const rootIndex = this.alternatives.findIndex((alternative) => alternative.name === value.key);
+    if (rootIndex >= 0) {
+      const alternative = this.alternatives[rootIndex];
+      if (alternative === void 0) throw new Error(`Unknown CHOICE alternative: '${value.key}'`);
+      if (this.extensible) buffer.writeBit(0);
+      if (this.alternatives.length > 1) {
+        encodeConstrainedWholeNumber(buffer, rootIndex, 0, this.alternatives.length - 1);
+      }
+      encodeValue(buffer, alternative.codec, value.value);
+      return;
+    }
+    const extensionIndex = this.extensionAlternatives.findIndex(
+      (alternative) => alternative.name === value.key
+    );
+    if (!this.extensible || extensionIndex < 0) {
+      throw new Error(`Unknown CHOICE alternative: '${value.key}'`);
+    }
+    const extension = this.extensionAlternatives[extensionIndex];
+    if (extension === void 0) throw new Error(`Unknown CHOICE alternative: '${value.key}'`);
+    buffer.writeBit(1);
+    encodeNormallySmallNumber(buffer, extensionIndex);
+    const encoded2 = BitBuffer.alloc();
+    encodeValue(encoded2, extension.codec, value.value);
+    const bytes = encoded2.toUint8Array();
+    encodeUnconstrainedLength(buffer, bytes.length);
+    buffer.writeOctets(bytes);
+  }
+  decode(buffer) {
+    const isExtension = this.extensible && buffer.readBit() === 1;
+    if (isExtension) {
+      const index2 = decodeNormallySmallNumber(buffer);
+      const alternative2 = this.extensionAlternatives[index2];
+      if (alternative2 === void 0) throw new Error(`Extension index ${index2} out of range for CHOICE`);
+      const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
+      return { key: alternative2.name, value: alternative2.codec.decode(BitBuffer.from(bytes)) };
+    }
+    const index = this.alternatives.length > 1 ? decodeConstrainedWholeNumber(buffer, 0, this.alternatives.length - 1) : 0;
+    const alternative = this.alternatives[index];
+    if (alternative === void 0) throw new Error(`Alternative index ${index} out of range for CHOICE`);
+    return { key: alternative.name, value: alternative.codec.decode(buffer) };
+  }
+};
+
+// src/vendor/asn1-per-ts/codecs/SequenceCodec.ts
+var SequenceCodec = class {
+  fields;
+  extensionFields;
+  optionalFields;
+  extensible;
+  constructor(options) {
+    this.fields = options.fields;
+    this.extensionFields = options.extensionFields ?? [];
+    this.extensible = options.extensionFields !== void 0;
+    this.optionalFields = this.fields.filter(
+      (field2) => field2.optional === true || field2.defaultValue !== void 0
+    );
+  }
+  get preambleBitCount() {
+    return this.optionalFields.length;
+  }
+  encode(buffer, value) {
+    const hasExtensions = this.extensible && this.extensionFields.some((field2) => value[field2.name] !== void 0);
+    if (this.extensible) buffer.writeBit(hasExtensions ? 1 : 0);
+    for (const field2 of this.optionalFields) {
+      const fieldValue = value[field2.name];
+      buffer.writeBit(
+        fieldValue !== void 0 && !Object.is(fieldValue, field2.defaultValue) ? 1 : 0
+      );
+    }
+    for (const field2 of this.fields) {
+      const fieldValue = value[field2.name];
+      if (field2.optional === true || field2.defaultValue !== void 0) {
+        if (fieldValue !== void 0 && !Object.is(fieldValue, field2.defaultValue)) {
+          encodeValue(buffer, field2.codec, fieldValue);
+        }
+      } else {
+        if (fieldValue === void 0) throw new Error(`Missing mandatory field: '${field2.name}'`);
+        encodeValue(buffer, field2.codec, fieldValue);
+      }
+    }
+    if (hasExtensions) this.encodeExtensions(buffer, value);
+  }
+  decode(buffer) {
+    const result = {};
+    const hasExtensions = this.extensible && buffer.readBit() === 1;
+    const presence = this.optionalFields.map(() => buffer.readBit() === 1);
+    let optionalIndex = 0;
+    for (const field2 of this.fields) {
+      if (field2.optional === true || field2.defaultValue !== void 0) {
+        if (presence[optionalIndex++]) result[field2.name] = field2.codec.decode(buffer);
+        else if (field2.defaultValue !== void 0) result[field2.name] = field2.defaultValue;
+      } else {
+        result[field2.name] = field2.codec.decode(buffer);
+      }
+    }
+    if (hasExtensions) this.decodeExtensions(buffer, result);
+    return result;
+  }
+  encodeExtensions(buffer, value) {
+    encodeNormallySmallNumber(buffer, this.extensionFields.length - 1);
+    for (const field2 of this.extensionFields) {
+      buffer.writeBit(value[field2.name] !== void 0 ? 1 : 0);
+    }
+    for (const field2 of this.extensionFields) {
+      const fieldValue = value[field2.name];
+      if (fieldValue === void 0) continue;
+      const encoded2 = BitBuffer.alloc();
+      encodeValue(encoded2, field2.codec, fieldValue);
+      encodeUnconstrainedLength(buffer, encoded2.toUint8Array().length);
+      buffer.writeOctets(encoded2.toUint8Array());
+    }
+  }
+  decodeExtensions(buffer, result) {
+    const count = decodeNormallySmallNumber(buffer) + 1;
+    const presence = Array.from({ length: count }, () => buffer.readBit() === 1);
+    for (let index = 0; index < count; index++) {
+      if (!presence[index]) continue;
+      const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
+      const field2 = this.extensionFields[index];
+      if (field2 !== void 0) result[field2.name] = field2.codec.decode(BitBuffer.from(bytes));
+    }
+  }
+};
+
+// src/vendor/asn1-per-ts/codecs/IA5StringCodec.ts
+var IA5StringCodec = class {
+  constraints;
+  alphabet;
+  indexes;
+  bitsPerCharacter;
+  constructor(constraints = {}) {
+    this.constraints = constraints;
+    this.alphabet = constraints.alphabet === void 0 ? Array.from({ length: 128 }, (_, index) => String.fromCharCode(index)) : [...new Set([...constraints.alphabet].sort())];
+    this.indexes = new Map(this.alphabet.map((character, index) => [character, index]));
+    this.bitsPerCharacter = this.alphabet.length <= 1 ? 0 : Math.ceil(Math.log2(this.alphabet.length));
+  }
+  encode(buffer, value) {
+    const characters = [...value];
+    const inRoot = this.isRootLength(characters.length);
+    if (this.constraints.extensible) buffer.writeBit(inRoot ? 0 : 1);
+    if (!inRoot && !this.constraints.extensible) this.assertRootLength(characters.length);
+    this.encodeLength(buffer, characters.length, inRoot);
+    for (const character of characters) {
+      const index = this.indexes.get(character);
+      if (index === void 0) throw new Error(`Character '${character}' not in permitted alphabet`);
+      buffer.writeBits(index, this.bitsPerCharacter);
+    }
+  }
+  decode(buffer) {
+    const inRoot = !this.constraints.extensible || buffer.readBit() === 0;
+    const length = this.decodeLength(buffer, inRoot);
+    let result = "";
+    for (let index = 0; index < length; index++) {
+      const alphabetIndex = buffer.readBits(this.bitsPerCharacter);
+      const character = this.alphabet[alphabetIndex];
+      if (character === void 0) throw new Error(`Character index ${alphabetIndex} out of alphabet range`);
+      result += character;
+    }
+    return result;
+  }
+  isRootLength(length) {
+    const { fixedSize, minSize, maxSize } = this.constraints;
+    if (fixedSize !== void 0) return length === fixedSize;
+    if (minSize !== void 0 && maxSize !== void 0) return length >= minSize && length <= maxSize;
+    return true;
+  }
+  assertRootLength(length) {
+    const { fixedSize, minSize, maxSize } = this.constraints;
+    if (fixedSize !== void 0) throw new Error(`String length ${length} does not match fixed size ${fixedSize}`);
+    if (minSize !== void 0 && maxSize !== void 0) {
+      throw new Error(`String length ${length} out of range [${minSize}, ${maxSize}]`);
+    }
+  }
+  encodeLength(buffer, length, inRoot) {
+    const { fixedSize, minSize, maxSize } = this.constraints;
+    if (inRoot && fixedSize !== void 0) return;
+    if (inRoot && minSize !== void 0 && maxSize !== void 0) {
+      encodeConstrainedLength(buffer, length, minSize, maxSize);
+    } else {
+      encodeUnconstrainedLength(buffer, length);
+    }
+  }
+  decodeLength(buffer, inRoot) {
+    const { fixedSize, minSize, maxSize } = this.constraints;
+    if (inRoot && fixedSize !== void 0) return fixedSize;
+    if (inRoot && minSize !== void 0 && maxSize !== void 0) {
+      return decodeConstrainedLength(buffer, minSize, maxSize);
+    }
+    return decodeUnconstrainedLength(buffer);
+  }
+};
+
+// src/core/cast/setup/pairing-url-schema.ts
+var nullCodec = new NullCodec();
+var labelString = new IA5StringCodec({ minSize: 1, maxSize: 255 });
+var replacement = new SequenceCodec({ fields: [
+  { name: "removeLabels", codec: new IntegerCodec({ min: 1, max: 15 }) },
+  { name: "addLabels", codec: labelString }
+] });
+var relayHost = new ChoiceCodec({ alternatives: [
+  { name: "same", codec: nullCodec },
+  { name: "replaceLeft", codec: replacement },
+  { name: "absolute", codec: labelString }
+] });
+var relayPort = new ChoiceCodec({ alternatives: [
+  { name: "default", codec: nullCodec },
+  { name: "explicit", codec: new IntegerCodec({ min: 1, max: 65535 }) }
+] });
+var relayOrigin = new SequenceCodec({ fields: [
+  { name: "scheme", codec: new EnumeratedCodec({ values: ["http", "https"] }) },
+  { name: "host", codec: relayHost },
+  { name: "port", codec: relayPort }
+] });
+var relayLocation = new ChoiceCodec({ alternatives: [
+  { name: "conventional", codec: nullCodec },
+  { name: "custom", codec: relayOrigin }
+] });
+var payloadV0 = new SequenceCodec({ fields: [
+  { name: "roomCode", codec: new IntegerCodec({ min: 0, max: 9999 }) },
+  { name: "authCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
+  { name: "relay", codec: relayLocation }
+] });
+var pairingInfoCodec = new ChoiceCodec({
+  alternatives: [{ name: "v0", codec: payloadV0 }],
+  extensionAlternatives: []
+});
+function encodePairingInfo(value) {
+  const buffer = BitBuffer.alloc(64);
+  pairingInfoCodec.encode(buffer, { key: "v0", value });
+  return { bytes: buffer.toUint8Array(), bitLength: buffer.bitLength };
+}
+
 // src/core/cast/setup/pairing-url.ts
-var VERSION = 1;
-var FLAG_RELAY = 1;
-var FLAG_HTTPS = 2;
-var HEADER_LENGTH = 6;
-var MAX_AUTHORITY_BYTES = 255;
+var ROOM_CODE_DIGITS = 4;
+function invalid(message = "Invalid Cast pairing payload.") {
+  throw new TypeError(message);
+}
 function encodeBase64Url(bytes) {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 function parseCode(code) {
-  if (!/^\d{10}$/.test(code)) throw new TypeError("Cast pairing code must contain exactly 10 digits.");
-  const numeric = Number(code);
-  if (!Number.isSafeInteger(numeric) || numeric > 4294967295) throw new TypeError("Cast pairing code exceeds its binary representation.");
-  return numeric;
+  if (!/^\d{10}$/.test(code)) return invalid("Cast pairing code must contain exactly 10 digits.");
+  return { roomCode: Number(code.slice(0, ROOM_CODE_DIGITS)), authCode: Number(code.slice(ROOM_CODE_DIGITS)) };
 }
-function parseRelay(value) {
-  if (value.length > 2048) throw new TypeError("Cast relay URL is too long.");
-  const relay = new URL(value);
-  if (relay.protocol !== "http:" && relay.protocol !== "https:" || relay.username || relay.password || relay.pathname !== "/" || relay.search || relay.hash) {
-    throw new TypeError("Cast relay must be an HTTP or HTTPS origin.");
+function parseOrigin(value, label) {
+  if (value.length > 2048) return invalid(`${label} URL is too long.`);
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    return invalid(`${label} must be an HTTP or HTTPS origin.`);
   }
-  return relay;
+  if (url.protocol !== "http:" && url.protocol !== "https:" || url.username || url.password || url.pathname !== "/" || url.search || url.hash) return invalid(`${label} must be an HTTP or HTTPS origin.`);
+  if (!url.hostname || url.hostname.endsWith(".")) return invalid(`${label} host is not canonical.`);
+  return url;
+}
+function isIp(host) {
+  if (host.startsWith("[")) return true;
+  const parts = host.split(".");
+  return parts.length === 4 && parts.every((part) => /^\d+$/.test(part));
+}
+function labels(host) {
+  const result = host.split(".");
+  if (result.some((label) => !label || label.length > 63 || !/^[a-z0-9-]+$/.test(label) || label.startsWith("-") || label.endsWith("-"))) invalid("Invalid Cast relay DNS host.");
+  return result;
+}
+function conventionalRelay(sender) {
+  const senderLabels = labels(sender.hostname);
+  if (senderLabels[0] !== "cast") invalid("Cast sender does not have a conventional relay host.");
+  senderLabels[0] = "relay";
+  return `${sender.protocol}//${senderLabels.join(".")}${sender.port ? `:${sender.port}` : ""}`;
+}
+function hostDelta(senderHost, relayHost2) {
+  if (senderHost === relayHost2) return { key: "same", value: null };
+  if (isIp(senderHost) || isIp(relayHost2)) return { key: "absolute", value: relayHost2 };
+  const sender = labels(senderHost);
+  const relay = labels(relayHost2);
+  let common = 0;
+  while (common < sender.length - 1 && common < relay.length - 1 && sender[sender.length - 1 - common] === relay[relay.length - 1 - common]) common++;
+  const removeLabels = sender.length - common;
+  const addLabels = relay.slice(0, relay.length - common).join(".");
+  return common > 0 && removeLabels <= 15 && addLabels.length <= 255 ? { key: "replaceLeft", value: { removeLabels, addLabels } } : { key: "absolute", value: relayHost2 };
+}
+function customPayload(code, relay, sender) {
+  return { ...code, relay: { key: "custom", value: {
+    scheme: relay.protocol.slice(0, -1),
+    host: hostDelta(sender.hostname, relay.hostname),
+    port: relay.port ? { key: "explicit", value: Number(relay.port) } : { key: "default", value: null }
+  } } };
+}
+function canonicalPayload(code, relay, sender) {
+  let conventional = false;
+  try {
+    conventional = relay.origin === conventionalRelay(sender);
+  } catch {
+  }
+  return conventional ? { ...code, relay: { key: "conventional", value: null } } : customPayload(code, relay, sender);
 }
 function encodeCastPairingPayload(roomCode, relayUrl, senderOrigin) {
-  const code = parseCode(roomCode);
-  const relay = parseRelay(relayUrl);
-  const sender = parseRelay(senderOrigin);
-  const hasRelay = relay.origin !== sender.origin;
-  const authority = hasRelay ? new TextEncoder().encode(relay.host) : new Uint8Array();
-  if (authority.length > MAX_AUTHORITY_BYTES) throw new TypeError("Cast relay authority is too long.");
-  const bytes = new Uint8Array(HEADER_LENGTH + (hasRelay ? 2 + authority.length : 0));
-  bytes[0] = VERSION;
-  bytes[1] = (hasRelay ? FLAG_RELAY : 0) | (hasRelay && relay.protocol === "https:" ? FLAG_HTTPS : 0);
-  new DataView(bytes.buffer).setUint32(2, code);
-  if (hasRelay) {
-    new DataView(bytes.buffer).setUint16(HEADER_LENGTH, authority.length);
-    bytes.set(authority, HEADER_LENGTH + 2);
-  }
-  return encodeBase64Url(bytes);
+  const sender = parseOrigin(senderOrigin, "Cast sender");
+  const relay = parseOrigin(relayUrl, "Cast relay");
+  return encodeBase64Url(encodePairingInfo(canonicalPayload(parseCode(roomCode), relay, sender)).bytes);
 }
 function createCastPairingUrl(senderUrl, relayUrl, roomCode) {
-  const sender = new URL(senderUrl);
-  if (sender.protocol !== "http:" && sender.protocol !== "https:" || sender.username || sender.password || sender.search || sender.hash) throw new TypeError("Invalid Cast sender URL.");
+  let sender;
+  try {
+    sender = new URL(senderUrl);
+  } catch {
+    return invalid("Invalid Cast sender URL.");
+  }
+  if (sender.protocol !== "http:" && sender.protocol !== "https:" || sender.username || sender.password || sender.search || sender.hash) return invalid("Invalid Cast sender URL.");
   sender.pathname = "/cast";
   sender.hash = encodeCastPairingPayload(roomCode, relayUrl, sender.origin);
   return sender.href;
