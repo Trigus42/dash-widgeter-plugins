@@ -71,10 +71,12 @@ describe('PairingWidget', () => {
   it('keeps the launch click behavior unchanged', () => {
     mocks.useCastPlayback.mockReturnValue(baseState);
     const ctx = context();
+    const setPairingDetails = vi.fn<GuestWidgetContext['setPairingDetails']>(() => Promise.resolve());
+    ctx.setPairingDetails = setPairingDetails;
     render(<PairingWidget context={ctx} />);
     fireEvent.click(document.querySelector('.cast-pairing-button') as HTMLButtonElement);
-    expect(ctx.setPairingDetails).toHaveBeenCalledWith(expect.objectContaining({ code: '1234567890' }));
-    const details = vi.mocked(ctx.setPairingDetails).mock.calls[0]?.[0];
+    expect(setPairingDetails).toHaveBeenCalledWith(expect.objectContaining({ code: '1234567890' }));
+    const details = setPairingDetails.mock.calls[0]?.[0];
     expect(details && 'url' in details ? details.url : '').toMatch(/^https:\/\/sender\.example\/cast#[A-Za-z0-9_-]+$/);
   });
 });
