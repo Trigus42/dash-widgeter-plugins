@@ -131,8 +131,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock-76d26ace05eb34fca1fa10c92283926e63a774dcb3bd5ed2494a24b404c6e94d.js",
-      "sha256": "76d26ace05eb34fca1fa10c92283926e63a774dcb3bd5ed2494a24b404c6e94d"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/clock-48d7096f8f388dc6973621ba1ffe05c6b10024a8744d6bc32234b6f2459502fb.js",
+      "sha256": "48d7096f8f388dc6973621ba1ffe05c6b10024a8744d6bc32234b6f2459502fb"
     },
     {
       "manifest": {
@@ -380,8 +380,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-dd9cda1d2d94dddf6366e7e0719714e3c39bba21776c9b1207d5f23fae56fcb6.js",
-      "sha256": "dd9cda1d2d94dddf6366e7e0719714e3c39bba21776c9b1207d5f23fae56fcb6"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-84eb34f916871b03f374a6e163eb58da4ccfdc47052189ecf4a9939e0e622e3d.js",
+      "sha256": "84eb34f916871b03f374a6e163eb58da4ccfdc47052189ecf4a9939e0e622e3d"
     },
     {
       "manifest": {
@@ -989,8 +989,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-67113f550989d3a6e890f5af65f8cb7fd5ea667585e82e58dc956f22a7ad8f92.js",
-      "sha256": "67113f550989d3a6e890f5af65f8cb7fd5ea667585e82e58dc956f22a7ad8f92"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-5ebf2618264428d66dc29b42713579149c8f781969d2f55d07cb4d7880b76c7b.js",
+      "sha256": "5ebf2618264428d66dc29b42713579149c8f781969d2f55d07cb4d7880b76c7b"
     },
     {
       "manifest": {
@@ -1366,8 +1366,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-8d923152d210ff4423cc4c17f6d9f95f156a30a52bca39f89cc6a5615b6b5ef1.js",
-      "sha256": "8d923152d210ff4423cc4c17f6d9f95f156a30a52bca39f89cc6a5615b6b5ef1"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/webdav-photos-f78e5a02a8c61c4e26c6ad02bddb5783b8d93a68b01afb2cfb959730d13d358e.js",
+      "sha256": "f78e5a02a8c61c4e26c6ad02bddb5783b8d93a68b01afb2cfb959730d13d358e"
     },
     {
       "manifest": {
@@ -1748,14 +1748,14 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-364dbf89e9bc9b19b3b869092aa8e3d1b4f02bf31b0af71571e72f2f409591ee.js",
-      "sha256": "364dbf89e9bc9b19b3b869092aa8e3d1b4f02bf31b0af71571e72f2f409591ee"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/google-photos-c9e26849391859fa36f355796ec498fda57f3fbba87d635e99b7cb596d0cdb5f.js",
+      "sha256": "c9e26849391859fa36f355796ec498fda57f3fbba87d635e99b7cb596d0cdb5f"
     },
     {
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "4.6.0",
+        "version": "4.6.1",
         "description": "Remote receiver for YouTube, screen sharing, websites, and media",
         "translations": {
           "de": {
@@ -1973,8 +1973,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-3dafb98b8384f626cc91ebd1c70b07b7f5bbc70c7e6bc07be1999417c51fdef9.js",
-      "sha256": "3dafb98b8384f626cc91ebd1c70b07b7f5bbc70c7e6bc07be1999417c51fdef9"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-35ed524ab6f26d0c0f7b7a99906c6a4fa243ec07bc4dd0b729baaa1e5f973139.js",
+      "sha256": "35ed524ab6f26d0c0f7b7a99906c6a4fa243ec07bc4dd0b729baaa1e5f973139"
     }
   ]
 }

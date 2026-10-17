@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 
-const mocks = vi.hoisted(() => ({ createPairingSession: vi.fn(), createPluginReceiver: vi.fn() }));
+const mocks = vi.hoisted(() => ({ createPairingSession: vi.fn(), createResumeSession: vi.fn(), createPluginReceiver: vi.fn() }));
 vi.mock('./pairing', () => ({ createPairingSession: mocks.createPairingSession }));
+vi.mock('@/core/cast/setup/receiver-client', () => ({ createResumeSession: mocks.createResumeSession }));
 vi.mock('../receiver', () => ({ createPluginReceiver: mocks.createPluginReceiver }));
 import { createScreenSession } from './screen-session';
 
@@ -15,7 +16,7 @@ describe('screen session room lifecycle', () => {
     const first = { roomCode: '1234111111', expiresAt: 31_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
     const second = { roomCode: '5678222222', expiresAt: 64_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(first).mockResolvedValueOnce(second);
-    mocks.createPluginReceiver.mockReturnValue({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() });
+    mocks.createPluginReceiver.mockReturnValue({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() });
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()),
       reportStatus: vi.fn() } as unknown as GuestWidgetContext;
@@ -30,7 +31,7 @@ describe('screen session room lifecycle', () => {
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: object) => void) => {
       onState({ status: 'connecting', command: null, stream: {} as MediaStream, peerCount: 0, error: null });
-      return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
+      return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
     });
     const setCastState = vi.fn<(state: Record<string, unknown>) => Promise<void>>(() => Promise.resolve());
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
@@ -47,7 +48,7 @@ describe('screen session room lifecycle', () => {
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: object) => void) => {
       onState({ status: 'paired', command: null, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
-      return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
+      return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
     });
     const setCastState = vi.fn<(state: Record<string, unknown>) => Promise<void>>(() => Promise.resolve());
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
@@ -62,7 +63,7 @@ describe('screen session room lifecycle', () => {
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let callback: ((state: Record<string, unknown>) => void) | undefined;
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
-      callback = onState; return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+      callback = onState; return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
     });
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
@@ -79,7 +80,7 @@ describe('screen session room lifecycle', () => {
     const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let callback: ((state: Record<string, unknown>) => void) | undefined;
-    const receiver = { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    const receiver = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
       callback = onState; return receiver;
     });
@@ -100,7 +101,7 @@ describe('screen session room lifecycle', () => {
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]).mockResolvedValueOnce(rooms[2]);
     const callbacks: Array<(state: { status: 'paired' | 'disconnected'; command: null; stream: null; peerCount: number; error: null }) => void> = [];
-    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
+    const receivers = rooms.map(() => ({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Parameters<(typeof callbacks)[number]>[0]) => void) => {
       callbacks.push(onState); return receivers[callbacks.length - 1];
     });
@@ -129,7 +130,7 @@ describe('screen session room lifecycle', () => {
     const states: Array<(state: Record<string, unknown>) => void> = [];
     const messages: Array<(message: { type: string; mutation?: object }) => void> = [];
     const connections: Array<(event: { generation: string; trusted: boolean }) => void> = [];
-    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
+    const receivers = rooms.map(() => ({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void,
       _binding, _revoke, onMessage: (message: { type: string; mutation?: object }, send: () => void) => void,
       onConnection: (event: { generation: string; trusted: boolean }) => void) => {
@@ -160,7 +161,7 @@ describe('screen session room lifecycle', () => {
       onConnection: (event: { generation: string; trusted: boolean }) => void) => {
       message = (value) => { onMessage(value, send); }; connection = onConnection;
       connection?.({ generation: 'wrong-generation', trusted: true });
-      return { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send };
+      return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send };
     });
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
@@ -180,7 +181,7 @@ describe('screen session room lifecycle', () => {
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
     const messages: Array<(message: { type: string; mutation?: object }) => void> = [];
-    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
+    const receivers = rooms.map(() => ({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void,
       _binding, _revoke, onMessage: (message: { type: string; mutation?: object }, send: () => void) => void,
       onConnection: (event: { generation: string; trusted: boolean }) => void) => {
@@ -209,7 +210,7 @@ describe('screen session room lifecycle', () => {
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
-    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
+    const receivers = rooms.map(() => ({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
       callbacks.push(onState); return receivers[callbacks.length - 1];
     });
@@ -238,7 +239,7 @@ describe('screen session room lifecycle', () => {
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
-    const receivers = rooms.map(() => ({ close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
+    const receivers = rooms.map(() => ({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }));
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
       callbacks.push(onState); return receivers[callbacks.length - 1];
     });
@@ -257,6 +258,35 @@ describe('screen session room lifecycle', () => {
     callbacks[1]!({ status: 'paired', command: null, presentationEpoch: 1, stream: null, peerCount: 1, error: null });
     expect(session.state.command).toEqual(secondCommand);
     expect(receivers[0]!.revokePresenter).toHaveBeenCalledTimes(1);
+    session.close();
+  });
+  it('settles binding only after the resume listener starts and retains it until revoke or close', async () => {
+    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: { generation: 'pair-generation' }, close: vi.fn(() => Promise.resolve()) };
+    const never = Promise.withResolvers<never>();
+    mocks.createPairingSession.mockResolvedValueOnce(pairing).mockImplementation(() => never.promise);
+    mocks.createResumeSession.mockResolvedValue({ generation: 'resume-generation', relayUrl: 'wss://relay.example/socket', roomCode: 'a'.repeat(43), authCode: '', resumeBindingId: 'a'.repeat(43), resumePassword: new Uint8Array(32) });
+    let install: ((binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>) | undefined;
+    let revoke: ((bindingId: string) => Promise<void>) | undefined;
+    const listening = Promise.withResolvers<void>();
+    const pairingReceiver = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    const resumeReceiver = { listening: listening.promise, close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, _state,
+      onBinding: (binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>, onRevoke: (bindingId: string) => Promise<void>) => {
+      if (!install) { install = onBinding; revoke = onRevoke; return pairingReceiver; }
+      return resumeReceiver;
+    });
+    const stored: Array<{ bindingId: string; resumePassword: string; expiresAt: number }> = [];
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(),
+      castResume: { get: vi.fn(() => Promise.resolve([...stored])), replace: vi.fn((bindings: typeof stored) => { stored.splice(0, stored.length, ...bindings); return Promise.resolve(); }), delete: vi.fn((bindingId: string) => { const index = stored.findIndex((item) => item.bindingId === bindingId); if (index >= 0) stored.splice(index, 1); return Promise.resolve(); }) } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(install).toBeTypeOf('function'));
+    const binding = { bindingId: 'a'.repeat(43), resumePassword: 'A'.repeat(43), expiresAt: Date.now() + 60_000 };
+    let settled = false; const installing = install!(binding).then(() => { settled = true; });
+    await vi.waitFor(() => expect(mocks.createPluginReceiver).toHaveBeenCalledTimes(2));
+    expect(settled).toBe(false); expect(resumeReceiver.close).not.toHaveBeenCalled();
+    listening.resolve(); await installing; expect(settled).toBe(true);
+    pairingReceiver.close(); expect(resumeReceiver.close).not.toHaveBeenCalled();
+    await revoke!(binding.bindingId); expect(resumeReceiver.close).toHaveBeenCalledOnce();
     session.close();
   });
 });

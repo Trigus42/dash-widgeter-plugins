@@ -152,6 +152,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
             }
             aggregate(entry);
           }, undefined, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : undefined, authenticatedMessage(entry), ({ trusted }) => { entry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
+          await entry.receiver.listening;
         } catch (error) {
           if (!disposed && !(error instanceof DOMException && error.name === 'AbortError')) enqueue(listen);
           else listeningBindings.delete(binding.bindingId);
@@ -187,7 +188,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       await context.castResume.replace([...bindings.filter((item) => item.bindingId !== binding.bindingId), receiverBinding]);
       if (listeningBindings.has(binding.bindingId)) return;
       listeningBindings.add(binding.bindingId);
-      void createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal).then((options) => {
+      try {
+        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
+        if (disposed) return;
         const resumeEntry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
           state: { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }, connected: false, trusted: true, revokedEpoch: 0, epochOffset: authoritativeEpoch };
         resumeEntries.set(binding.bindingId, resumeEntry);
@@ -202,8 +205,17 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           }
           aggregate(resumeEntry);
         }, undefined, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(resumeEntry), ({ trusted }) => { resumeEntry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
-      }).catch(report);
-    }, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(entry), (event) => {
+        await resumeEntry.receiver.listening;
+      } catch (error) {
+        listeningBindings.delete(binding.bindingId);
+        resumeEntries.delete(binding.bindingId);
+        throw error;
+      }
+    }, async (bindingId) => {
+      await context.castResume.delete(bindingId);
+      const resumeEntry = resumeEntries.get(bindingId);
+      if (resumeEntry) { resumeEntries.delete(bindingId); listeningBindings.delete(bindingId); connected.delete(resumeEntry); resumeEntry.receiver?.close(); }
+    }, authenticatedMessage(entry), (event) => {
       if (!initialized) { const pending = pendingConnectionEvents.get(entry) ?? []; pending.push(event); pendingConnectionEvents.set(entry, pending); return; }
       applyConnection(entry, room.options.generation, event);
     });

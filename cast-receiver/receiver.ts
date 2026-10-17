@@ -15,7 +15,7 @@ export interface ReceiverState {
   sasTrusted?: boolean;
 }
 
-export interface PluginReceiver { close(): void; confirmSas(accepted: boolean): void; revokePresenter(epoch: number): void; send(message: DataMessage): void }
+export interface PluginReceiver { readonly listening: Promise<void>; close(): void; confirmSas(accepted: boolean): void; revokePresenter(epoch: number): void; send(message: DataMessage): void }
 export function createPluginReceiver(options: CastSessionOptions, asset: SpakeRuntimeAsset, onState: (state: ReceiverState) => void,
   onResumeBinding?: (binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>,
   onResumeRevoke?: (bindingId: string) => Promise<void>,

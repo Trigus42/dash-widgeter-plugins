@@ -3625,15 +3625,15 @@ var require_react_dom_client_development = __commonJS({
         );
         return false;
       }
-      function setTextContent(node, text2) {
-        if (text2) {
+      function setTextContent(node, text) {
+        if (text) {
           var firstChild = node.firstChild;
           if (firstChild && firstChild === node.lastChild && 3 === firstChild.nodeType) {
-            firstChild.nodeValue = text2;
+            firstChild.nodeValue = text;
             return;
           }
         }
-        node.textContent = text2;
+        node.textContent = text;
       }
       function camelize(string) {
         return string.replace(hyphenPattern, function(_, character) {
@@ -18458,8 +18458,8 @@ var require_react_dom_client_development = __commonJS({
         props = void 0 !== props && null !== props && props.hasOwnProperty("display") ? props.display : null;
         instance.style.display = null == props || "boolean" === typeof props ? "" : ("" + props).trim();
       }
-      function unhideTextInstance(textInstance, text2) {
-        textInstance.nodeValue = text2;
+      function unhideTextInstance(textInstance, text) {
+        textInstance.nodeValue = text;
       }
       function warnForBlockInsideInline(instance) {
         for (var nextNode = instance.firstChild; null != nextNode; ) {
@@ -18949,8 +18949,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return null;
       }
-      function canHydrateTextInstance(instance, text2, inRootOrSingleton) {
-        if ("" === text2) return null;
+      function canHydrateTextInstance(instance, text, inRootOrSingleton) {
+        if ("" === text) return null;
         for (; 3 !== instance.nodeType; ) {
           if ((1 !== instance.nodeType || "INPUT" !== instance.nodeName || "hidden" !== instance.type) && !inRootOrSingleton)
             return null;
@@ -19013,8 +19013,8 @@ var require_react_dom_client_development = __commonJS({
         }
         return 8 === instance.nodeType ? instance.data === ACTIVITY_START_DATA ? { type: "Activity", props: {} } : { type: "Suspense", props: {} } : instance.nodeValue;
       }
-      function diffHydratedTextForDevWarnings(textInstance, text2, parentProps) {
-        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text2 ? textInstance = null : (text2 = normalizeMarkupForTextOrAttribute(text2), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text2 ? null : textInstance.nodeValue), textInstance) : null;
+      function diffHydratedTextForDevWarnings(textInstance, text, parentProps) {
+        return null === parentProps || true !== parentProps[SUPPRESS_HYDRATION_WARNING] ? (textInstance.nodeValue === text ? textInstance = null : (text = normalizeMarkupForTextOrAttribute(text), textInstance = normalizeMarkupForTextOrAttribute(textInstance.nodeValue) === text ? null : textInstance.nodeValue), textInstance) : null;
       }
       function getNextHydratableInstanceAfterHydrationBoundary(hydrationInstance) {
         hydrationInstance = hydrationInstance.nextSibling;
@@ -24207,465 +24207,3370 @@ function defineReactWidget(Component) {
     }
   };
 }
-function useWidgetData(context, options) {
-  const [snapshot, setSnapshot] = (0, import_react.useState)({
-    data: void 0,
-    isLoading: true,
-    isStale: false,
-    fetchedAt: null,
-    error: null
-  });
-  const refetchRef = (0, import_react.useRef)(() => void 0);
-  const keyId = JSON.stringify(options.key);
-  (0, import_react.useEffect)(() => {
-    const sub = context.useData({
-      ...options,
-      onUpdate: (snap) => setSnapshot(snap)
-    });
-    refetchRef.current = () => sub.refetch();
-    return () => sub.dispose();
-  }, [keyId]);
-  return { ...snapshot, refetch: () => refetchRef.current() };
-}
-function usePullToRefresh(onRefresh) {
-  const containerRef = (0, import_react.useRef)(null);
-  (0, import_react.useEffect)(() => {
-    const el = containerRef.current;
-    if (!el || typeof window === "undefined") return;
-    let style = document.getElementById("wg-pull-to-refresh-style");
-    if (!style) {
-      style = document.createElement("style");
-      style.id = "wg-pull-to-refresh-style";
-      style.textContent = ".ptr--text,.ptr--icon{color:rgba(255,255,255,.72)!important}";
-      document.head.appendChild(style);
-    }
-    const ptr = import_pulltorefreshjs.default.init({
-      mainElement: el,
-      triggerElement: el,
-      shouldPullToRefresh: () => el.scrollTop <= 0,
-      onRefresh() {
-        return Promise.resolve(onRefresh());
-      },
-      distThreshold: 45,
-      distMax: 65,
-      distReload: 35
-    });
-    return () => {
-      ptr.destroy();
-    };
-  }, [onRefresh]);
-  return containerRef;
-}
 
-// src/plugins/weather/WeatherWidget.tsx
+// src/plugins/cast-receiver/widgets/CastWidget.tsx
 var import_react2 = __toESM(require_react(), 1);
 
-// src/plugins/weather/wmo.ts
-var WMO = {
-  0: { label: "Clear sky", icon: "clear" },
-  1: { label: "Mainly clear", icon: "partly" },
-  2: { label: "Partly cloudy", icon: "partly" },
-  3: { label: "Overcast", icon: "cloudy" },
-  45: { label: "Fog", icon: "fog" },
-  48: { label: "Rime fog", icon: "fog" },
-  51: { label: "Light drizzle", icon: "drizzle" },
-  53: { label: "Drizzle", icon: "drizzle" },
-  55: { label: "Dense drizzle", icon: "drizzle" },
-  61: { label: "Slight rain", icon: "rain" },
-  63: { label: "Rain", icon: "rain" },
-  65: { label: "Heavy rain", icon: "rain" },
-  66: { label: "Freezing rain", icon: "rain" },
-  67: { label: "Freezing rain", icon: "rain" },
-  71: { label: "Slight snow", icon: "snow" },
-  73: { label: "Snow", icon: "snow" },
-  75: { label: "Heavy snow", icon: "snow" },
-  77: { label: "Snow grains", icon: "snow" },
-  80: { label: "Rain showers", icon: "rain" },
-  81: { label: "Rain showers", icon: "rain" },
-  82: { label: "Violent showers", icon: "rain" },
-  85: { label: "Snow showers", icon: "snow" },
-  86: { label: "Snow showers", icon: "snow" },
-  95: { label: "Thunderstorm", icon: "thunder" },
-  96: { label: "Thunderstorm", icon: "thunder" },
-  99: { label: "Thunderstorm", icon: "thunder" }
+// src/plugins/cast-receiver/types.ts
+var CAST_DEFAULT_CONFIG = {
+  sourceKind: "idle",
+  sourceUrl: "",
+  relayUrl: "",
+  senderUrl: "",
+  outputMode: "audio-video",
+  overlayMode: "inline",
+  muted: false,
+  autoplay: true,
+  sasTimeoutSeconds: 60
 };
-var FALLBACK = { label: "Unknown", icon: "cloudy" };
-function describeWeather(code) {
-  return WMO[code] ?? FALLBACK;
-}
 
-// src/plugins/weather/WeatherIcon.tsx
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-var SUN = "#ffd166";
-var CLOUD = "#c7d0da";
-var RAIN = "#6ba7e8";
-var SNOW = "#e8f0fa";
-var BOLT = "#ffd166";
-function WeatherIcon({ icon, size = 48 }) {
-  const common = { width: size, height: size, viewBox: "0 0 64 64" };
-  switch (icon) {
-    case "clear":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "32", cy: "32", r: "14", fill: SUN }),
-        Array.from({ length: 8 }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-          "rect",
-          {
-            x: "31",
-            y: "2",
-            width: "2",
-            height: "9",
-            rx: "1",
-            fill: SUN,
-            transform: `rotate(${i * 45} 32 32)`
-          },
-          i
-        ))
-      ] });
-    case "partly":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: "24", cy: "24", r: "11", fill: SUN }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "38", cy: "40", rx: "18", ry: "12", fill: CLOUD })
-      ] });
-    case "cloudy":
-    case "fog":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "34", rx: "20", ry: "13", fill: CLOUD }),
-        icon === "fog" && [46, 52].map((y) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("rect", { x: "14", y, width: "36", height: "3", rx: "1.5", fill: CLOUD }, y))
-      ] });
-    case "drizzle":
-    case "rain":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
-        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-          "line",
-          {
-            x1: x,
-            y1: "44",
-            x2: x - 4,
-            y2: icon === "rain" ? 56 : 51,
-            stroke: RAIN,
-            strokeWidth: "3",
-            strokeLinecap: "round"
-          },
-          x
-        ))
-      ] });
-    case "snow":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "28", rx: "19", ry: "12", fill: CLOUD }),
-        [22, 32, 42].map((x) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("circle", { cx: x, cy: "50", r: "2.5", fill: SNOW }, x))
-      ] });
-    case "thunder":
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("svg", { ...common, "aria-hidden": true, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("ellipse", { cx: "32", cy: "26", rx: "19", ry: "12", fill: CLOUD }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("polygon", { points: "30,40 40,40 32,50 38,50 26,62 30,50 24,50", fill: BOLT })
-      ] });
-    default:
-      return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("svg", { ...common, "aria-hidden": true });
+// src/plugins/cast-receiver/config/resolve.ts
+function str(raw, fallback) {
+  return typeof raw === "string" ? raw : fallback;
+}
+function bool(raw, fallback) {
+  return typeof raw === "boolean" ? raw : fallback;
+}
+function boundedSeconds(raw, fallback) {
+  return typeof raw === "number" && Number.isInteger(raw) && raw >= 10 && raw <= 300 ? raw : fallback;
+}
+var SOURCE_KINDS = ["idle", "website", "media", "youtube"];
+var OVERLAY_MODES = ["inline", "cover", "dim"];
+var OUTPUT_MODES = ["audio-video", "audio-only", "video-only"];
+function readCastConfig(raw) {
+  const d = CAST_DEFAULT_CONFIG;
+  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind) ? raw.sourceKind : d.sourceKind;
+  const overlayMode = OVERLAY_MODES.includes(raw.overlayMode) ? raw.overlayMode : d.overlayMode;
+  const outputMode = OUTPUT_MODES.includes(raw.outputMode) ? raw.outputMode : d.outputMode;
+  return {
+    sourceKind,
+    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
+    relayUrl: str(raw.relayUrl, d.relayUrl),
+    senderUrl: str(raw.senderUrl, d.senderUrl),
+    overlayMode,
+    muted: bool(raw.muted, d.muted),
+    outputMode,
+    autoplay: bool(raw.autoplay, d.autoplay),
+    sasTimeoutSeconds: boundedSeconds(raw.sasTimeoutSeconds, d.sasTimeoutSeconds)
+  };
+}
+function parseYouTubeTarget(input) {
+  const trimmed = input.trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return { videoId: trimmed };
+  let url;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    return null;
+  }
+  if (!["www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(url.hostname)) return null;
+  if (url.protocol !== "https:") return null;
+  const path = url.pathname.split("/").filter(Boolean);
+  const candidate = url.hostname === "youtu.be" ? path[0] : path[0] === "embed" || path[0] === "shorts" ? path[1] : url.searchParams.get("v");
+  const videoId = candidate && /^[A-Za-z0-9_-]{11}$/.test(candidate) ? candidate : void 0;
+  const playlist = url.searchParams.get("list");
+  const playlistId = playlist && /^[A-Za-z0-9_-]{10,80}$/.test(playlist) ? playlist : void 0;
+  if (!videoId && !playlistId) return null;
+  const rawIndex = url.searchParams.get("index");
+  const parsedIndex = rawIndex ? Number(rawIndex) : void 0;
+  const index = playlistId && Number.isSafeInteger(parsedIndex) && parsedIndex >= 1 && parsedIndex <= 1e4 ? parsedIndex : void 0;
+  return { ...videoId ? { videoId } : {}, ...playlistId ? { playlistId } : {}, ...index ? { index } : {} };
+}
+function isHttpsUrl(value) {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
   }
 }
-
-// src/plugins/weather/service.ts
-var MAX_FORECAST_DAYS = 16;
-function buildWeatherUrl(config) {
-  const params = new URLSearchParams({
-    latitude: String(config.latitude),
-    longitude: String(config.longitude),
-    current: "temperature_2m,weather_code,wind_speed_10m,is_day",
-    daily: "weather_code,temperature_2m_max,temperature_2m_min",
-    minutely_15: "precipitation,weather_code",
-    forecast_minutely_15: "48",
-    timezone: "auto",
-    timeformat: "unixtime",
-    forecast_days: String(MAX_FORECAST_DAYS),
-    temperature_unit: config.unit
-  });
-  return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+function youTubeEmbedUrl(target, muted, autoplay = true) {
+  const parsed = typeof target === "string" ? { videoId: target } : target;
+  const params = new URLSearchParams({ autoplay: autoplay ? "1" : "0", mute: muted ? "1" : "0", rel: "0", modestbranding: "1", playsinline: "1" });
+  if (parsed.playlistId) {
+    params.set("listType", "playlist");
+    params.set("list", parsed.playlistId);
+    if (parsed.index) params.set("index", String(parsed.index - 1));
+  }
+  const resource = parsed.videoId ?? "videoseries";
+  return `https://www.youtube-nocookie.com/embed/${resource}?${params.toString()}`;
 }
-function mapOpenMeteo(raw) {
-  const res = raw;
-  return mapResponse(res);
-}
-function mapResponse(res) {
-  const daily = res.daily.time.map((sec, i) => ({
-    dateMs: sec * 1e3,
-    weatherCode: res.daily.weather_code[i] ?? 0,
-    tempMax: res.daily.temperature_2m_max[i] ?? 0,
-    tempMin: res.daily.temperature_2m_min[i] ?? 0
-  }));
-  const m = res.minutely_15;
-  const minutely = m ? m.time.map((sec, i) => ({
-    timeMs: sec * 1e3,
-    precipitation: m.precipitation[i] ?? 0,
-    weatherCode: m.weather_code[i] ?? 0
-  })) : [];
-  return {
-    temperature: res.current.temperature_2m,
-    weatherCode: res.current.weather_code,
-    windSpeed: res.current.wind_speed_10m,
-    isDay: res.current.is_day === 1,
-    unitLabel: res.current_units.temperature_2m,
-    utcOffsetSeconds: res.utc_offset_seconds ?? 0,
-    daily,
-    minutely
-  };
-}
-function weatherCacheKey(config) {
-  return `weather:${config.latitude},${config.longitude},${config.unit}`;
-}
-function nextPrecipEvent(data, nowMs) {
-  const THRESHOLD_MM = 0.1;
-  const upcoming = data.minutely.filter((s) => s.timeMs + 15 * 60 * 1e3 > nowMs);
-  if (upcoming.length === 0) return null;
-  const current = upcoming[0];
-  if (current && current.timeMs <= nowMs && current.precipitation >= THRESHOLD_MM) return null;
-  const event = upcoming.find((s) => s.timeMs > nowMs && s.precipitation >= THRESHOLD_MM);
-  if (!event) return null;
-  return {
-    minutesUntil: Math.max(0, Math.round((event.timeMs - nowMs) / 6e4)),
-    weatherCode: event.weatherCode
-  };
+function resolveCastTarget(config) {
+  if (config.sourceKind === "idle") return { kind: "idle" };
+  if (config.sourceKind === "youtube") {
+    const target = parseYouTubeTarget(config.sourceUrl);
+    return target ? { kind: "youtube", ...target, embedUrl: youTubeEmbedUrl(target, config.muted, config.autoplay) } : { kind: "idle" };
+  }
+  if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
+  return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
 }
 
-// src/plugins/weather/types.ts
-var WEATHER_DEFAULT_CONFIG = {
-  latitude: 59.91,
-  longitude: 10.75,
-  locationName: "Oslo",
-  unit: "celsius",
-  forecastDays: 4,
-  showNextEvent: true,
-  showTitle: true,
-  refreshIntervalMinutes: 15
+// node_modules/@noble/ciphers/utils.js
+function isBytes(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in a && a.BYTES_PER_ELEMENT === 1;
+}
+var atitle = (title) => title ? `"${title}" ` : "";
+function abool(value, title = "") {
+  if (typeof value !== "boolean")
+    throw new TypeError(atitle(title) + "expected boolean, got type=" + typeof value);
+  return value;
+}
+function anumber(n, title = "") {
+  if (typeof n !== "number")
+    throw new TypeError(atitle(title) + "expected number, got " + typeof n);
+  if (!Number.isSafeInteger(n) || n < 0)
+    throw new RangeError(atitle(title) + "expected integer >= 0, got " + n);
+  return n;
+}
+function abytes(value, length, title = "") {
+  if (isBytes(value) && (length === void 0 || value.length === length))
+    return value;
+  if (length !== void 0)
+    anumber(length, "length");
+  const bytes = isBytes(value);
+  const ofLen = length !== void 0 ? ` of length ${length}` : "";
+  const got = bytes ? `length=${value.length}` : `type=${typeof value}`;
+  const message = atitle(title) + "expected Uint8Array" + ofLen + ", got " + got;
+  if (!bytes)
+    throw new TypeError(message);
+  throw new RangeError(message);
+}
+function aexists(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("hash was destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("digest() was already called");
+}
+function aoutput(out, instance) {
+  abytes(out, void 0, "output");
+  const min = instance.outputLen;
+  if (!(out.length >= min)) {
+    throw new RangeError('"output" expected length >= ' + min);
+  }
+}
+function aoutput32(out, instance) {
+  aoutput(out, instance);
+  if (!isAligned32(out))
+    throw new Error("invalid output, must be aligned");
+}
+function u8(arr) {
+  return new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
+}
+function u32(arr) {
+  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
+}
+function clean(...arrays) {
+  for (let i = 0; i < arrays.length; i++) {
+    arrays[i].fill(0);
+  }
+}
+function createView(arr) {
+  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+}
+var isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
+function byteSwap(word) {
+  return word << 24 & 4278190080 | word << 8 & 16711680 | word >>> 8 & 65280 | word >>> 24 & 255;
+}
+var swap8IfBE = isLE ? (n) => n : (n) => byteSwap(n) >>> 0;
+function byteSwap32(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = byteSwap(arr[i]);
+  }
+  return arr;
+}
+var swap32IfBE = isLE ? (u) => u : byteSwap32;
+function equalBytes(a, b) {
+  a = abytes(a);
+  b = abytes(b);
+  if (a.length !== b.length)
+    return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++)
+    diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+function wrapMacConstructor(keyLen, macCons, fromMsg) {
+  const mac = macCons;
+  const getArgs = fromMsg || (() => []);
+  const macC = (msg, key) => mac(key, ...getArgs(msg)).update(msg).digest();
+  const tmp = mac(new Uint8Array(keyLen), ...getArgs(new Uint8Array(0)));
+  macC.outputLen = tmp.outputLen;
+  macC.blockLen = tmp.blockLen;
+  macC.create = (key, ...args) => mac(key, ...args);
+  return macC;
+}
+var wrapCipher = /* @__NO_SIDE_EFFECTS__ */ (params, constructor) => {
+  function wrappedCipher(key, ...args) {
+    abytes(key, void 0, "key");
+    if (params.nonceLength !== void 0) {
+      const nonce = args[0];
+      abytes(nonce, params.varSizeNonce ? void 0 : params.nonceLength, "nonce");
+    }
+    const tagl = params.tagLength;
+    const aadStart = params.nonceLength !== void 0 ? 1 : 0;
+    if (!params.withAAD) {
+      for (let i = aadStart; i < args.length; i++)
+        if (isBytes(args[i]))
+          throw new Error("AAD not supported");
+    }
+    if (params.withAAD && args[aadStart] !== void 0)
+      abytes(args[aadStart], void 0, "AAD");
+    const cipher = constructor(key, ...args);
+    const checkOutput = (fnLength, output) => {
+      if (output !== void 0) {
+        if (fnLength !== 2)
+          throw new Error("cipher output not supported");
+        abytes(output, void 0, "output");
+      }
+    };
+    let called = false;
+    const wrCipher = {
+      encrypt(data, output) {
+        if (called)
+          throw new Error("cannot encrypt() twice with same key + nonce");
+        called = true;
+        abytes(data, void 0, "data");
+        checkOutput(cipher.encrypt.length, output);
+        return cipher.encrypt(data, output);
+      },
+      decrypt(data, output) {
+        abytes(data, void 0, "data");
+        if (tagl && data.length < tagl)
+          throw new Error('"ciphertext" expected length >= tagLength=' + tagl);
+        checkOutput(cipher.decrypt.length, output);
+        return cipher.decrypt(data, output);
+      }
+    };
+    return wrCipher;
+  }
+  Object.assign(wrappedCipher, params);
+  return wrappedCipher;
 };
-function toForecastDays(raw) {
-  const n = typeof raw === "string" ? Number(raw) : raw;
-  if (typeof n !== "number" || Number.isNaN(n)) return WEATHER_DEFAULT_CONFIG.forecastDays;
-  return Math.max(1, Math.min(16, Math.round(n)));
+function getOutput(expectedLength, out, onlyAligned = true) {
+  if (out === void 0)
+    return new Uint8Array(expectedLength);
+  abytes(out, expectedLength, "output");
+  if (onlyAligned && !isAligned32(out))
+    throw new Error("invalid output, must be aligned");
+  return out;
 }
-function readWeatherConfig(raw) {
+function u64Lengths(dataLength, aadLength, isLE2) {
+  anumber(dataLength);
+  anumber(aadLength);
+  abool(isLE2);
+  const num = new Uint8Array(16);
+  const view = createView(num);
+  view.setBigUint64(0, BigInt(aadLength), isLE2);
+  view.setBigUint64(8, BigInt(dataLength), isLE2);
+  return num;
+}
+function isAligned32(bytes) {
+  return bytes.byteOffset % 4 === 0;
+}
+function copyBytes(bytes) {
+  return Uint8Array.from(abytes(bytes));
+}
+
+// node_modules/@noble/ciphers/_polyval.js
+var BLOCK_SIZE = 16;
+var ZEROS16 = /* @__PURE__ */ new Uint8Array(16);
+var ZEROS32 = /* @__PURE__ */ u32(ZEROS16);
+var POLY = 225;
+var mul2 = (s0, s1, s2, s3) => {
+  const hiBit = s3 & 1;
   return {
-    latitude: typeof raw.latitude === "number" ? raw.latitude : WEATHER_DEFAULT_CONFIG.latitude,
-    longitude: typeof raw.longitude === "number" ? raw.longitude : WEATHER_DEFAULT_CONFIG.longitude,
-    locationName: typeof raw.locationName === "string" ? raw.locationName : WEATHER_DEFAULT_CONFIG.locationName,
-    unit: raw.unit === "fahrenheit" ? "fahrenheit" : "celsius",
-    forecastDays: toForecastDays(raw.forecastDays),
-    showNextEvent: typeof raw.showNextEvent === "boolean" ? raw.showNextEvent : WEATHER_DEFAULT_CONFIG.showNextEvent,
-    showTitle: typeof raw.showTitle === "boolean" ? raw.showTitle : WEATHER_DEFAULT_CONFIG.showTitle,
-    refreshIntervalMinutes: typeof raw.refreshIntervalMinutes === "number" && raw.refreshIntervalMinutes > 0 ? raw.refreshIntervalMinutes : typeof raw.refreshIntervalMinutes === "string" && Number(raw.refreshIntervalMinutes) > 0 ? Number(raw.refreshIntervalMinutes) : WEATHER_DEFAULT_CONFIG.refreshIntervalMinutes
+    s3: s2 << 31 | s3 >>> 1,
+    s2: s1 << 31 | s2 >>> 1,
+    s1: s0 << 31 | s1 >>> 1,
+    // NIST SP 800-38D §6.3 applies `V >> 1` and XORs R on carry. In this
+    // 4x32-bit split, R = 0xe1 || 0^120 lives in the top byte of s0.
+    s0: s0 >>> 1 ^ POLY << 24 & -(hiBit & 1)
+    // reduce % poly
+  };
+};
+var swapLE = (n) => (n >>> 0 & 255) << 24 | (n >>> 8 & 255) << 16 | (n >>> 16 & 255) << 8 | n >>> 24 & 255 | 0;
+var estimateWindow = (bytes) => {
+  if (bytes > 64 * 1024)
+    return 8;
+  if (bytes > 1024)
+    return 4;
+  return 2;
+};
+var GHASH = class {
+  blockLen = BLOCK_SIZE;
+  outputLen = BLOCK_SIZE;
+  s0 = 0;
+  s1 = 0;
+  s2 = 0;
+  s3 = 0;
+  finished = false;
+  destroyed = false;
+  t;
+  W;
+  windowSize;
+  // We select bits per window adaptively based on expectedLength
+  constructor(key, expectedLength) {
+    abytes(key, 16, "key");
+    key = copyBytes(key);
+    const kView = createView(key);
+    let k0 = kView.getUint32(0, false);
+    let k1 = kView.getUint32(4, false);
+    let k2 = kView.getUint32(8, false);
+    let k3 = kView.getUint32(12, false);
+    const doubles = [];
+    for (let i = 0; i < 128; i++) {
+      doubles.push({ s0: swapLE(k0), s1: swapLE(k1), s2: swapLE(k2), s3: swapLE(k3) });
+      ({ s0: k0, s1: k1, s2: k2, s3: k3 } = mul2(k0, k1, k2, k3));
+    }
+    const W = estimateWindow(expectedLength || 1024);
+    if (![1, 2, 4, 8].includes(W))
+      throw new Error("ghash: invalid window size, expected 2, 4 or 8");
+    this.W = W;
+    const bits = 128;
+    const windows = bits / W;
+    const windowSize = this.windowSize = 2 ** W;
+    const items = [];
+    for (let w = 0; w < windows; w++) {
+      for (let byte = 0; byte < windowSize; byte++) {
+        let s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+        for (let j = 0; j < W; j++) {
+          const bit = byte >>> W - j - 1 & 1;
+          if (!bit)
+            continue;
+          const { s0: d0, s1: d1, s2: d2, s3: d3 } = doubles[W * w + j];
+          s0 ^= d0, s1 ^= d1, s2 ^= d2, s3 ^= d3;
+        }
+        items.push({ s0, s1, s2, s3 });
+      }
+    }
+    this.t = items;
+  }
+  _updateBlock(s0, s1, s2, s3) {
+    s0 ^= this.s0, s1 ^= this.s1, s2 ^= this.s2, s3 ^= this.s3;
+    const { W, t, windowSize } = this;
+    let o0 = 0, o1 = 0, o2 = 0, o3 = 0;
+    const mask = (1 << W) - 1;
+    let w = 0;
+    for (const num of [s0, s1, s2, s3]) {
+      for (let bytePos = 0; bytePos < 4; bytePos++) {
+        const byte = num >>> 8 * bytePos & 255;
+        for (let bitPos = 8 / W - 1; bitPos >= 0; bitPos--) {
+          const bit = byte >>> W * bitPos & mask;
+          const { s0: e0, s1: e1, s2: e2, s3: e3 } = t[w * windowSize + bit];
+          o0 ^= e0, o1 ^= e1, o2 ^= e2, o3 ^= e3;
+          w += 1;
+        }
+      }
+    }
+    this.s0 = o0;
+    this.s1 = o1;
+    this.s2 = o2;
+    this.s3 = o3;
+  }
+  update(data) {
+    aexists(this);
+    abytes(data);
+    data = copyBytes(data);
+    const b32 = u32(data);
+    const blocks = Math.floor(data.length / BLOCK_SIZE);
+    const left = data.length % BLOCK_SIZE;
+    for (let i = 0; i < blocks; i++) {
+      this._updateBlock(swap8IfBE(b32[i * 4 + 0]), swap8IfBE(b32[i * 4 + 1]), swap8IfBE(b32[i * 4 + 2]), swap8IfBE(b32[i * 4 + 3]));
+    }
+    if (left) {
+      ZEROS16.set(data.subarray(blocks * BLOCK_SIZE));
+      this._updateBlock(swap8IfBE(ZEROS32[0]), swap8IfBE(ZEROS32[1]), swap8IfBE(ZEROS32[2]), swap8IfBE(ZEROS32[3]));
+      clean(ZEROS32);
+    }
+    return this;
+  }
+  destroy() {
+    this.destroyed = true;
+    const { t } = this;
+    for (const elm of t) {
+      elm.s0 = 0, elm.s1 = 0, elm.s2 = 0, elm.s3 = 0;
+    }
+  }
+  digestInto(out) {
+    aexists(this);
+    aoutput32(out, this);
+    this.finished = true;
+    const { s0, s1, s2, s3 } = this;
+    const o32 = u32(out);
+    o32[0] = s0;
+    o32[1] = s1;
+    o32[2] = s2;
+    o32[3] = s3;
+    if (!isLE)
+      swap32IfBE(o32.subarray(0, BLOCK_SIZE / 4));
+  }
+  digest() {
+    const res = new Uint8Array(BLOCK_SIZE);
+    this.digestInto(res);
+    this.destroy();
+    return res;
+  }
+};
+var ghash = /* @__PURE__ */ wrapMacConstructor(16, (key, expectedLength) => new GHASH(key, expectedLength), (msg) => [msg.length]);
+
+// node_modules/@noble/ciphers/aes.js
+var BLOCK_SIZE2 = 16;
+var BLOCK_SIZE32 = 4;
+var EMPTY_BLOCK = /* @__PURE__ */ new Uint8Array(BLOCK_SIZE2);
+var POLY2 = 283;
+function validateKeyLength(key) {
+  if (![16, 24, 32].includes(key.length))
+    throw new Error('"aes key" expected Uint8Array of length 16/24/32, got length=' + key.length);
+}
+function mul22(n) {
+  return n << 1 ^ POLY2 & -(n >> 7);
+}
+function mul(a, b) {
+  let res = 0;
+  for (; b > 0; b >>= 1) {
+    res ^= a & -(b & 1);
+    a = mul22(a);
+  }
+  return res;
+}
+var sbox = /* @__PURE__ */ (() => {
+  const t = new Uint8Array(256);
+  for (let i = 0, x = 1; i < 256; i++, x ^= mul22(x))
+    t[i] = x;
+  const box = new Uint8Array(256);
+  box[0] = 99;
+  for (let i = 0; i < 255; i++) {
+    let x = t[255 - i];
+    x |= x << 8;
+    box[t[i]] = (x ^ x >> 4 ^ x >> 5 ^ x >> 6 ^ x >> 7 ^ 99) & 255;
+  }
+  clean(t);
+  return box;
+})();
+var rotr32_8 = (n) => n << 24 | n >>> 8;
+var rotl32_8 = (n) => n << 8 | n >>> 24;
+function genTtable(sbox2, fn) {
+  if (sbox2.length !== 256)
+    throw new Error("wrong sbox length");
+  const T0 = new Uint32Array(256).map((_, j) => fn(sbox2[j]));
+  const T1 = T0.map(rotl32_8);
+  const T2 = T1.map(rotl32_8);
+  const T3 = T2.map(rotl32_8);
+  const T01 = new Uint32Array(256 * 256);
+  const T23 = new Uint32Array(256 * 256);
+  const sbox22 = new Uint16Array(256 * 256);
+  for (let i = 0; i < 256; i++) {
+    for (let j = 0; j < 256; j++) {
+      const idx = i * 256 + j;
+      T01[idx] = T0[i] ^ T1[j];
+      T23[idx] = T2[i] ^ T3[j];
+      sbox22[idx] = sbox2[i] << 8 | sbox2[j];
+    }
+  }
+  return { sbox: sbox2, sbox2: sbox22, T0, T1, T2, T3, T01, T23 };
+}
+var tableEncoding = /* @__PURE__ */ genTtable(sbox, (s) => mul(s, 3) << 24 | s << 16 | s << 8 | mul(s, 2));
+var xPowers = /* @__PURE__ */ (() => {
+  const p = new Uint8Array(16);
+  for (let i = 0, x = 1; i < 16; i++, x = mul22(x))
+    p[i] = x;
+  return p;
+})();
+function expandKeyLE(key) {
+  abytes(key);
+  const len = key.length;
+  validateKeyLength(key);
+  const { sbox2 } = tableEncoding;
+  const toClean = [];
+  if (!isLE || !isAligned32(key))
+    toClean.push(key = copyBytes(key));
+  const k32 = swap32IfBE(u32(key));
+  const Nk = k32.length;
+  const subByte = (n) => applySbox(sbox2, n, n, n, n);
+  const xk = new Uint32Array(len + 28);
+  xk.set(k32);
+  for (let i = Nk; i < xk.length; i++) {
+    let t = xk[i - 1];
+    if (i % Nk === 0)
+      t = subByte(rotr32_8(t)) ^ xPowers[i / Nk - 1];
+    else if (Nk > 6 && i % Nk === 4)
+      t = subByte(t);
+    xk[i] = xk[i - Nk] ^ t;
+  }
+  clean(...toClean);
+  return xk;
+}
+function apply0123(T01, T23, s0, s1, s2, s3) {
+  return T01[s0 << 8 & 65280 | s1 >>> 8 & 255] ^ T23[s2 >>> 8 & 65280 | s3 >>> 24 & 255];
+}
+function applySbox(sbox2, s0, s1, s2, s3) {
+  return sbox2[s0 & 255 | s1 & 65280] | sbox2[s2 >>> 16 & 255 | s3 >>> 16 & 65280] << 16;
+}
+function encrypt(xk, s0, s1, s2, s3) {
+  const { sbox2, T01, T23 } = tableEncoding;
+  let k = 0;
+  s0 ^= xk[k++], s1 ^= xk[k++], s2 ^= xk[k++], s3 ^= xk[k++];
+  const rounds = xk.length / 4 - 2;
+  for (let i = 0; i < rounds; i++) {
+    const t02 = xk[k++] ^ apply0123(T01, T23, s0, s1, s2, s3);
+    const t12 = xk[k++] ^ apply0123(T01, T23, s1, s2, s3, s0);
+    const t22 = xk[k++] ^ apply0123(T01, T23, s2, s3, s0, s1);
+    const t32 = xk[k++] ^ apply0123(T01, T23, s3, s0, s1, s2);
+    s0 = t02, s1 = t12, s2 = t22, s3 = t32;
+  }
+  const t0 = xk[k++] ^ applySbox(sbox2, s0, s1, s2, s3);
+  const t1 = xk[k++] ^ applySbox(sbox2, s1, s2, s3, s0);
+  const t2 = xk[k++] ^ applySbox(sbox2, s2, s3, s0, s1);
+  const t3 = xk[k++] ^ applySbox(sbox2, s3, s0, s1, s2);
+  return { s0: t0, s1: t1, s2: t2, s3: t3 };
+}
+function ctr32(xk, isLE2, nonce, src, dst) {
+  abytes(nonce, BLOCK_SIZE2, "nonce");
+  abytes(src);
+  dst = getOutput(src.length, dst);
+  const ctr = nonce;
+  const c32 = u32(ctr);
+  const view = createView(ctr);
+  const src32 = u32(src);
+  const dst32 = u32(dst);
+  const ctrPos = isLE2 ? 0 : 12;
+  const srcLen = src.length;
+  let ctrNum = view.getUint32(ctrPos, isLE2);
+  for (let i = 0; i + 4 <= src32.length; i += 4) {
+    const { s0, s1, s2, s3 } = encrypt(xk, swap8IfBE(c32[0]), swap8IfBE(c32[1]), swap8IfBE(c32[2]), swap8IfBE(c32[3]));
+    dst32[i + 0] = src32[i + 0] ^ swap8IfBE(s0);
+    dst32[i + 1] = src32[i + 1] ^ swap8IfBE(s1);
+    dst32[i + 2] = src32[i + 2] ^ swap8IfBE(s2);
+    dst32[i + 3] = src32[i + 3] ^ swap8IfBE(s3);
+    ctrNum = ctrNum + 1 >>> 0;
+    view.setUint32(ctrPos, ctrNum, isLE2);
+  }
+  const start = BLOCK_SIZE2 * Math.floor(src32.length / BLOCK_SIZE32);
+  if (start < srcLen) {
+    const { s0, s1, s2, s3 } = encrypt(xk, swap8IfBE(c32[0]), swap8IfBE(c32[1]), swap8IfBE(c32[2]), swap8IfBE(c32[3]));
+    const b32 = new Uint32Array([s0, s1, s2, s3]);
+    swap32IfBE(b32);
+    const buf = u8(b32);
+    for (let i = start, pos = 0; i < srcLen; i++, pos++)
+      dst[i] = src[i] ^ buf[pos];
+    clean(b32);
+  }
+  return dst;
+}
+function computeTag(fn, isLE2, key, data, AAD) {
+  const aadLength = AAD ? AAD.length : 0;
+  const h = fn.create(key, data.length + aadLength);
+  if (AAD)
+    h.update(AAD);
+  const num = u64Lengths(8 * data.length, 8 * aadLength, isLE2);
+  h.update(data);
+  h.update(num);
+  const res = h.digest();
+  clean(num);
+  return res;
+}
+var gcm = /* @__PURE__ */ wrapCipher({ blockSize: 16, nonceLength: 12, tagLength: 16, withAAD: true, varSizeNonce: true }, function aesgcm(key, nonce, AAD) {
+  if (nonce.length < 8)
+    throw new Error("aes/gcm: invalid nonce length");
+  const tagLength = 16;
+  function _computeTag(authKey, tagMask, data) {
+    const tag = computeTag(ghash, false, authKey, data, AAD);
+    for (let i = 0; i < tagMask.length; i++)
+      tag[i] ^= tagMask[i];
+    return tag;
+  }
+  function deriveKeys() {
+    const xk = expandKeyLE(key);
+    const authKey = EMPTY_BLOCK.slice();
+    const counter = EMPTY_BLOCK.slice();
+    ctr32(xk, false, counter, counter, authKey);
+    if (nonce.length === 12) {
+      counter.set(nonce);
+    } else {
+      const nonceLen = EMPTY_BLOCK.slice();
+      const view = createView(nonceLen);
+      view.setBigUint64(8, BigInt(nonce.length * 8), false);
+      const g = ghash.create(authKey).update(nonce).update(nonceLen);
+      g.digestInto(counter);
+      g.destroy();
+    }
+    const tagMask = ctr32(xk, false, counter, EMPTY_BLOCK);
+    return { xk, authKey, counter, tagMask };
+  }
+  return {
+    encrypt(plaintext) {
+      const { xk, authKey, counter, tagMask } = deriveKeys();
+      const out = new Uint8Array(plaintext.length + tagLength);
+      const toClean = [xk, authKey, counter, tagMask];
+      if (!isAligned32(plaintext))
+        toClean.push(plaintext = copyBytes(plaintext));
+      ctr32(xk, false, counter, plaintext, out.subarray(0, plaintext.length));
+      const tag = _computeTag(authKey, tagMask, out.subarray(0, out.length - tagLength));
+      toClean.push(tag);
+      out.set(tag, plaintext.length);
+      clean(...toClean);
+      return out;
+    },
+    decrypt(ciphertext) {
+      const { xk, authKey, counter, tagMask } = deriveKeys();
+      const toClean = [xk, authKey, tagMask, counter];
+      if (!isAligned32(ciphertext))
+        toClean.push(ciphertext = copyBytes(ciphertext));
+      const data = ciphertext.subarray(0, -tagLength);
+      const passedTag = ciphertext.subarray(-tagLength);
+      const tag = _computeTag(authKey, tagMask, data);
+      toClean.push(tag);
+      if (!equalBytes(tag, passedTag)) {
+        clean(...toClean);
+        throw new Error("aes-gcm: invalid tag");
+      }
+      const out = ctr32(xk, false, counter, data);
+      clean(...toClean);
+      return out;
+    }
+  };
+});
+
+// node_modules/@noble/hashes/utils.js
+function isBytes2(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in a && a.BYTES_PER_ELEMENT === 1;
+}
+var atitle2 = (title) => title ? `"${title}" ` : "";
+function anumber2(n, title = "") {
+  if (typeof n !== "number")
+    throw new TypeError(atitle2(title) + "expected number, got " + typeof n);
+  if (!Number.isSafeInteger(n) || n < 0)
+    throw new RangeError(atitle2(title) + "expected integer >= 0, got " + n);
+  return n;
+}
+function abytes2(value, length, title = "") {
+  if (isBytes2(value) && (length === void 0 || value.length === length))
+    return value;
+  if (length !== void 0)
+    anumber2(length, "length");
+  const bytes = isBytes2(value);
+  const ofLen = length !== void 0 ? ` of length ${length}` : "";
+  const got = bytes ? `length=${value.length}` : `type=${typeof value}`;
+  const message = atitle2(title) + "expected Uint8Array" + ofLen + ", got " + got;
+  if (!bytes)
+    throw new TypeError(message);
+  throw new RangeError(message);
+}
+function ahash(h) {
+  if (typeof h !== "function" || typeof h.create !== "function")
+    throw new TypeError("expected hash wrapped by utils.createHasher");
+  anumber2(h.outputLen);
+  anumber2(h.blockLen);
+  if (h.outputLen < 1 || h.blockLen < 1)
+    throw new Error("hash blockLen / outputLen must be >= 1");
+}
+var aobject = (value, label) => {
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    throw new TypeError((label === "object" ? "" : `"${label}" `) + "expected object, got type=" + typeof value);
+};
+var aopts = (value, label) => {
+  aobject(value, label);
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null)
+    throw new TypeError(`"${label}" expected plain object`);
+  if (Object.hasOwn(value, "__proto__"))
+    throw new TypeError(`"${label}.__proto__" is not allowed`);
+};
+function aexists2(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("hash was destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("digest() was already called");
+}
+function aoutput2(out, instance) {
+  abytes2(out, void 0, "output");
+  const min = instance.outputLen;
+  if (!(out.length >= min)) {
+    throw new RangeError('"output" expected length >= ' + min);
+  }
+}
+function clean2(...arrays) {
+  for (let i = 0; i < arrays.length; i++) {
+    arrays[i].fill(0);
+  }
+}
+function createView2(arr) {
+  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
+}
+function rotr(word, shift) {
+  return word << 32 - shift | word >>> shift;
+}
+function checkOpts(defaults, opts, title = "opts") {
+  aopts(defaults, "defaults");
+  if (opts !== void 0)
+    aopts(opts, title);
+  const merged = Object.assign(/* @__PURE__ */ Object.create(null), defaults, opts);
+  return merged;
+}
+function createHasher(hashCons, info = {}) {
+  if (typeof hashCons !== "function")
+    throw new TypeError('"hashCons" expected function, got type=' + typeof hashCons);
+  info = checkOpts({}, info, "info");
+  const hashC = (msg, opts) => hashCons(opts).update(msg).digest();
+  const tmp = hashCons(void 0);
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.canXOF = tmp.canXOF;
+  hashC.create = (opts) => hashCons(opts);
+  Object.assign(hashC, info);
+  return Object.freeze(hashC);
+}
+var oidNist = (suffix) => ({
+  // Current NIST hashAlgs suffixes used here fit in one DER subidentifier octet.
+  // Larger suffix values would need base-128 OID encoding and a different length byte.
+  oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, suffix])
+});
+
+// node_modules/@noble/hashes/hmac.js
+var _HMAC = class {
+  oHash;
+  iHash;
+  blockLen;
+  outputLen;
+  canXOF = false;
+  finished = false;
+  destroyed = false;
+  constructor(hash, key) {
+    ahash(hash);
+    abytes2(key, void 0, "key");
+    this.iHash = hash.create();
+    if (typeof this.iHash.update !== "function")
+      throw new Error("expected Hash instance");
+    this.blockLen = this.iHash.blockLen;
+    this.outputLen = this.iHash.outputLen;
+    const blockLen = this.blockLen;
+    const pad = new Uint8Array(blockLen);
+    pad.set(key.length > blockLen ? hash.create().update(key).digest() : key);
+    for (let i = 0; i < pad.length; i++)
+      pad[i] ^= 54;
+    this.iHash.update(pad);
+    this.oHash = hash.create();
+    for (let i = 0; i < pad.length; i++)
+      pad[i] ^= 54 ^ 92;
+    this.oHash.update(pad);
+    clean2(pad);
+  }
+  update(buf) {
+    aexists2(this);
+    this.iHash.update(buf);
+    return this;
+  }
+  digestInto(out) {
+    aexists2(this);
+    aoutput2(out, this);
+    this.finished = true;
+    const buf = out.subarray(0, this.outputLen);
+    this.iHash.digestInto(buf);
+    this.oHash.update(buf);
+    this.oHash.digestInto(buf);
+    this.destroy();
+  }
+  digest() {
+    const out = new Uint8Array(this.oHash.outputLen);
+    this.digestInto(out);
+    return out;
+  }
+  _cloneInto(to) {
+    to || (to = Object.create(Object.getPrototypeOf(this), {}));
+    const { oHash, iHash, finished, destroyed, blockLen, outputLen, canXOF } = this;
+    to = to;
+    to.finished = finished;
+    to.destroyed = destroyed;
+    to.blockLen = blockLen;
+    to.outputLen = outputLen;
+    to.canXOF = canXOF;
+    to.oHash = oHash._cloneInto(to.oHash);
+    to.iHash = iHash._cloneInto(to.iHash);
+    return to;
+  }
+  clone() {
+    return this._cloneInto();
+  }
+  destroy() {
+    this.destroyed = true;
+    this.oHash.destroy();
+    this.iHash.destroy();
+  }
+};
+var hmac = /* @__PURE__ */ (() => {
+  const hmac_ = ((hash, key, message) => new _HMAC(hash, key).update(message).digest());
+  hmac_.create = (hash, key) => new _HMAC(hash, key);
+  return hmac_;
+})();
+
+// node_modules/@noble/hashes/hkdf.js
+var HKDF_COUNTER = /* @__PURE__ */ Uint8Array.of(0);
+var EMPTY_BUFFER = /* @__PURE__ */ Uint8Array.of();
+function expand(hash, prk, info, length = 32, _recycled) {
+  ahash(hash);
+  anumber2(length, "length");
+  abytes2(prk, void 0, "prk");
+  const olen = hash.outputLen;
+  if (prk.length < olen)
+    throw new Error('"prk" must be at least HashLen octets');
+  if (length > 255 * olen)
+    throw new Error("Length must be <= 255*HashLen");
+  const blocks = Math.ceil(length / olen);
+  if (info === void 0)
+    info = EMPTY_BUFFER;
+  else
+    abytes2(info, void 0, "info");
+  if (!blocks) {
+    if (_recycled)
+      clean2(prk);
+    return new Uint8Array();
+  }
+  const okm = _recycled && blocks === 1 ? prk : new Uint8Array(blocks * olen);
+  const { iHash, oHash } = hmac.create(hash, prk);
+  const T = _recycled ? prk : new Uint8Array(olen);
+  const worker = blocks > 1 ? (_recycled == null ? void 0 : _recycled.iHash) || hash.create() : void 0;
+  for (let counter = 0; counter < blocks - 1; counter++) {
+    HKDF_COUNTER[0] = counter + 1;
+    const iWork = iHash._cloneInto(worker);
+    if (counter)
+      iWork.update(T);
+    iWork.update(info).update(HKDF_COUNTER).digestInto(T);
+    oHash._cloneInto(worker).update(T).digestInto(T);
+    okm.set(T, olen * counter);
+  }
+  HKDF_COUNTER[0] = blocks;
+  if (blocks > 1)
+    iHash.update(T);
+  iHash.update(info).update(HKDF_COUNTER).digestInto(T);
+  oHash.update(T).digestInto(T);
+  okm.set(T, olen * (blocks - 1));
+  iHash.destroy();
+  oHash.destroy();
+  worker == null ? void 0 : worker.destroy();
+  if (T !== okm)
+    clean2(T);
+  clean2(HKDF_COUNTER);
+  if (length === okm.length)
+    return okm;
+  const res = okm.slice(0, length);
+  clean2(okm);
+  return res;
+}
+var hkdf = (hash, ikm, salt, info, length) => {
+  ahash(hash);
+  if (salt === void 0)
+    salt = new Uint8Array(hash.outputLen);
+  const HMAC = hmac.create(hash, salt).update(ikm);
+  return expand(hash, HMAC.digest(), info, length, HMAC);
+};
+
+// node_modules/@noble/hashes/_u64.js
+var fromNumH = (n) => n / 2 ** 32 | 0;
+var fromNumL = (n) => n >>> 0;
+function setU64FromNum(view, byteOffset, n, isLE2) {
+  const h = fromNumH(n);
+  const l = fromNumL(n);
+  view.setUint32(byteOffset, isLE2 ? l : h, isLE2);
+  view.setUint32(byteOffset + 4, isLE2 ? h : l, isLE2);
+}
+
+// node_modules/@noble/hashes/_md.js
+function Chi(a, b, c) {
+  return a & b ^ ~a & c;
+}
+function Maj(a, b, c) {
+  return a & b ^ a & c ^ b & c;
+}
+var HashMD = class {
+  blockLen;
+  outputLen;
+  canXOF = false;
+  padOffset;
+  isLE;
+  // For partial updates less than block size
+  buffer;
+  view;
+  finished = false;
+  length = 0;
+  pos = 0;
+  destroyed = false;
+  constructor(blockLen, outputLen, padOffset, isLE2) {
+    this.blockLen = blockLen;
+    this.outputLen = outputLen;
+    this.padOffset = padOffset;
+    this.isLE = isLE2;
+    this.buffer = new Uint8Array(blockLen);
+    this.view = createView2(this.buffer);
+  }
+  update(data) {
+    aexists2(this);
+    abytes2(data);
+    const { view, buffer, blockLen } = this;
+    const len = data.length;
+    let processed = false;
+    for (let pos = 0; pos < len; ) {
+      const take = Math.min(blockLen - this.pos, len - pos);
+      if (take === blockLen) {
+        const dataView = createView2(data);
+        for (; blockLen <= len - pos; pos += blockLen)
+          this.process(dataView, pos);
+        processed = true;
+        continue;
+      }
+      buffer.set(pos === 0 && take === len ? data : data.subarray(pos, pos + take), this.pos);
+      this.pos += take;
+      pos += take;
+      if (this.pos === blockLen) {
+        this.process(view, 0);
+        this.pos = 0;
+        processed = true;
+      }
+    }
+    this.length += data.length;
+    if (processed)
+      this.roundClean();
+    return this;
+  }
+  digestInto(out) {
+    aexists2(this);
+    aoutput2(out, this);
+    this.finished = true;
+    const { buffer, view, blockLen, isLE: isLE2 } = this;
+    let { pos } = this;
+    buffer[pos++] = 128;
+    buffer.fill(0, pos);
+    if (this.padOffset > blockLen - pos) {
+      this.process(view, 0);
+      buffer.fill(0);
+    }
+    setU64FromNum(view, blockLen - 8, this.length * 8, isLE2);
+    this.process(view, 0);
+    this.roundClean();
+    const oview = out === buffer ? view : createView2(out);
+    const len = this.outputLen;
+    const outLen = len / 4;
+    const state = this.get();
+    if (len % 4 || outLen > state.length)
+      throw new Error("invalid outputLen");
+    for (let i = 0; i < outLen; i++)
+      oview.setUint32(4 * i, state[i], isLE2);
+  }
+  digest() {
+    const { buffer, outputLen } = this;
+    this.digestInto(buffer);
+    const res = buffer.slice(0, outputLen);
+    this.destroy();
+    return res;
+  }
+  _cloneIntoMeta(to) {
+    const { buffer, length, finished, destroyed, pos } = this;
+    to.destroyed = destroyed;
+    to.finished = finished;
+    to.length = length;
+    to.pos = pos;
+    if (pos)
+      to.buffer.set(buffer);
+    return to;
+  }
+  clone() {
+    return this._cloneInto();
+  }
+};
+var SHA256_IV = /* @__PURE__ */ Uint32Array.from([
+  1779033703,
+  3144134277,
+  1013904242,
+  2773480762,
+  1359893119,
+  2600822924,
+  528734635,
+  1541459225
+]);
+
+// node_modules/@noble/hashes/sha2.js
+var SHA256_K = /* @__PURE__ */ Uint32Array.from([
+  1116352408,
+  1899447441,
+  3049323471,
+  3921009573,
+  961987163,
+  1508970993,
+  2453635748,
+  2870763221,
+  3624381080,
+  310598401,
+  607225278,
+  1426881987,
+  1925078388,
+  2162078206,
+  2614888103,
+  3248222580,
+  3835390401,
+  4022224774,
+  264347078,
+  604807628,
+  770255983,
+  1249150122,
+  1555081692,
+  1996064986,
+  2554220882,
+  2821834349,
+  2952996808,
+  3210313671,
+  3336571891,
+  3584528711,
+  113926993,
+  338241895,
+  666307205,
+  773529912,
+  1294757372,
+  1396182291,
+  1695183700,
+  1986661051,
+  2177026350,
+  2456956037,
+  2730485921,
+  2820302411,
+  3259730800,
+  3345764771,
+  3516065817,
+  3600352804,
+  4094571909,
+  275423344,
+  430227734,
+  506948616,
+  659060556,
+  883997877,
+  958139571,
+  1322822218,
+  1537002063,
+  1747873779,
+  1955562222,
+  2024104815,
+  2227730452,
+  2361852424,
+  2428436474,
+  2756734187,
+  3204031479,
+  3329325298
+]);
+var SHA256_W = /* @__PURE__ */ new Uint32Array(64);
+var SHA2_32B = class extends HashMD {
+  // We cannot use array here since array allows indexing by variable
+  // which means optimizer/compiler cannot use registers.
+  // Numeric initializers matter: starting the fields as `undefined` changes
+  // V8's field representation and makes sha256 3x slower (measured).
+  A = 0;
+  B = 0;
+  C = 0;
+  D = 0;
+  E = 0;
+  F = 0;
+  G = 0;
+  H = 0;
+  constructor(outputLen, IV) {
+    super(64, outputLen, 8, false);
+    this.A = IV[0] | 0;
+    this.B = IV[1] | 0;
+    this.C = IV[2] | 0;
+    this.D = IV[3] | 0;
+    this.E = IV[4] | 0;
+    this.F = IV[5] | 0;
+    this.G = IV[6] | 0;
+    this.H = IV[7] | 0;
+  }
+  get() {
+    const { A, B, C, D, E, F, G, H } = this;
+    return [A, B, C, D, E, F, G, H];
+  }
+  // prettier-ignore
+  set(A, B, C, D, E, F, G, H) {
+    this.A = A | 0;
+    this.B = B | 0;
+    this.C = C | 0;
+    this.D = D | 0;
+    this.E = E | 0;
+    this.F = F | 0;
+    this.G = G | 0;
+    this.H = H | 0;
+  }
+  _cloneInto(to) {
+    (to || (to = new this.constructor())).set(...this.get());
+    return this._cloneIntoMeta(to);
+  }
+  process(view, offset) {
+    for (let i = 0; i < 16; i++, offset += 4)
+      SHA256_W[i] = view.getUint32(offset, false);
+    for (let i = 16; i < 64; i++) {
+      const W15 = SHA256_W[i - 15];
+      const W2 = SHA256_W[i - 2];
+      const s0 = rotr(W15, 7) ^ rotr(W15, 18) ^ W15 >>> 3;
+      const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
+      SHA256_W[i] = s1 + SHA256_W[i - 7] + s0 + SHA256_W[i - 16] | 0;
+    }
+    let { A, B, C, D, E, F, G, H } = this;
+    for (let i = 0; i < 64; i++) {
+      const sigma1 = rotr(E, 6) ^ rotr(E, 11) ^ rotr(E, 25);
+      const T1 = H + sigma1 + Chi(E, F, G) + SHA256_K[i] + SHA256_W[i] | 0;
+      const sigma0 = rotr(A, 2) ^ rotr(A, 13) ^ rotr(A, 22);
+      const T2 = sigma0 + Maj(A, B, C) | 0;
+      H = G;
+      G = F;
+      F = E;
+      E = D + T1 | 0;
+      D = C;
+      C = B;
+      B = A;
+      A = T1 + T2 | 0;
+    }
+    A = A + this.A | 0;
+    B = B + this.B | 0;
+    C = C + this.C | 0;
+    D = D + this.D | 0;
+    E = E + this.E | 0;
+    F = F + this.F | 0;
+    G = G + this.G | 0;
+    H = H + this.H | 0;
+    this.set(A, B, C, D, E, F, G, H);
+  }
+  roundClean() {
+    clean2(SHA256_W);
+  }
+  destroy() {
+    this.destroyed = true;
+    this.set(0, 0, 0, 0, 0, 0, 0, 0);
+    clean2(this.buffer);
+  }
+};
+var _SHA256 = class extends SHA2_32B {
+  constructor() {
+    super(32, SHA256_IV);
+  }
+};
+var sha256 = /* @__PURE__ */ createHasher(
+  () => new _SHA256(),
+  /* @__PURE__ */ oidNist(1)
+);
+
+// src/cast-protocol/crypto.ts
+var KEY_BYTES = /* @__PURE__ */ new WeakMap();
+var CastCryptoKey = class _CastCryptoKey {
+  destroyed = false;
+  constructor(bytes) {
+    KEY_BYTES.set(this, bytes);
+  }
+  static take(bytes) {
+    if (bytes.length !== 32) throw new Error("Cast AES keys must be 32 bytes");
+    return new _CastCryptoKey(bytes);
+  }
+  destroy() {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    const bytes = KEY_BYTES.get(this);
+    bytes == null ? void 0 : bytes.fill(0);
+    KEY_BYTES.delete(this);
+  }
+};
+function keyBytes(key) {
+  const bytes = KEY_BYTES.get(key);
+  if (!bytes) throw new Error("Cast crypto key is destroyed");
+  return bytes;
+}
+function castSha256(message) {
+  return sha256(message);
+}
+function castHmacSha256(key, message) {
+  return hmac(sha256, key, message);
+}
+function castHkdfSha256(key, salt, info) {
+  return CastCryptoKey.take(hkdf(sha256, key, salt, info, 32));
+}
+function castAesGcmEncrypt(key, iv, plaintext, additionalData) {
+  return gcm(keyBytes(key), iv, additionalData).encrypt(plaintext);
+}
+function castAesGcmDecrypt(key, iv, ciphertext, additionalData) {
+  return gcm(keyBytes(key), iv, additionalData).decrypt(ciphertext);
+}
+
+// src/cast-protocol/secure.ts
+var MAX_CRYPTO_FAILURES = 8;
+var PROTOCOL_VERSION = 2;
+function destroyDirectionalKeys(keys) {
+  if (!keys) return;
+  keys.send.destroy();
+  keys.receive.destroy();
+}
+var encoder = new TextEncoder();
+function powDifficulty(challengeCount) {
+  if (!Number.isSafeInteger(challengeCount) || challengeCount < 1) throw new Error("Invalid challenge count");
+  return Math.min(10 + 2 * (challengeCount - 1), 24);
+}
+function createChallenge(count, now = Date.now(), lifetimeMs = 3e4) {
+  if (!Number.isSafeInteger(now) || lifetimeMs < 1) throw new Error("Invalid challenge lifetime");
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return { challenge: encode(bytes), count, difficulty: powDifficulty(count), expiresAt: now + lifetimeMs };
+}
+async function verifyProof(challenge, context, proverShare, nonce, difficulty) {
+  if (!Number.isSafeInteger(nonce) || nonce < 0 || nonce > 4294967295 || difficulty < 1 || difficulty > 24) return false;
+  const message = new Uint8Array(challenge.length + context.length + proverShare.length + 4);
+  message.set(challenge);
+  message.set(context, challenge.length);
+  message.set(proverShare, challenge.length + context.length);
+  new DataView(message.buffer).setUint32(message.length - 4, nonce, false);
+  const digest = await Promise.resolve(castSha256(message));
+  let bits = difficulty;
+  for (const byte of digest) {
+    const checked = Math.min(bits, 8);
+    if (byte >>> 8 - checked !== 0) return false;
+    bits -= checked;
+    if (!bits) return true;
+  }
+  return false;
+}
+function field(value) {
+  const bytes = encoder.encode(String(value));
+  const result = new Uint8Array(4 + bytes.length);
+  new DataView(result.buffer).setUint32(0, bytes.length, false);
+  result.set(bytes, 4);
+  return result;
+}
+function canonicalTranscript(input) {
+  const values = [
+    "dash-cast",
+    PROTOCOL_VERSION,
+    "sender",
+    "receiver",
+    input.roomId,
+    input.generation,
+    input.challenge,
+    input.challengeCount,
+    input.difficulty,
+    input.expiresAt,
+    input.proverNonce,
+    input.proverShare,
+    input.verifierShare
+  ];
+  const parts = values.map(field);
+  const result = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    result.set(part, offset);
+    offset += part.length;
+  }
+  return result;
+}
+async function deriveDirectionalKeys(sharedKey, transcript, role) {
+  await Promise.resolve();
+  const senderToReceiver = castHkdfSha256(sharedKey, transcript, encoder.encode("dash-cast/signaling/v2/sender-to-receiver"));
+  try {
+    const receiverToSender = castHkdfSha256(sharedKey, transcript, encoder.encode("dash-cast/signaling/v2/receiver-to-sender"));
+    return role === "sender" ? { send: senderToReceiver, receive: receiverToSender } : { send: receiverToSender, receive: senderToReceiver };
+  } catch (error) {
+    senderToReceiver.destroy();
+    throw error;
+  }
+}
+async function deriveBinding(sharedKey, transcript, role) {
+  await Promise.resolve();
+  const input = concat(transcript, encoder.encode(`channel-binding/${role}`));
+  const binding = castHmacSha256(sharedKey, input);
+  input.fill(0);
+  const encoded2 = encode(binding);
+  binding.fill(0);
+  return encoded2;
+}
+function sequenceIv(sequence) {
+  if (!Number.isSafeInteger(sequence) || sequence < 0) throw new Error("Invalid signaling sequence");
+  const iv = new Uint8Array(12);
+  new DataView(iv.buffer).setBigUint64(4, BigInt(sequence));
+  return iv;
+}
+function aad(direction, type, sequence) {
+  return encoder.encode(`dash-cast/signaling/v2/${direction}/${type}/${sequence}`);
+}
+function encode(bytes) {
+  let value = "";
+  for (const byte of bytes) value += String.fromCharCode(byte);
+  return btoa(value).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
+}
+function decode(value) {
+  const normalized = value.replaceAll("-", "+").replaceAll("_", "/");
+  const raw = atob(normalized);
+  const bytes = new Uint8Array(raw.length);
+  for (let index = 0; index < raw.length; index += 1) bytes[index] = raw.charCodeAt(index);
+  return bytes;
+}
+function concat(a, b) {
+  const result = new Uint8Array(a.length + b.length);
+  result.set(a);
+  result.set(b, a.length);
+  return result;
+}
+async function encryptSignal(key, sequence, message, type = "offer", direction = "sender") {
+  await Promise.resolve();
+  const plaintext = encoder.encode(JSON.stringify(message));
+  const ciphertext = encode(castAesGcmEncrypt(key, sequenceIv(sequence), plaintext, aad(direction, type, sequence)));
+  return { sequence, ciphertext };
+}
+async function decryptSignal(key, frame, lastSequence, type = "offer", direction = "sender") {
+  if (!Number.isSafeInteger(frame.sequence) || frame.sequence !== lastSequence + 1) throw new Error("Replayed or out-of-order signaling frame");
+  await Promise.resolve();
+  const plaintext = castAesGcmDecrypt(key, sequenceIv(frame.sequence), decode(frame.ciphertext), aad(direction, type, frame.sequence));
+  return { value: JSON.parse(new TextDecoder().decode(plaintext)), sequence: frame.sequence };
+}
+
+// src/cast-protocol/random.ts
+function generateAuthCode() {
+  const range = 4294967296;
+  const limit = range - range % 1e6;
+  const word = new Uint32Array(1);
+  do {
+    crypto.getRandomValues(word);
+  } while ((word[0] ?? range) >= limit);
+  return String((word[0] ?? 0) % 1e6).padStart(6, "0");
+}
+
+// src/cast-protocol/queue.ts
+var MAX_CAST_QUEUE_ITEMS = 100;
+var MAX_CAST_QUEUE_TITLE = 200;
+var MAX_CAST_QUEUE_REVISION = Number.MAX_SAFE_INTEGER;
+var ITEM_ID = /^[A-Za-z0-9_-]{16,64}$/;
+function record(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value) ? value : null;
+}
+function hasOnly(candidate, keys) {
+  return Object.keys(candidate).every((key) => keys.includes(key));
+}
+function itemId(value) {
+  return typeof value === "string" && ITEM_ID.test(value);
+}
+function revision(value) {
+  return Number.isSafeInteger(value) && Number(value) >= 0 && Number(value) <= MAX_CAST_QUEUE_REVISION;
+}
+function parseCastQueueItem(value) {
+  const candidate = record(value);
+  if (!candidate || !hasOnly(candidate, ["id", "command", "title"]) || !itemId(candidate.id)) return null;
+  const commandValue = record(candidate.command);
+  if (!commandValue || !hasOnly(commandValue, ["sourceKind", "sourceUrl", "muted", "paused", "volume", "outputMode"])) return null;
+  const command = parseCastCommand(commandValue);
+  if (!command || command.sourceKind === "idle") return null;
+  const title = candidate.title;
+  if (title !== void 0 && (typeof title !== "string" || title.length > MAX_CAST_QUEUE_TITLE)) return null;
+  return { id: candidate.id, command, ...title === void 0 ? {} : { title } };
+}
+function parseCastQueueMutation(value) {
+  const candidate = record(value);
+  if (!candidate || typeof candidate.type !== "string" || !revision(candidate.expectedRevision)) return null;
+  const expectedRevision = candidate.expectedRevision;
+  if (candidate.type === "queue-add") {
+    if (!hasOnly(candidate, ["type", "item", "index", "expectedRevision"])) return null;
+    const item = parseCastQueueItem(candidate.item);
+    const index = candidate.index;
+    if (!item || index !== void 0 && (!Number.isSafeInteger(index) || index < 0 || index > MAX_CAST_QUEUE_ITEMS)) return null;
+    return { type: candidate.type, item, expectedRevision, ...index === void 0 ? {} : { index } };
+  }
+  if (candidate.type === "queue-remove" || candidate.type === "queue-play") {
+    return hasOnly(candidate, ["type", "itemId", "expectedRevision"]) && itemId(candidate.itemId) ? { type: candidate.type, itemId: candidate.itemId, expectedRevision } : null;
+  }
+  if (candidate.type === "queue-paused" && hasOnly(candidate, ["type", "paused", "expectedRevision"]) && typeof candidate.paused === "boolean") {
+    return { type: candidate.type, paused: candidate.paused, expectedRevision };
+  }
+  if (candidate.type === "queue-move") {
+    return hasOnly(candidate, ["type", "itemId", "index", "expectedRevision"]) && itemId(candidate.itemId) && Number.isSafeInteger(candidate.index) && candidate.index >= 0 && candidate.index < MAX_CAST_QUEUE_ITEMS ? { type: candidate.type, itemId: candidate.itemId, index: candidate.index, expectedRevision } : null;
+  }
+  if (candidate.type === "queue-next" || candidate.type === "queue-previous" || candidate.type === "queue-clear") {
+    return hasOnly(candidate, ["type", "expectedRevision"]) ? { type: candidate.type, expectedRevision } : null;
+  }
+  if (candidate.type === "queue-autoplay" && hasOnly(candidate, ["type", "autoplay", "expectedRevision"]) && typeof candidate.autoplay === "boolean") {
+    return { type: candidate.type, autoplay: candidate.autoplay, expectedRevision };
+  }
+  if (candidate.type === "queue-output-mode" && hasOnly(candidate, ["type", "outputMode", "expectedRevision"]) && (candidate.outputMode === "audio-video" || candidate.outputMode === "audio-only" || candidate.outputMode === "video-only")) {
+    return { type: candidate.type, outputMode: candidate.outputMode, expectedRevision };
+  }
+  return null;
+}
+function parseCastQueueSnapshot(value) {
+  const candidate = record(value);
+  if (!candidate || !hasOnly(candidate, ["revision", "items", "currentItemId", "autoplay", "outputMode"]) || !Number.isSafeInteger(candidate.revision) || candidate.revision < 0 || candidate.revision > MAX_CAST_QUEUE_REVISION || !Array.isArray(candidate.items) || candidate.items.length > MAX_CAST_QUEUE_ITEMS || typeof candidate.autoplay !== "boolean" || candidate.outputMode !== "audio-video" && candidate.outputMode !== "audio-only" && candidate.outputMode !== "video-only") return null;
+  const items = [];
+  const ids = /* @__PURE__ */ new Set();
+  for (const value2 of candidate.items) {
+    const item = parseCastQueueItem(value2);
+    if (!item || ids.has(item.id)) return null;
+    ids.add(item.id);
+    items.push(item);
+  }
+  if (candidate.currentItemId !== null && (!itemId(candidate.currentItemId) || !ids.has(candidate.currentItemId))) return null;
+  return { revision: candidate.revision, items, currentItemId: candidate.currentItemId, autoplay: candidate.autoplay, outputMode: candidate.outputMode };
+}
+function createCastQueueSnapshot(autoplay = false) {
+  return { revision: 0, items: [], currentItemId: null, autoplay, outputMode: "audio-video" };
+}
+function applyCastQueueMutation(state, mutation) {
+  var _a, _b;
+  if (state.revision >= MAX_CAST_QUEUE_REVISION || mutation.expectedRevision !== state.revision) return null;
+  let items = state.items;
+  let currentItemId = state.currentItemId;
+  let autoplay = state.autoplay;
+  let outputMode = state.outputMode;
+  if (mutation.type === "queue-add") {
+    if (items.length >= MAX_CAST_QUEUE_ITEMS || items.some((item) => item.id === mutation.item.id)) return null;
+    items = [...items];
+    items.splice(Math.min(mutation.index ?? items.length, items.length), 0, mutation.item);
+  } else if (mutation.type === "queue-remove") {
+    const index = items.findIndex((item) => item.id === mutation.itemId);
+    if (index < 0) return null;
+    items = items.filter((item) => item.id !== mutation.itemId);
+    if (currentItemId === mutation.itemId) currentItemId = ((_a = items[Math.min(index, items.length - 1)]) == null ? void 0 : _a.id) ?? null;
+  } else if (mutation.type === "queue-move") {
+    const index = items.findIndex((item2) => item2.id === mutation.itemId);
+    if (index < 0) return null;
+    items = [...items];
+    const item = items.splice(index, 1)[0];
+    if (!item) return null;
+    items.splice(Math.min(mutation.index, items.length), 0, item);
+  } else if (mutation.type === "queue-play") {
+    const index = items.findIndex((item) => item.id === mutation.itemId);
+    if (index < 0) return null;
+    currentItemId = mutation.itemId;
+    items = items.map((item, itemIndex) => itemIndex === index ? { ...item, command: { ...item.command, paused: false } } : item);
+  } else if (mutation.type === "queue-paused") {
+    const index = items.findIndex((item) => item.id === currentItemId);
+    if (index < 0) return null;
+    items = items.map((item, itemIndex) => itemIndex === index ? { ...item, command: { ...item.command, paused: mutation.paused } } : item);
+  } else if (mutation.type === "queue-next" || mutation.type === "queue-previous") {
+    if (!items.length) return null;
+    const found = items.findIndex((item) => item.id === currentItemId);
+    const index = found < 0 ? mutation.type === "queue-next" ? -1 : 0 : found;
+    const delta = mutation.type === "queue-next" ? 1 : -1;
+    currentItemId = ((_b = items[(index + delta + items.length) % items.length]) == null ? void 0 : _b.id) ?? null;
+    items = items.map((item) => item.id === currentItemId ? { ...item, command: { ...item.command, paused: false } } : item);
+  } else if (mutation.type === "queue-clear") {
+    items = [];
+    currentItemId = null;
+  } else if (mutation.type === "queue-autoplay") autoplay = mutation.autoplay;
+  else outputMode = mutation.outputMode;
+  return { revision: state.revision + 1, items, currentItemId, autoplay, outputMode };
+}
+
+// src/cast-protocol/index.ts
+var MAX_CAST_MESSAGE_BYTES = 16 * 1024;
+function parseCastCommand(value) {
+  const sourceKind = value.sourceKind;
+  if (sourceKind !== "idle" && sourceKind !== "website" && sourceKind !== "media" && sourceKind !== "youtube") return null;
+  const sourceUrl = String(value.sourceUrl ?? "");
+  if (sourceUrl.length > 8192) return null;
+  const volume = typeof value.volume === "number" && Number.isFinite(value.volume) ? Math.min(1, Math.max(0, value.volume)) : void 0;
+  const outputMode = value.outputMode === "audio-only" || value.outputMode === "video-only" ? value.outputMode : "audio-video";
+  return {
+    sourceKind,
+    sourceUrl,
+    muted: value.muted === true,
+    outputMode,
+    ...typeof value.paused === "boolean" ? { paused: value.paused } : {},
+    ...volume === void 0 ? {} : { volume }
   };
 }
 
-// src/plugins/weather/locales/de.json
-var de_default = {
-  manifest: {
-    Weather: "Wetter",
-    "Current conditions and forecast via Open-Meteo": "Aktuelles Wetter und Vorhersage \xFCber Open-Meteo",
-    "Weather Now": "Aktuelles Wetter",
-    "Current conditions badge": "Aktuelle Wetterbedingungen",
-    "Weather Forecast": "Wettervorhersage",
-    "Multi-day forecast card": "Mehrt\xE4gige Wettervorhersage",
-    Location: "Standort",
-    Display: "Anzeige",
-    "Location name": "Ortsname",
-    Coordinates: "Koordinaten",
-    Latitude: "Breitengrad",
-    Longitude: "L\xE4ngengrad",
-    "Temperature unit": "Temperatureinheit",
-    "Refresh interval": "Aktualisierungsintervall",
-    "5 minutes": "5 Minuten",
-    "15 minutes": "15 Minuten",
-    "30 minutes": "30 Minuten",
-    "60 minutes": "60 Minuten",
-    "Show next precipitation": "N\xE4chsten Niederschlag anzeigen",
-    'A small note like "Rain in 25 min" from the 15-minute nowcast.': "Zeigt einen kurzen Hinweis wie \u201ERegen in 25 Min.\u201C aus der 15-Minuten-Vorhersage.",
-    "Show location name": "Ortsnamen anzeigen",
-    "Turn off to save space \u2014 the widget content already makes it obvious.": "Deaktivieren, um Platz zu sparen \u2013 der Widget-Inhalt ist bereits eindeutig.",
-    "Forecast days": "Vorhersagetage",
-    "Number of days to show (1\u201316).": "Anzahl der anzuzeigenden Tage (1\u201316)."
-  },
-  runtime: {
-    "codes.0": "Klar",
-    "codes.1": "\xDCberwiegend klar",
-    "codes.2": "Teilweise bew\xF6lkt",
-    "codes.3": "Bedeckt",
-    "codes.45": "Nebel",
-    "codes.48": "Reifnebel",
-    "codes.51": "Leichter Nieselregen",
-    "codes.53": "Nieselregen",
-    "codes.55": "Starker Nieselregen",
-    "codes.61": "Leichter Regen",
-    "codes.63": "Regen",
-    "codes.65": "Starker Regen",
-    "codes.66": "Gefrierender Regen",
-    "codes.67": "Gefrierender Regen",
-    "codes.71": "Leichter Schneefall",
-    "codes.73": "Schnee",
-    "codes.75": "Starker Schneefall",
-    "codes.77": "Schneegriesel",
-    "codes.80": "Regenschauer",
-    "codes.81": "Regenschauer",
-    "codes.82": "Heftige Schauer",
-    "codes.85": "Schneeschauer",
-    "codes.86": "Schneeschauer",
-    "codes.95": "Gewitter",
-    "codes.96": "Gewitter",
-    "codes.99": "Gewitter",
-    inHours: "in {{count}} Std.",
-    inMinutes: "in {{count}} Min.",
-    loading: "Wetter wird geladen\u2026",
-    loadingForecast: "Vorhersage wird geladen\u2026",
-    nextPrecipitation: "N\xE4chster Niederschlag",
-    now: "jetzt",
-    today: "Heute"
+// src/core/cast/setup/setup-url.ts
+var MAX_CAST_URL_LENGTH = 2048;
+function parseBoundedUrl(value) {
+  if (value.length > MAX_CAST_URL_LENGTH) throw new TypeError("Cast setup URL is too long.");
+  const url = new URL(value);
+  if (url.username || url.password) throw new TypeError("Credentials are not allowed in Cast setup URLs.");
+  if (url.search || url.hash) throw new TypeError("Queries and fragments are not allowed in Cast setup URLs.");
+  return url;
+}
+function parseCastRelayUrl(value, kind) {
+  const url = parseBoundedUrl(value);
+  const accepted = kind === "http" ? url.protocol === "http:" || url.protocol === "https:" : url.protocol === "ws:" || url.protocol === "wss:";
+  if (!accepted) throw new TypeError(`Cast ${kind} URL uses an unsupported scheme.`);
+  if (kind === "http" && url.pathname !== "/" && url.pathname !== "") throw new TypeError("Cast relay HTTP URLs must be origins without a path.");
+  return url;
+}
+
+// src/plugins/cast-receiver/session/pairing.ts
+async function createPairingSession(baseUrl, signal, validateOrigin) {
+  const base = parseCastRelayUrl(baseUrl, "http");
+  const response = await fetch(new URL("/room", base), { method: "POST", signal });
+  if (!response.ok) throw new Error(`Signaling service rejected room (${response.status})`);
+  const value = await response.json();
+  if (!value || typeof value !== "object") throw new Error("Cast signaling service returned an invalid room");
+  const room = value;
+  if (typeof room.roomId !== "string" || !/^\d{4,}$/.test(room.roomId) || typeof room.reclaimToken !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(room.reclaimToken) || typeof room.generation !== "string" || typeof room.expiresAt !== "number" || room.expiresAt <= Date.now() || typeof room.websocketUrl !== "string") throw new Error("Cast signaling service returned an invalid room");
+  const created = room;
+  try {
+    parseCastRelayUrl(created.websocketUrl, "websocket");
+  } catch {
+    throw new Error("Cast signaling service returned an invalid room");
+  }
+  await validateOrigin(created.websocketUrl);
+  const authCode = generateAuthCode();
+  return {
+    options: {
+      relayUrl: created.websocketUrl,
+      roomCode: created.roomId,
+      authCode,
+      generation: created.generation,
+      reclaimToken: created.reclaimToken
+    },
+    roomCode: `${created.roomId}${authCode}`,
+    authCode,
+    generation: created.generation,
+    expiresAt: created.expiresAt,
+    async renew() {
+      const renewal = await fetch(new URL(`/room/${created.roomId}`, base), {
+        method: "POST",
+        headers: { authorization: `Bearer ${created.reclaimToken}` },
+        signal
+      });
+      if (!renewal.ok) throw new Error(`Signaling renewal failed (${renewal.status})`);
+      const value2 = await renewal.json();
+      if (!value2 || typeof value2 !== "object" || !("expiresAt" in value2) || typeof value2.expiresAt !== "number" || value2.expiresAt <= Date.now()) {
+        throw new Error("Signaling renewal returned invalid expiry");
+      }
+      created.expiresAt = value2.expiresAt;
+      return created.expiresAt;
+    },
+    async close() {
+      const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${created.reclaimToken}` }
+      });
+      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
+    }
+  };
+}
+
+// src/core/cast/setup/receiver-client.ts
+var CastResumeLookupError = class extends Error {
+  constructor(message, authority) {
+    super(message);
+    this.authority = authority;
+    this.name = "CastResumeLookupError";
+  }
+};
+async function resumeLookup(relayUrl, bindingId, signal) {
+  if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId)) throw new CastResumeLookupError("Invalid Cast resume binding", "invalid");
+  const base = parseCastRelayUrl(relayUrl, "http");
+  if (!base.pathname.endsWith("/")) base.pathname += "/";
+  let response;
+  try {
+    response = await fetch(new URL(`resume/${bindingId}`, base), { method: "POST", ...signal ? { signal } : {} });
+  } catch (error) {
+    throw new CastResumeLookupError(error instanceof Error ? error.message : "Cast resume lookup failed", "transient");
+  }
+  if (response.status === 404 || response.status === 410) throw new CastResumeLookupError("Cast resume binding is unavailable", "not-found");
+  if (!response.ok) throw new CastResumeLookupError(`Cast relay rejected resume (${response.status})`, "rejected");
+  let value;
+  try {
+    value = await response.json();
+  } catch {
+    throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
+  }
+  if (!value || typeof value !== "object") throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
+  const room = value;
+  if (typeof room.websocketUrl !== "string" || typeof room.generation !== "string" || !/^[A-Za-z0-9_-]{16,64}$/.test(room.generation) || typeof room.expiresAt !== "number" || room.expiresAt <= Date.now()) throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
+  try {
+    parseCastRelayUrl(room.websocketUrl, "websocket");
+  } catch {
+    throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
+  }
+  return room;
+}
+async function createResumeSession(relayUrl, bindingId, resumePassword, signal) {
+  if (resumePassword.length !== 32) throw new Error("Invalid Cast resume password");
+  const room = await resumeLookup(relayUrl, bindingId, signal);
+  return {
+    relayUrl: room.websocketUrl,
+    roomCode: bindingId,
+    authCode: "",
+    generation: room.generation,
+    resumeBindingId: bindingId,
+    resumePassword
+  };
+}
+
+// src/core/cast/setup/resume-binding.ts
+var MAX_CAST_RESUME_LIFETIME_MS = 30 * 24 * 60 * 60 * 1e3;
+
+// src/core/cast/protocol/data-message.ts
+var exact = (value, keys) => {
+  const actual = Object.keys(value);
+  return actual.length === keys.length && actual.every((key) => keys.includes(key));
+};
+function encoded32(value) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value)) return false;
+  try {
+    const decoded = decode(value);
+    return decoded.length === 32 && encode(decoded) === value;
+  } catch {
+    return false;
+  }
+}
+function validPresentationEpoch(value) {
+  return Number.isSafeInteger(value) && Number(value) > 0;
+}
+function parseDataMessage(input, now = Date.now()) {
+  let value;
+  try {
+    value = JSON.parse(input);
+  } catch {
+    return null;
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const message = value;
+  if (message.type === "binding" && exact(message, ["type", "proof"]) && encoded32(message.proof)) return { type: "binding", proof: message.proof };
+  if (message.type === "resume-binding" && exact(message, ["type", "bindingId", "resumePassword", "expiresAt"]) && encoded32(message.bindingId) && encoded32(message.resumePassword) && Number.isSafeInteger(message.expiresAt) && Number(message.expiresAt) > now && Number(message.expiresAt) <= now + MAX_CAST_RESUME_LIFETIME_MS) {
+    return message;
+  }
+  if ((message.type === "resume-binding-ack" || message.type === "resume-binding-revoke") && exact(message, ["type", "bindingId"]) && encoded32(message.bindingId)) return message;
+  if (message.type === "command" && exact(message, ["type", "command", "epoch"]) && validPresentationEpoch(message.epoch) && message.command && typeof message.command === "object" && !Array.isArray(message.command)) {
+    const command = parseCastCommand(message.command);
+    return command ? { type: "command", command, epoch: message.epoch } : null;
+  }
+  if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
+  if (message.type === "stream" && exact(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
+  if ((message.type === "sas-confirm" || message.type === "sas-ack") && exact(message, ["type", "generation"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) return message;
+  if (message.type === "queue-mutation" && exact(message, ["type", "mutation"])) {
+    const mutation = parseCastQueueMutation(message.mutation);
+    return mutation ? { type: "queue-mutation", mutation } : null;
+  }
+  if (message.type === "queue-snapshot" && exact(message, ["type", "snapshot", "conflict", "pairingVisible"]) && typeof message.conflict === "boolean" && typeof message.pairingVisible === "boolean") {
+    const snapshot = parseCastQueueSnapshot(message.snapshot);
+    return snapshot ? { type: "queue-snapshot", snapshot, conflict: message.conflict, pairingVisible: message.pairingVisible } : null;
+  }
+  if (message.type === "pair-display-request" && exact(message, ["type", "visible"]) && typeof message.visible === "boolean") return { type: "pair-display-request", visible: message.visible };
+  return null;
+}
+
+// src/core/cast/session/transport/presentation-epoch.ts
+var CastAuthenticationError = class extends Error {
+  code = "CAST_AUTHENTICATION_FAILED";
+  constructor(cause) {
+    super("Cast authentication failed", { cause });
+    this.name = "CastAuthenticationError";
+  }
+};
+function acceptsIncomingTrack(currentEpoch, offerEpoch) {
+  return validPresentationEpoch(offerEpoch) && offerEpoch >= currentEpoch;
+}
+function ownsActiveStream(currentEpoch, trackEpoch, currentStream, trackStream) {
+  return trackEpoch === currentEpoch && currentStream === trackStream;
+}
+
+// src/core/cast/protocol/signaling.ts
+var exact2 = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
+var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
+var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
+function parseDescription(value, type) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value;
+  if (!exact2(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
+  return { type, sdp: candidate.sdp };
+}
+function parseIceCandidate(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value;
+  const keys = Object.keys(candidate);
+  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
+  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
+  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
+  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
+  return candidate;
+}
+function sendWire(socket, value) {
+  const text = JSON.stringify(value);
+  if (text.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
+  socket.send(text);
+}
+function parseWire(data) {
+  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES) return null;
+  let value;
+  try {
+    value = JSON.parse(data);
+  } catch {
+    return null;
+  }
+  if (!value || typeof value !== "object" || !("type" in value)) return null;
+  const candidate = value;
+  if (candidate.type === "hello" && exact2(candidate, ["type", "roomId", "generation", "role"]) && typeof candidate.roomId === "string" && /^\d{4,9}$/.test(candidate.roomId) && typeof candidate.generation === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(candidate.generation) && (candidate.role === "sender" || candidate.role === "receiver")) return candidate;
+  if (candidate.type === "receiver-ready" && exact2(candidate, ["type"])) return candidate;
+  if ((candidate.type === "burn" || candidate.type === "recycle") && exact2(candidate, ["type", "reclaimToken"]) && typeof candidate.reclaimToken === "string" && /^[A-Za-z0-9_-]{43}$/.test(candidate.reclaimToken)) return candidate;
+  if (candidate.type === "challenge-request" && exact2(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) return candidate;
+  if (candidate.type === "challenge" && exact2(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) return candidate;
+  if (candidate.type === "prover" && exact2(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) return candidate;
+  if (candidate.type === "verifier" && exact2(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) return candidate;
+  if (candidate.type === "confirm" && exact2(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) return candidate;
+  if (candidate.type === "signal" && exact2(candidate, ["type", "signalType", "sequence", "ciphertext"]) && (candidate.signalType === "offer" || candidate.signalType === "answer" || candidate.signalType === "ice") && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && candidate.ciphertext.length <= MAX_CAST_MESSAGE_BYTES && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) return candidate;
+  return null;
+}
+var EncryptedSignaling = class {
+  constructor(socket, keys, role) {
+    this.socket = socket;
+    this.keys = keys;
+    this.role = role;
+  }
+  sent = 1;
+  received = 0;
+  sendQueue = Promise.resolve();
+  receiveQueue = Promise.resolve();
+  applyQueue = Promise.resolve();
+  closed = false;
+  close() {
+    if (this.closed) return;
+    this.closed = true;
+    destroyDirectionalKeys(this.keys);
+  }
+  send(signal) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.sendQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      const type = signal.type;
+      const payload = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
+      const sequence = this.sent;
+      const frame = await encryptSignal(this.keys.send, sequence, payload, type, this.role);
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
+      this.sent = sequence + 1;
+    });
+    this.sendQueue = pending.catch(() => void 0);
+    return pending;
+  }
+  receive(value) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.receiveQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      const remote = this.role === "sender" ? "receiver" : "sender";
+      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      this.received = opened.sequence;
+      if (value.signalType === "ice") {
+        const candidate = parseIceCandidate(opened.value);
+        if (!candidate) throw new Error("Invalid Cast ICE candidate");
+        return { type: "ice", candidate };
+      }
+      if (value.signalType === "offer") {
+        const offer = opened.value;
+        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
+        const metadata = offer;
+        const description2 = exact2(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
+        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
+        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
+      }
+      const description = parseDescription(opened.value, "answer");
+      if (!description) throw new Error("Invalid Cast answer");
+      return { type: "answer", description };
+    });
+    this.receiveQueue = pending.then(() => void 0, () => void 0);
+    return pending;
+  }
+  apply(operation) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.applyQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      await operation();
+    });
+    this.applyQueue = pending.catch(() => void 0);
+    return pending;
   }
 };
 
-// src/plugins/weather/translate.ts
-var translations = { de: de_default.runtime };
-function text(locale, key, params = {}, fallback = key) {
+// src/core/cast/session/transport/channel-connection.ts
+function requiredOptions(options) {
   var _a;
-  const value = (_a = translations[locale.split("-")[0] ?? locale]) == null ? void 0 : _a[key];
-  if (!value) return fallback;
-  return value.replace(/{{(\w+)}}/g, (_, name) => String(params[name] ?? ""));
+  const resume = options.resumePassword !== void 0 || options.resumeBindingId !== void 0;
+  if (!options.generation || options.generation.length > 128 || (resume ? ((_a = options.resumePassword) == null ? void 0 : _a.length) !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId ?? "") : !options.authCode || !/^\d{6}$/.test(options.authCode))) {
+    throw new Error("Secure cast credentials are required");
+  }
+  if (options.reclaimToken !== void 0 && !/^[A-Za-z0-9_-]{43}$/.test(options.reclaimToken)) {
+    throw new Error("Invalid cast reclaim credential");
+  }
+  return { ...options, authCode: options.authCode ?? "", generation: options.generation };
+}
+function socketFor(options, role, onOpen, prepare) {
+  const socket = new WebSocket(options.relayUrl);
+  prepare == null ? void 0 : prepare(socket);
+  socket.onopen = () => {
+    sendWire(socket, { type: "hello", roomId: options.roomCode, generation: options.generation, role });
+    onOpen == null ? void 0 : onOpen(socket);
+  };
+  return socket;
+}
+function peerFor(options) {
+  return new RTCPeerConnection(options.turnUrl ? {
+    iceServers: [{
+      urls: options.turnUrl,
+      ...options.turnUsername ? { username: options.turnUsername } : {},
+      ...options.turnCredential ? { credential: options.turnCredential } : {}
+    }]
+  } : {});
+}
+async function applySignal(peer, secure, signal) {
+  if (signal.type === "ice") {
+    await peer.addIceCandidate(signal.candidate);
+  } else if (signal.type === "offer") {
+    await peer.setRemoteDescription(signal.description);
+    await peer.setLocalDescription(await peer.createAnswer());
+    await secure.send({ type: "answer", description: peer.localDescription });
+  } else {
+    await peer.setRemoteDescription(signal.description);
+  }
+}
+function activateChannel(channel, pairing, onBound, onMessage) {
+  let bound = false;
+  channel.onopen = () => channel.send(JSON.stringify({ type: "binding", proof: pairing.sendBinding }));
+  channel.onmessage = ({ data }) => {
+    if (typeof data !== "string") return;
+    const value = parseDataMessage(data);
+    if (!value) return;
+    if (!bound) {
+      if (value.type !== "binding" || value.proof !== pairing.receiveBinding) {
+        channel.close();
+        return;
+      }
+      bound = true;
+      onBound();
+      return;
+    }
+    onMessage(value);
+  };
 }
 
-// src/plugins/weather/WeatherWidget.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-function formatLeadTime(locale, minutes) {
-  if (minutes < 1) return text(locale, "now");
-  if (minutes < 60) return text(locale, "inMinutes", { count: minutes });
-  const hours = Math.round(minutes / 60);
-  return text(locale, "inHours", { count: hours });
+// src/core/cast/crypto/web/spake.source.ts
+var SIZE = { handle: 16, scalar: 32, share: 65, confirm: 32, secret: 32 };
+var encoder2 = new TextEncoder();
+var SpakeError = class extends Error {
+  constructor() {
+    super("SPAKE2+ operation failed");
+    this.name = "SpakeError";
+  }
+};
+var Secret = class {
+  value;
+  constructor(value) {
+    this.value = value;
+  }
+  bytes() {
+    if (!this.value) throw new SpakeError();
+    return this.value.slice();
+  }
+  destroy() {
+    if (this.value) {
+      this.value.fill(0);
+      this.value = void 0;
+    }
+  }
+};
+function equal(a, b) {
+  if (a.length !== b.length) return false;
+  let difference = 0;
+  for (let i = 0; i < a.length; ++i) difference |= a[i] ^ b[i];
+  return difference === 0;
 }
-function WeatherWidget({ context }) {
-  const config = (0, import_react2.useMemo)(() => readWeatherConfig(context.config), [context.config]);
-  const { data, error, refetch } = useWidgetData(context, {
-    key: [weatherCacheKey(config)],
-    fetcher: async () => {
-      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
-      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
-      return mapOpenMeteo(res.data);
-    },
-    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
-    staleMessage: "Offline \u2014 showing last weather",
-    errorMessage: "Weather unavailable"
+var Spake = class _Spake {
+  constructor(native) {
+    this.native = native;
+  }
+  static fromNativeForTest(native) {
+    return new _Spake(native);
+  }
+  static async load(bytes, trustedSha256) {
+    if (trustedSha256.length !== 32) throw new SpakeError();
+    const raw = bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const digest = castSha256(raw);
+    if (!equal(digest, trustedSha256)) throw new SpakeError();
+    const holder = {};
+    const entropy = (pointer, length) => {
+      if (!holder.instance || !Number.isInteger(pointer) || !Number.isInteger(length) || pointer < 0 || length < 0 || length > 65536) return -1;
+      const exports = holder.instance.exports;
+      const byteLength = exports.memory.buffer.byteLength;
+      if (pointer > byteLength - length) return -1;
+      try {
+        crypto.getRandomValues(new Uint8Array(exports.memory.buffer, pointer, length));
+        return 0;
+      } catch {
+        return -1;
+      }
+    };
+    const result = await WebAssembly.instantiate(raw, {
+      env: { getentropy: entropy, emscripten_notify_memory_growth: () => void 0 },
+      wasi_snapshot_preview1: {
+        random_get: entropy,
+        fd_write: () => 0,
+        fd_close: () => 0,
+        fd_seek: () => 0,
+        proc_exit: () => {
+          throw new SpakeError();
+        }
+      }
+    });
+    const instance = result instanceof WebAssembly.Instance ? result : result.instance;
+    holder.instance = instance;
+    const initialize = instance.exports._initialize;
+    if (typeof initialize === "function") initialize();
+    const required = [
+      "memory",
+      "malloc",
+      "free",
+      "ds_register",
+      "ds_register_resume",
+      "ds_prover_new",
+      "ds_prover_share",
+      "ds_prover_finish",
+      "ds_verifier_new",
+      "ds_verifier_process",
+      "ds_verifier_finish",
+      "ds_destroy"
+    ];
+    for (const name of required) if (!(name in instance.exports)) throw new SpakeError();
+    const native = {
+      HEAPU8: new Uint8Array(instance.exports.memory.buffer),
+      _malloc: instance.exports.malloc,
+      _free: instance.exports.free,
+      _ds_register: instance.exports.ds_register,
+      _ds_register_resume: instance.exports.ds_register_resume,
+      _ds_prover_new: instance.exports.ds_prover_new,
+      _ds_prover_share: instance.exports.ds_prover_share,
+      _ds_prover_finish: instance.exports.ds_prover_finish,
+      _ds_verifier_new: instance.exports.ds_verifier_new,
+      _ds_verifier_process: instance.exports.ds_verifier_process,
+      _ds_verifier_finish: instance.exports.ds_verifier_finish,
+      _ds_destroy: instance.exports.ds_destroy
+    };
+    Object.defineProperty(native, "HEAPU8", { get: () => new Uint8Array(instance.exports.memory.buffer) });
+    return new _Spake(native);
+  }
+  allocate(length) {
+    if (!Number.isInteger(length) || length <= 0) throw new SpakeError();
+    const pointer = this.native._malloc(length);
+    if (!pointer || pointer > this.native.HEAPU8.length - length) {
+      if (pointer) this.native._free(pointer);
+      throw new SpakeError();
+    }
+    return pointer;
+  }
+  buffers(inputs, outputs, operation) {
+    const lengths = [...inputs.map((value) => value.length), ...outputs];
+    const pointers = [];
+    try {
+      for (const length of lengths) pointers.push(this.allocate(length));
+      inputs.forEach((value, index) => this.native.HEAPU8.set(value, pointers[index]));
+      if (!operation(pointers)) throw new SpakeError();
+      return outputs.map((length, index) => {
+        const pointer = pointers[inputs.length + index];
+        if (pointer === void 0) throw new SpakeError();
+        return this.native.HEAPU8.slice(pointer, pointer + length);
+      });
+    } finally {
+      pointers.forEach((pointer, index) => {
+        this.native.HEAPU8.fill(0, pointer, pointer + lengths[index]);
+        this.native._free(pointer);
+      });
+    }
+  }
+  context(generation) {
+    const generationBytes = encoder2.encode(generation);
+    const prefix = encoder2.encode("dash-cast/spake2plus/v2/room-generation/");
+    if (!generationBytes.length || prefix.length + 4 + generationBytes.length > 256) throw new SpakeError();
+    const result = new Uint8Array(prefix.length + 4 + generationBytes.length);
+    result.set(prefix);
+    new DataView(result.buffer).setUint32(prefix.length, generationBytes.length, false);
+    result.set(generationBytes, prefix.length + 4);
+    return result;
+  }
+  resumeContext(bindingId, generation) {
+    const identity = encoder2.encode(`${bindingId}/${generation}`);
+    const prefix = encoder2.encode("dash-cast/spake2plus/resume/v1/sender-receiver/");
+    if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId) || !generation || prefix.length + 4 + identity.length > 256) throw new SpakeError();
+    const result = new Uint8Array(prefix.length + 4 + identity.length);
+    result.set(prefix);
+    new DataView(result.buffer).setUint32(prefix.length, identity.length, false);
+    result.set(identity, prefix.length + 4);
+    return result;
+  }
+  register(code) {
+    if (!/^\d{6}$/.test(code)) throw new SpakeError();
+    const values = this.buffers([encoder2.encode(code)], [32, 32, 65], (p) => this.native._ds_register(p[0], 6, p[1], 32, p[2], 32, p[3], 65));
+    return { w0: new Secret(values[0]), w1: new Secret(values[1]), registration: values[2] };
+  }
+  registerResume(password) {
+    if (password.length !== 32) throw new SpakeError();
+    const values = this.buffers([password], [32, 32, 65], (p) => this.native._ds_register_resume(p[0], 32, p[1], 32, p[2], 32, p[3], 65));
+    return { w0: new Secret(values[0]), w1: new Secret(values[1]), registration: values[2] };
+  }
+  prover(context, w0, w1) {
+    if (w0.length !== 32 || w1.length !== 32) throw new SpakeError();
+    const [handle] = this.buffers([w0, w1, context], [16], (p) => this.native._ds_prover_new(p[0], 32, p[1], 32, p[2], context.length, p[3], 16));
+    return new Prover(this.native, handle, this.buffers.bind(this));
+  }
+  verifier(context, w0, registration) {
+    if (w0.length !== 32 || registration.length !== 65) throw new SpakeError();
+    const [handle] = this.buffers([w0, registration, context], [16], (p) => this.native._ds_verifier_new(p[0], 32, p[1], 65, p[2], context.length, p[3], 16));
+    return new Verifier(this.native, handle, this.buffers.bind(this));
+  }
+};
+var Session = class {
+  constructor(native, handle, buffers) {
+    this.native = native;
+    this.handle = handle;
+    this.buffers = buffers;
+  }
+  live = true;
+  requireLive() {
+    if (!this.live) throw new SpakeError();
+  }
+  terminal(operation) {
+    this.requireLive();
+    try {
+      return operation();
+    } catch (error) {
+      this.destroy();
+      throw error;
+    } finally {
+      this.live = false;
+      this.handle.fill(0);
+    }
+  }
+  destroy() {
+    if (!this.live) return;
+    try {
+      const pointer = this.native._malloc(SIZE.handle);
+      if (!pointer || pointer > this.native.HEAPU8.length - SIZE.handle) {
+        if (pointer) this.native._free(pointer);
+        throw new SpakeError();
+      }
+      try {
+        this.native.HEAPU8.set(this.handle, pointer);
+        this.native._ds_destroy(pointer, SIZE.handle);
+      } finally {
+        this.native.HEAPU8.fill(0, pointer, pointer + SIZE.handle);
+        this.native._free(pointer);
+      }
+    } finally {
+      this.live = false;
+      this.handle.fill(0);
+    }
+  }
+};
+var Prover = class extends Session {
+  shared = false;
+  share() {
+    this.requireLive();
+    if (this.shared) {
+      this.destroy();
+      throw new SpakeError();
+    }
+    try {
+      const [share] = this.buffers([this.handle], [65], (p) => this.native._ds_prover_share(p[0], 16, p[1], 65));
+      this.shared = true;
+      return share;
+    } catch (error) {
+      this.destroy();
+      throw error;
+    }
+  }
+  finish(share, confirmation) {
+    if (share.length !== 65 || confirmation.length !== 32) {
+      this.destroy();
+      throw new SpakeError();
+    }
+    return this.terminal(() => {
+      const values = this.buffers([this.handle, share, confirmation], [32, 32], (p) => this.native._ds_prover_finish(p[0], 16, p[1], 65, p[2], 32, p[3], 32, p[4], 32));
+      return { confirmation: values[0], key: new Secret(values[1]) };
+    });
+  }
+};
+var Verifier = class extends Session {
+  processed = false;
+  process(share) {
+    this.requireLive();
+    if (this.processed || share.length !== 65) {
+      this.destroy();
+      throw new SpakeError();
+    }
+    try {
+      const values = this.buffers([this.handle, share], [65, 32], (p) => this.native._ds_verifier_process(p[0], 16, p[1], 65, p[2], 65, p[3], 32));
+      this.processed = true;
+      return { share: values[0], confirmation: values[1] };
+    } catch (error) {
+      this.destroy();
+      throw error;
+    }
+  }
+  finish(confirmation) {
+    if (confirmation.length !== 32) {
+      this.destroy();
+      throw new SpakeError();
+    }
+    return this.terminal(() => new Secret(this.buffers([this.handle, confirmation], [32], (p) => this.native._ds_verifier_finish(p[0], 16, p[1], 32, p[2], 32))[0]));
+  }
+};
+
+// src/core/cast/crypto/runtime.ts
+function ownedBuffer(bytes) {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
+}
+function loadSpake(asset) {
+  return Spake.load(ownedBuffer(asset.bytes), decode(asset.sha256));
+}
+
+// src/core/cast/protocol/handshake.ts
+async function deriveSas(shared, transcript) {
+  await Promise.resolve();
+  for (let counter = 0; counter < 256; counter += 1) {
+    const label = new TextEncoder().encode(`dash-secure-webrtc/sas/v1/${counter}`);
+    const input = new Uint8Array(label.length + transcript.length);
+    input.set(label);
+    input.set(transcript, label.length);
+    const output = castHmacSha256(shared, input);
+    input.fill(0);
+    const value = new DataView(output.buffer, output.byteOffset, output.byteLength).getUint32(0, false);
+    output.fill(0);
+    if (value < 4294e6) return String(value % 1e6).padStart(6, "0");
+  }
+  throw new Error("Unable to derive session authentication code");
+}
+async function complete(shared, transcript, role) {
+  let keys;
+  try {
+    const sas = await deriveSas(shared, transcript);
+    keys = await deriveDirectionalKeys(shared, transcript, role);
+    const sendBinding = await deriveBinding(shared, transcript, role);
+    const receiveBinding = await deriveBinding(shared, transcript, role === "sender" ? "receiver" : "sender");
+    return { keys, sendBinding, receiveBinding, sas };
+  } catch (error) {
+    destroyDirectionalKeys(keys);
+    throw error;
+  } finally {
+    shared.fill(0);
+  }
+}
+var ReceiverHandshake = class {
+  constructor(spake, identity) {
+    this.spake = spake;
+    this.identity = identity;
+  }
+  request;
+  challenge;
+  transcript;
+  verifier;
+  destroy() {
+    var _a;
+    (_a = this.verifier) == null ? void 0 : _a.destroy();
+    delete this.verifier;
+  }
+  createVerifier() {
+    const registration = this.identity.resumePassword ? this.spake.registerResume(this.identity.resumePassword) : this.spake.register(this.identity.authCode);
+    const w0 = registration.w0.bytes();
+    const context = this.identity.resumePassword ? this.spake.resumeContext(this.identity.resumeBindingId ?? "", this.identity.generation) : this.spake.context(this.identity.generation);
+    try {
+      return this.spake.verifier(context, w0, registration.registration);
+    } finally {
+      w0.fill(0);
+      registration.w0.destroy();
+      registration.w1.destroy();
+      registration.registration.fill(0);
+    }
+  }
+  challengeFor(request, count) {
+    var _a;
+    if (this.transcript) throw new Error("Cast verification already started");
+    (_a = this.verifier) == null ? void 0 : _a.destroy();
+    this.verifier = this.createVerifier();
+    this.request = request;
+    this.challenge = createChallenge(count);
+    return { type: "challenge", ...this.challenge };
+  }
+  async process(value) {
+    const request = this.request;
+    const challenge = this.challenge;
+    const verifier = this.verifier;
+    if (!request || !challenge || !verifier || value.challenge !== challenge.challenge || value.share !== request.share || value.nonce !== request.nonce || challenge.expiresAt <= Date.now() || !await verifyProof(decode(value.challenge), this.identity.resumePassword ? this.spake.resumeContext(this.identity.resumeBindingId ?? "", this.identity.generation) : this.spake.context(this.identity.generation), decode(value.share), value.proof, challenge.difficulty) || this.request !== request || this.challenge !== challenge || this.verifier !== verifier || challenge.expiresAt <= Date.now()) {
+      throw new Error("Invalid cast proof");
+    }
+    const processed = verifier.process(decode(value.share));
+    this.transcript = canonicalTranscript({
+      roomId: this.identity.roomCode,
+      generation: this.identity.generation,
+      challenge: challenge.challenge,
+      challengeCount: challenge.count,
+      difficulty: challenge.difficulty,
+      expiresAt: challenge.expiresAt,
+      proverNonce: value.nonce,
+      proverShare: value.share,
+      verifierShare: encode(processed.share)
+    });
+    return { type: "verifier", share: encode(processed.share), confirmation: encode(processed.confirmation) };
+  }
+  async finish(value) {
+    if (!this.transcript || !this.verifier) throw new Error("Cast verifier not ready");
+    const secret = this.verifier.finish(decode(value.confirmation));
+    const shared = secret.bytes();
+    secret.destroy();
+    return complete(shared, this.transcript, "receiver");
+  }
+};
+
+// src/core/cast/session/receiver/receiver-channel-handler.ts
+function handleReceiverDataMessage(message, ctx) {
+  var _a, _b;
+  if (message.type === "resume-binding") {
+    if (!ctx.trusted) {
+      ctx.setProvisionalBinding(message);
+      return;
+    }
+    const persisted = ctx.onResumeBinding ? ctx.onResumeBinding(message) : Promise.reject(new Error("Cast resume storage is unavailable"));
+    void persisted.then(() => ctx.send({ type: "resume-binding-ack", bindingId: message.bindingId })).catch(ctx.fail);
+    return;
+  }
+  if (message.type === "resume-binding-revoke") {
+    if (ctx.trusted) void ((_a = ctx.onResumeRevoke) == null ? void 0 : _a.call(ctx, message.bindingId).catch(ctx.fail));
+    return;
+  }
+  if (message.type === "sas-confirm") {
+    if (ctx.trusted || message.generation !== ctx.options.generation || !ctx.state.sas) {
+      ctx.closeChannel();
+      return;
+    }
+    ctx.setTrusted(true);
+    ctx.state.sasTrusted = true;
+    delete ctx.state.sas;
+    const pending = ctx.provisionalBinding;
+    ctx.setProvisionalBinding(void 0);
+    const persisted = pending && ctx.onResumeBinding ? ctx.onResumeBinding(pending) : Promise.resolve();
+    void persisted.then(() => {
+      var _a2;
+      if (pending) ctx.send({ type: "resume-binding-ack", bindingId: pending.bindingId });
+      ctx.send({ type: "sas-ack", generation: ctx.options.generation });
+      (_a2 = ctx.onConnection) == null ? void 0 : _a2.call(ctx, { generation: ctx.options.generation, trusted: true });
+      ctx.emit();
+    }).catch(ctx.fail);
+    return;
+  }
+  if (!ctx.trusted) return;
+  if (message.type === "queue-mutation" || message.type === "pair-display-request") {
+    (_b = ctx.onAuthenticatedMessage) == null ? void 0 : _b.call(ctx, message, ctx.send);
+    return;
+  }
+  if (message.type === "presentation-start") {
+    if (message.epoch > ctx.state.presentationEpoch) {
+      ctx.state.presentationEpoch = message.epoch;
+      ctx.state.command = null;
+      ctx.state.screenStream = ctx.pendingStream;
+      ctx.state.status = "casting";
+      ctx.emit();
+    }
+    return;
+  }
+  if (message.type === "stream") {
+    if (message.epoch !== ctx.state.presentationEpoch) return;
+    if (!message.active) {
+      ctx.state.screenStream = null;
+      ctx.state.command = null;
+      ctx.state.status = "paired";
+      ctx.emit();
+    } else if (ctx.pendingStream) {
+      ctx.state.screenStream = ctx.pendingStream;
+      ctx.state.command = null;
+      ctx.state.status = "casting";
+      ctx.emit();
+    }
+    return;
+  }
+  if (message.type !== "command" || message.epoch < ctx.state.presentationEpoch) return;
+  ctx.state.presentationEpoch = message.epoch;
+  ctx.state.command = message.command.sourceKind === "idle" ? null : message.command;
+  ctx.state.screenStream = null;
+  ctx.setPendingStream(null);
+  ctx.state.status = message.command.sourceKind === "idle" ? "paired" : "casting";
+  ctx.emit();
+}
+
+// src/core/cast/session/receiver/receiver-track-handler.ts
+function handleReceiverTrack(ev, ctx) {
+  queueMicrotask(() => {
+    const trackEpoch = ctx.transceiverEpochs.get(ev.transceiver) ?? ctx.applyingOfferEpoch;
+    if (trackEpoch === void 0 || !acceptsIncomingTrack(ctx.state.presentationEpoch, trackEpoch)) {
+      ev.track.stop();
+      return;
+    }
+    const activeStream = ev.streams[0] ?? ctx.getPendingStream() ?? new MediaStream();
+    if (!activeStream.getTracks().includes(ev.track)) activeStream.addTrack(ev.track);
+    ctx.setPendingStream(activeStream);
+    ev.track.addEventListener("ended", () => {
+      if (!ownsActiveStream(ctx.state.presentationEpoch, trackEpoch, ctx.state.screenStream, activeStream)) return;
+      activeStream.removeTrack(ev.track);
+      if (activeStream.getTracks().length === 0) {
+        ctx.setPendingStream(null);
+        ctx.state.screenStream = null;
+        ctx.state.command = null;
+        ctx.state.status = "paired";
+        ctx.emit();
+      }
+    }, { once: true });
+    if (trackEpoch !== ctx.state.presentationEpoch) return;
+    ctx.state.screenStream = activeStream;
+    ctx.state.command = null;
+    ctx.state.status = "casting";
+    ctx.emit();
   });
-  const containerRef = usePullToRefresh(refetch);
-  if (error && !data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
-  }
-  if (!data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loading") });
-  }
-  const current = describeWeather(data.weatherCode);
-  const nextEvent = config.showNextEvent ? nextPrecipEvent(data, Date.now()) : null;
-  const nextDescription = nextEvent ? describeWeather(nextEvent.weatherCode) : null;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-current", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: current.icon, size: 64 }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-temp", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-value", children: [
-          Math.round(data.temperature),
-          data.unitLabel
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-desc", children: text(context.locale, `codes.${data.weatherCode}`, {}, current.label) }),
-        config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "weather-loc", children: config.locationName })
-      ] })
-    ] }),
-    nextEvent && nextDescription && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "weather-next", title: text(context.locale, "nextPrecipitation"), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(WeatherIcon, { icon: nextDescription.icon, size: 18 }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "weather-next-text", children: [
-        text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label),
-        " ",
-        formatLeadTime(context.locale, nextEvent.minutesUntil)
-      ] })
-    ] })
-  ] });
 }
 
-// src/plugins/weather/ForecastWidget.tsx
+// src/core/cast/session/receiver/receiver-signaling.ts
+async function handleReceiverSignalWire(wire, signaling, peer, ctx) {
+  try {
+    const signal = await signaling.receive(wire);
+    if (signal.type === "offer") {
+      ctx.setApplyingOfferEpoch(signal.presentationEpoch);
+      try {
+        await peer.setRemoteDescription(signal.description);
+      } finally {
+        ctx.setApplyingOfferEpoch(void 0);
+      }
+      for (const transceiver of peer.getTransceivers()) {
+        ctx.transceiverEpochs.set(transceiver, signal.presentationEpoch);
+      }
+      await peer.setLocalDescription(await peer.createAnswer());
+      await signaling.send({ type: "answer", description: peer.localDescription });
+    } else {
+      await applySignal(peer, signaling, signal);
+    }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "OperationError") {
+      throw new CastAuthenticationError(error);
+    }
+    throw error;
+  }
+}
+
+// src/core/cast/session/receiver/receiver-wire-handler.ts
+async function processReceiverWireMessage(data, ctx) {
+  const wire = parseWire(data);
+  if (!wire) throw new Error("Invalid cast message");
+  const handshake = ctx.getHandshake();
+  if (wire.type === "challenge-request") {
+    sendWire(ctx.active, handshake.challengeFor(wire, ctx.incrementCount()));
+    return;
+  }
+  if (wire.type === "prover") {
+    sendWire(ctx.active, await handshake.process(wire));
+    return;
+  }
+  if (wire.type === "confirm") {
+    let result;
+    try {
+      result = await handshake.finish(wire);
+    } catch (error) {
+      throw new CastAuthenticationError(error);
+    }
+    const { keys, ...activePairing } = result;
+    let peer;
+    let signaling;
+    try {
+      peer = peerFor(ctx.options);
+      signaling = new EncryptedSignaling(ctx.active, keys, "receiver");
+      ctx.setPeer(peer);
+      ctx.setSignaling(signaling);
+      ctx.setPairing(activePairing);
+    } catch (error) {
+      keys.send.destroy();
+      keys.receive.destroy();
+      throw error;
+    }
+    if (ctx.options.resumePassword) delete ctx.state.sas;
+    else ctx.state.sas = activePairing.sas;
+    peer.onicecandidate = ({ candidate }) => {
+      if (candidate) void signaling.send({ type: "ice", candidate: candidate.toJSON() }).catch(ctx.fail);
+    };
+    peer.onconnectionstatechange = () => {
+      if (peer.connectionState === "closed" || peer.connectionState === "failed" || peer.connectionState === "disconnected") {
+        ctx.disconnect();
+      }
+    };
+    peer.ontrack = (trackEvent) => {
+      handleReceiverTrack(trackEvent, {
+        state: ctx.state,
+        applyingOfferEpoch: ctx.getApplyingOfferEpoch(),
+        transceiverEpochs: ctx.transceiverEpochs,
+        getPendingStream: ctx.getPendingStream,
+        setPendingStream: ctx.setPendingStream,
+        emit: ctx.emit
+      });
+    };
+    peer.ondatachannel = ({ channel: incoming }) => {
+      ctx.setChannel(incoming);
+      const pairing = ctx.getPairing();
+      if (!pairing) {
+        incoming.close();
+        return;
+      }
+      const send = (outgoing) => {
+        if (incoming.readyState === "open") incoming.send(JSON.stringify(outgoing));
+      };
+      activateChannel(
+        incoming,
+        pairing,
+        () => {
+          var _a;
+          ctx.state.peerCount = 1;
+          ctx.state.status = "paired";
+          const isTrusted = Boolean(ctx.options.resumePassword);
+          ctx.setTrusted(isTrusted);
+          if (isTrusted) {
+            ctx.state.sasTrusted = true;
+            (_a = ctx.onConnection) == null ? void 0 : _a.call(ctx, { generation: ctx.options.generation, trusted: true });
+          }
+          ctx.emit();
+        },
+        (message) => {
+          handleReceiverDataMessage(message, {
+            state: ctx.state,
+            trusted: ctx.getTrusted(),
+            setTrusted: ctx.setTrusted,
+            options: ctx.options,
+            provisionalBinding: ctx.getProvisionalBinding(),
+            setProvisionalBinding: ctx.setProvisionalBinding,
+            pendingStream: ctx.getPendingStream(),
+            setPendingStream: ctx.setPendingStream,
+            emit: ctx.emit,
+            fail: ctx.fail,
+            closeChannel: () => incoming.close(),
+            send,
+            onResumeBinding: ctx.onResumeBinding,
+            onResumeRevoke: ctx.onResumeRevoke,
+            onAuthenticatedMessage: ctx.onAuthenticatedMessage,
+            onConnection: ctx.onConnection
+          });
+        }
+      );
+      incoming.onclose = ctx.disconnect;
+    };
+    return;
+  }
+  if (wire.type === "signal") {
+    const signaling = ctx.getSignaling();
+    const peer = ctx.getPeer();
+    if (signaling && peer) {
+      await handleReceiverSignalWire(wire, signaling, peer, {
+        applyingOfferEpoch: ctx.getApplyingOfferEpoch(),
+        setApplyingOfferEpoch: ctx.setApplyingOfferEpoch,
+        transceiverEpochs: ctx.transceiverEpochs
+      });
+    }
+  }
+}
+
+// src/core/cast/session/receiver/receiver-teardown.ts
+function closeReceiver(ctx) {
+  var _a, _b, _c, _d, _e, _f, _g, _h;
+  ctx.setProvisionalBinding(void 0);
+  if (ctx.getTrusted()) (_a = ctx.onConnection) == null ? void 0 : _a.call(ctx, { generation: ctx.generation, trusted: false });
+  ctx.setTrusted(false);
+  (_b = ctx.setClosed) == null ? void 0 : _b.call(ctx, true);
+  (_c = ctx.setPendingStream) == null ? void 0 : _c.call(ctx, null);
+  (_d = ctx.clearScreenStream) == null ? void 0 : _d.call(ctx);
+  (_e = ctx.getActiveHandshake()) == null ? void 0 : _e.destroy();
+  ctx.setActiveHandshake(void 0);
+  (_f = ctx.getSignaling()) == null ? void 0 : _f.close();
+  ctx.setSignaling(void 0);
+  ctx.setPairing(void 0);
+  (_g = ctx.getSocket()) == null ? void 0 : _g.close();
+  (_h = ctx.getPeer()) == null ? void 0 : _h.close();
+}
+function rejectReceiverSas(ctx) {
+  var _a, _b, _c, _d;
+  ctx.setProvisionalBinding(void 0);
+  ctx.setTrusted(false);
+  (_a = ctx.getActiveHandshake()) == null ? void 0 : _a.destroy();
+  ctx.setActiveHandshake(void 0);
+  (_b = ctx.getSignaling()) == null ? void 0 : _b.close();
+  ctx.setSignaling(void 0);
+  ctx.setPairing(void 0);
+  (_c = ctx.getChannel()) == null ? void 0 : _c.close();
+  (_d = ctx.getPeer()) == null ? void 0 : _d.close();
+}
+function revokePresenterHelper(trusted, channel, epoch) {
+  if (trusted && (channel == null ? void 0 : channel.readyState) === "open" && Number.isSafeInteger(epoch) && epoch > 0) {
+    channel.send(JSON.stringify({ type: "presenter-revoke", epoch }));
+  }
+}
+function sendReceiverMessageHelper(trusted, channel, message) {
+  if (trusted && (channel == null ? void 0 : channel.readyState) === "open") {
+    channel.send(JSON.stringify(message));
+  }
+}
+
+// src/core/cast/session/receiver/receiver-session.ts
+function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
+  const options = requiredOptions(optionsInput);
+  const state = { status: "connecting", command: null, presentationEpoch: 0, screenStream: null, peerCount: 0, error: null };
+  let peer;
+  let channel;
+  let pendingStream = null;
+  const transceiverEpochs = /* @__PURE__ */ new WeakMap();
+  let closed = false;
+  let failures = 0;
+  let socketAttempts = 0;
+  let socket;
+  let signaling;
+  let pairing;
+  let applyingOfferEpoch;
+  let activeHandshake;
+  let trusted = Boolean(options.resumePassword);
+  const listening = Promise.withResolvers();
+  let provisionalBinding;
+  const emit = () => {
+    if (!closed) onState({ ...state });
+  };
+  const disconnect = () => {
+    if (closed || state.peerCount === 0) return;
+    provisionalBinding = void 0;
+    trusted = false;
+    onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: false });
+    state.peerCount = 0;
+    state.status = "disconnected";
+    emit();
+    signaling == null ? void 0 : signaling.close();
+    if (!options.resumePassword) socket.close();
+    peer == null ? void 0 : peer.close();
+    peer = void 0;
+    channel = void 0;
+    signaling = void 0;
+    pairing = void 0;
+  };
+  const fail = (error) => {
+    activeHandshake == null ? void 0 : activeHandshake.destroy();
+    activeHandshake = void 0;
+    signaling == null ? void 0 : signaling.close();
+    signaling = void 0;
+    pairing = void 0;
+    if (error instanceof CastAuthenticationError) failures += 1;
+    state.status = "error";
+    state.error = error instanceof Error ? error.message : String(error);
+    emit();
+    if (failures >= MAX_CRYPTO_FAILURES && options.reclaimToken && socket.readyState === WebSocket.OPEN) {
+      sendWire(socket, { type: "burn", reclaimToken: options.reclaimToken });
+    }
+  };
+  const initialPending = [];
+  let bindReady;
+  socket = socketFor(
+    options,
+    "receiver",
+    (active) => bindReady == null ? void 0 : bindReady(active, initialPending),
+    (active) => {
+      active.onmessage = (event) => initialPending.push(event);
+    }
+  );
+  void loadSpake(asset).then((spake) => {
+    const bindSocket = (active, pending) => {
+      let handshake = new ReceiverHandshake(spake, options);
+      activeHandshake = handshake;
+      let count = 0;
+      listening.resolve();
+      sendWire(active, { type: "receiver-ready" });
+      const wireCtx = {
+        active,
+        options,
+        state,
+        getHandshake: () => handshake,
+        setHandshake: (h) => {
+          handshake = h;
+          activeHandshake = h;
+        },
+        getCount: () => count,
+        incrementCount: () => ++count,
+        getPeer: () => peer,
+        setPeer: (p) => {
+          peer = p;
+        },
+        getChannel: () => channel,
+        setChannel: (c) => {
+          channel = c;
+        },
+        getSignaling: () => signaling,
+        setSignaling: (s) => {
+          signaling = s;
+        },
+        getPairing: () => pairing,
+        setPairing: (p) => {
+          pairing = p;
+        },
+        getTrusted: () => trusted,
+        setTrusted: (t) => {
+          trusted = t;
+        },
+        getProvisionalBinding: () => provisionalBinding,
+        setProvisionalBinding: (b) => {
+          provisionalBinding = b;
+        },
+        getPendingStream: () => pendingStream,
+        setPendingStream: (s) => {
+          pendingStream = s;
+        },
+        transceiverEpochs,
+        getApplyingOfferEpoch: () => applyingOfferEpoch,
+        setApplyingOfferEpoch: (e) => {
+          applyingOfferEpoch = e;
+        },
+        disconnect,
+        emit,
+        fail,
+        onResumeBinding,
+        onResumeRevoke,
+        onAuthenticatedMessage,
+        onConnection
+      };
+      const receive = ({ data }) => {
+        void processReceiverWireMessage(data, wireCtx).catch(fail);
+      };
+      active.onmessage = receive;
+      active.onclose = (event) => {
+        handshake.destroy();
+        if (activeHandshake === handshake) activeHandshake = void 0;
+        if (!closed && options.resumePassword && state.peerCount === 0 && event.code === 1008 && socketAttempts < 7) {
+          const delay = 100 * 2 ** socketAttempts++;
+          window.setTimeout(() => {
+            if (closed) return;
+            const retryPending = [];
+            const retry = socketFor(options, "receiver", (retrySocket) => bindSocket(retrySocket, retryPending));
+            retry.onmessage = (retryEvent) => retryPending.push(retryEvent);
+            socket = retry;
+          }, delay);
+          return;
+        }
+        disconnect();
+      };
+      pending.splice(0).forEach(receive);
+    };
+    bindReady = bindSocket;
+    if (socket.readyState === WebSocket.OPEN) bindSocket(socket, initialPending);
+  }).catch(fail);
+  emit();
+  const tearDownContext = {
+    getProvisionalBinding: () => provisionalBinding,
+    setProvisionalBinding: (b) => {
+      provisionalBinding = b;
+    },
+    getTrusted: () => trusted,
+    setTrusted: (t) => {
+      trusted = t;
+    },
+    setClosed: (c) => {
+      closed = c;
+    },
+    setPendingStream: (s) => {
+      pendingStream = s;
+    },
+    clearScreenStream: () => {
+      state.screenStream = null;
+    },
+    getActiveHandshake: () => activeHandshake,
+    setActiveHandshake: (h) => {
+      activeHandshake = h;
+    },
+    getSignaling: () => signaling,
+    setSignaling: (s) => {
+      signaling = s;
+    },
+    setPairing: (p) => {
+      pairing = p;
+    },
+    getSocket: () => socket,
+    getPeer: () => peer,
+    getChannel: () => channel,
+    generation: options.generation,
+    onConnection
+  };
+  return {
+    listening: listening.promise,
+    close() {
+      closeReceiver(tearDownContext);
+    },
+    confirmSas(accepted) {
+      if (!accepted) rejectReceiverSas(tearDownContext);
+    },
+    revokePresenter(epoch) {
+      revokePresenterHelper(trusted, channel, epoch);
+    },
+    send(message) {
+      sendReceiverMessageHelper(trusted, channel, message);
+    }
+  };
+}
+
+// src/plugins/cast-receiver/receiver.ts
+function createPluginReceiver(options, asset, onState, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
+  return createCastReceiver(options, (state) => onState({
+    status: state.status,
+    command: state.command,
+    presentationEpoch: state.presentationEpoch,
+    stream: state.screenStream,
+    peerCount: state.peerCount,
+    error: state.error,
+    ...state.sas ? { sas: state.sas } : {},
+    ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
+  }), asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection);
+}
+
+// src/plugins/cast-receiver/session/screen-session.ts
+function createScreenSession(context) {
+  const config = readCastConfig(context.config);
+  const state = {
+    status: "connecting",
+    command: null,
+    presentationEpoch: 0,
+    stream: null,
+    peerCount: 0,
+    error: null,
+    roomCode: "",
+    relayUrl: config.relayUrl,
+    senderUrl: config.senderUrl,
+    queue: createCastQueueSnapshot(config.autoplay),
+    pairingReveal: 0,
+    pairingVisible: false
+  };
+  const listeners = /* @__PURE__ */ new Set();
+  const listeningBindings = /* @__PURE__ */ new Set();
+  const resumeEntries = /* @__PURE__ */ new Map();
+  const connected = /* @__PURE__ */ new Set();
+  const abort = new AbortController();
+  const pendingConnectionEvents = /* @__PURE__ */ new Map();
+  let pairing, livePresenter, sasOwner, renewal, sasTimer, disposed = false;
+  let authoritativeEpoch = 0;
+  let lifecycle = Promise.resolve();
+  let observedDismissSas;
+  let dismissalInitialized = false;
+  const publish = (patch) => {
+    if ("sas" in patch && patch.sas === void 0) delete state.sas;
+    if ("sasTrusted" in patch && patch.sasTrusted === void 0) delete state.sasTrusted;
+    if (state.sasTrusted === true && patch.sasTrusted === void 0) delete patch.sasTrusted;
+    Object.assign(state, patch);
+    listeners.forEach((listener) => listener({ ...state }));
+    const hostState = {
+      status: state.status,
+      command: state.command,
+      presentationEpoch: state.presentationEpoch,
+      peerCount: state.peerCount,
+      error: state.error,
+      roomCode: state.roomCode,
+      relayUrl: state.relayUrl,
+      senderUrl: state.senderUrl,
+      pairingReveal: state.pairingReveal,
+      pairingVisible: state.pairingVisible,
+      ...state.sas ? { sas: state.sas } : {},
+      ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
+    };
+    void context.setCastState(hostState);
+  };
+  const report = (error) => publish({ status: "error", error: error instanceof Error ? error.message : String(error) });
+  const enqueue = (operation) => {
+    lifecycle = lifecycle.then(operation).catch(report);
+  };
+  const dismissalInterval = context.getCastState ? window.setInterval(() => {
+    void context.getCastState().then((hostState) => {
+      var _a;
+      const dismissed = hostState == null ? void 0 : hostState.dismissSas;
+      if (!dismissalInitialized) {
+        dismissalInitialized = true;
+        observedDismissSas = dismissed;
+        return;
+      }
+      if (dismissed === void 0 || dismissed === observedDismissSas) return;
+      observedDismissSas = dismissed;
+      if (!sasOwner) return;
+      const entry = sasOwner;
+      sasOwner = void 0;
+      clearTimeout(sasTimer);
+      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(false);
+      entry.trusted = false;
+      delete state.sas;
+      delete state.sasTrusted;
+      publish({});
+    }).catch(report);
+  }, 200) : void 0;
+  const applyConnection = (entry, expectedGeneration, event) => {
+    var _a, _b;
+    if (event.generation !== expectedGeneration) return;
+    entry.trusted = event.trusted;
+    if (event.trusted) {
+      delete state.sas;
+      publish({ sasTrusted: true });
+      (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
+    }
+  };
+  const broadcastQueue = (conflictEntry) => {
+    var _a, _b;
+    for (const entry of connected) if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: entry === conflictEntry, pairingVisible: state.pairingVisible });
+  };
+  const authenticatedMessage = (entry) => (message, send) => {
+    var _a, _b;
+    if (!entry.trusted) return;
+    if (message.type === "pair-display-request") {
+      publish({ pairingVisible: message.visible, pairingReveal: message.visible ? state.pairingReveal + 1 : state.pairingReveal });
+      broadcastQueue();
+      return;
+    }
+    const next = applyCastQueueMutation(state.queue, message.mutation);
+    if (!next) {
+      send({ type: "queue-snapshot", snapshot: state.queue, conflict: true, pairingVisible: state.pairingVisible });
+      return;
+    }
+    state.queue = next;
+    const current = next.items.find((item) => item.id === next.currentItemId);
+    const sourceChanged = Boolean(current && (((_a = state.command) == null ? void 0 : _a.sourceKind) !== current.command.sourceKind || state.command.sourceUrl !== current.command.sourceUrl));
+    const command = current ? { ...current.command, outputMode: next.outputMode } : null;
+    if (current && sourceChanged) {
+      authoritativeEpoch += 1;
+      entry.epochOffset = authoritativeEpoch - entry.state.presentationEpoch;
+      if (livePresenter) {
+        livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch);
+        (_b = livePresenter.receiver) == null ? void 0 : _b.revokePresenter(livePresenter.state.presentationEpoch);
+        livePresenter = void 0;
+      }
+      publish({ queue: next, command, stream: null, presentationEpoch: authoritativeEpoch, status: "casting" });
+    } else if (!current && next.currentItemId === null && state.command && next.items.length === 0) {
+      authoritativeEpoch += 1;
+      livePresenter = void 0;
+      publish({ queue: next, command: null, stream: null, presentationEpoch: authoritativeEpoch, status: connected.size ? "paired" : "disconnected" });
+    } else publish({ queue: next, ...command ? { command } : {} });
+    broadcastQueue();
+  };
+  const aggregate = (entry) => {
+    var _a;
+    const latest = entry.state;
+    const live = latest.stream !== null;
+    const command = latest.command !== null && latest.command.sourceKind !== "idle";
+    const stale = latest.presentationEpoch <= entry.revokedEpoch;
+    if ((live || command) && !stale) {
+      const epoch = latest.presentationEpoch;
+      if (livePresenter !== entry && latest.presentationEpoch > entry.revokedEpoch && epoch <= authoritativeEpoch) {
+        entry.epochOffset = authoritativeEpoch + 1 - latest.presentationEpoch;
+      }
+      const globalEpoch = latest.presentationEpoch + entry.epochOffset;
+      if (globalEpoch > authoritativeEpoch) {
+        authoritativeEpoch = globalEpoch;
+        if (livePresenter && livePresenter !== entry) {
+          livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch);
+          (_a = livePresenter.receiver) == null ? void 0 : _a.revokePresenter(livePresenter.state.presentationEpoch);
+        }
+        livePresenter = entry;
+        publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomCode: state.roomCode });
+      } else if (livePresenter === entry && (live || command) && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
+    } else publish({ peerCount: connected.size, roomCode: state.roomCode });
+    if (latest.sas && sasOwner !== entry) {
+      sasOwner = entry;
+      delete state.sasTrusted;
+      clearTimeout(sasTimer);
+      sasTimer = setTimeout(() => {
+        var _a2;
+        if (sasOwner === entry) {
+          sasOwner = void 0;
+          (_a2 = entry.receiver) == null ? void 0 : _a2.confirmSas(false);
+          entry.trusted = false;
+          delete state.sas;
+          delete state.sasTrusted;
+          publish({});
+        }
+      }, config.sasTimeoutSeconds * 1e3);
+    }
+    if (sasOwner === entry && latest.sasTrusted === true) {
+      sasOwner = void 0;
+      clearTimeout(sasTimer);
+      delete state.sas;
+      publish({ sasTrusted: true });
+      context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
+      return;
+    }
+    if (sasOwner === entry && !latest.sas) {
+      sasOwner = void 0;
+      clearTimeout(sasTimer);
+    }
+    const ownedSas = sasOwner == null ? void 0 : sasOwner.state.sas;
+    if (!ownedSas) {
+      delete state.sas;
+      if (state.sasTrusted !== true) delete state.sasTrusted;
+    }
+    publish({
+      ...ownedSas ? { sas: ownedSas } : {},
+      ...ownedSas && (sasOwner == null ? void 0 : sasOwner.state.sasTrusted) !== void 0 ? { sasTrusted: sasOwner.state.sasTrusted } : {}
+    });
+    context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
+  };
+  const disposeEntry = async (entry) => {
+    var _a;
+    connected.delete(entry);
+    if (pairing === entry) pairing = void 0;
+    if (sasOwner === entry) sasOwner = void 0;
+    (_a = entry.receiver) == null ? void 0 : _a.close();
+    publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size > 0 ? "paired" : "disconnected" });
+    await entry.room.close();
+  };
+  const resume = async () => {
+    const bindings = context.castResume ? await context.castResume.get() : [];
+    await Promise.all(bindings.map(async (binding) => {
+      if (listeningBindings.has(binding.bindingId)) return;
+      listeningBindings.add(binding.bindingId);
+      const listen = async () => {
+        try {
+          const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
+          const asset = await context.secureWebRtcCryptoAsset();
+          const entry = {
+            room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
+            state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
+            connected: false,
+            trusted: true,
+            revokedEpoch: 0,
+            epochOffset: authoritativeEpoch
+          };
+          resumeEntries.set(binding.bindingId, entry);
+          entry.receiver = createPluginReceiver(options, asset, (next) => {
+            var _a, _b, _c;
+            entry.state = next;
+            if (next.peerCount > 0 && !entry.connected) {
+              entry.connected = true;
+              connected.add(entry);
+              (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
+            }
+            if (next.peerCount === 0 && entry.connected) {
+              entry.connected = false;
+              connected.delete(entry);
+              resumeEntries.delete(binding.bindingId);
+              listeningBindings.delete(binding.bindingId);
+              if (sasOwner === entry) {
+                sasOwner = void 0;
+                clearTimeout(sasTimer);
+              }
+              (_c = entry.receiver) == null ? void 0 : _c.close();
+              publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
+              if (!disposed) enqueue(listen);
+              return;
+            }
+            aggregate(entry);
+          }, void 0, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : void 0, authenticatedMessage(entry), ({ trusted }) => {
+            entry.trusted = trusted;
+            if (trusted) {
+              delete state.sas;
+              publish({ sasTrusted: true });
+            }
+          });
+          await entry.receiver.listening;
+        } catch (error) {
+          if (!disposed && !(error instanceof DOMException && error.name === "AbortError")) enqueue(listen);
+          else listeningBindings.delete(binding.bindingId);
+        }
+      };
+      await listen();
+    }));
+  };
+  const allocate = async () => {
+    if (disposed || pairing) return;
+    const room = await createPairingSession(config.relayUrl, abort.signal, (url) => context.validateNativeOrigin("signaling", url));
+    if (disposed) {
+      await room.close();
+      return;
+    }
+    const asset = await context.secureWebRtcCryptoAsset();
+    const initialState = { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null };
+    const pendingStates = [];
+    const entry = { room, state: initialState, connected: false, trusted: false, revokedEpoch: 0, epochOffset: authoritativeEpoch };
+    const applyState = (next) => {
+      var _a, _b, _c;
+      entry.state = next;
+      if (next.peerCount > 0 && !entry.connected) {
+        entry.connected = true;
+        connected.add(entry);
+        if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
+        if (pairing === entry) {
+          pairing = void 0;
+          clearTimeout(renewal);
+          enqueue(allocate);
+        }
+      }
+      if (next.peerCount === 0 && entry.connected) {
+        entry.connected = false;
+        connected.delete(entry);
+        if (sasOwner === entry) {
+          sasOwner = void 0;
+          clearTimeout(sasTimer);
+        }
+        (_c = entry.receiver) == null ? void 0 : _c.close();
+        void entry.room.close();
+        publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
+        return;
+      }
+      aggregate(entry);
+    };
+    let initialized = false;
+    entry.receiver = createPluginReceiver(room.options, asset, (next) => {
+      if (initialized) applyState(next);
+      else pendingStates.push(next);
+    }, async (binding) => {
+      const receiverBinding = { bindingId: binding.bindingId, resumePassword: binding.resumePassword, expiresAt: binding.expiresAt };
+      const bindings = await context.castResume.get();
+      await context.castResume.replace([...bindings.filter((item) => item.bindingId !== binding.bindingId), receiverBinding]);
+      if (listeningBindings.has(binding.bindingId)) return;
+      listeningBindings.add(binding.bindingId);
+      try {
+        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
+        if (disposed) return;
+        const resumeEntry = {
+          room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
+          state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
+          connected: false,
+          trusted: true,
+          revokedEpoch: 0,
+          epochOffset: authoritativeEpoch
+        };
+        resumeEntries.set(binding.bindingId, resumeEntry);
+        resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
+          var _a, _b, _c;
+          resumeEntry.state = next;
+          if (next.peerCount > 0 && !resumeEntry.connected) {
+            resumeEntry.connected = true;
+            connected.add(resumeEntry);
+            (_b = (_a = resumeEntry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
+          }
+          if (next.peerCount === 0 && resumeEntry.connected) {
+            resumeEntry.connected = false;
+            connected.delete(resumeEntry);
+            resumeEntries.delete(binding.bindingId);
+            listeningBindings.delete(binding.bindingId);
+            if (sasOwner === resumeEntry) {
+              sasOwner = void 0;
+              clearTimeout(sasTimer);
+            }
+            (_c = resumeEntry.receiver) == null ? void 0 : _c.close();
+            publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
+            enqueue(resume);
+            return;
+          }
+          aggregate(resumeEntry);
+        }, void 0, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(resumeEntry), ({ trusted }) => {
+          resumeEntry.trusted = trusted;
+          if (trusted) {
+            delete state.sas;
+            publish({ sasTrusted: true });
+          }
+        });
+        await resumeEntry.receiver.listening;
+      } catch (error) {
+        listeningBindings.delete(binding.bindingId);
+        resumeEntries.delete(binding.bindingId);
+        throw error;
+      }
+    }, async (bindingId) => {
+      var _a;
+      await context.castResume.delete(bindingId);
+      const resumeEntry = resumeEntries.get(bindingId);
+      if (resumeEntry) {
+        resumeEntries.delete(bindingId);
+        listeningBindings.delete(bindingId);
+        connected.delete(resumeEntry);
+        (_a = resumeEntry.receiver) == null ? void 0 : _a.close();
+      }
+    }, authenticatedMessage(entry), (event) => {
+      if (!initialized) {
+        const pending = pendingConnectionEvents.get(entry) ?? [];
+        pending.push(event);
+        pendingConnectionEvents.set(entry, pending);
+        return;
+      }
+      applyConnection(entry, room.options.generation, event);
+    });
+    pairing = entry;
+    initialized = true;
+    pendingStates.forEach(applyState);
+    for (const event of pendingConnectionEvents.get(entry) ?? []) applyConnection(entry, room.options.generation, event);
+    pendingConnectionEvents.delete(entry);
+    if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
+    if (pairing === entry) {
+      clearTimeout(renewal);
+      renewal = setTimeout(() => enqueue(async () => {
+        if (pairing === entry) {
+          await disposeEntry(entry);
+          await allocate();
+        }
+      }), Math.max(1e3, room.expiresAt - Date.now() - 3e4));
+    }
+  };
+  if (!config.relayUrl) report("Configure and approve a signaling origin.");
+  else {
+    enqueue(resume);
+    enqueue(allocate);
+  }
+  return {
+    state,
+    subscribe(listener) {
+      listeners.add(listener);
+      listener({ ...state });
+      return () => listeners.delete(listener);
+    },
+    confirmSas(accepted) {
+      var _a;
+      if (!sasOwner) return;
+      const entry = sasOwner;
+      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(accepted);
+      sasOwner = void 0;
+      clearTimeout(sasTimer);
+      delete state.sas;
+      delete state.sasTrusted;
+      publish({});
+    },
+    close() {
+      var _a;
+      disposed = true;
+      abort.abort();
+      clearInterval(dismissalInterval);
+      clearTimeout(renewal);
+      clearTimeout(sasTimer);
+      const entries = /* @__PURE__ */ new Set([...resumeEntries.values(), ...connected, ...pairing ? [pairing] : []]);
+      for (const entry of entries) (_a = entry.receiver) == null ? void 0 : _a.close();
+      resumeEntries.clear();
+      listeningBindings.clear();
+      connected.clear();
+      pairing = void 0;
+      livePresenter = void 0;
+      sasOwner = void 0;
+      lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => void 0).catch(report);
+      listeners.clear();
+    }
+  };
+}
+
+// src/plugins/cast-receiver/widgets/CastWidget.tsx
+var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+function applyPlayback(media, paused, volume, muted) {
+  media.volume = volume;
+  media.muted = muted;
+  if (paused) media.pause();
+  else void media.play().catch(() => void 0);
+}
+function CastWidget({ context }) {
+  const config = (0, import_react2.useMemo)(() => readCastConfig(context.config), [context.config]);
+  const [receiver, setReceiver] = (0, import_react2.useState)(() => ({
+    status: "connecting",
+    command: null,
+    presentationEpoch: 0,
+    stream: null,
+    peerCount: 0,
+    error: null,
+    roomCode: "",
+    relayUrl: config.relayUrl,
+    senderUrl: config.senderUrl,
+    queue: createCastQueueSnapshot(config.autoplay),
+    pairingReveal: 0,
+    pairingVisible: false
+  }));
+  const videoRef = (0, import_react2.useRef)(null);
+  (0, import_react2.useEffect)(() => {
+    const sessionContext = { ...context, config: { ...config } };
+    const session = createScreenSession(sessionContext);
+    const unsubscribe = session.subscribe(setReceiver);
+    return () => {
+      unsubscribe();
+      session.close();
+    };
+  }, [config.relayUrl, config.senderUrl]);
+  const effectiveConfig = (0, import_react2.useMemo)(() => receiver.command ? { ...config, ...receiver.command, outputMode: receiver.queue.outputMode } : { ...config, sourceKind: "idle", outputMode: receiver.queue.outputMode }, [config, receiver.command, receiver.queue.outputMode]);
+  const target = (0, import_react2.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
+  const paused = effectiveConfig.paused ?? false;
+  const volume = effectiveConfig.volume ?? 1;
+  const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
+  (0, import_react2.useEffect)(() => {
+    const video = videoRef.current;
+    if (!video || !receiver.stream) return;
+    video.srcObject = receiver.stream;
+    applyPlayback(video, paused, volume, effectiveConfig.muted);
+    return () => {
+      video.srcObject = null;
+    };
+  }, [effectiveConfig.muted, paused, receiver.stream, volume]);
+  (0, import_react2.useEffect)(() => {
+    const stream = receiver.stream;
+    if (!stream) return;
+    const tracks = stream.getTracks();
+    const describe = () => {
+      if (tracks.every((track) => track.readyState === "ended")) context.reportStatus("error", "The shared stream ended.");
+      else if (stream.getAudioTracks().length === 0) context.reportStatus("error", "This shared stream has no audio.");
+      else context.reportStatus("ok", "");
+    };
+    tracks.forEach((track) => track.addEventListener("ended", describe));
+    describe();
+    return () => tracks.forEach((track) => track.removeEventListener("ended", describe));
+  }, [context, receiver.stream]);
+  (0, import_react2.useEffect)(() => {
+    const next = receiver.stream ? null : target.kind === "youtube" ? {
+      provider: "youtube",
+      ...target.videoId ? { videoId: target.videoId } : {},
+      muted: effectiveConfig.muted,
+      paused,
+      volume,
+      outputMode: effectiveConfig.outputMode,
+      ...target.playlistId ? { playlistId: target.playlistId } : {},
+      ...target.index ? { index: target.index } : {}
+    } : target.kind === "website" ? { provider: "website", url: target.url } : null;
+    const updatePresentation = async () => {
+      await context.setPresentation(next);
+      await context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
+    };
+    void updatePresentation().catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    return void 0;
+  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
+  (0, import_react2.useEffect)(() => {
+    const video = videoRef.current;
+    if (video && target.kind === "media") applyPlayback(
+      video,
+      paused,
+      volume,
+      effectiveConfig.muted || effectiveConfig.outputMode === "video-only"
+    );
+  }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
+  if (receiver.stream) return effectiveConfig.outputMode !== "audio-only" && receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty", "aria-label": context.locale.startsWith("de") ? "Audio\xFCbertragung aktiv" : "Audio casting active" });
+  if (target.kind === "youtube" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
+  if (target.kind === "media") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `cast-root cast-active ${effectiveConfig.outputMode === "audio-only" ? "cast-audio-only" : ""}`, "data-overlay": config.overlayMode, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", src: target.url, autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty" });
+}
+
+// src/plugins/cast-receiver/widgets/PairingWidget.tsx
 var import_react4 = __toESM(require_react(), 1);
-var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
-function ForecastWidget({ context }) {
-  const config = (0, import_react4.useMemo)(() => readWeatherConfig(context.config), [context.config]);
-  const { data, error, refetch } = useWidgetData(context, {
-    key: [weatherCacheKey(config)],
-    fetcher: async () => {
-      const res = await context.http({ url: buildWeatherUrl(config), proxy: "auto" });
-      if (!res.ok) throw new Error(`Open-Meteo failed (${res.status})`);
-      return mapOpenMeteo(res.data);
-    },
-    refetchIntervalMs: config.refreshIntervalMinutes * 60 * 1e3,
-    staleMessage: "Offline \u2014 showing last forecast",
-    errorMessage: "Forecast unavailable"
-  });
-  const containerRef = usePullToRefresh(refetch);
-  if (error && !data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-error", role: "alert", children: error });
-  }
-  if (!data) {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-widget weather-loading", children: text(context.locale, "loadingForecast") });
-  }
-  return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { ref: containerRef, className: "weather-widget", children: [
-    config.showTitle && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast-header", children: config.locationName }),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "weather-forecast weather-forecast-full", children: data.daily.slice(0, config.forecastDays).map((day, i) => {
-      const d = describeWeather(day.weatherCode);
-      return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "weather-day", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "weather-dow", children: i === 0 ? text(context.locale, "today") : new Date(day.dateMs).toLocaleDateString(context.locale, { weekday: "short" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(WeatherIcon, { icon: d.icon, size: 32 }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("span", { className: "weather-range", children: [
-          Math.round(day.tempMax),
-          "\xB0 / ",
-          Math.round(day.tempMin),
-          "\xB0"
-        ] })
-      ] }, day.dateMs);
-    }) })
-  ] });
+
+// src/plugins/cast-receiver/session/session-store.ts
+var import_react3 = __toESM(require_react(), 1);
+var INITIAL = {
+  status: "connecting",
+  command: null,
+  presentationEpoch: 0,
+  stream: null,
+  peerCount: 0,
+  error: null,
+  roomCode: "",
+  relayUrl: "",
+  senderUrl: "",
+  pairingReveal: 0
+};
+var playbackState = INITIAL;
+function useCastPlayback(context) {
+  const [state, setState] = (0, import_react3.useState)(playbackState);
+  (0, import_react3.useEffect)(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      const next = await context.getCastState();
+      if (!cancelled && next) {
+        playbackState = next;
+        setState(playbackState);
+      }
+    };
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 200);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [context]);
+  return state;
 }
 
-// src/plugins/weather/weather-styles.ts
-var WEATHER_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-  body { width: 100%; height: 100%; }
-  .wg-plugin-root { width: 100%; height: 100%; }
-  .weather-widget {
-    position: relative; width: 100%; height: 100%; padding: 3% 5%;
-    display: flex; flex-direction: column; justify-content: center;
-    color: #fff; overflow: hidden; container-type: size; box-sizing: border-box;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  }
-  .weather-loading, .weather-error { display: grid; place-items: center; text-align: center; }
-  .weather-error { color: #ff8080; }
-  .weather-current { display: flex; align-items: center; justify-content: center; gap: min(10cqh,5cqw); height: 100%; }
-  .weather-current svg { width: min(90cqh,30cqw); height: min(90cqh,30cqw); flex-shrink: 0; }
-  .weather-temp { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-  .weather-value { font-size: min(52cqh,22cqw); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-  .weather-desc { font-size: min(20cqh,8cqw); color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .weather-loc { font-size: min(17cqh,7cqw); color: rgba(255,255,255,0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .weather-forecast { display: flex; justify-content: space-between; gap: 3%; margin-top: 8px; }
-  .weather-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6%; flex: 1; min-width: 0; }
-  .weather-day svg { width: min(34cqh,60%); height: min(34cqh,60%); }
-  .weather-dow { font-size: min(11cqh,4.5cqw); color: rgba(255,255,255,0.82); }
-  .weather-range { font-size: min(11cqh,4.5cqw); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .weather-forecast-header { font-size: min(12cqh,6cqw); color: rgba(255,255,255,0.82); margin-bottom: 2%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .weather-forecast-full { margin-top: 0; flex: 1; align-items: stretch; }
-  .weather-next {
-    position: absolute; left: 5%; right: 5%; bottom: 4%;
-    display: flex; align-items: center; justify-content: center; gap: 0.4em;
-    color: rgba(255,255,255,0.9);
-  }
-  .weather-next svg { width: min(14cqh,7cqw); height: min(14cqh,7cqw); flex-shrink: 0; }
-  .weather-next-text { font-size: min(13cqh,5.5cqw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+// src/plugins/cast-receiver/widgets/PairingWidget.tsx
+var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+var EN = { title: "Cast pairing", devices: "Connected devices", sas: "Security code" };
+var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te", sas: "Sicherheitscode" };
+function senderLink(senderUrl, relayUrl, roomCode) {
+  if (!senderUrl || !relayUrl || !roomCode) return "";
+  const url = new URL(senderUrl);
+  url.searchParams.set("relay", relayUrl);
+  url.searchParams.set("code", roomCode);
+  return url.href;
+}
+function PairingWidget({ context }) {
+  const receiver = useCastPlayback(context);
+  const config = (0, import_react4.useMemo)(() => readCastConfig(context.config), [context.config]);
+  const strings = context.locale.startsWith("de") ? DE : EN;
+  const [defaultSenderUrl, setDefaultSenderUrl] = (0, import_react4.useState)("");
+  const roomCode = receiver.roomCode;
+  const relayUrl = receiver.relayUrl || config.relayUrl;
+  const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
+  const url = (0, import_react4.useMemo)(
+    () => senderLink(senderUrl, relayUrl, roomCode),
+    [relayUrl, roomCode, senderUrl]
+  );
+  const observedReveal = (0, import_react4.useRef)(receiver.pairingReveal);
+  const observedDismissal = (0, import_react4.useRef)(receiver.dismissSas);
+  (0, import_react4.useEffect)(() => {
+    if (receiver.senderUrl || config.senderUrl) return;
+    void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [config.senderUrl, context, receiver.senderUrl]);
+  (0, import_react4.useEffect)(() => {
+    if (!receiver.dismissSas || receiver.dismissSas === observedDismissal.current || !receiver.sas) return;
+    observedDismissal.current = receiver.dismissSas;
+    void context.dismissCastSas();
+  }, [context, receiver]);
+  (0, import_react4.useEffect)(() => {
+    if (receiver.sasTrusted !== true || receiver.pairingReveal !== 0) return;
+    void context.setPairingDetails(null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [context, receiver.pairingReveal, receiver.sasTrusted]);
+  (0, import_react4.useEffect)(() => {
+    if (!receiver.sas || receiver.sasTrusted === true || !roomCode || !url) return;
+    void context.setPairingDetails({ code: roomCode, url, sas: receiver.sas }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [context, receiver.sas, receiver.sasTrusted, roomCode, url]);
+  (0, import_react4.useEffect)(() => {
+    if (receiver.pairingVisible !== false || receiver.sas) return;
+    void context.setPairingDetails(null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [context, receiver.pairingVisible, receiver.sas]);
+  (0, import_react4.useEffect)(() => {
+    const prior = observedReveal.current;
+    observedReveal.current = receiver.pairingReveal;
+    if (receiver.pairingReveal <= prior || receiver.sas || !roomCode || !url) return;
+    void context.setPairingDetails({ code: roomCode, url }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  }, [context, receiver.pairingReveal, receiver.sas, roomCode, url]);
+  const showDetails = () => {
+    if (roomCode && url) void context.setPairingDetails({ code: roomCode, url, ...receiver.sas ? { sas: receiver.sas } : {} }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
+    "button",
+    {
+      type: "button",
+      className: "cast-pairing-button",
+      onClick: showDetails,
+      disabled: !roomCode,
+      "aria-label": `${strings.title}. ${strings.devices}: ${receiver.peerCount}`,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: strings.title }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("strong", { children: receiver.peerCount })
+      ]
+    }
+  );
+}
+
+// src/plugins/cast-receiver/styles.ts
+var CAST_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; color: #fff; }
+  body, button { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  .wg-plugin-root, .cast-root, .cast-pairing-root { width: 100%; height: 100%; }
+  .cast-root { position: relative; overflow: hidden; }
+  .cast-empty { background: transparent; pointer-events: none; }
+  .cast-active[data-overlay='cover'] { background: #000; }
+  .cast-active[data-overlay='dim'] { background: rgba(0,0,0,0.6); }
+  .cast-active[data-overlay='inline'] { background: transparent; }
+  .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
+  .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
+  .cast-pairing-button { width: 100%; height: 100%; min-width: 48px; min-height: 48px; display: grid; grid-template-columns: 24px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 8px 12px; border: 0; border-radius: inherit; color: inherit; background: transparent; cursor: pointer; font-size: 16px; text-align: left; }
+  .cast-pairing-button:disabled { opacity: .45; cursor: default; }
+  .cast-pairing-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+  .cast-pairing-button span { min-width: 0; overflow-wrap: anywhere; }
+  .cast-pairing-button svg { width: 24px; height: 24px; fill: currentColor; }
+  .cast-pairing-button strong { font-size: 14px; }
 `;
 
-// src/plugins/weather/sandbox.ts
-injectStyle("weather-style", WEATHER_SANDBOX_CSS);
+// src/plugins/cast-receiver/sandbox.ts
+injectStyle("cast-receiver-style", CAST_SANDBOX_CSS);
 var sandbox_default = definePlugin({
   widgets: {
-    "weather.current": defineReactWidget(WeatherWidget),
-    "weather.forecast": defineReactWidget(ForecastWidget)
+    "cast-receiver.screen": defineReactWidget(CastWidget),
+    "cast-receiver.pairing": defineReactWidget(PairingWidget)
   }
 });
 export {

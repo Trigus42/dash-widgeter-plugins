@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 const { controller, createCastReceiver } = vi.hoisted(() => {
-  const controller = { close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
+  const controller = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
   return { controller, createCastReceiver: vi.fn((_options: object, _callback: (state: object) => void) => controller) };
 });
 vi.mock('@/core/cast/session', () => ({ createCastReceiver }));
