@@ -1,4 +1,4 @@
-import de from './locales/de.json';
+import de from '../locales/de.json';
 
 type Params = Record<string, string | number>;
 const translations: Record<string, Record<string, string>> = { de: de.runtime };

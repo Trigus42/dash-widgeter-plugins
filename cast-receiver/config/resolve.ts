@@ -1,4 +1,4 @@
-import { CAST_DEFAULT_CONFIG, type CastConfig, type CastSourceKind } from './types';
+import { CAST_DEFAULT_CONFIG, type CastConfig, type CastSourceKind } from '../types';
 
 function str(raw: unknown, fallback: string): string {
   return typeof raw === 'string' ? raw : fallback;

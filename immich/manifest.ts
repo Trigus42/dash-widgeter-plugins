@@ -1,6 +1,6 @@
 import { BACKGROUND_Z, type PluginManifest, type WidgetSettingField } from '@/types';
 import { FRAME_SETTINGS, FRAME_DEFAULT_CONFIG } from '@/sandbox/photoframe';
-import { IMMICH_DEFAULT_CONFIG } from './types';
+import { IMMICH_DEFAULT_CONFIG } from './model/types';
 import de from './locales/de.json';
 
 /**

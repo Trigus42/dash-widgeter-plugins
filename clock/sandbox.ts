@@ -1,7 +1,7 @@
 import { definePlugin, injectStyle } from '@/sandbox/sdk';
 import { defineReactWidget } from '@/sandbox/react';
-import { ClockWidget } from './ClockWidget';
-import { CLOCK_SANDBOX_CSS } from './clock-styles';
+import { ClockWidget } from './runtime/ClockWidget';
+import { CLOCK_SANDBOX_CSS } from './runtime/clock-styles';
 
 /**
  * Clock plugin sandbox entry: one React widget in the plugin's null-origin

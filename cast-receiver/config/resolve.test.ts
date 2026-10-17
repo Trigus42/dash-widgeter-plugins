@@ -6,7 +6,7 @@ import {
   youTubeEmbedUrl,
   youTubeVideoId,
 } from './resolve';
-import { CAST_DEFAULT_CONFIG } from './types';
+import { CAST_DEFAULT_CONFIG } from '../types';
 
 describe('readCastConfig', () => {
   it('defaults to idle and coerces unknown enums', () => {

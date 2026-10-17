@@ -6,7 +6,7 @@ import type {
   ImmichAsset,
   ImmichConfig,
   SelectOption,
-} from './types';
+} from '../model/types';
 import {
   fetchAssetAlbumsHelper,
   fetchFaceBoxHelper,

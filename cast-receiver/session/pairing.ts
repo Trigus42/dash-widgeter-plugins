@@ -1,5 +1,5 @@
 import { generateAuthCode, type CastSessionOptions } from '@/cast-protocol';
-import { parseCastRelayUrl } from '@/core/cast/setup-url';
+import { parseCastRelayUrl } from '@/core/cast/setup/setup-url';
 
 interface CreatedRoom { roomId: string; reclaimToken: string; generation: string; expiresAt: number; websocketUrl: string }
 

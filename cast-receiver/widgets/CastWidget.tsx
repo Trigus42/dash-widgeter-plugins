@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
-import { readCastConfig, resolveCastTarget } from './resolve';
+import { readCastConfig, resolveCastTarget } from '../config/resolve';
 import { createCastQueueSnapshot } from '@/cast-protocol';
-import { createScreenSession, type ScreenSession } from './screen-session';
+import { createScreenSession, type ScreenSession } from '../session/screen-session';
 
 function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number, muted: boolean): void {
   media.volume = volume;

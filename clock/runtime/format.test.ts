@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatClock } from './format';
-import { CLOCK_DEFAULT_CONFIG } from './types';
+import { CLOCK_DEFAULT_CONFIG } from '../config/types';
 
 // Fixed instant: 2026-01-02 09:05:07 local time.
 const when = new Date(2026, 0, 2, 9, 5, 7);

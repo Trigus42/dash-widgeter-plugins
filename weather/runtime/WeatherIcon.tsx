@@ -1,4 +1,4 @@
-import type { IconKey } from './wmo';
+import type { IconKey } from '../data/wmo';
 
 interface Props {
   icon: IconKey;

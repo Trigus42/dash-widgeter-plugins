@@ -1,10 +1,10 @@
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 import { createPairingSession } from './pairing';
-import { createResumeSession } from '@/core/cast/receiver-client';
+import { createResumeSession } from '@/core/cast/setup/receiver-client';
 import { applyCastQueueMutation, createCastQueueSnapshot, decode, type CastQueueSnapshot, type CastSessionOptions } from '@/cast-protocol';
-import type { DataMessage } from '@/core/cast/data-message';
-import { createPluginReceiver, type PluginReceiver, type ReceiverState } from './receiver';
-import { readCastConfig } from './resolve';
+import type { DataMessage } from '@/core/cast/protocol/data-message';
+import { createPluginReceiver, type PluginReceiver, type ReceiverState } from '../receiver';
+import { readCastConfig } from '../config/resolve';
 
 export interface ScreenSession {
   state: ReceiverState & { roomCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number; pairingVisible: boolean };

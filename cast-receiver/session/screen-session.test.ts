@@ -3,7 +3,7 @@ import type { GuestWidgetContext } from '@/sandbox/sdk';
 
 const mocks = vi.hoisted(() => ({ createPairingSession: vi.fn(), createPluginReceiver: vi.fn() }));
 vi.mock('./pairing', () => ({ createPairingSession: mocks.createPairingSession }));
-vi.mock('./receiver', () => ({ createPluginReceiver: mocks.createPluginReceiver }));
+vi.mock('../receiver', () => ({ createPluginReceiver: mocks.createPluginReceiver }));
 import { createScreenSession } from './screen-session';
 
 const lifecycleTick = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve(); };

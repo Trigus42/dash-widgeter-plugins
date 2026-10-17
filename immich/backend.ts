@@ -6,9 +6,9 @@ import type {
   PhotoBackend,
   PhotoImageSize,
 } from '@/sandbox/photoframe';
-import { ImmichService, type ImmichTransport } from './service';
-import { readImmichConfig } from './config';
-import type { ImmichAsset } from './types';
+import { ImmichService, type ImmichTransport } from './api/service';
+import { readImmichConfig } from './model/config';
+import type { ImmichAsset } from './model/types';
 
 /**
  * The Immich photo-source backend: a thin adapter over {@link ImmichService}

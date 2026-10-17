@@ -1,6 +1,6 @@
 import { createCastReceiver } from '@/core/cast/session';
 import type { CastCommand, CastSessionOptions } from '@/cast-protocol';
-import type { DataMessage } from '@/core/cast/data-message';
+import type { DataMessage } from '@/core/cast/protocol/data-message';
 import type { SpakeRuntimeAsset } from '@/core/cast/crypto/runtime';
 import type { CastSessionStatus } from '@/core/cast/types';
 

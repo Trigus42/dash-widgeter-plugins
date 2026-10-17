@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ImmichService, type ImmichTransport } from './service';
 import type { HttpRequest } from '@/types';
-import { IMMICH_DEFAULT_CONFIG, type ImmichConfig } from './types';
+import { IMMICH_DEFAULT_CONFIG, type ImmichConfig } from '../model/types';
 
 const config: ImmichConfig = {
   ...IMMICH_DEFAULT_CONFIG,

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
-import { readClockConfig } from './types';
+import { readClockConfig } from '../config/types';
 import { formatClock } from './format';
 import { fitClock } from './fit';
 

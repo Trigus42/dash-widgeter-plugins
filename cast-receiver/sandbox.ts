@@ -1,7 +1,7 @@
 import { definePlugin, injectStyle } from '@/sandbox/sdk';
 import { defineReactWidget } from '@/sandbox/react';
-import { CastWidget } from './CastWidget';
-import { PairingWidget } from './PairingWidget';
+import { CastWidget } from './widgets/CastWidget';
+import { PairingWidget } from './widgets/PairingWidget';
 import { CAST_SANDBOX_CSS } from './styles';
 
 /**

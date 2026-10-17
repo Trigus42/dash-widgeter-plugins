@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
-import type { ReceiverState } from './receiver';
+import type { ReceiverState } from '../receiver';
 
 export interface CastSessionState extends ReceiverState {
   roomCode: string;

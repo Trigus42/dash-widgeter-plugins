@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { usePullToRefresh, useWidgetData, type ReactWidgetProps } from '@/sandbox/react';
-import { describeWeather } from './wmo';
+import { describeWeather } from '../data/wmo';
 import { WeatherIcon } from './WeatherIcon';
-import { buildWeatherUrl, mapOpenMeteo, nextPrecipEvent, weatherCacheKey } from './service';
-import { readWeatherConfig, type WeatherData } from './types';
+import { buildWeatherUrl, mapOpenMeteo, nextPrecipEvent, weatherCacheKey } from '../data/service';
+import { readWeatherConfig, type WeatherData } from '../data/types';
 import { text } from './translate';
 
 /** "in 25 min" / "in 2 h" — compact, locale-neutral relative label. */

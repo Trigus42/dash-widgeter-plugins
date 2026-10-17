@@ -1,5 +1,5 @@
 import { WIDGET_Z, type PluginManifest } from '@/types';
-import { CLOCK_DEFAULT_CONFIG } from './types';
+import { CLOCK_DEFAULT_CONFIG } from './config/types';
 import de from './locales/de.json';
 
 /**

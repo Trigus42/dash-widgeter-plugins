@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { deriveMetadata, hasMetadata, type MetadataOptions } from '@/sandbox/photoframe';
-import { readImmichConfig } from './config';
-import type { ImmichAsset } from './types';
+import { readImmichConfig } from '../model/config';
+import type { ImmichAsset } from '../model/types';
 
 const ALL_ON: MetadataOptions = {
   showDate: true,

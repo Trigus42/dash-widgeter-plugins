@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 
 const mocks = vi.hoisted(() => ({ useCastPlayback: vi.fn() }));
-vi.mock('./session-store', () => ({ useCastPlayback: mocks.useCastPlayback }));
+vi.mock('../session/session-store', () => ({ useCastPlayback: mocks.useCastPlayback }));
 import { PairingWidget } from './PairingWidget';
 
 const baseState = { status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null,

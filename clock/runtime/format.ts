@@ -1,4 +1,4 @@
-import type { ClockConfig } from './types';
+import type { ClockConfig } from '../config/types';
 
 export interface ClockParts {
   time: string;

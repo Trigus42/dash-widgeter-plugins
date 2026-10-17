@@ -1,4 +1,4 @@
-import type { FaceBox, ImmichAsset, SelectOption } from './types';
+import type { FaceBox, ImmichAsset, SelectOption } from '../model/types';
 import type { HttpRequest, HttpResponse } from '@/types';
 
 interface MemoryResponse {

@@ -1,8 +1,8 @@
 import { definePlugin, injectStyle } from '@/sandbox/sdk';
 import { defineReactWidget } from '@/sandbox/react';
-import { WeatherWidget } from './WeatherWidget';
-import { ForecastWidget } from './ForecastWidget';
-import { WEATHER_SANDBOX_CSS } from './weather-styles';
+import { WeatherWidget } from './runtime/WeatherWidget';
+import { ForecastWidget } from './runtime/ForecastWidget';
+import { WEATHER_SANDBOX_CSS } from './runtime/weather-styles';
 
 /**
  * Weather plugin sandbox entry. Registers two React widgets (current + forecast)

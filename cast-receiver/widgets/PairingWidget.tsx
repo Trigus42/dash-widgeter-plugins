@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
-import { useCastPlayback } from './session-store';
-import { readCastConfig } from './resolve';
+import { useCastPlayback } from '../session/session-store';
+import { readCastConfig } from '../config/resolve';
 const EN = { title: 'Cast pairing', devices: 'Connected devices', sas: 'Security code' };
 const DE = { title: 'Cast-Kopplung', devices: 'Verbundene Geräte', sas: 'Sicherheitscode' };
 

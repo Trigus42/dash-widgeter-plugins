@@ -1,5 +1,5 @@
 import { WIDGET_Z, type PluginManifest, type WidgetSettingField } from '@/types';
-import { WEATHER_DEFAULT_CONFIG } from './types';
+import { WEATHER_DEFAULT_CONFIG } from './data/types';
 import de from './locales/de.json';
 
 /**
