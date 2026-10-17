@@ -25807,6 +25807,9 @@ function encoded32(value) {
     return false;
   }
 }
+function validGeneration(value) {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(value);
+}
 function validPresentationEpoch(value) {
   return Number.isSafeInteger(value) && Number(value) > 0;
 }
@@ -25830,14 +25833,14 @@ function parseDataMessage(input, now = Date.now()) {
   }
   if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
   if (message.type === "stream" && exact(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
-  if (message.type === "sas-confirm" && exact(message, message.binding === void 0 ? ["type", "generation"] : ["type", "generation", "binding"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) {
+  if (message.type === "sas-confirm" && exact(message, message.binding === void 0 ? ["type", "generation"] : ["type", "generation", "binding"]) && validGeneration(message.generation)) {
     if (message.binding === void 0) return { type: "sas-confirm", generation: message.generation };
     if (!message.binding || typeof message.binding !== "object" || Array.isArray(message.binding)) return null;
     const binding = message.binding;
     if (!exact(binding, ["bindingId", "resumePassword", "expiresAt"]) || !encoded32(binding.bindingId) || !encoded32(binding.resumePassword) || !Number.isSafeInteger(binding.expiresAt) || Number(binding.expiresAt) <= now || Number(binding.expiresAt) > now + MAX_CAST_RESUME_LIFETIME_MS) return null;
     return { type: "sas-confirm", generation: message.generation, binding };
   }
-  if (message.type === "sas-ack" && exact(message, ["type", "generation"]) && typeof message.generation === "string" && message.generation.length > 0 && message.generation.length <= 128) return message;
+  if (message.type === "sas-ack" && exact(message, ["type", "generation"]) && validGeneration(message.generation)) return message;
   if (message.type === "queue-mutation" && exact(message, ["type", "mutation"])) {
     const mutation = parseCastQueueMutation(message.mutation);
     return mutation ? { type: "queue-mutation", mutation } : null;
