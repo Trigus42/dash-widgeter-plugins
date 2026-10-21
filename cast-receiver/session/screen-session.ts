@@ -1,5 +1,6 @@
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 import { createPairingSession } from './pairing';
+import { provisionReceiverResume } from './resume-lifecycle';
 import { createResumeSession } from '@/core/cast/setup/receiver-client';
 import { applyCastQueueMutation, createCastQueueSnapshot, decode, type CastQueueSnapshot, type CastSessionOptions } from '@/cast-protocol';
 import type { DataMessage } from '@/core/cast/protocol/data-message';
@@ -7,36 +8,37 @@ import { createPluginReceiver, type PluginReceiver, type ReceiverState } from '.
 import { readCastConfig } from '../config/resolve';
 
 export interface ScreenSession {
-  state: ReceiverState & { roomCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number; pairingVisible: boolean };
+  state: ReceiverState & { roomJoinCode: string; authCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number; pairingVisible: boolean };
   subscribe(listener: (state: ScreenSession['state']) => void): () => void;
   confirmSas(accepted: boolean): void;
   close(): void;
 }
-interface ReceiverEntry { room: { options: CastSessionOptions; roomCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; trusted: boolean; revokedEpoch: number; epochOffset: number }
+interface ReceiverEntry { room: { options: CastSessionOptions; roomJoinCode: string; authCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; trusted: boolean; resumeBinding?: { bindingId: string; resumePassword: string; expiresAt: number; ownerCapability: string }; bindingInstall?: Promise<void>; revokedEpoch: number; epochOffset: number }
 type TimerHandle = number | NodeJS.Timeout;
 
 
 export function createScreenSession(context: GuestWidgetContext): ScreenSession {
   const config = readCastConfig(context.config);
   const state: ScreenSession['state'] = { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null,
-    roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0, pairingVisible: false };
+    roomJoinCode: '', authCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0, pairingVisible: false };
   const listeners = new Set<(state: ScreenSession['state']) => void>();
   const listeningBindings = new Set<string>();
+  const pendingBindingInstalls = new Map<string, Promise<void>>();
   const resumeEntries = new Map<string, ReceiverEntry>();
+  const dormantBindings = new Map<string, NonNullable<ReceiverEntry['resumeBinding']>>();
   const connected = new Set<ReceiverEntry>(); const abort = new AbortController();
   const pendingConnectionEvents = new Map<ReceiverEntry, Array<{ generation: string; trusted: boolean }>>();
   let pairing: ReceiverEntry | undefined, livePresenter: ReceiverEntry | undefined, sasOwner: ReceiverEntry | undefined, renewal: TimerHandle | undefined, sasTimer: TimerHandle | undefined, disposed = false;
   let authoritativeEpoch = 0;
   let lifecycle: Promise<void> = Promise.resolve();
-  let observedDismissSas: unknown;
-  let dismissalInitialized = false;
+  let observedDecisionVersion = 0;
   const publish = (patch: Partial<ScreenSession['state']>): void => {
     if ('sas' in patch && patch.sas === undefined) delete state.sas;
     if ('sasTrusted' in patch && patch.sasTrusted === undefined) delete state.sasTrusted;
     if (state.sasTrusted === true && patch.sasTrusted === undefined) delete patch.sasTrusted;
     Object.assign(state, patch); listeners.forEach((listener) => listener({ ...state }));
     const hostState = { status: state.status, command: state.command, presentationEpoch: state.presentationEpoch, peerCount: state.peerCount, error: state.error,
-      roomCode: state.roomCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, pairingReveal: state.pairingReveal, pairingVisible: state.pairingVisible,
+      roomJoinCode: state.roomJoinCode, authCode: state.authCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, pairingReveal: state.pairingReveal, pairingVisible: state.pairingVisible,
       ...(state.sas ? { sas: state.sas } : {}), ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
     void context.setCastState(hostState);
   };
@@ -44,19 +46,15 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
     void context.getCastState().then((hostState) => {
-      const dismissed = hostState?.dismissSas;
-      if (!dismissalInitialized) { dismissalInitialized = true; observedDismissSas = dismissed; return; }
-      if (dismissed === undefined || dismissed === observedDismissSas) return;
-      observedDismissSas = dismissed;
-      if (!sasOwner) return;
-      const entry = sasOwner;
-      sasOwner = undefined;
-      clearTimeout(sasTimer);
-      entry.receiver?.confirmSas(false);
-      entry.trusted = false;
-      delete state.sas;
-      delete state.sasTrusted;
-      publish({});
+      if (disposed || !sasOwner || !hostState?.sasDecision || typeof hostState.sasDecision !== 'object') return;
+      const action = hostState.sasDecision as Record<string, unknown>;
+      if (action.sas !== state.sas || !Number.isSafeInteger(action.version) || Number(action.version) <= observedDecisionVersion
+        || (action.decision !== 'accept' && action.decision !== 'dismiss')) return;
+      observedDecisionVersion = Number(action.version);
+      const entry = sasOwner; sasOwner = undefined; clearTimeout(sasTimer);
+      entry.receiver?.confirmSas(action.decision === 'accept');
+      if (action.decision === 'dismiss') entry.trusted = false;
+      delete state.sas; delete state.sasTrusted; publish({});
     }).catch(report);
   }, 200) : undefined;
   const applyConnection = (entry: ReceiverEntry, expectedGeneration: string, event: { generation: string; trusted: boolean }): void => {
@@ -105,9 +103,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         authoritativeEpoch = globalEpoch;
         if (livePresenter && livePresenter !== entry) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); }
         livePresenter = entry;
-        publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomCode: state.roomCode });
+        publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
       } else if (livePresenter === entry && (live || command) && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
-    } else publish({ peerCount: connected.size, roomCode: state.roomCode });
+    } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
       sasOwner = entry; delete state.sasTrusted; clearTimeout(sasTimer); sasTimer = setTimeout(() => {
         if (sasOwner === entry) { sasOwner = undefined; entry.receiver?.confirmSas(false); entry.trusted = false; delete state.sas; delete state.sasTrusted; publish({}); }
@@ -129,37 +127,37 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size > 0 ? 'paired' : 'disconnected' });
     await entry.room.close();
   };
+  const startResumeBinding = async (binding: NonNullable<ReceiverEntry['resumeBinding']>): Promise<void> => {
+    if (listeningBindings.has(binding.bindingId)) return;
+    listeningBindings.add(binding.bindingId);
+    const listen = async (): Promise<void> => {
+      try {
+        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), binding.ownerCapability, abort.signal);
+        const asset = await context.secureWebRtcCryptoAsset();
+        const entry: ReceiverEntry = { room: { options, roomJoinCode: '', authCode: '', expiresAt: binding.expiresAt, close: () => Promise.resolve() },
+          state: { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }, connected: false, trusted: true, resumeBinding: binding, revokedEpoch: 0, epochOffset: authoritativeEpoch };
+        resumeEntries.set(binding.bindingId, entry);
+        entry.receiver = createPluginReceiver(options, asset, (next) => {
+          entry.state = next;
+          if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
+          if (next.peerCount === 0 && entry.connected) {
+            entry.connected = false; connected.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
+            if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
+            entry.receiver?.close(); publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size ? 'paired' : 'disconnected' });
+            if (!disposed) enqueue(listen); return;
+          }
+          aggregate(entry);
+        }, undefined, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : undefined, authenticatedMessage(entry), ({ trusted }) => { entry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
+        await entry.receiver.listening;
+      } catch {
+        listeningBindings.delete(binding.bindingId);
+      }
+    };
+    await listen();
+  };
   const resume = async (): Promise<void> => {
     const bindings = context.castResume ? await context.castResume.get() : [];
-    await Promise.all(bindings.map(async (binding) => {
-      if (listeningBindings.has(binding.bindingId)) return;
-      listeningBindings.add(binding.bindingId);
-      const listen = async (): Promise<void> => {
-        try {
-          const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
-          const asset = await context.secureWebRtcCryptoAsset();
-          const entry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-            state: { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }, connected: false, trusted: true, revokedEpoch: 0, epochOffset: authoritativeEpoch };
-          resumeEntries.set(binding.bindingId, entry);
-          entry.receiver = createPluginReceiver(options, asset, (next) => {
-            entry.state = next;
-            if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
-            if (next.peerCount === 0 && entry.connected) {
-              entry.connected = false; connected.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
-              if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
-              entry.receiver?.close(); publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size ? 'paired' : 'disconnected' });
-              if (!disposed) enqueue(listen); return;
-            }
-            aggregate(entry);
-          }, undefined, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : undefined, authenticatedMessage(entry), ({ trusted }) => { entry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
-          await entry.receiver.listening;
-        } catch (error) {
-          if (!disposed && !(error instanceof DOMException && error.name === 'AbortError')) enqueue(listen);
-          else listeningBindings.delete(binding.bindingId);
-        }
-      };
-      await listen();
-    }));
+    for (const binding of bindings) if (!dormantBindings.has(binding.bindingId)) void startResumeBinding(binding);
   };
   const allocate = async (): Promise<void> => {
     if (disposed || pairing) return;
@@ -176,42 +174,23 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         if (pairing === entry) { pairing = undefined; clearTimeout(renewal); enqueue(allocate); } }
       if (next.peerCount === 0 && entry.connected) {
         entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
-        entry.receiver?.close(); void entry.room.close();
+        entry.receiver?.close(); const settle = entry.bindingInstall ?? Promise.resolve(); void settle.then(() => { const binding = entry.resumeBinding; if (!binding) { void entry.room.close(); return; } dormantBindings.set(binding.bindingId, binding); if (connected.size === 0) { const pending = [...dormantBindings.values()]; dormantBindings.clear(); pending.forEach((candidate) => void startResumeBinding(candidate)); } }, () => { void entry.room.close(); });
         publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size ? 'paired' : 'disconnected' }); return;
       }
       aggregate(entry);
     };
     let initialized = false;
-    entry.receiver = createPluginReceiver(room.options, asset, (next) => { if (initialized) applyState(next); else pendingStates.push(next); }, async (binding) => {
-      const receiverBinding = { bindingId: binding.bindingId, resumePassword: binding.resumePassword, expiresAt: binding.expiresAt };
-      const bindings = await context.castResume.get();
-      await context.castResume.replace([...bindings.filter((item) => item.bindingId !== binding.bindingId), receiverBinding]);
-      if (listeningBindings.has(binding.bindingId)) return;
-      listeningBindings.add(binding.bindingId);
-      try {
-        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
-        if (disposed) return;
-        const resumeEntry: ReceiverEntry = { room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-          state: { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }, connected: false, trusted: true, revokedEpoch: 0, epochOffset: authoritativeEpoch };
-        resumeEntries.set(binding.bindingId, resumeEntry);
-        resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
-          resumeEntry.state = next;
-          if (next.peerCount > 0 && !resumeEntry.connected) { resumeEntry.connected = true; connected.add(resumeEntry); resumeEntry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
-          if (next.peerCount === 0 && resumeEntry.connected) {
-            resumeEntry.connected = false; connected.delete(resumeEntry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
-            if (sasOwner === resumeEntry) { sasOwner = undefined; clearTimeout(sasTimer); }
-            resumeEntry.receiver?.close(); publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size ? 'paired' : 'disconnected' });
-            enqueue(resume); return;
-          }
-          aggregate(resumeEntry);
-        }, undefined, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(resumeEntry), ({ trusted }) => { resumeEntry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
-        await resumeEntry.receiver.listening;
-      } catch (error) {
-        listeningBindings.delete(binding.bindingId);
-        resumeEntries.delete(binding.bindingId);
-        throw error;
-      }
+    const installBinding = async (binding: { bindingId: string; resumePassword: string; expiresAt: number }): Promise<void> => {
+      await provisionReceiverResume(config.relayUrl, room, binding, context.castResume, abort.signal);
+      entry.resumeBinding = { ...binding, ownerCapability: room.ownerCapability };
+    };
+    entry.receiver = createPluginReceiver(room.options, asset, (next) => { if (initialized) applyState(next); else pendingStates.push(next); }, (binding) => {
+      const existing = pendingBindingInstalls.get(binding.bindingId); if (existing) return existing;
+      const install = installBinding(binding); entry.bindingInstall = install; pendingBindingInstalls.set(binding.bindingId, install);
+      void install.finally(() => { if (pendingBindingInstalls.get(binding.bindingId) === install) pendingBindingInstalls.delete(binding.bindingId); }).catch(() => undefined);
+      return install;
     }, async (bindingId) => {
+      dormantBindings.delete(bindingId);
       await context.castResume.delete(bindingId);
       const resumeEntry = resumeEntries.get(bindingId);
       if (resumeEntry) { resumeEntries.delete(bindingId); listeningBindings.delete(bindingId); connected.delete(resumeEntry); resumeEntry.receiver?.close(); }
@@ -221,7 +200,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     });
     pairing = entry; initialized = true; pendingStates.forEach(applyState);
     for (const event of pendingConnectionEvents.get(entry) ?? []) applyConnection(entry, room.options.generation, event);
-    pendingConnectionEvents.delete(entry); if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
+    pendingConnectionEvents.delete(entry); if (pairing === entry) publish({ roomJoinCode: room.roomJoinCode, authCode: room.authCode, error: null });
     if (pairing === entry) { clearTimeout(renewal); renewal = setTimeout(() => enqueue(async () => {
       if (pairing === entry) { await disposeEntry(entry); await allocate(); }
     }), Math.max(1_000, room.expiresAt - Date.now() - 30_000)); }
@@ -230,6 +209,6 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
     confirmSas(accepted) { if (!sasOwner) return; const entry = sasOwner; entry.receiver?.confirmSas(accepted); sasOwner = undefined; clearTimeout(sasTimer); delete state.sas; delete state.sasTrusted; publish({}); },
     close() { disposed = true; abort.abort(); clearInterval(dismissalInterval); clearTimeout(renewal); clearTimeout(sasTimer); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
-      for (const entry of entries) entry.receiver?.close();
-      resumeEntries.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => undefined).catch(report); listeners.clear(); } };
+      for (const entry of entries) { entry.receiver?.close(); if (!entry.resumeBinding) void entry.room.close(); }
+      resumeEntries.clear(); dormantBindings.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; listeners.clear(); } };
 }

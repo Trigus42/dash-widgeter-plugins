@@ -14,7 +14,7 @@ function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number,
 export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const config = useMemo(() => readCastConfig(context.config), [context.config]);
   const [receiver, setReceiver] = useState<ScreenSession['state']>(() => ({ status: 'connecting', command: null, presentationEpoch: 0, stream: null,
-    peerCount: 0, error: null, roomCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0, pairingVisible: false }));
+    peerCount: 0, error: null, roomJoinCode: '', authCode: '', relayUrl: config.relayUrl, senderUrl: config.senderUrl, queue: createCastQueueSnapshot(config.autoplay), pairingReveal: 0, pairingVisible: false }));
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => { const sessionContext = { ...context, config: { ...config } }; const session = createScreenSession(sessionContext); const unsubscribe = session.subscribe(setReceiver);
     return () => { unsubscribe(); session.close(); };

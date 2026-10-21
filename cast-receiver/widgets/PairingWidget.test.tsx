@@ -7,7 +7,7 @@ vi.mock('../session/session-store', () => ({ useCastPlayback: mocks.useCastPlayb
 import { PairingWidget } from './PairingWidget';
 
 const baseState = { status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null,
-  roomCode: '1234567890', relayUrl: 'https://relay.example', senderUrl: 'https://sender.example', pairingReveal: 0,
+  roomJoinCode: '123456', authCode: '789012', relayUrl: 'https://relay.example', senderUrl: 'https://sender.example', pairingReveal: 0,
   sas: undefined as string | undefined, sasTrusted: undefined as boolean | undefined };
 
 function context(): GuestWidgetContext {
@@ -31,7 +31,7 @@ describe('PairingWidget', () => {
     setPairingDetails.mockClear();
     fireEvent.click(view.getByRole('button'));
     await waitFor(() => expect(setPairingDetails).toHaveBeenCalledTimes(1));
-    expect(setPairingDetails).toHaveBeenLastCalledWith(expect.objectContaining({ code: '1234567890' }));
+    expect(setPairingDetails).toHaveBeenLastCalledWith(expect.objectContaining({ roomJoinCode: '123456', authCode: '789012' }));
 
     state = { ...baseState, sasTrusted: true }; view.rerender(<PairingWidget context={ctx} />);
     await waitFor(() => expect(setPairingDetails).toHaveBeenLastCalledWith(null));
@@ -39,7 +39,7 @@ describe('PairingWidget', () => {
     setPairingDetails.mockClear();
     state = { ...baseState, sasTrusted: true, pairingReveal: 1 }; view.rerender(<PairingWidget context={ctx} />);
     await waitFor(() => expect(setPairingDetails).toHaveBeenCalledTimes(1));
-    expect(setPairingDetails).toHaveBeenLastCalledWith(expect.objectContaining({ code: '1234567890' }));
+    expect(setPairingDetails).toHaveBeenLastCalledWith(expect.objectContaining({ roomJoinCode: '123456', authCode: '789012' }));
   });
 
   it('does not reopen a persisted reveal when the widget remounts', async () => {
@@ -75,8 +75,8 @@ describe('PairingWidget', () => {
     ctx.setPairingDetails = setPairingDetails;
     render(<PairingWidget context={ctx} />);
     fireEvent.click(document.querySelector('.cast-pairing-button') as HTMLButtonElement);
-    expect(setPairingDetails).toHaveBeenCalledWith(expect.objectContaining({ code: '1234567890' }));
+    expect(setPairingDetails).toHaveBeenCalledWith(expect.objectContaining({ roomJoinCode: '123456', authCode: '789012' }));
     const details = setPairingDetails.mock.calls[0]?.[0];
-    expect(details && 'url' in details ? details.url : '').toMatch(/^https:\/\/sender\.example\/cast#[A-Za-z0-9_-]+$/);
+    expect(details && 'url' in details ? details.url : '').toMatch(/^https:\/\/sender\.example\/#{1}[A-Za-z0-9_-]+$/);
   });
 });

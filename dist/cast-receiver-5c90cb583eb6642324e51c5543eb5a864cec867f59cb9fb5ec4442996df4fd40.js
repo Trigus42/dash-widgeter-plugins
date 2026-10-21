@@ -367,21 +367,21 @@ var require_react_development = __commonJS({
         });
         return result;
       }
-      function lazyInitializer(payload) {
-        if (-1 === payload._status) {
-          var resolveDebugValue = null, rejectDebugValue = null, ioInfo = payload._ioInfo;
+      function lazyInitializer(payload2) {
+        if (-1 === payload2._status) {
+          var resolveDebugValue = null, rejectDebugValue = null, ioInfo = payload2._ioInfo;
           null != ioInfo && (ioInfo.start = ioInfo.end = performance.now(), ioInfo.value = new Promise(function(resolve, reject) {
             resolveDebugValue = resolve;
             rejectDebugValue = reject;
           }));
-          ioInfo = payload._result;
+          ioInfo = payload2._result;
           var thenable = ioInfo();
           thenable.then(
             function(moduleObject) {
-              if (0 === payload._status || -1 === payload._status) {
-                payload._status = 1;
-                payload._result = moduleObject;
-                var _ioInfo = payload._ioInfo;
+              if (0 === payload2._status || -1 === payload2._status) {
+                payload2._status = 1;
+                payload2._result = moduleObject;
+                var _ioInfo = payload2._ioInfo;
                 if (null != _ioInfo) {
                   _ioInfo.end = performance.now();
                   var debugValue = null == moduleObject ? void 0 : moduleObject.default;
@@ -393,31 +393,31 @@ var require_react_development = __commonJS({
               }
             },
             function(error) {
-              if (0 === payload._status || -1 === payload._status) {
-                payload._status = 2;
-                payload._result = error;
-                var _ioInfo2 = payload._ioInfo;
+              if (0 === payload2._status || -1 === payload2._status) {
+                payload2._status = 2;
+                payload2._result = error;
+                var _ioInfo2 = payload2._ioInfo;
                 null != _ioInfo2 && (_ioInfo2.end = performance.now(), _ioInfo2.value.then(noop, noop), rejectDebugValue(error), _ioInfo2.value.status = "rejected", _ioInfo2.value.reason = error);
                 void 0 === thenable.status && (thenable.status = "rejected", thenable.reason = error);
               }
             }
           );
-          ioInfo = payload._ioInfo;
+          ioInfo = payload2._ioInfo;
           if (null != ioInfo) {
             var displayName = thenable.displayName;
             "string" === typeof displayName && (ioInfo.name = displayName);
           }
-          -1 === payload._status && (payload._status = 0, payload._result = thenable);
+          -1 === payload2._status && (payload2._status = 0, payload2._result = thenable);
         }
-        if (1 === payload._status)
-          return ioInfo = payload._result, void 0 === ioInfo && console.error(
+        if (1 === payload2._status)
+          return ioInfo = payload2._result, void 0 === ioInfo && console.error(
             "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))\n\nDid you accidentally put curly braces around the import?",
             ioInfo
           ), "default" in ioInfo || console.error(
             "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))",
             ioInfo
           ), ioInfo.default;
-        throw payload._result;
+        throw payload2._result;
       }
       function resolveDispatcher() {
         var dispatcher = ReactSharedInternals.H;
@@ -7739,13 +7739,13 @@ var require_react_dom_client_development = __commonJS({
         hook.baseState = passthrough;
         return [passthrough, hook.queue.dispatch];
       }
-      function dispatchActionState(fiber, actionQueue, setPendingState, setState, payload) {
+      function dispatchActionState(fiber, actionQueue, setPendingState, setState, payload2) {
         if (isRenderPhaseUpdate(fiber))
           throw Error("Cannot update action state while rendering.");
         fiber = actionQueue.action;
         if (null !== fiber) {
           var actionNode = {
-            payload,
+            payload: payload2,
             action: fiber,
             next: null,
             isTransition: true,
@@ -7764,14 +7764,14 @@ var require_react_dom_client_development = __commonJS({
         }
       }
       function runActionStateAction(actionQueue, node) {
-        var action = node.action, payload = node.payload, prevState = actionQueue.state;
+        var action = node.action, payload2 = node.payload, prevState = actionQueue.state;
         if (node.isTransition) {
           var prevTransition = ReactSharedInternals.T, currentTransition = {};
           currentTransition.types = null !== prevTransition ? prevTransition.types : null;
           currentTransition._updatedFibers = /* @__PURE__ */ new Set();
           ReactSharedInternals.T = currentTransition;
           try {
-            var returnValue = action(prevState, payload), onStartTransitionFinish = ReactSharedInternals.S;
+            var returnValue = action(prevState, payload2), onStartTransitionFinish = ReactSharedInternals.S;
             null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
             handleActionReturnValue(actionQueue, node, returnValue);
           } catch (error) {
@@ -7785,7 +7785,7 @@ var require_react_dom_client_development = __commonJS({
           }
         } else
           try {
-            currentTransition = action(prevState, payload), handleActionReturnValue(actionQueue, node, currentTransition);
+            currentTransition = action(prevState, payload2), handleActionReturnValue(actionQueue, node, currentTransition);
           } catch (error$5) {
             onActionError(actionQueue, node, error$5);
           }
@@ -7991,14 +7991,14 @@ var require_react_dom_client_development = __commonJS({
       function mountEffect(create, deps) {
         (currentlyRenderingFiber.mode & StrictEffectsMode) !== NoMode ? mountEffectImpl(545261568, Passive, create, deps) : mountEffectImpl(8390656, Passive, create, deps);
       }
-      function useEffectEventImpl(payload) {
+      function useEffectEventImpl(payload2) {
         currentlyRenderingFiber.flags |= 4;
         var componentUpdateQueue = currentlyRenderingFiber.updateQueue;
         if (null === componentUpdateQueue)
-          componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload];
+          componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload2];
         else {
           var events = componentUpdateQueue.events;
-          null === events ? componentUpdateQueue.events = [payload] : events.push(payload);
+          null === events ? componentUpdateQueue.events = [payload2] : events.push(payload2);
         }
       }
       function mountEvent(callback) {
@@ -22705,22 +22705,22 @@ var require_react_dom_client_development = __commonJS({
       var didWarnOnInvalidCallback = /* @__PURE__ */ new Set();
       Object.freeze(fakeInternalInstance);
       var classComponentUpdater = {
-        enqueueSetState: function(inst, payload, callback) {
+        enqueueSetState: function(inst, payload2, callback) {
           inst = inst._reactInternals;
           var lane = requestUpdateLane(inst), update = createUpdate(lane);
-          update.payload = payload;
+          update.payload = payload2;
           void 0 !== callback && null !== callback && (warnOnInvalidCallback(callback), update.callback = callback);
-          payload = enqueueUpdate(inst, update, lane);
-          null !== payload && (startUpdateTimerByLane(lane, "this.setState()", inst), scheduleUpdateOnFiber(payload, inst, lane), entangleTransitions(payload, inst, lane));
+          payload2 = enqueueUpdate(inst, update, lane);
+          null !== payload2 && (startUpdateTimerByLane(lane, "this.setState()", inst), scheduleUpdateOnFiber(payload2, inst, lane), entangleTransitions(payload2, inst, lane));
         },
-        enqueueReplaceState: function(inst, payload, callback) {
+        enqueueReplaceState: function(inst, payload2, callback) {
           inst = inst._reactInternals;
           var lane = requestUpdateLane(inst), update = createUpdate(lane);
           update.tag = ReplaceState;
-          update.payload = payload;
+          update.payload = payload2;
           void 0 !== callback && null !== callback && (warnOnInvalidCallback(callback), update.callback = callback);
-          payload = enqueueUpdate(inst, update, lane);
-          null !== payload && (startUpdateTimerByLane(lane, "this.replaceState()", inst), scheduleUpdateOnFiber(payload, inst, lane), entangleTransitions(payload, inst, lane));
+          payload2 = enqueueUpdate(inst, update, lane);
+          null !== payload2 && (startUpdateTimerByLane(lane, "this.replaceState()", inst), scheduleUpdateOnFiber(payload2, inst, lane), entangleTransitions(payload2, inst, lane));
         },
         enqueueForceUpdate: function(inst, callback) {
           inst = inst._reactInternals;
@@ -24304,6 +24304,16 @@ function resolveCastTarget(config) {
   return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
 }
 
+// src/cast-protocol/identifiers.ts
+function parseRoomJoinCode(value) {
+  if (!/^\d{6}$/.test(value)) throw new Error("Room join code must contain exactly six digits");
+  return value;
+}
+function parseAuthCode(value) {
+  if (!/^\d{6}$/.test(value)) throw new Error("Auth code must contain exactly six digits");
+  return value;
+}
+
 // node_modules/@noble/ciphers/utils.js
 function isBytes(a) {
   return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in a && a.BYTES_PER_ELEMENT === 1;
@@ -25392,7 +25402,6 @@ function castAesGcmDecrypt(key, iv, ciphertext, additionalData) {
 }
 
 // src/cast-protocol/secure.ts
-var MAX_CRYPTO_FAILURES = 8;
 var PROTOCOL_VERSION = 2;
 function destroyDirectionalKeys(keys) {
   if (!keys) return;
@@ -25439,7 +25448,7 @@ function canonicalTranscript(input) {
     PROTOCOL_VERSION,
     "sender",
     "receiver",
-    input.roomId,
+    input.sessionIdentity,
     input.generation,
     input.challenge,
     input.challengeCount,
@@ -25687,58 +25696,97 @@ function parseCastRelayUrl(value, kind) {
   if (kind === "http" && url.pathname !== "/" && url.pathname !== "") throw new TypeError("Cast relay HTTP URLs must be origins without a path.");
   return url;
 }
+function castRelayHttpUrl(value) {
+  const url = parseBoundedUrl(value);
+  if (url.protocol === "ws:") url.protocol = "http:";
+  else if (url.protocol === "wss:") url.protocol = "https:";
+  return parseCastRelayUrl(url.href, "http");
+}
 
 // src/plugins/cast-receiver/session/pairing.ts
 async function createPairingSession(baseUrl, signal, validateOrigin) {
   const base = parseCastRelayUrl(baseUrl, "http");
-  const response = await fetch(new URL("/room", base), { method: "POST", signal });
-  if (!response.ok) throw new Error(`Signaling service rejected room (${response.status})`);
+  const response = await fetch(new URL("/v1/rooms", base), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "createRoomRequest", mode: "anonymous" }), signal });
+  if (!response.ok) throw new Error(`Relay rejected room (${response.status})`);
   const value = await response.json();
-  if (!value || typeof value !== "object") throw new Error("Cast signaling service returned an invalid room");
-  const room = value;
-  if (typeof room.roomId !== "string" || !/^\d{4,}$/.test(room.roomId) || typeof room.reclaimToken !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(room.reclaimToken) || typeof room.generation !== "string" || typeof room.expiresAt !== "number" || room.expiresAt <= Date.now() || typeof room.websocketUrl !== "string") throw new Error("Cast signaling service returned an invalid room");
-  const created = room;
-  try {
-    parseCastRelayUrl(created.websocketUrl, "websocket");
-  } catch {
-    throw new Error("Cast signaling service returned an invalid room");
-  }
-  await validateOrigin(created.websocketUrl);
-  const authCode = generateAuthCode();
+  if (!validRoom(value)) throw new Error("Relay returned an invalid room");
+  const created = value;
+  const websocket = new URL("/v1/socket", base);
+  websocket.protocol = websocket.protocol === "https:" ? "wss:" : "ws:";
+  await validateOrigin(websocket.href);
+  const authCode = parseAuthCode(generateAuthCode());
+  const roomJoinCode = parseRoomJoinCode(created.roomJoinCode);
   return {
-    options: {
-      relayUrl: created.websocketUrl,
-      roomCode: created.roomId,
-      authCode,
-      generation: created.generation,
-      reclaimToken: created.reclaimToken
-    },
-    roomCode: `${created.roomId}${authCode}`,
+    options: { mode: "pairing", relayUrl: websocket.href, roomJoinCode, authCode, generation: created.generation, attachmentTicket: created.receiverAttachmentTicket, ownerCapability: created.ownerCapability },
+    roomId: created.roomId,
+    ownerCapability: created.ownerCapability,
+    roomJoinCode,
     authCode,
     generation: created.generation,
-    expiresAt: created.expiresAt,
-    async renew() {
-      const renewal = await fetch(new URL(`/room/${created.roomId}`, base), {
-        method: "POST",
-        headers: { authorization: `Bearer ${created.reclaimToken}` },
-        signal
-      });
-      if (!renewal.ok) throw new Error(`Signaling renewal failed (${renewal.status})`);
-      const value2 = await renewal.json();
-      if (!value2 || typeof value2 !== "object" || !("expiresAt" in value2) || typeof value2.expiresAt !== "number" || value2.expiresAt <= Date.now()) {
-        throw new Error("Signaling renewal returned invalid expiry");
-      }
-      created.expiresAt = value2.expiresAt;
-      return created.expiresAt;
+    expiresAt: Date.parse(created.expiresAt),
+    renew() {
+      return Promise.reject(new Error("Anonymous relay rooms cannot be renewed"));
     },
     async close() {
-      const cleanup = await fetch(new URL(`/room/${created.roomId}`, base), {
-        method: "DELETE",
-        headers: { authorization: `Bearer ${created.reclaimToken}` }
-      });
-      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Signaling cleanup failed (${cleanup.status})`);
+      const cleanup = await fetch(new URL(`/v1/rooms/${created.roomId}`, base), { method: "DELETE", headers: { authorization: `DashRoom ${created.ownerCapability}` } });
+      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Relay cleanup failed (${cleanup.status})`);
     }
   };
+}
+function validRoom(value) {
+  if (!value || typeof value !== "object") return false;
+  const room = value;
+  return room.kind === "anonymousRoomView" && typeof room.roomId === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.roomId) && typeof room.roomJoinCode === "string" && /^\d{6}$/.test(room.roomJoinCode) && typeof room.generation === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.generation) && typeof room.receiverAttachmentTicket === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.receiverAttachmentTicket) && typeof room.ownerCapability === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.ownerCapability) && typeof room.expiresAt === "string" && Date.parse(room.expiresAt) > Date.now();
+}
+
+// src/plugins/cast-receiver/session/resume-lifecycle.ts
+async function provisionReceiverResume(relayUrl, room, peer, store, signal) {
+  const base = castRelayHttpUrl(relayUrl);
+  const response = await fetch(new URL("/v1/resume/provision", base), {
+    method: "POST",
+    headers: headers(room),
+    body: JSON.stringify({ kind: "provisionResumeRequest", roomId: room.roomId, bindingId: peer.bindingId, expiresAt: peer.expiresAt }),
+    signal
+  });
+  if (!response.ok) throw new Error(`Relay resume provisioning failed (${response.status})`);
+  let rollbackPromise;
+  const rollback = () => rollbackPromise ?? (rollbackPromise = revoke(base, room, peer.bindingId));
+  let expiresAt;
+  try {
+    expiresAt = parseProvisioned(await response.json(), peer);
+  } catch (error) {
+    await rollback();
+    throw error;
+  }
+  const binding = {
+    bindingId: peer.bindingId,
+    resumePassword: peer.resumePassword,
+    roomId: room.roomId,
+    ownerCapability: room.ownerCapability,
+    expiresAt
+  };
+  const previous = await store.get();
+  try {
+    await store.replace([...previous.filter((item) => item.bindingId !== peer.bindingId), binding]);
+  } catch (error) {
+    await store.replace(previous).catch(() => void 0);
+    await rollback();
+    throw error;
+  }
+  return { binding, previous, rollback };
+}
+function parseProvisioned(value, requested) {
+  if (!value || typeof value !== "object") throw new Error("Relay returned an invalid resume binding");
+  const record2 = value;
+  const expiresAt = typeof record2.expiresAt === "string" ? Date.parse(record2.expiresAt) : Number.NaN;
+  if (record2.bindingId !== requested.bindingId || !Number.isSafeInteger(expiresAt) || expiresAt <= Date.now() || expiresAt > requested.expiresAt) throw new Error("Relay returned an invalid resume binding");
+  return expiresAt;
+}
+function headers(room) {
+  return { authorization: `DashRoom ${room.ownerCapability}`, "content-type": "application/json" };
+}
+async function revoke(base, room, bindingId) {
+  await fetch(new URL("/v1/resume/revoke", base), { method: "POST", headers: headers(room), body: JSON.stringify({ kind: "revokeResumeRequest", bindingId }) }).catch(() => void 0);
 }
 
 // src/core/cast/setup/receiver-client.ts
@@ -25749,46 +25797,26 @@ var CastResumeLookupError = class extends Error {
     this.name = "CastResumeLookupError";
   }
 };
-async function resumeLookup(relayUrl, bindingId, signal) {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId)) throw new CastResumeLookupError("Invalid Cast resume binding", "invalid");
-  const base = parseCastRelayUrl(relayUrl, "http");
-  if (!base.pathname.endsWith("/")) base.pathname += "/";
-  let response;
-  try {
-    response = await fetch(new URL(`resume/${bindingId}`, base), { method: "POST", ...signal ? { signal } : {} });
-  } catch (error) {
-    if (signal == null ? void 0 : signal.aborted) throw error;
-    throw new CastResumeLookupError(error instanceof Error ? error.message : "Cast resume lookup failed", "transient");
-  }
-  if (response.status === 404 || response.status === 410) throw new CastResumeLookupError("Cast resume binding is unavailable", "not-found");
-  if (!response.ok) throw new CastResumeLookupError(`Cast relay rejected resume (${response.status})`, "rejected");
-  let value;
-  try {
-    value = await response.json();
-  } catch {
-    throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
-  }
-  if (!value || typeof value !== "object") throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
-  const room = value;
-  if (typeof room.websocketUrl !== "string" || typeof room.generation !== "string" || !/^[A-Za-z0-9_-]{16,64}$/.test(room.generation) || typeof room.expiresAt !== "number" || room.expiresAt <= Date.now()) throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
-  try {
-    parseCastRelayUrl(room.websocketUrl, "websocket");
-  } catch {
-    throw new CastResumeLookupError("Cast relay returned an invalid resume room", "rejected");
-  }
-  return room;
+async function createResumeSession(relayUrl, bindingId, resumePassword, ownerCapability, signal) {
+  if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId) || !/^[A-Za-z0-9_-]{43}$/.test(ownerCapability) || resumePassword.length !== 32) throw new CastResumeLookupError("Stored Cast resume credentials are invalid", "invalid");
+  const base = castRelayHttpUrl(relayUrl);
+  const response = await fetch(new URL("/v1/resume/reconnect", base), { method: "POST", headers: { authorization: `DashRoom ${ownerCapability}`, "content-type": "application/json" }, body: JSON.stringify({ kind: "reconnectResumeRequest", bindingId }), ...signal ? { signal } : {} });
+  if (!response.ok) throw resumeError(response.status);
+  const value = await response.json();
+  if (!validResumeClaim(value, bindingId)) throw new CastResumeLookupError("Cast relay returned an invalid resume reconnect", "invalid");
+  const websocket = new URL("/v1/socket", base);
+  websocket.protocol = websocket.protocol === "https:" ? "wss:" : "ws:";
+  return { mode: "resume", relayUrl: websocket.href, attachmentTicket: value.ticket, generation: value.generation, resumeBindingId: bindingId, resumePassword };
 }
-async function createResumeSession(relayUrl, bindingId, resumePassword, signal) {
-  if (resumePassword.length !== 32) throw new Error("Invalid Cast resume password");
-  const room = await resumeLookup(relayUrl, bindingId, signal);
-  return {
-    relayUrl: room.websocketUrl,
-    roomCode: bindingId,
-    authCode: "",
-    generation: room.generation,
-    resumeBindingId: bindingId,
-    resumePassword
-  };
+function validResumeClaim(value, bindingId) {
+  if (!value || typeof value !== "object") return false;
+  const claim = value;
+  return claim.bindingId === bindingId && typeof claim.ticket === "string" && /^[A-Za-z0-9_-]{43}$/.test(claim.ticket) && typeof claim.generation === "string" && /^[A-Za-z0-9_-]{43}$/.test(claim.generation) && typeof claim.expiresAt === "string" && Date.parse(claim.expiresAt) > Date.now();
+}
+function resumeError(status) {
+  if (status === 404) return new CastResumeLookupError("Cast resume binding was not found", "not-found");
+  if (status === 400 || status === 403) return new CastResumeLookupError("Cast resume claim was rejected", "rejected");
+  return new CastResumeLookupError(`Cast resume lookup failed (${status})`, "transient");
 }
 
 // src/core/cast/setup/resume-binding.ts
@@ -25869,152 +25897,26 @@ function ownsActiveStream(currentEpoch, trackEpoch, currentStream, trackStream) 
   return trackEpoch === currentEpoch && currentStream === trackStream;
 }
 
-// src/core/cast/protocol/signaling.ts
-var exact2 = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
-var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
-var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
-function parseDescription(value, type) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  if (!exact2(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
-  return { type, sdp: candidate.sdp };
-}
-function parseIceCandidate(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  const keys = Object.keys(candidate);
-  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
-  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
-  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
-  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
-  return candidate;
-}
-function sendWire(socket, value) {
-  const text = JSON.stringify(value);
-  if (text.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
-  socket.send(text);
-}
-function parseWire(data) {
-  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES) return null;
-  let value;
-  try {
-    value = JSON.parse(data);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || !("type" in value)) return null;
-  const candidate = value;
-  if (candidate.type === "hello" && exact2(candidate, ["type", "roomId", "generation", "role"]) && typeof candidate.roomId === "string" && /^\d{4,9}$/.test(candidate.roomId) && typeof candidate.generation === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(candidate.generation) && (candidate.role === "sender" || candidate.role === "receiver")) return candidate;
-  if (candidate.type === "receiver-ready" && exact2(candidate, ["type"])) return candidate;
-  if ((candidate.type === "burn" || candidate.type === "recycle") && exact2(candidate, ["type", "reclaimToken"]) && typeof candidate.reclaimToken === "string" && /^[A-Za-z0-9_-]{43}$/.test(candidate.reclaimToken)) return candidate;
-  if (candidate.type === "challenge-request" && exact2(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) return candidate;
-  if (candidate.type === "challenge" && exact2(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) return candidate;
-  if (candidate.type === "prover" && exact2(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) return candidate;
-  if (candidate.type === "verifier" && exact2(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) return candidate;
-  if (candidate.type === "confirm" && exact2(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) return candidate;
-  if (candidate.type === "signal" && exact2(candidate, ["type", "signalType", "sequence", "ciphertext"]) && (candidate.signalType === "offer" || candidate.signalType === "answer" || candidate.signalType === "ice") && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && candidate.ciphertext.length <= MAX_CAST_MESSAGE_BYTES && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) return candidate;
-  return null;
-}
-var EncryptedSignaling = class {
-  constructor(socket, keys, role) {
-    this.socket = socket;
-    this.keys = keys;
-    this.role = role;
-  }
-  sent = 1;
-  received = 0;
-  sendQueue = Promise.resolve();
-  receiveQueue = Promise.resolve();
-  applyQueue = Promise.resolve();
-  closed = false;
-  close() {
-    if (this.closed) return;
-    this.closed = true;
-    destroyDirectionalKeys(this.keys);
-  }
-  send(signal) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.sendQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      const type = signal.type;
-      const payload = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
-      const sequence = this.sent;
-      const frame = await encryptSignal(this.keys.send, sequence, payload, type, this.role);
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
-      this.sent = sequence + 1;
-    });
-    this.sendQueue = pending.catch(() => void 0);
-    return pending;
-  }
-  receive(value) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.receiveQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      const remote = this.role === "sender" ? "receiver" : "sender";
-      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      this.received = opened.sequence;
-      if (value.signalType === "ice") {
-        const candidate = parseIceCandidate(opened.value);
-        if (!candidate) throw new Error("Invalid Cast ICE candidate");
-        return { type: "ice", candidate };
-      }
-      if (value.signalType === "offer") {
-        const offer = opened.value;
-        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
-        const metadata = offer;
-        const description2 = exact2(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
-        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
-        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
-      }
-      const description = parseDescription(opened.value, "answer");
-      if (!description) throw new Error("Invalid Cast answer");
-      return { type: "answer", description };
-    });
-    this.receiveQueue = pending.then(() => void 0, () => void 0);
-    return pending;
-  }
-  apply(operation) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.applyQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      await operation();
-    });
-    this.applyQueue = pending.catch(() => void 0);
-    return pending;
-  }
-};
-
 // src/core/cast/session/transport/channel-connection.ts
 function requiredOptions(options) {
-  var _a;
-  const resume = options.resumePassword !== void 0 || options.resumeBindingId !== void 0;
-  if (!options.generation || options.generation.length > 128 || (resume ? ((_a = options.resumePassword) == null ? void 0 : _a.length) !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId ?? "") : !options.authCode || !/^\d{6}$/.test(options.authCode))) {
-    throw new Error("Secure cast credentials are required");
-  }
-  if (options.reclaimToken !== void 0 && !/^[A-Za-z0-9_-]{43}$/.test(options.reclaimToken)) {
-    throw new Error("Invalid cast reclaim credential");
-  }
-  return { ...options, authCode: options.authCode ?? "", generation: options.generation };
+  if (!options.generation || options.generation.length > 128 || !/^[A-Za-z0-9_-]{43}$/.test(options.attachmentTicket)) throw new Error("Secure cast credentials are required");
+  if (options.mode === "pairing") {
+    if (!/^\d{6}$/.test(options.roomJoinCode)) throw new Error("Invalid room join code");
+    if (!/^\d{6}$/.test(options.authCode)) throw new Error("Invalid auth code");
+  } else if (options.resumePassword.length !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId)) throw new Error("Invalid resume credentials");
+  return options;
 }
-function socketFor(options, role, onOpen, prepare) {
-  const socket = new WebSocket(options.relayUrl);
+function socketFor(options, _role, onOpen, prepare) {
+  const protocol = `dash-relay-v1.ticket.${options.attachmentTicket}`;
+  const socket = new WebSocket(options.relayUrl, protocol);
   prepare == null ? void 0 : prepare(socket);
   socket.onopen = () => {
-    sendWire(socket, { type: "hello", roomId: options.roomCode, generation: options.generation, role });
     onOpen == null ? void 0 : onOpen(socket);
   };
   return socket;
 }
-function peerFor(options) {
-  return new RTCPeerConnection(options.turnUrl ? {
-    iceServers: [{
-      urls: options.turnUrl,
-      ...options.turnUsername ? { username: options.turnUsername } : {},
-      ...options.turnCredential ? { credential: options.turnCredential } : {}
-    }]
-  } : {});
+function peerFor(_options) {
+  return new RTCPeerConnection();
 }
 async function applySignal(peer, secure, signal) {
   if (signal.type === "ice") {
@@ -26373,9 +26275,9 @@ var ReceiverHandshake = class {
     delete this.verifier;
   }
   createVerifier() {
-    const registration = this.identity.resumePassword ? this.spake.registerResume(this.identity.resumePassword) : this.spake.register(this.identity.authCode);
+    const registration = this.identity.mode === "resume" ? this.spake.registerResume(this.identity.resumePassword) : this.spake.register(this.identity.authCode);
     const w0 = registration.w0.bytes();
-    const context = this.identity.resumePassword ? this.spake.resumeContext(this.identity.resumeBindingId ?? "", this.identity.generation) : this.spake.context(this.identity.generation);
+    const context = this.identity.mode === "resume" ? this.spake.resumeContext(this.identity.resumeBindingId, this.identity.generation) : this.spake.context(this.identity.generation);
     try {
       return this.spake.verifier(context, w0, registration.registration);
     } finally {
@@ -26398,12 +26300,13 @@ var ReceiverHandshake = class {
     const request = this.request;
     const challenge = this.challenge;
     const verifier = this.verifier;
-    if (!request || !challenge || !verifier || value.challenge !== challenge.challenge || value.share !== request.share || value.nonce !== request.nonce || challenge.expiresAt <= Date.now() || !await verifyProof(decode(value.challenge), this.identity.resumePassword ? this.spake.resumeContext(this.identity.resumeBindingId ?? "", this.identity.generation) : this.spake.context(this.identity.generation), decode(value.share), value.proof, challenge.difficulty) || this.request !== request || this.challenge !== challenge || this.verifier !== verifier || challenge.expiresAt <= Date.now()) {
+    if (!request || !challenge || !verifier || value.challenge !== challenge.challenge || value.share !== request.share || value.nonce !== request.nonce || challenge.expiresAt <= Date.now() || !await verifyProof(decode(value.challenge), this.identity.mode === "resume" ? this.spake.resumeContext(this.identity.resumeBindingId, this.identity.generation) : this.spake.context(this.identity.generation), decode(value.share), value.proof, challenge.difficulty) || this.request !== request || this.challenge !== challenge || this.verifier !== verifier || challenge.expiresAt <= Date.now()) {
       throw new Error("Invalid cast proof");
     }
     const processed = verifier.process(decode(value.share));
+    const transcriptIdentity = this.identity.mode === "pairing" ? this.identity.roomJoinCode : this.identity.resumeBindingId;
     this.transcript = canonicalTranscript({
-      roomId: this.identity.roomCode,
+      sessionIdentity: transcriptIdentity,
       generation: this.identity.generation,
       challenge: challenge.challenge,
       challengeCount: challenge.count,
@@ -26421,6 +26324,150 @@ var ReceiverHandshake = class {
     const shared = secret.bytes();
     secret.destroy();
     return complete(shared, this.transcript, "receiver");
+  }
+};
+
+// src/core/cast/protocol/signaling.ts
+var socketSequences = /* @__PURE__ */ new WeakMap();
+var exact2 = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
+var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
+var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
+function parseDescription(value, type) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value;
+  if (!exact2(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
+  return { type, sdp: candidate.sdp };
+}
+function parseIceCandidate(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value;
+  const keys = Object.keys(candidate);
+  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
+  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
+  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
+  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
+  return candidate;
+}
+function sendWire(socket, value) {
+  const state = socketSequences.get(socket) ?? { sent: 0, received: 0 };
+  const inner = JSON.stringify(value);
+  if (inner.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
+  const type = value.type === "signal" ? "signal" : value.type === "receiver-ready" ? "resume" : "pairing";
+  socket.send(JSON.stringify({ kind: "wsFrame", v: 1, seq: state.sent, type, payload: encode(new TextEncoder().encode(inner)) }));
+  state.sent += 1;
+  socketSequences.set(socket, state);
+}
+function parseWire(data, socket) {
+  return parseWireFrame(data, socket);
+}
+function parseWireFrame(data, socket) {
+  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES * 2) return null;
+  let outer;
+  try {
+    outer = JSON.parse(data);
+  } catch {
+    return null;
+  }
+  if (!outer || typeof outer !== "object") return null;
+  const frame = outer;
+  if (!exact2(frame, ["kind", "v", "seq", "type", "payload"]) || frame.kind !== "wsFrame" || frame.v !== 1 || !Number.isSafeInteger(frame.seq) || !["pairing", "signal", "resume"].includes(String(frame.type)) || typeof frame.payload !== "string" || !/^[A-Za-z0-9_-]+$/.test(frame.payload)) return null;
+  let value;
+  try {
+    const bytes = decode(frame.payload);
+    if (encode(bytes) !== frame.payload) return null;
+    value = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  } catch {
+    return null;
+  }
+  if (!value || typeof value !== "object" || !("type" in value)) return null;
+  const candidate = value;
+  const innerType = candidate.type === "signal" ? "signal" : candidate.type === "receiver-ready" ? "resume" : "pairing";
+  if (frame.type !== innerType) return null;
+  let parsed = null;
+  if (candidate.type === "receiver-ready" && exact2(candidate, ["type"])) parsed = candidate;
+  else if (candidate.type === "challenge-request" && exact2(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) parsed = candidate;
+  else if (candidate.type === "challenge" && exact2(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) parsed = candidate;
+  else if (candidate.type === "prover" && exact2(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) parsed = candidate;
+  else if (candidate.type === "verifier" && exact2(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) parsed = candidate;
+  else if (candidate.type === "confirm" && exact2(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) parsed = candidate;
+  else if (candidate.type === "signal" && exact2(candidate, ["type", "signalType", "sequence", "ciphertext"]) && ["offer", "answer", "ice"].includes(String(candidate.signalType)) && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) parsed = candidate;
+  if (!parsed) return null;
+  if (socket) {
+    const state = socketSequences.get(socket) ?? { sent: 0, received: 0 };
+    if (frame.seq !== state.received) return null;
+    state.received += 1;
+    socketSequences.set(socket, state);
+  }
+  return parsed;
+}
+var EncryptedSignaling = class {
+  constructor(socket, keys, role) {
+    this.socket = socket;
+    this.keys = keys;
+    this.role = role;
+  }
+  sent = 1;
+  received = 0;
+  sendQueue = Promise.resolve();
+  receiveQueue = Promise.resolve();
+  applyQueue = Promise.resolve();
+  closed = false;
+  close() {
+    if (this.closed) return;
+    this.closed = true;
+    destroyDirectionalKeys(this.keys);
+  }
+  send(signal) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.sendQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      const type = signal.type;
+      const payload2 = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
+      const sequence = this.sent;
+      const frame = await encryptSignal(this.keys.send, sequence, payload2, type, this.role);
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
+      this.sent = sequence + 1;
+    });
+    this.sendQueue = pending.catch(() => void 0);
+    return pending;
+  }
+  receive(value) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.receiveQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      const remote = this.role === "sender" ? "receiver" : "sender";
+      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      this.received = opened.sequence;
+      if (value.signalType === "ice") {
+        const candidate = parseIceCandidate(opened.value);
+        if (!candidate) throw new Error("Invalid Cast ICE candidate");
+        return { type: "ice", candidate };
+      }
+      if (value.signalType === "offer") {
+        const offer = opened.value;
+        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
+        const metadata = offer;
+        const description2 = exact2(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
+        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
+        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
+      }
+      const description = parseDescription(opened.value, "answer");
+      if (!description) throw new Error("Invalid Cast answer");
+      return { type: "answer", description };
+    });
+    this.receiveQueue = pending.then(() => void 0, () => void 0);
+    return pending;
+  }
+  apply(operation) {
+    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
+    const pending = this.applyQueue.then(async () => {
+      if (this.closed) throw new Error("Encrypted signaling is closed");
+      await operation();
+    });
+    this.applyQueue = pending.catch(() => void 0);
+    return pending;
   }
 };
 
@@ -26557,7 +26604,7 @@ async function handleReceiverSignalWire(wire, signaling, peer, ctx) {
 
 // src/core/cast/session/receiver/receiver-wire-handler.ts
 async function processReceiverWireMessage(data, ctx) {
-  const wire = parseWire(data);
+  const wire = parseWire(data, ctx.active);
   if (!wire) throw new Error("Invalid cast message");
   const handshake = ctx.getHandshake();
   if (wire.type === "challenge-request") {
@@ -26589,7 +26636,7 @@ async function processReceiverWireMessage(data, ctx) {
       keys.receive.destroy();
       throw error;
     }
-    if (ctx.options.resumePassword) delete ctx.state.sas;
+    if (ctx.options.mode === "resume") delete ctx.state.sas;
     else ctx.state.sas = activePairing.sas;
     peer.onicecandidate = ({ candidate }) => {
       if (candidate) void signaling.send({ type: "ice", candidate: candidate.toJSON() }).catch(ctx.fail);
@@ -26626,7 +26673,7 @@ async function processReceiverWireMessage(data, ctx) {
           var _a;
           ctx.state.peerCount = 1;
           ctx.state.status = "paired";
-          const isTrusted = Boolean(ctx.options.resumePassword);
+          const isTrusted = ctx.options.mode === "resume";
           ctx.setTrusted(isTrusted);
           if (isTrusted) {
             ctx.state.sasTrusted = true;
@@ -26717,14 +26764,13 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
   let pendingStream = null;
   const transceiverEpochs = /* @__PURE__ */ new WeakMap();
   let closed = false;
-  let failures = 0;
   let socketAttempts = 0;
   let socket;
   let signaling;
   let pairing;
   let applyingOfferEpoch;
   let activeHandshake;
-  let trusted = Boolean(options.resumePassword);
+  let trusted = options.mode === "resume";
   const listening = Promise.withResolvers();
   const emit = () => {
     if (!closed) onState({ ...state });
@@ -26737,7 +26783,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
     state.status = "disconnected";
     emit();
     signaling == null ? void 0 : signaling.close();
-    if (!options.resumePassword) socket.close();
+    if (options.mode !== "resume") socket.close();
     peer == null ? void 0 : peer.close();
     peer = void 0;
     channel = void 0;
@@ -26750,13 +26796,9 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
     signaling == null ? void 0 : signaling.close();
     signaling = void 0;
     pairing = void 0;
-    if (error instanceof CastAuthenticationError) failures += 1;
     state.status = "error";
-    state.error = error instanceof Error ? error.message : String(error);
+    state.error = error instanceof CastAuthenticationError ? "Cast authentication failed" : error instanceof Error ? error.message : String(error);
     emit();
-    if (failures >= MAX_CRYPTO_FAILURES && options.reclaimToken && socket.readyState === WebSocket.OPEN) {
-      sendWire(socket, { type: "burn", reclaimToken: options.reclaimToken });
-    }
   };
   const initialPending = [];
   let bindReady;
@@ -26774,7 +26816,6 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
       activeHandshake = handshake;
       let count = 0;
       listening.resolve();
-      sendWire(active, { type: "receiver-ready" });
       const wireCtx = {
         active,
         options,
@@ -26830,7 +26871,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
       active.onclose = (event) => {
         handshake.destroy();
         if (activeHandshake === handshake) activeHandshake = void 0;
-        if (!closed && options.resumePassword && state.peerCount === 0 && event.code === 1008 && socketAttempts < 7) {
+        if (!closed && options.mode === "resume" && state.peerCount === 0 && event.code === 1008 && socketAttempts < 7) {
           const delay = 100 * 2 ** socketAttempts++;
           window.setTimeout(() => {
             if (closed) return;
@@ -26886,7 +26927,14 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
       closeReceiver(tearDownContext);
     },
     confirmSas(accepted) {
-      if (!accepted) rejectReceiverSas(tearDownContext);
+      if (accepted && (channel == null ? void 0 : channel.readyState) === "open") {
+        channel.send(JSON.stringify({ type: "sas-ack", generation: options.generation }));
+        trusted = true;
+        state.sasTrusted = true;
+        delete state.sas;
+        onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
+        emit();
+      } else rejectReceiverSas(tearDownContext);
     },
     revokePresenter(epoch) {
       revokePresenterHelper(trusted, channel, epoch);
@@ -26921,7 +26969,8 @@ function createScreenSession(context) {
     stream: null,
     peerCount: 0,
     error: null,
-    roomCode: "",
+    roomJoinCode: "",
+    authCode: "",
     relayUrl: config.relayUrl,
     senderUrl: config.senderUrl,
     queue: createCastQueueSnapshot(config.autoplay),
@@ -26930,15 +26979,16 @@ function createScreenSession(context) {
   };
   const listeners = /* @__PURE__ */ new Set();
   const listeningBindings = /* @__PURE__ */ new Set();
+  const pendingBindingInstalls = /* @__PURE__ */ new Map();
   const resumeEntries = /* @__PURE__ */ new Map();
+  const dormantBindings = /* @__PURE__ */ new Map();
   const connected = /* @__PURE__ */ new Set();
   const abort = new AbortController();
   const pendingConnectionEvents = /* @__PURE__ */ new Map();
   let pairing, livePresenter, sasOwner, renewal, sasTimer, disposed = false;
   let authoritativeEpoch = 0;
   let lifecycle = Promise.resolve();
-  let observedDismissSas;
-  let dismissalInitialized = false;
+  let observedDecisionVersion = 0;
   const publish = (patch) => {
     if ("sas" in patch && patch.sas === void 0) delete state.sas;
     if ("sasTrusted" in patch && patch.sasTrusted === void 0) delete state.sasTrusted;
@@ -26951,7 +27001,8 @@ function createScreenSession(context) {
       presentationEpoch: state.presentationEpoch,
       peerCount: state.peerCount,
       error: state.error,
-      roomCode: state.roomCode,
+      roomJoinCode: state.roomJoinCode,
+      authCode: state.authCode,
       relayUrl: state.relayUrl,
       senderUrl: state.senderUrl,
       pairingReveal: state.pairingReveal,
@@ -26968,20 +27019,15 @@ function createScreenSession(context) {
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
     void context.getCastState().then((hostState) => {
       var _a;
-      const dismissed = hostState == null ? void 0 : hostState.dismissSas;
-      if (!dismissalInitialized) {
-        dismissalInitialized = true;
-        observedDismissSas = dismissed;
-        return;
-      }
-      if (dismissed === void 0 || dismissed === observedDismissSas) return;
-      observedDismissSas = dismissed;
-      if (!sasOwner) return;
+      if (disposed || !sasOwner || !(hostState == null ? void 0 : hostState.sasDecision) || typeof hostState.sasDecision !== "object") return;
+      const action = hostState.sasDecision;
+      if (action.sas !== state.sas || !Number.isSafeInteger(action.version) || Number(action.version) <= observedDecisionVersion || action.decision !== "accept" && action.decision !== "dismiss") return;
+      observedDecisionVersion = Number(action.version);
       const entry = sasOwner;
       sasOwner = void 0;
       clearTimeout(sasTimer);
-      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(false);
-      entry.trusted = false;
+      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(action.decision === "accept");
+      if (action.decision === "dismiss") entry.trusted = false;
       delete state.sas;
       delete state.sasTrusted;
       publish({});
@@ -27053,9 +27099,9 @@ function createScreenSession(context) {
           (_a = livePresenter.receiver) == null ? void 0 : _a.revokePresenter(livePresenter.state.presentationEpoch);
         }
         livePresenter = entry;
-        publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomCode: state.roomCode });
+        publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
       } else if (livePresenter === entry && (live || command) && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
-    } else publish({ peerCount: connected.size, roomCode: state.roomCode });
+    } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
       sasOwner = entry;
       delete state.sasTrusted;
@@ -27104,62 +27150,63 @@ function createScreenSession(context) {
     publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size > 0 ? "paired" : "disconnected" });
     await entry.room.close();
   };
+  const startResumeBinding = async (binding) => {
+    if (listeningBindings.has(binding.bindingId)) return;
+    listeningBindings.add(binding.bindingId);
+    const listen = async () => {
+      try {
+        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), binding.ownerCapability, abort.signal);
+        const asset = await context.secureWebRtcCryptoAsset();
+        const entry = {
+          room: { options, roomJoinCode: "", authCode: "", expiresAt: binding.expiresAt, close: () => Promise.resolve() },
+          state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
+          connected: false,
+          trusted: true,
+          resumeBinding: binding,
+          revokedEpoch: 0,
+          epochOffset: authoritativeEpoch
+        };
+        resumeEntries.set(binding.bindingId, entry);
+        entry.receiver = createPluginReceiver(options, asset, (next) => {
+          var _a, _b, _c;
+          entry.state = next;
+          if (next.peerCount > 0 && !entry.connected) {
+            entry.connected = true;
+            connected.add(entry);
+            (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
+          }
+          if (next.peerCount === 0 && entry.connected) {
+            entry.connected = false;
+            connected.delete(entry);
+            resumeEntries.delete(binding.bindingId);
+            listeningBindings.delete(binding.bindingId);
+            if (sasOwner === entry) {
+              sasOwner = void 0;
+              clearTimeout(sasTimer);
+            }
+            (_c = entry.receiver) == null ? void 0 : _c.close();
+            publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
+            if (!disposed) enqueue(listen);
+            return;
+          }
+          aggregate(entry);
+        }, void 0, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : void 0, authenticatedMessage(entry), ({ trusted }) => {
+          entry.trusted = trusted;
+          if (trusted) {
+            delete state.sas;
+            publish({ sasTrusted: true });
+          }
+        });
+        await entry.receiver.listening;
+      } catch {
+        listeningBindings.delete(binding.bindingId);
+      }
+    };
+    await listen();
+  };
   const resume = async () => {
     const bindings = context.castResume ? await context.castResume.get() : [];
-    await Promise.all(bindings.map(async (binding) => {
-      if (listeningBindings.has(binding.bindingId)) return;
-      listeningBindings.add(binding.bindingId);
-      const listen = async () => {
-        try {
-          const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
-          const asset = await context.secureWebRtcCryptoAsset();
-          const entry = {
-            room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-            state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
-            connected: false,
-            trusted: true,
-            revokedEpoch: 0,
-            epochOffset: authoritativeEpoch
-          };
-          resumeEntries.set(binding.bindingId, entry);
-          entry.receiver = createPluginReceiver(options, asset, (next) => {
-            var _a, _b, _c;
-            entry.state = next;
-            if (next.peerCount > 0 && !entry.connected) {
-              entry.connected = true;
-              connected.add(entry);
-              (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
-            }
-            if (next.peerCount === 0 && entry.connected) {
-              entry.connected = false;
-              connected.delete(entry);
-              resumeEntries.delete(binding.bindingId);
-              listeningBindings.delete(binding.bindingId);
-              if (sasOwner === entry) {
-                sasOwner = void 0;
-                clearTimeout(sasTimer);
-              }
-              (_c = entry.receiver) == null ? void 0 : _c.close();
-              publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
-              if (!disposed) enqueue(listen);
-              return;
-            }
-            aggregate(entry);
-          }, void 0, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : void 0, authenticatedMessage(entry), ({ trusted }) => {
-            entry.trusted = trusted;
-            if (trusted) {
-              delete state.sas;
-              publish({ sasTrusted: true });
-            }
-          });
-          await entry.receiver.listening;
-        } catch (error) {
-          if (!disposed && !(error instanceof DOMException && error.name === "AbortError")) enqueue(listen);
-          else listeningBindings.delete(binding.bindingId);
-        }
-      };
-      await listen();
-    }));
+    for (const binding of bindings) if (!dormantBindings.has(binding.bindingId)) void startResumeBinding(binding);
   };
   const allocate = async () => {
     if (disposed || pairing) return;
@@ -27193,72 +27240,48 @@ function createScreenSession(context) {
           clearTimeout(sasTimer);
         }
         (_c = entry.receiver) == null ? void 0 : _c.close();
-        void entry.room.close();
+        const settle = entry.bindingInstall ?? Promise.resolve();
+        void settle.then(() => {
+          const binding = entry.resumeBinding;
+          if (!binding) {
+            void entry.room.close();
+            return;
+          }
+          dormantBindings.set(binding.bindingId, binding);
+          if (connected.size === 0) {
+            const pending = [...dormantBindings.values()];
+            dormantBindings.clear();
+            pending.forEach((candidate) => void startResumeBinding(candidate));
+          }
+        }, () => {
+          void entry.room.close();
+        });
         publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
         return;
       }
       aggregate(entry);
     };
     let initialized = false;
+    const installBinding = async (binding) => {
+      await provisionReceiverResume(config.relayUrl, room, binding, context.castResume, abort.signal);
+      entry.resumeBinding = { ...binding, ownerCapability: room.ownerCapability };
+    };
     entry.receiver = createPluginReceiver(room.options, asset, (next) => {
       if (initialized) applyState(next);
       else pendingStates.push(next);
-    }, async (binding) => {
-      const receiverBinding = { bindingId: binding.bindingId, resumePassword: binding.resumePassword, expiresAt: binding.expiresAt };
-      const bindings = await context.castResume.get();
-      await context.castResume.replace([...bindings.filter((item) => item.bindingId !== binding.bindingId), receiverBinding]);
-      if (listeningBindings.has(binding.bindingId)) return;
-      listeningBindings.add(binding.bindingId);
-      try {
-        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), abort.signal);
-        if (disposed) return;
-        const resumeEntry = {
-          room: { options, roomCode: binding.bindingId, expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-          state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
-          connected: false,
-          trusted: true,
-          revokedEpoch: 0,
-          epochOffset: authoritativeEpoch
-        };
-        resumeEntries.set(binding.bindingId, resumeEntry);
-        resumeEntry.receiver = createPluginReceiver(options, asset, (next) => {
-          var _a, _b, _c;
-          resumeEntry.state = next;
-          if (next.peerCount > 0 && !resumeEntry.connected) {
-            resumeEntry.connected = true;
-            connected.add(resumeEntry);
-            (_b = (_a = resumeEntry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
-          }
-          if (next.peerCount === 0 && resumeEntry.connected) {
-            resumeEntry.connected = false;
-            connected.delete(resumeEntry);
-            resumeEntries.delete(binding.bindingId);
-            listeningBindings.delete(binding.bindingId);
-            if (sasOwner === resumeEntry) {
-              sasOwner = void 0;
-              clearTimeout(sasTimer);
-            }
-            (_c = resumeEntry.receiver) == null ? void 0 : _c.close();
-            publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
-            enqueue(resume);
-            return;
-          }
-          aggregate(resumeEntry);
-        }, void 0, (bindingId) => context.castResume.delete(bindingId), authenticatedMessage(resumeEntry), ({ trusted }) => {
-          resumeEntry.trusted = trusted;
-          if (trusted) {
-            delete state.sas;
-            publish({ sasTrusted: true });
-          }
-        });
-        await resumeEntry.receiver.listening;
-      } catch (error) {
-        listeningBindings.delete(binding.bindingId);
-        resumeEntries.delete(binding.bindingId);
-        throw error;
-      }
+    }, (binding) => {
+      const existing = pendingBindingInstalls.get(binding.bindingId);
+      if (existing) return existing;
+      const install = installBinding(binding);
+      entry.bindingInstall = install;
+      pendingBindingInstalls.set(binding.bindingId, install);
+      void install.finally(() => {
+        if (pendingBindingInstalls.get(binding.bindingId) === install) pendingBindingInstalls.delete(binding.bindingId);
+      }).catch(() => void 0);
+      return install;
     }, async (bindingId) => {
       var _a;
+      dormantBindings.delete(bindingId);
       await context.castResume.delete(bindingId);
       const resumeEntry = resumeEntries.get(bindingId);
       if (resumeEntry) {
@@ -27281,7 +27304,7 @@ function createScreenSession(context) {
     pendingStates.forEach(applyState);
     for (const event of pendingConnectionEvents.get(entry) ?? []) applyConnection(entry, room.options.generation, event);
     pendingConnectionEvents.delete(entry);
-    if (pairing === entry) publish({ roomCode: room.roomCode, error: null });
+    if (pairing === entry) publish({ roomJoinCode: room.roomJoinCode, authCode: room.authCode, error: null });
     if (pairing === entry) {
       clearTimeout(renewal);
       renewal = setTimeout(() => enqueue(async () => {
@@ -27323,14 +27346,17 @@ function createScreenSession(context) {
       clearTimeout(renewal);
       clearTimeout(sasTimer);
       const entries = /* @__PURE__ */ new Set([...resumeEntries.values(), ...connected, ...pairing ? [pairing] : []]);
-      for (const entry of entries) (_a = entry.receiver) == null ? void 0 : _a.close();
+      for (const entry of entries) {
+        (_a = entry.receiver) == null ? void 0 : _a.close();
+        if (!entry.resumeBinding) void entry.room.close();
+      }
       resumeEntries.clear();
+      dormantBindings.clear();
       listeningBindings.clear();
       connected.clear();
       pairing = void 0;
       livePresenter = void 0;
       sasOwner = void 0;
-      lifecycle = lifecycle.then(() => Promise.all([...entries].map((entry) => entry.room.close()))).then(() => void 0).catch(report);
       listeners.clear();
     }
   };
@@ -27353,7 +27379,8 @@ function CastWidget({ context }) {
     stream: null,
     peerCount: 0,
     error: null,
-    roomCode: "",
+    roomJoinCode: "",
+    authCode: "",
     relayUrl: config.relayUrl,
     senderUrl: config.senderUrl,
     queue: createCastQueueSnapshot(config.autoplay),
@@ -28007,7 +28034,13 @@ var ChoiceCodec = class {
       const alternative2 = this.extensionAlternatives[index2];
       if (alternative2 === void 0) throw new Error(`Extension index ${index2} out of range for CHOICE`);
       const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
-      return { key: alternative2.name, value: alternative2.codec.decode(BitBuffer.from(bytes)) };
+      const inner = BitBuffer.from(bytes);
+      const value = alternative2.codec.decode(inner);
+      if (inner.remaining > 7) throw new Error("Trailing CHOICE open type content");
+      while (inner.remaining > 0) {
+        if (inner.readBit() !== 0) throw new Error("Nonzero CHOICE open type padding");
+      }
+      return { key: alternative2.name, value };
     }
     const index = this.alternatives.length > 1 ? decodeConstrainedWholeNumber(buffer, 0, this.alternatives.length - 1) : 0;
     const alternative = this.alternatives[index];
@@ -28195,18 +28228,22 @@ var payloadV0 = new SequenceCodec({ fields: [
   { name: "authCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
   { name: "relay", codec: relayLocation }
 ] });
+var payloadV1 = new SequenceCodec({ fields: [
+  { name: "roomJoinCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
+  { name: "authCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
+  { name: "relay", codec: relayLocation }
+] });
 var pairingInfoCodec = new ChoiceCodec({
   alternatives: [{ name: "v0", codec: payloadV0 }],
-  extensionAlternatives: []
+  extensionAlternatives: [{ name: "v1", codec: payloadV1 }]
 });
-function encodePairingInfo(value) {
+function encodePairingInfoV1(value) {
   const buffer = BitBuffer.alloc(64);
-  pairingInfoCodec.encode(buffer, { key: "v0", value });
+  pairingInfoCodec.encode(buffer, { key: "v1", value });
   return { bytes: buffer.toUint8Array(), bitLength: buffer.bitLength };
 }
 
 // src/core/cast/setup/pairing-url.ts
-var ROOM_CODE_DIGITS = 4;
 function invalid(message = "Invalid Cast pairing payload.") {
   throw new TypeError(message);
 }
@@ -28215,79 +28252,47 @@ function encodeBase64Url(bytes) {
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
-function parseCode(code) {
-  if (!/^\d{10}$/.test(code)) return invalid("Cast pairing code must contain exactly 10 digits.");
-  return { roomCode: Number(code.slice(0, ROOM_CODE_DIGITS)), authCode: Number(code.slice(ROOM_CODE_DIGITS)) };
+function validateCodes(codes) {
+  if (!/^\d{6}$/.test(codes.roomJoinCode)) return invalid("Room join code must contain exactly six digits.");
+  if (!/^\d{6}$/.test(codes.authCode)) return invalid("Auth code must contain exactly six digits.");
+  return { roomJoinCode: Number(codes.roomJoinCode), authCode: Number(codes.authCode) };
 }
 function parseOrigin(value, label) {
-  if (value.length > 2048) return invalid(`${label} URL is too long.`);
   let url;
   try {
     url = new URL(value);
   } catch {
-    return invalid(`${label} must be an HTTP or HTTPS origin.`);
+    return invalid(`Invalid ${label} URL.`);
   }
-  if (url.protocol !== "http:" && url.protocol !== "https:" || url.username || url.password || url.pathname !== "/" || url.search || url.hash) return invalid(`${label} must be an HTTP or HTTPS origin.`);
-  if (!url.hostname || url.hostname.endsWith(".")) return invalid(`${label} host is not canonical.`);
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.pathname !== "/" || url.search || url.hash) return invalid(`Invalid ${label} URL.`);
   return url;
 }
-function isIp(host) {
-  if (host.startsWith("[")) return true;
-  const parts = host.split(".");
-  return parts.length === 4 && parts.every((part) => /^\d+$/.test(part));
-}
-function labels(host) {
-  const result = host.split(".");
-  if (result.some((label) => !label || label.length > 63 || !/^[a-z0-9-]+$/.test(label) || label.startsWith("-") || label.endsWith("-"))) invalid("Invalid Cast relay DNS host.");
-  return result;
-}
 function conventionalRelay(sender) {
-  const senderLabels = labels(sender.hostname);
-  if (senderLabels[0] !== "cast") invalid("Cast sender does not have a conventional relay host.");
-  senderLabels[0] = "relay";
-  return `${sender.protocol}//${senderLabels.join(".")}${sender.port ? `:${sender.port}` : ""}`;
+  return `${sender.protocol}//relay.${sender.hostname}${sender.port ? `:${sender.port}` : ""}`;
 }
-function hostDelta(senderHost, relayHost2) {
-  if (senderHost === relayHost2) return { key: "same", value: null };
-  if (isIp(senderHost) || isIp(relayHost2)) return { key: "absolute", value: relayHost2 };
-  const sender = labels(senderHost);
-  const relay = labels(relayHost2);
+function hostDelta(sender, relay) {
+  if (sender === relay) return { key: "same", value: null };
+  const senderLabels = sender.split(".");
+  const relayLabels = relay.split(".");
   let common = 0;
-  while (common < sender.length - 1 && common < relay.length - 1 && sender[sender.length - 1 - common] === relay[relay.length - 1 - common]) common++;
-  const removeLabels = sender.length - common;
-  const addLabels = relay.slice(0, relay.length - common).join(".");
-  return common > 0 && removeLabels <= 15 && addLabels.length <= 255 ? { key: "replaceLeft", value: { removeLabels, addLabels } } : { key: "absolute", value: relayHost2 };
+  while (common < senderLabels.length && common < relayLabels.length && senderLabels.at(-1 - common) === relayLabels.at(-1 - common)) common += 1;
+  const removeLabels = senderLabels.length - common;
+  const addLabels = relayLabels.slice(0, relayLabels.length - common).join(".");
+  return common > 0 && removeLabels >= 1 && removeLabels <= 15 && addLabels.length >= 1 && addLabels.length <= 255 ? { key: "replaceLeft", value: { removeLabels, addLabels } } : { key: "absolute", value: relay };
 }
-function customPayload(code, relay, sender) {
-  return { ...code, relay: { key: "custom", value: {
-    scheme: relay.protocol.slice(0, -1),
-    host: hostDelta(sender.hostname, relay.hostname),
-    port: relay.port ? { key: "explicit", value: Number(relay.port) } : { key: "default", value: null }
-  } } };
+function payload(codes, relay, sender) {
+  if (relay.origin === conventionalRelay(sender)) return { ...codes, relay: { key: "conventional", value: null } };
+  const origin = { scheme: relay.protocol.slice(0, -1), host: hostDelta(sender.hostname, relay.hostname), port: relay.port ? { key: "explicit", value: Number(relay.port) } : { key: "default", value: null } };
+  return { ...codes, relay: { key: "custom", value: origin } };
 }
-function canonicalPayload(code, relay, sender) {
-  let conventional = false;
-  try {
-    conventional = relay.origin === conventionalRelay(sender);
-  } catch {
-  }
-  return conventional ? { ...code, relay: { key: "conventional", value: null } } : customPayload(code, relay, sender);
-}
-function encodeCastPairingPayload(roomCode, relayUrl, senderOrigin) {
+function encodeCastPairingPayload(codes, relayUrl, senderOrigin) {
   const sender = parseOrigin(senderOrigin, "Cast sender");
   const relay = parseOrigin(relayUrl, "Cast relay");
-  return encodeBase64Url(encodePairingInfo(canonicalPayload(parseCode(roomCode), relay, sender)).bytes);
+  return encodeBase64Url(encodePairingInfoV1(payload(validateCodes(codes), relay, sender)).bytes);
 }
-function createCastPairingUrl(senderUrl, relayUrl, roomCode) {
-  let sender;
-  try {
-    sender = new URL(senderUrl);
-  } catch {
-    return invalid("Invalid Cast sender URL.");
-  }
-  if (sender.protocol !== "http:" && sender.protocol !== "https:" || sender.username || sender.password || sender.search || sender.hash) return invalid("Invalid Cast sender URL.");
-  sender.pathname = "/cast";
-  sender.hash = encodeCastPairingPayload(roomCode, relayUrl, sender.origin);
+function createCastPairingUrl(senderUrl, relayUrl, codes) {
+  const sender = parseOrigin(senderUrl, "Cast sender");
+  sender.hash = encodeCastPairingPayload(codes, relayUrl, sender.origin);
   return sender.href;
 }
 
@@ -28300,7 +28305,8 @@ var INITIAL = {
   stream: null,
   peerCount: 0,
   error: null,
-  roomCode: "",
+  roomJoinCode: "",
+  authCode: "",
   relayUrl: "",
   senderUrl: "",
   pairingReveal: 0
@@ -28329,73 +28335,51 @@ function useCastPlayback(context) {
 
 // src/plugins/cast-receiver/widgets/PairingWidget.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-var EN = { title: "Cast pairing", devices: "Connected devices", sas: "Security code" };
-var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te", sas: "Sicherheitscode" };
-function senderLink(senderUrl, relayUrl, roomCode) {
-  if (!senderUrl || !relayUrl || !roomCode) return "";
-  return createCastPairingUrl(senderUrl, relayUrl, roomCode);
-}
+var EN = { title: "Cast pairing", devices: "Connected devices" };
+var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te" };
 function PairingWidget({ context }) {
   const receiver = useCastPlayback(context);
   const config = (0, import_react4.useMemo)(() => readCastConfig(context.config), [context.config]);
   const strings = context.locale.startsWith("de") ? DE : EN;
   const [defaultSenderUrl, setDefaultSenderUrl] = (0, import_react4.useState)("");
-  const roomCode = receiver.roomCode;
+  const { roomJoinCode, authCode } = receiver;
   const relayUrl = receiver.relayUrl || config.relayUrl;
   const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
-  const url = (0, import_react4.useMemo)(
-    () => senderLink(senderUrl, relayUrl, roomCode),
-    [relayUrl, roomCode, senderUrl]
-  );
+  const url = (0, import_react4.useMemo)(() => roomJoinCode && authCode && senderUrl && relayUrl ? createCastPairingUrl(senderUrl, relayUrl, { roomJoinCode, authCode }) : "", [authCode, relayUrl, roomJoinCode, senderUrl]);
   const observedReveal = (0, import_react4.useRef)(receiver.pairingReveal);
   const observedDismissal = (0, import_react4.useRef)(receiver.dismissSas);
   (0, import_react4.useEffect)(() => {
-    if (receiver.senderUrl || config.senderUrl) return;
-    void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    if (!receiver.senderUrl && !config.senderUrl) void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", String(error)));
   }, [config.senderUrl, context, receiver.senderUrl]);
   (0, import_react4.useEffect)(() => {
-    if (!receiver.dismissSas || receiver.dismissSas === observedDismissal.current || !receiver.sas) return;
-    observedDismissal.current = receiver.dismissSas;
-    void context.dismissCastSas();
+    if (receiver.dismissSas && receiver.dismissSas !== observedDismissal.current && receiver.sas) {
+      observedDismissal.current = receiver.dismissSas;
+      void context.dismissCastSas();
+    }
   }, [context, receiver]);
   (0, import_react4.useEffect)(() => {
-    if (receiver.sasTrusted !== true || receiver.pairingReveal !== 0) return;
-    void context.setPairingDetails(null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    if (receiver.sasTrusted === true && receiver.pairingReveal === 0) void context.setPairingDetails(null);
   }, [context, receiver.pairingReveal, receiver.sasTrusted]);
+  const details = (0, import_react4.useMemo)(() => url && roomJoinCode && authCode ? { roomJoinCode, authCode, url, ...receiver.sas ? { sas: receiver.sas } : {} } : null, [authCode, receiver.sas, roomJoinCode, url]);
   (0, import_react4.useEffect)(() => {
-    if (!receiver.sas || receiver.sasTrusted === true || !roomCode || !url) return;
-    void context.setPairingDetails({ code: roomCode, url, sas: receiver.sas }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
-  }, [context, receiver.sas, receiver.sasTrusted, roomCode, url]);
+    if (receiver.sas && receiver.sasTrusted !== true && details) void context.setPairingDetails(details);
+  }, [context, details, receiver.sas, receiver.sasTrusted]);
   (0, import_react4.useEffect)(() => {
-    if (receiver.pairingVisible !== false || receiver.sas) return;
-    void context.setPairingDetails(null).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    if (receiver.pairingVisible === false && !receiver.sas) void context.setPairingDetails(null);
   }, [context, receiver.pairingVisible, receiver.sas]);
   (0, import_react4.useEffect)(() => {
     const prior = observedReveal.current;
     observedReveal.current = receiver.pairingReveal;
-    if (receiver.pairingReveal <= prior || receiver.sas || !roomCode || !url) return;
-    void context.setPairingDetails({ code: roomCode, url }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
-  }, [context, receiver.pairingReveal, receiver.sas, roomCode, url]);
-  const showDetails = () => {
-    if (roomCode && url) void context.setPairingDetails({ code: roomCode, url, ...receiver.sas ? { sas: receiver.sas } : {} }).catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
-  };
+    if (receiver.pairingReveal > prior && !receiver.sas && details) void context.setPairingDetails(details);
+  }, [context, details, receiver.pairingReveal, receiver.sas]);
   const label = `${strings.title}. ${strings.devices}: ${receiver.peerCount}`;
   const connected = receiver.peerCount > 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(
-    "button",
-    {
-      type: "button",
-      className: "cast-pairing-button",
-      onClick: showDetails,
-      disabled: !roomCode,
-      "aria-label": label,
-      title: label,
-      children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `cast-pairing-status ${connected ? "cast-pairing-status-connected" : ""}`, "aria-hidden": "true" })
-      ]
-    }
-  );
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { type: "button", className: "cast-pairing-button", onClick: () => {
+    if (details) void context.setPairingDetails(details);
+  }, disabled: !details, "aria-label": label, title: label, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `cast-pairing-status ${connected ? "cast-pairing-status-connected" : ""}`, "aria-hidden": "true" })
+  ] });
 }
 
 // src/plugins/cast-receiver/styles.ts

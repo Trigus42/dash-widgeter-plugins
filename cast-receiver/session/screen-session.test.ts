@@ -1,33 +1,34 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 
-const mocks = vi.hoisted(() => ({ createPairingSession: vi.fn(), createResumeSession: vi.fn(), createPluginReceiver: vi.fn() }));
+type ProvisionResume = (relayUrl: string, room: { roomId: string; ownerCapability: string }, peer: { bindingId: string; resumePassword: string; expiresAt: number }, store: { replace(bindings: Array<{ bindingId: string; resumePassword: string; roomId: string; ownerCapability: string; expiresAt: number }>): Promise<void> }) => Promise<void>;
+const mocks = vi.hoisted(() => ({ createPairingSession: vi.fn(), createResumeSession: vi.fn(), createPluginReceiver: vi.fn(), provisionReceiverResume: vi.fn<ProvisionResume>() }));
 vi.mock('./pairing', () => ({ createPairingSession: mocks.createPairingSession }));
 vi.mock('@/core/cast/setup/receiver-client', () => ({ createResumeSession: mocks.createResumeSession }));
+vi.mock('./resume-lifecycle', () => ({ provisionReceiverResume: mocks.provisionReceiverResume }));
 vi.mock('../receiver', () => ({ createPluginReceiver: mocks.createPluginReceiver }));
 import { createScreenSession } from './screen-session';
 
 const lifecycleTick = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve(); };
-
 describe('screen session room lifecycle', () => {
-  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks(); });
+  afterEach(() => { vi.useRealTimers(); vi.clearAllMocks(); mocks.provisionReceiverResume.mockImplementation(async (_relayUrl, room, peer, store) => { await store.replace([{ bindingId: peer.bindingId, resumePassword: peer.resumePassword, roomId: room.roomId, ownerCapability: room.ownerCapability, expiresAt: peer.expiresAt }]); }); });
   it('rotates an unpaired room at expiry', async () => {
     vi.useFakeTimers(); vi.setSystemTime(1_000);
-    const first = { roomCode: '1234111111', expiresAt: 31_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
-    const second = { roomCode: '5678222222', expiresAt: 64_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
+    const first = { roomJoinCode: '123411', authCode: '111111', expiresAt: 31_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
+    const second = { roomJoinCode: '567822', authCode: '222222', expiresAt: 64_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(first).mockResolvedValueOnce(second);
     mocks.createPluginReceiver.mockReturnValue({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() });
     const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()),
       reportStatus: vi.fn() } as unknown as GuestWidgetContext;
     const session = createScreenSession(context); await vi.advanceTimersByTimeAsync(1);
-    expect(session.state.roomCode).toBe(first.roomCode);
+    expect(session.state.roomJoinCode).toBe(first.roomJoinCode); expect(session.state.authCode).toBe(first.authCode);
     await vi.advanceTimersByTimeAsync(31_001); await lifecycleTick();
     expect(first.close).toHaveBeenCalledOnce(); expect(mocks.createPairingSession).toHaveBeenCalledTimes(2);
-    expect(session.state.roomCode).toBe(second.roomCode); session.close();
+    expect(session.state.roomJoinCode).toBe(second.roomJoinCode); expect(session.state.authCode).toBe(second.authCode); session.close();
   });
   it('never sends live media through host state RPC', async () => {
-    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: object) => void) => {
       onState({ status: 'connecting', command: null, stream: {} as MediaStream, peerCount: 0, error: null });
@@ -44,7 +45,7 @@ describe('screen session room lifecycle', () => {
   });
 
   it('publishes the receiver SAS through clone-safe host state', async () => {
-    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: object) => void) => {
       onState({ status: 'paired', command: null, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
@@ -59,7 +60,7 @@ describe('screen session room lifecycle', () => {
     session.close();
   });
   it('publishes the trusted SAS transition so pairing UI can close', async () => {
-    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let callback: ((state: Record<string, unknown>) => void) | undefined;
     mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
@@ -77,7 +78,7 @@ describe('screen session room lifecycle', () => {
 
   it('ignores a dismissal token left by a previous SAS dialog', async () => {
     vi.useFakeTimers();
-    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let callback: ((state: Record<string, unknown>) => void) | undefined;
     const receiver = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
@@ -96,8 +97,8 @@ describe('screen session room lifecycle', () => {
     session.close();
   });
   it('keeps another connected room alive when one receiver disconnects', async () => {
-    const rooms = ['1111111111', '2222222222', '3333333333'].map((roomCode) => ({
-      roomCode, expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()),
+    const rooms = ['111111', '222222', '333333'].map((roomJoinCode) => ({
+      roomJoinCode, authCode: '444444', expiresAt: Date.now() + 60_000, options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()),
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]).mockResolvedValueOnce(rooms[2]);
     const callbacks: Array<(state: { status: 'paired' | 'disconnected'; command: null; stream: null; peerCount: number; error: null }) => void> = [];
@@ -123,8 +124,8 @@ describe('screen session room lifecycle', () => {
     session.close();
   });
   it('keeps a trusted fresh-pair receiver alive while allocating the next pairing room', async () => {
-    const rooms = ['1111111111', '2222222222'].map((roomCode, index) => ({
-      roomCode, expiresAt: Date.now() + 60_000, options: { generation: `generation-${index}` }, close: vi.fn(() => Promise.resolve()),
+    const rooms = ['111111', '222222'].map((roomJoinCode, index) => ({
+      roomJoinCode, authCode: '444444', expiresAt: Date.now() + 60_000, options: { generation: `generation-${index}` }, close: vi.fn(() => Promise.resolve()),
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const states: Array<(state: Record<string, unknown>) => void> = [];
@@ -150,8 +151,8 @@ describe('screen session room lifecycle', () => {
     expect(session.state.peerCount).toBe(1); expect(receivers[0]!.close).not.toHaveBeenCalled(); session.close();
   });
   it('accepts authenticated messages only after the exact receiver generation is trusted', async () => {
-    const options = { relayUrl: 'https://relay.example', roomCode: 'room', authCode: 'code', generation: 'expected-generation' };
-    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options, close: vi.fn(() => Promise.resolve()) };
+    const options = { mode: 'pairing', relayUrl: 'https://relay.example', roomJoinCode: '123456', authCode: '654321', attachmentTicket: 'T'.repeat(43), generation: 'expected-generation' } as const;
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let message: ((value: { type: string; mutation?: object; visible?: boolean }) => void) | undefined;
     let connection: ((event: { generation: string; trusted: boolean }) => void) | undefined;
@@ -177,7 +178,7 @@ describe('screen session room lifecycle', () => {
     session.close();
   });
   it('preserves authoritative playback and queue while a sender reconnects', async () => {
-    const rooms = ['1111111111', '2222222222'].map((roomCode, index) => ({ roomCode, expiresAt: Date.now() + 60_000, options: { generation: String(index) }, close: vi.fn(() => Promise.resolve()) }));
+    const rooms = ['111111', '222222'].map((roomJoinCode, index) => ({ roomJoinCode, authCode: '444444', expiresAt: Date.now() + 60_000, options: { generation: String(index) }, close: vi.fn(() => Promise.resolve()) }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
     const messages: Array<(message: { type: string; mutation?: object }) => void> = [];
@@ -205,8 +206,8 @@ describe('screen session room lifecycle', () => {
     expect(session.state.queue.revision).toBe(2); expect(session.state.command).toEqual({ ...command, paused: false }); session.close();
   });
   it('ignores revoked epochs and permits a genuinely newer A epoch to reacquire', async () => {
-    const rooms = ['1111111111', '2222222222'].map((roomCode) => ({
-      roomCode, expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()),
+    const rooms = ['111111', '222222'].map((roomJoinCode) => ({
+      roomJoinCode, authCode: '444444', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()),
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
@@ -234,8 +235,8 @@ describe('screen session room lifecycle', () => {
     expect(session.state.command?.sourceUrl).toBe('fresh'); session.close();
   });
   it('does not retain or reclaim with contentless casting state at a revoked epoch', async () => {
-    const rooms = ['1111111111', '2222222222'].map((roomCode) => ({
-      roomCode, expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()),
+    const rooms = ['111111', '222222'].map((roomJoinCode) => ({
+      roomJoinCode, authCode: '444444', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()),
     }));
     mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]);
     const callbacks: Array<(state: Record<string, unknown>) => void> = [];
@@ -260,33 +261,60 @@ describe('screen session room lifecycle', () => {
     expect(receivers[0]!.revokePresenter).toHaveBeenCalledTimes(1);
     session.close();
   });
-  it('settles binding only after the resume listener starts and retains it until revoke or close', async () => {
-    const pairing = { roomCode: '1234111111', expiresAt: Date.now() + 60_000, options: { generation: 'pair-generation' }, close: vi.fn(() => Promise.resolve()) };
-    const never = Promise.withResolvers<never>();
-    mocks.createPairingSession.mockResolvedValueOnce(pairing).mockImplementation(() => never.promise);
-    mocks.createResumeSession.mockResolvedValue({ generation: 'resume-generation', relayUrl: 'wss://relay.example/socket', roomCode: 'a'.repeat(43), authCode: '', resumeBindingId: 'a'.repeat(43), resumePassword: new Uint8Array(32) });
+  it('settles binding after relay provisioning without opening a parallel receiver', async () => {
+    const expiresAt = Date.now() + 60_000; const pairing = { roomId: 'R'.repeat(43), ownerCapability: 'O'.repeat(43), roomJoinCode: '123411', authCode: '111111', expiresAt, options: { generation: 'pair-generation' }, close: vi.fn(() => Promise.resolve()) };
+    const never = Promise.withResolvers<never>(); mocks.createPairingSession.mockResolvedValueOnce(pairing).mockImplementation(() => never.promise);
     let install: ((binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>) | undefined;
-    let revoke: ((bindingId: string) => Promise<void>) | undefined;
-    const listening = Promise.withResolvers<void>();
     const pairingReceiver = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
-    const resumeReceiver = { listening: listening.promise, close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
-    mocks.createPluginReceiver.mockImplementation((_options, _asset, _state,
-      onBinding: (binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>, onRevoke: (bindingId: string) => Promise<void>) => {
-      if (!install) { install = onBinding; revoke = onRevoke; return pairingReceiver; }
-      return resumeReceiver;
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, _state, onBinding: typeof install) => { install = onBinding; return pairingReceiver; });
+    const stored: Array<{ bindingId: string; resumePassword: string; roomId: string; ownerCapability: string; expiresAt: number }> = [];
+    const replace = vi.fn((bindings: typeof stored) => { stored.splice(0, stored.length, ...bindings); return Promise.resolve(); });
+    mocks.provisionReceiverResume.mockImplementationOnce(async (relayUrl, room, peer, store) => {
+      await store.replace([{ bindingId: peer.bindingId, resumePassword: peer.resumePassword, roomId: room.roomId, ownerCapability: room.ownerCapability, expiresAt: peer.expiresAt }]);
+      expect(relayUrl).toBe('wss://relay.example');
     });
-    const stored: Array<{ bindingId: string; resumePassword: string; expiresAt: number }> = [];
-    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
-      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(),
-      castResume: { get: vi.fn(() => Promise.resolve([...stored])), replace: vi.fn((bindings: typeof stored) => { stored.splice(0, stored.length, ...bindings); return Promise.resolve(); }), delete: vi.fn((bindingId: string) => { const index = stored.findIndex((item) => item.bindingId === bindingId); if (index >= 0) stored.splice(index, 1); return Promise.resolve(); }) } } as unknown as GuestWidgetContext;
+    const context = { config: { relayUrl: 'wss://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()), secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(),
+      castResume: { get: vi.fn(() => Promise.resolve([...stored])), replace, delete: vi.fn(() => Promise.resolve()) } } as unknown as GuestWidgetContext;
     const session = createScreenSession(context); await vi.waitFor(() => expect(install).toBeTypeOf('function'));
-    const binding = { bindingId: 'a'.repeat(43), resumePassword: 'A'.repeat(43), expiresAt: Date.now() + 60_000 };
-    let settled = false; const installing = install!(binding).then(() => { settled = true; });
+    await install!({ bindingId: 'a'.repeat(43), resumePassword: 'A'.repeat(43), expiresAt });
+    expect(mocks.provisionReceiverResume).toHaveBeenCalledWith('wss://relay.example', pairing, expect.objectContaining({ bindingId: 'a'.repeat(43) }), context.castResume, expect.any(AbortSignal));
+    expect(replace).toHaveBeenCalledWith([expect.objectContaining({ roomId: pairing.roomId, ownerCapability: pairing.ownerCapability })]);
+    expect(mocks.createPluginReceiver).toHaveBeenCalledOnce(); session.close();
+  });
+  it('waits for binding persistence before transitioning a disconnected pair to resume', async () => {
+    const expiresAt = Date.now() + 60_000; const pairing = { roomId: 'R'.repeat(43), ownerCapability: 'O'.repeat(43), roomJoinCode: '123411', authCode: '111111', expiresAt, options: { generation: 'pair-generation' }, close: vi.fn(() => Promise.resolve()) };
+    const never = Promise.withResolvers<never>(); mocks.createPairingSession.mockResolvedValueOnce(pairing).mockImplementation(() => never.promise);
+    const persisted = Promise.withResolvers<void>(); mocks.provisionReceiverResume.mockImplementationOnce(async (_relayUrl, room, peer, store) => { await persisted.promise; await store.replace([{ ...peer, roomId: room.roomId, ownerCapability: room.ownerCapability }]); });
+    let install: ((binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>) | undefined; let update: ((state: Record<string, unknown>) => void) | undefined;
+    mocks.createPluginReceiver.mockImplementationOnce((_options, _asset, onState: typeof update, onBinding: typeof install) => { update = onState; install = onBinding; return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() }; });
+    mocks.createResumeSession.mockResolvedValue({ mode: 'resume', relayUrl: 'wss://relay.example/v1/socket', generation: 'resume-generation', attachmentTicket: 'T'.repeat(43), bindingId: 'a'.repeat(43), resumePassword: new Uint8Array(32) });
+    const context = { config: { relayUrl: 'wss://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()), secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(), castResume: { get: vi.fn(() => Promise.resolve([])), replace: vi.fn(() => Promise.resolve()), delete: vi.fn(() => Promise.resolve()) } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(install).toBeTypeOf('function'));
+    const pending = install!({ bindingId: 'a'.repeat(43), resumePassword: 'A'.repeat(43), expiresAt }); update!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null }); await lifecycleTick(); update!({ status: 'disconnected', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null });
+    expect(pairing.close).not.toHaveBeenCalled(); expect(mocks.createResumeSession).not.toHaveBeenCalled(); persisted.resolve(); await pending; await lifecycleTick();
+    await vi.waitFor(() => expect(mocks.createResumeSession).toHaveBeenCalledOnce()); expect(pairing.close).not.toHaveBeenCalled(); session.close();
+  });
+  it('allocates a fresh pairing room while an existing resume listener stays pending', async () => {
+    const binding = { bindingId: 'b'.repeat(43), resumePassword: 'B'.repeat(43), roomId: 'R'.repeat(43), ownerCapability: 'O'.repeat(43), expiresAt: Date.now() + 60_000 };
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: binding.expiresAt, options: {}, close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValueOnce(pairing); mocks.createResumeSession.mockResolvedValueOnce({ mode: 'resume', relayUrl: 'wss://relay.example/v1/socket', generation: 'resume', attachmentTicket: 'T'.repeat(43), bindingId: binding.bindingId, resumePassword: new Uint8Array(32) });
+    const pendingListening = Promise.withResolvers<void>(); mocks.createPluginReceiver.mockReturnValueOnce({ listening: pendingListening.promise, close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }).mockReturnValueOnce({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() });
+    const context = { config: { relayUrl: 'wss://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()), secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(), castResume: { get: vi.fn(() => Promise.resolve([binding])), replace: vi.fn(() => Promise.resolve()), delete: vi.fn(() => Promise.resolve()) } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context);
+    await vi.waitFor(() => expect(mocks.createPairingSession).toHaveBeenCalledOnce());
     await vi.waitFor(() => expect(mocks.createPluginReceiver).toHaveBeenCalledTimes(2));
-    expect(settled).toBe(false); expect(resumeReceiver.close).not.toHaveBeenCalled();
-    listening.resolve(); await installing; expect(settled).toBe(true);
-    pairingReceiver.close(); expect(resumeReceiver.close).not.toHaveBeenCalled();
-    await revoke!(binding.bindingId); expect(resumeReceiver.close).toHaveBeenCalledOnce();
-    session.close();
+    expect(session.state.roomJoinCode).toBe(pairing.roomJoinCode); session.close(); pendingListening.resolve();
+  });
+  it('does not restart a revoked dormant binding after the final sender disconnects', async () => {
+    const expiresAt = Date.now() + 60_000; const rooms = ['111111', '222222'].map((roomJoinCode, index) => ({ roomId: String(index + 1).repeat(43), ownerCapability: String(index + 3).repeat(43), roomJoinCode, authCode: '444444', expiresAt, options: { generation: `g-${index}` }, close: vi.fn(() => Promise.resolve()) }));
+    mocks.createPairingSession.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]).mockImplementation(() => new Promise(() => undefined));
+    const states: Array<(state: Record<string, unknown>) => void> = []; const bindings: Array<(binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>> = []; const revokes: Array<(bindingId: string) => Promise<void>> = [];
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void, onBinding: (binding: { bindingId: string; resumePassword: string; expiresAt: number }) => Promise<void>, onRevoke: (bindingId: string) => Promise<void>) => { states.push(onState); bindings.push(onBinding); revokes.push(onRevoke); return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }; });
+    const context = { config: { relayUrl: 'wss://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()), secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(), castResume: { get: vi.fn(() => Promise.resolve([])), replace: vi.fn(() => Promise.resolve()), delete: vi.fn(() => Promise.resolve()) } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(states).toHaveLength(1));
+    await bindings[0]!({ bindingId: 'a'.repeat(43), resumePassword: 'A'.repeat(43), expiresAt }); states[0]!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null }); await vi.waitFor(() => expect(states).toHaveLength(2));
+    await bindings[1]!({ bindingId: 'b'.repeat(43), resumePassword: 'B'.repeat(43), expiresAt }); states[1]!({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null }); states[0]!({ status: 'disconnected', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }); await lifecycleTick();
+    expect(mocks.createResumeSession).not.toHaveBeenCalled(); await revokes[0]!('a'.repeat(43)); states[1]!({ status: 'disconnected', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }); await lifecycleTick();
+    expect(mocks.createResumeSession).toHaveBeenCalledTimes(1); expect(mocks.createResumeSession).toHaveBeenCalledWith(expect.any(String), 'b'.repeat(43), expect.any(Uint8Array), rooms[1]!.ownerCapability, expect.any(AbortSignal)); session.close();
   });
 });

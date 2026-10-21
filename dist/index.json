@@ -413,6 +413,13 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
+        "proxyGrants": [
+          {
+            "id": "calendar-feed",
+            "label": "Calendar Feeds",
+            "purpose": "Fetch configured iCal (.ics) calendar feeds via the hardened Dash proxy"
+          }
+        ],
         "permissions": [
           {
             "name": "Internet",
@@ -450,6 +457,9 @@
             "defaultW": 8,
             "defaultH": 13,
             "defaultZIndex": 10,
+            "proxyGrants": [
+              "calendar-feed"
+            ],
             "defaultConfig": {
               "sources": [],
               "title": "",
@@ -609,6 +619,13 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
+        "proxyGrants": [
+          {
+            "id": "immich-home",
+            "label": "Immich Server Proxy",
+            "purpose": "Connect to operator-approved Immich photo libraries with server-injected API keys"
+          }
+        ],
         "secrets": [
           {
             "key": "apiKey",
@@ -705,6 +722,9 @@
             },
             "sandboxPolicy": [
               "remote-media"
+            ],
+            "proxyGrants": [
+              "immich-home"
             ],
             "settings": [
               {
@@ -1056,6 +1076,13 @@
         },
         "executionType": "sandboxed",
         "capabilities": [],
+        "proxyGrants": [
+          {
+            "id": "webdav-photos",
+            "label": "WebDAV Server Proxy",
+            "purpose": "Connect to operator-approved WebDAV media libraries with server-injected credentials"
+          }
+        ],
         "secrets": [
           {
             "key": "password",
@@ -1106,6 +1133,9 @@
             "minH": 3,
             "defaultW": 30,
             "defaultH": 25,
+            "proxyGrants": [
+              "webdav-photos"
+            ],
             "defaultZIndex": 0,
             "defaultConfig": {
               "intervalSeconds": 15,
@@ -1973,8 +2003,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-60a25d831ae81bfcabd4ba89e1cdab4afd5ef5bac834901b9ca1c1b5c1c0ae48.js",
-      "sha256": "60a25d831ae81bfcabd4ba89e1cdab4afd5ef5bac834901b9ca1c1b5c1c0ae48"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-5c90cb583eb6642324e51c5543eb5a864cec867f59cb9fb5ec4442996df4fd40.js",
+      "sha256": "5c90cb583eb6642324e51c5543eb5a864cec867f59cb9fb5ec4442996df4fd40"
     }
   ]
 }
