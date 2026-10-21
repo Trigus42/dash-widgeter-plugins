@@ -57,6 +57,13 @@ export const webdavManifest: PluginManifest = {
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
+  proxyGrants: [
+    {
+      id: 'webdav-photos',
+      label: 'WebDAV Server Proxy',
+      purpose: 'Connect to operator-approved WebDAV media libraries with server-injected credentials',
+    },
+  ],
   secrets: [{
     key: 'password',
     access: 'injected-only',
@@ -86,6 +93,7 @@ export const webdavManifest: PluginManifest = {
       minH: 3,
       defaultW: 30,
       defaultH: 25,
+      proxyGrants: ['webdav-photos'],
       defaultZIndex: BACKGROUND_Z,
       defaultConfig: { ...FRAME_DEFAULT_CONFIG, ...WEBDAV_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 1 },

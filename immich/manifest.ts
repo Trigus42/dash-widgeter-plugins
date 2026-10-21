@@ -55,6 +55,13 @@ export const immichManifest: PluginManifest = {
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
+  proxyGrants: [
+    {
+      id: 'immich-home',
+      label: 'Immich Server Proxy',
+      purpose: 'Connect to operator-approved Immich photo libraries with server-injected API keys',
+    },
+  ],
   secrets: [{
     key: 'apiKey',
     access: 'injected-only',
@@ -88,6 +95,7 @@ export const immichManifest: PluginManifest = {
       defaultConfig: { ...FRAME_DEFAULT_CONFIG, ...IMMICH_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 1 },
       sandboxPolicy: ['remote-media'],
+      proxyGrants: ['immich-home'],
       settings,
     },
   ],

@@ -18,6 +18,13 @@ export const calendarManifest: PluginManifest = {
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
+  proxyGrants: [
+    {
+      id: 'calendar-feed',
+      label: 'Calendar Feeds',
+      purpose: 'Fetch configured iCal (.ics) calendar feeds via the hardened Dash proxy',
+    },
+  ],
   permissions: [
     {
       name: 'Internet',
@@ -41,6 +48,7 @@ export const calendarManifest: PluginManifest = {
       defaultW: 8,
       defaultH: 13,
       defaultZIndex: WIDGET_Z,
+      proxyGrants: ['calendar-feed'],
       defaultConfig: { ...CALENDAR_DEFAULT_CONFIG },
       defaultAppearance: { background: 'glass', backgroundOpacity: 0.6, backgroundBlur: 4, opacity: 1 },
       settings: [
