@@ -19,7 +19,15 @@ import {
 interface MetadataEnvelope {
   assets?: { items?: ImmichAsset[] };
 }
+interface ProxyErrorEnvelope { error?: { code?: string; requestId?: string } }
 
+function responseFailure(operation: string, response: HttpResponse<unknown>): Error {
+  const envelope = response.data && typeof response.data === 'object' ? response.data as ProxyErrorEnvelope : undefined;
+  const code = response.headers['x-dash-proxy-error'] ?? envelope?.error?.code;
+  const requestId = response.headers['x-dash-request-id'] ?? envelope?.error?.requestId;
+  const source = code ? 'proxy' : 'upstream';
+  return new Error(`${operation} failed at ${source} (${response.status})${code ? `: ${code}` : ''}${requestId ? ` [request ${requestId}]` : ''}`);
+}
 const PROXY = 'always' as const;
 
 /** Minimal HTTP surface, satisfied by both the host and the sandbox context —
@@ -149,24 +157,12 @@ export class ImmichService {
   }
 
   private async fetchRandom(count: number): Promise<ImmichAsset[]> {
-    const filter = this.buildSearchFilter();
-    const hasFilter = Object.keys(filter).length > 0;
-    const body: Record<string, unknown> = {
-      size: count,
-      withExif: true,
-      withPeople: true,
-      ...(hasFilter ? { filter } : {}),
-    };
-    const res = await this.req<ImmichAsset[]>({
-      url: `${this.base}/search/random`,
-      method: 'POST',
-      headers: this.jsonHeaders,
-      body,
-      proxy: PROXY,
-    });
-    if (!res.ok) throw new Error(`Immich random search failed (${res.status})`);
-    const items = Array.isArray(res.data) ? res.data : [];
-    return this.postProcessAssets(items);
+    const items = await this.metadataSearch({}, count);
+    for (let index = items.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [items[index], items[swapIndex]] = [items[swapIndex]!, items[index]!];
+    }
+    return items;
   }
 
   private async metadataSearch(
@@ -188,7 +184,7 @@ export class ImmichService {
       body,
       proxy: PROXY,
     });
-    if (!res.ok) throw new Error(`Immich metadata search failed (${res.status})`);
+    if (!res.ok) throw responseFailure('Immich metadata search', res);
     const items = res.data.assets?.items ?? [];
     return this.postProcessAssets(items);
   }
@@ -206,9 +202,9 @@ export class ImmichService {
    * Build the request that returns an asset's image bytes. Pure — the shared
    * SDK engine executes it with `responseType: 'binary'`, caches, and decodes.
    */
-  imageRequest(assetId: string, size: PhotoImageSize = 'preview'): HttpRequest {
+  imageRequest(assetId: string, _size: PhotoImageSize = 'preview'): HttpRequest {
     return {
-      url: `${this.base}/assets/${assetId}/thumbnail?size=${size}`,
+      url: `${this.base}/assets/${encodeURIComponent(assetId)}/original`,
       method: 'GET',
       headers: { 'x-api-key': this.config.apiKey },
       proxy: PROXY,

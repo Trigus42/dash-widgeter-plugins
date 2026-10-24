@@ -35,6 +35,8 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
     outputMode,
     autoplay: bool(raw.autoplay, d.autoplay),
     sasTimeoutSeconds: boundedSeconds(raw.sasTimeoutSeconds, d.sasTimeoutSeconds),
+    hidePairingWhileInactive: bool(raw.hidePairingWhileInactive, d.hidePairingWhileInactive),
+    neverHidePairing: bool(raw.neverHidePairing, d.neverHidePairing),
   };
 }
 

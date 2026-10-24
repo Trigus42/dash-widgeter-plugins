@@ -11,7 +11,8 @@ describe('cast receiver manifest', () => {
     expect(screen?.sandboxPolicy).toEqual(['embed-sites', 'remote-media', 'secure-webrtc']);
     expect(pairing?.defaultZIndex).toBe(OVERLAY_Z);
     expect(pairing?.defaultAppearance).toEqual({ background: 'none', backgroundOpacity: 0 });
-    expect(pairing?.defaultConfig).not.toHaveProperty('hidePairingWhileCasting');
-    expect(pairing?.settings?.some((field) => field.key === 'hidePairingWhileCasting')).toBe(false);
+    expect(pairing?.defaultConfig).toMatchObject({ hidePairingWhileInactive: false, neverHidePairing: false });
+    expect(pairing?.settings?.filter((field) => ['hidePairingWhileInactive', 'neverHidePairing'].includes(field.key)).map((field) => field.key))
+      .toEqual(['hidePairingWhileInactive', 'neverHidePairing']);
   });
 });

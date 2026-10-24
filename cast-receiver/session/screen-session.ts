@@ -6,11 +6,7 @@ import { applyCastQueueMutation, createCastQueueSnapshot, decode, type CastQueue
 import type { DataMessage } from '@/core/cast/protocol/data-message';
 import { createPluginReceiver, type PluginReceiver, type ReceiverState } from '../receiver';
 import { readCastConfig } from '../config/resolve';
-function errorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') return error.message;
-  return String(error);
-}
+import { PLUGIN_FAILURE_CATEGORIES, PLUGIN_PUBLIC_FAILURE_MESSAGES, pluginFailure } from '@/sandbox/telemetry';
 
 
 export interface ScreenSession {
@@ -45,25 +41,36 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     Object.assign(state, patch); listeners.forEach((listener) => listener({ ...state }));
     const hostState = { status: state.status, command: state.command, presentationEpoch: state.presentationEpoch, peerCount: state.peerCount, error: state.error,
       roomJoinCode: state.roomJoinCode, authCode: state.authCode, relayUrl: state.relayUrl, senderUrl: state.senderUrl, pairingReveal: state.pairingReveal, pairingVisible: state.pairingVisible,
+      screenInstanceId: context.instanceId,
       ...(state.sas ? { sas: state.sas } : {}), ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
-    void context.setCastState(hostState);
+    void context.setCastState(hostState).catch((cause: unknown) => {
+      context.telemetry.failure(pluginFailure('cast.state.publish', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+    });
   };
-  const report = (error: unknown): void => {
-    const message = errorMessage(error);
-    context.log('error', 'Cast receiver operation failed', { 'error.message': message });
-    publish({ status: 'error', error: message });
+  const report = (cause: unknown): void => {
+    context.telemetry.disclose(pluginFailure('cast.session', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency));
+    publish({ status: 'error', error: PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency });
   };
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
     void context.getCastState().then((hostState) => {
-      if (disposed || !sasOwner || !hostState?.sasDecision || typeof hostState.sasDecision !== 'object') return;
-      const action = hostState.sasDecision as Record<string, unknown>;
-      if (action.sas !== state.sas || !Number.isSafeInteger(action.version) || Number(action.version) <= observedDecisionVersion
-        || (action.decision !== 'accept' && action.decision !== 'dismiss')) return;
-      observedDecisionVersion = Number(action.version);
+      const action = hostState?.sasDecision;
+      if (disposed || !action || typeof action !== 'object') return;
+      const record = action as Record<string, unknown>;
+      if (!Number.isSafeInteger(record.version) || Number(record.version) <= observedDecisionVersion) return;
+      observedDecisionVersion = Number(record.version);
+      if (record.action === 'unlink') {
+        const entries = [...connected];
+        entries.forEach((entry) => { connected.delete(entry); entry.receiver?.close(); void entry.room.close(); });
+        resumeEntries.clear(); dormantBindings.clear(); listeningBindings.clear(); livePresenter = undefined;
+        publish({ peerCount: 0, command: null, stream: null, status: 'disconnected' });
+        return;
+      }
+      if (!sasOwner || record.action !== 'sas' || record.sas !== state.sas
+          || (record.decision !== 'accept' && record.decision !== 'dismiss')) return;
       const entry = sasOwner; sasOwner = undefined; clearTimeout(sasTimer);
-      entry.receiver?.confirmSas(action.decision === 'accept');
-      if (action.decision === 'dismiss') entry.trusted = false;
+      entry.receiver?.confirmSas(record.decision === 'accept');
+      if (record.decision === 'dismiss') entry.trusted = false;
       delete state.sas; delete state.sasTrusted; publish({});
     }).catch(report);
   }, 200) : undefined;
@@ -163,16 +170,22 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           aggregate(entry);
         }, undefined, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : undefined, authenticatedMessage(entry), ({ trusted }) => { entry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
         await entry.receiver.listening;
-      } catch (error) {
+      } catch (cause) {
         listeningBindings.delete(binding.bindingId);
-        if (!abort.signal.aborted) context.log('error', 'Failed to start Cast resume listener', { error: error instanceof Error ? error.message : String(error) });
+        if (!abort.signal.aborted) context.telemetry.failure(pluginFailure('cast.resume.listen', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
       }
     };
     await listen();
   };
   const resume = async (): Promise<void> => {
     const bindings = context.castResume ? await context.castResume.get() : [];
-    for (const binding of bindings) if (!dormantBindings.has(binding.bindingId)) void startResumeBinding(binding);
+    for (const binding of bindings) {
+      if (!dormantBindings.has(binding.bindingId)) {
+        void startResumeBinding(binding).catch((cause: unknown) => {
+          if (!abort.signal.aborted) context.telemetry.failure(pluginFailure('cast.resume.start', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+        });
+      }
+    }
   };
   const allocate = async (): Promise<void> => {
     if (disposed || pairing) return;

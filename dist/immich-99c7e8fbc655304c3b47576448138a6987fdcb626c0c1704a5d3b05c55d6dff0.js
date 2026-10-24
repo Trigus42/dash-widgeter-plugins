@@ -367,21 +367,21 @@ var require_react_development = __commonJS({
         });
         return result;
       }
-      function lazyInitializer(payload2) {
-        if (-1 === payload2._status) {
-          var resolveDebugValue = null, rejectDebugValue = null, ioInfo = payload2._ioInfo;
+      function lazyInitializer(payload) {
+        if (-1 === payload._status) {
+          var resolveDebugValue = null, rejectDebugValue = null, ioInfo = payload._ioInfo;
           null != ioInfo && (ioInfo.start = ioInfo.end = performance.now(), ioInfo.value = new Promise(function(resolve, reject) {
             resolveDebugValue = resolve;
             rejectDebugValue = reject;
           }));
-          ioInfo = payload2._result;
+          ioInfo = payload._result;
           var thenable = ioInfo();
           thenable.then(
             function(moduleObject) {
-              if (0 === payload2._status || -1 === payload2._status) {
-                payload2._status = 1;
-                payload2._result = moduleObject;
-                var _ioInfo = payload2._ioInfo;
+              if (0 === payload._status || -1 === payload._status) {
+                payload._status = 1;
+                payload._result = moduleObject;
+                var _ioInfo = payload._ioInfo;
                 if (null != _ioInfo) {
                   _ioInfo.end = performance.now();
                   var debugValue = null == moduleObject ? void 0 : moduleObject.default;
@@ -393,31 +393,31 @@ var require_react_development = __commonJS({
               }
             },
             function(error) {
-              if (0 === payload2._status || -1 === payload2._status) {
-                payload2._status = 2;
-                payload2._result = error;
-                var _ioInfo2 = payload2._ioInfo;
+              if (0 === payload._status || -1 === payload._status) {
+                payload._status = 2;
+                payload._result = error;
+                var _ioInfo2 = payload._ioInfo;
                 null != _ioInfo2 && (_ioInfo2.end = performance.now(), _ioInfo2.value.then(noop, noop), rejectDebugValue(error), _ioInfo2.value.status = "rejected", _ioInfo2.value.reason = error);
                 void 0 === thenable.status && (thenable.status = "rejected", thenable.reason = error);
               }
             }
           );
-          ioInfo = payload2._ioInfo;
+          ioInfo = payload._ioInfo;
           if (null != ioInfo) {
             var displayName = thenable.displayName;
             "string" === typeof displayName && (ioInfo.name = displayName);
           }
-          -1 === payload2._status && (payload2._status = 0, payload2._result = thenable);
+          -1 === payload._status && (payload._status = 0, payload._result = thenable);
         }
-        if (1 === payload2._status)
-          return ioInfo = payload2._result, void 0 === ioInfo && console.error(
+        if (1 === payload._status)
+          return ioInfo = payload._result, void 0 === ioInfo && console.error(
             "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))\n\nDid you accidentally put curly braces around the import?",
             ioInfo
           ), "default" in ioInfo || console.error(
             "lazy: Expected the result of a dynamic import() call. Instead received: %s\n\nYour code should look like: \n  const MyComponent = lazy(() => import('./MyComponent'))",
             ioInfo
           ), ioInfo.default;
-        throw payload2._result;
+        throw payload._result;
       }
       function resolveDispatcher() {
         var dispatcher = ReactSharedInternals.H;
@@ -7739,13 +7739,13 @@ var require_react_dom_client_development = __commonJS({
         hook.baseState = passthrough;
         return [passthrough, hook.queue.dispatch];
       }
-      function dispatchActionState(fiber, actionQueue, setPendingState, setState, payload2) {
+      function dispatchActionState(fiber, actionQueue, setPendingState, setState, payload) {
         if (isRenderPhaseUpdate(fiber))
           throw Error("Cannot update action state while rendering.");
         fiber = actionQueue.action;
         if (null !== fiber) {
           var actionNode = {
-            payload: payload2,
+            payload,
             action: fiber,
             next: null,
             isTransition: true,
@@ -7764,14 +7764,14 @@ var require_react_dom_client_development = __commonJS({
         }
       }
       function runActionStateAction(actionQueue, node) {
-        var action = node.action, payload2 = node.payload, prevState = actionQueue.state;
+        var action = node.action, payload = node.payload, prevState = actionQueue.state;
         if (node.isTransition) {
           var prevTransition = ReactSharedInternals.T, currentTransition = {};
           currentTransition.types = null !== prevTransition ? prevTransition.types : null;
           currentTransition._updatedFibers = /* @__PURE__ */ new Set();
           ReactSharedInternals.T = currentTransition;
           try {
-            var returnValue = action(prevState, payload2), onStartTransitionFinish = ReactSharedInternals.S;
+            var returnValue = action(prevState, payload), onStartTransitionFinish = ReactSharedInternals.S;
             null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
             handleActionReturnValue(actionQueue, node, returnValue);
           } catch (error) {
@@ -7785,7 +7785,7 @@ var require_react_dom_client_development = __commonJS({
           }
         } else
           try {
-            currentTransition = action(prevState, payload2), handleActionReturnValue(actionQueue, node, currentTransition);
+            currentTransition = action(prevState, payload), handleActionReturnValue(actionQueue, node, currentTransition);
           } catch (error$5) {
             onActionError(actionQueue, node, error$5);
           }
@@ -7991,14 +7991,14 @@ var require_react_dom_client_development = __commonJS({
       function mountEffect(create, deps) {
         (currentlyRenderingFiber.mode & StrictEffectsMode) !== NoMode ? mountEffectImpl(545261568, Passive, create, deps) : mountEffectImpl(8390656, Passive, create, deps);
       }
-      function useEffectEventImpl(payload2) {
+      function useEffectEventImpl(payload) {
         currentlyRenderingFiber.flags |= 4;
         var componentUpdateQueue = currentlyRenderingFiber.updateQueue;
         if (null === componentUpdateQueue)
-          componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload2];
+          componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload];
         else {
           var events = componentUpdateQueue.events;
-          null === events ? componentUpdateQueue.events = [payload2] : events.push(payload2);
+          null === events ? componentUpdateQueue.events = [payload] : events.push(payload);
         }
       }
       function mountEvent(callback) {
@@ -22705,22 +22705,22 @@ var require_react_dom_client_development = __commonJS({
       var didWarnOnInvalidCallback = /* @__PURE__ */ new Set();
       Object.freeze(fakeInternalInstance);
       var classComponentUpdater = {
-        enqueueSetState: function(inst, payload2, callback) {
+        enqueueSetState: function(inst, payload, callback) {
           inst = inst._reactInternals;
           var lane = requestUpdateLane(inst), update = createUpdate(lane);
-          update.payload = payload2;
+          update.payload = payload;
           void 0 !== callback && null !== callback && (warnOnInvalidCallback(callback), update.callback = callback);
-          payload2 = enqueueUpdate(inst, update, lane);
-          null !== payload2 && (startUpdateTimerByLane(lane, "this.setState()", inst), scheduleUpdateOnFiber(payload2, inst, lane), entangleTransitions(payload2, inst, lane));
+          payload = enqueueUpdate(inst, update, lane);
+          null !== payload && (startUpdateTimerByLane(lane, "this.setState()", inst), scheduleUpdateOnFiber(payload, inst, lane), entangleTransitions(payload, inst, lane));
         },
-        enqueueReplaceState: function(inst, payload2, callback) {
+        enqueueReplaceState: function(inst, payload, callback) {
           inst = inst._reactInternals;
           var lane = requestUpdateLane(inst), update = createUpdate(lane);
           update.tag = ReplaceState;
-          update.payload = payload2;
+          update.payload = payload;
           void 0 !== callback && null !== callback && (warnOnInvalidCallback(callback), update.callback = callback);
-          payload2 = enqueueUpdate(inst, update, lane);
-          null !== payload2 && (startUpdateTimerByLane(lane, "this.replaceState()", inst), scheduleUpdateOnFiber(payload2, inst, lane), entangleTransitions(payload2, inst, lane));
+          payload = enqueueUpdate(inst, update, lane);
+          null !== payload && (startUpdateTimerByLane(lane, "this.replaceState()", inst), scheduleUpdateOnFiber(payload, inst, lane), entangleTransitions(payload, inst, lane));
         },
         enqueueForceUpdate: function(inst, callback) {
           inst = inst._reactInternals;
@@ -24163,17 +24163,350 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/sandbox/sdk.ts
-function definePlugin(module) {
-  return module;
+// src/sandbox/photoframe/config/frame-config.ts
+var FRAME_DEFAULT_CONFIG = {
+  intervalSeconds: 15,
+  preloadCount: 2,
+  layout: "single",
+  transition: "kenburns",
+  transitionSeconds: 1.2,
+  imageFit: "cover",
+  showControls: true,
+  progressBar: "bottom",
+  metadataPosition: "bottom-right",
+  metadataShowDate: true,
+  metadataShowLocation: true,
+  metadataShowDescription: false,
+  metadataShowPeople: true,
+  metadataShowAlbum: false,
+  metadataShowTags: true,
+  cacheEnabled: true,
+  cacheMaxMB: 500,
+  cacheExpirationDays: 0,
+  listTtlMinutes: 720
+};
+function num(raw, fallback) {
+  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
 }
-function injectStyle(id, css) {
-  if (document.getElementById(id)) return;
-  const style = document.createElement("style");
-  style.id = id;
-  style.textContent = css;
-  document.head.appendChild(style);
+function bool(raw, fallback) {
+  return typeof raw === "boolean" ? raw : fallback;
 }
+var TRANSITIONS = ["fade", "zoom", "pan", "kenburns", "none"];
+var METADATA_POSITIONS = [
+  "none",
+  "bottom-left",
+  "bottom-right",
+  "top-left",
+  "top-right"
+];
+function readFrameConfig(raw) {
+  const d = FRAME_DEFAULT_CONFIG;
+  const transition = TRANSITIONS.includes(raw.transition) ? raw.transition : d.transition;
+  const layout = raw.layout === "split" ? "split" : "single";
+  const imageFit = raw.imageFit === "contain" ? "contain" : "cover";
+  const progressBar = raw.progressBar === "top" || raw.progressBar === "none" ? raw.progressBar : d.progressBar;
+  const metadataPosition = METADATA_POSITIONS.includes(raw.metadataPosition) ? raw.metadataPosition : d.metadataPosition;
+  return {
+    intervalSeconds: num(raw.intervalSeconds, d.intervalSeconds),
+    preloadCount: num(raw.preloadCount, d.preloadCount),
+    layout,
+    transition,
+    transitionSeconds: num(raw.transitionSeconds, d.transitionSeconds),
+    imageFit,
+    showControls: bool(raw.showControls, d.showControls),
+    progressBar,
+    metadataPosition,
+    metadataShowDate: bool(raw.metadataShowDate, d.metadataShowDate),
+    metadataShowLocation: bool(raw.metadataShowLocation, d.metadataShowLocation),
+    metadataShowDescription: bool(raw.metadataShowDescription, d.metadataShowDescription),
+    metadataShowPeople: bool(raw.metadataShowPeople, d.metadataShowPeople),
+    metadataShowAlbum: bool(raw.metadataShowAlbum, d.metadataShowAlbum),
+    metadataShowTags: bool(raw.metadataShowTags, d.metadataShowTags),
+    cacheEnabled: bool(raw.cacheEnabled, d.cacheEnabled),
+    cacheMaxMB: num(raw.cacheMaxMB, d.cacheMaxMB),
+    cacheExpirationDays: num(raw.cacheExpirationDays, d.cacheExpirationDays),
+    listTtlMinutes: num(raw.listTtlMinutes, d.listTtlMinutes)
+  };
+}
+function cachePolicyFromConfig(config) {
+  const days = config.cacheExpirationDays;
+  return {
+    maxBytes: config.cacheMaxMB * 1024 * 1024,
+    maxAgeMs: days > 0 ? days * 24 * 60 * 60 * 1e3 : Infinity
+  };
+}
+function panesForLayout(layout) {
+  return layout === "split" ? 2 : 1;
+}
+
+// src/sandbox/photoframe/model/metadata.ts
+function deriveMetadata(asset, options, locale) {
+  const exif = asset.exifInfo;
+  const rawDate = (exif == null ? void 0 : exif.dateTimeOriginal) ?? asset.localDateTime;
+  const location2 = options.showLocation ? [exif == null ? void 0 : exif.city, exif == null ? void 0 : exif.state, exif == null ? void 0 : exif.country].filter(Boolean).join(", ") || null : null;
+  const people = options.showPeople && asset.people && asset.people.length > 0 ? asset.people.map((p) => p.name).filter(Boolean).join(", ") || null : null;
+  const album = options.showAlbum && asset.albumName ? asset.albumName : null;
+  const tags = options.showTags && asset.tags && asset.tags.length > 0 ? asset.tags.map((t) => t.value || t.name).filter(Boolean).join(", ") || null : null;
+  return {
+    date: options.showDate && rawDate ? new Date(rawDate).toLocaleDateString(locale) : null,
+    location: location2,
+    description: options.showDescription && (exif == null ? void 0 : exif.description) ? exif.description : null,
+    people,
+    album,
+    tags
+  };
+}
+function hasMetadata(meta) {
+  return Boolean(
+    meta.date || meta.location || meta.description || meta.people || meta.album || meta.tags
+  );
+}
+
+// node_modules/thumbhash/thumbhash.js
+function thumbHashToRGBA(hash) {
+  let { PI, min, max, cos, round } = Math;
+  let header24 = hash[0] | hash[1] << 8 | hash[2] << 16;
+  let header16 = hash[3] | hash[4] << 8;
+  let l_dc = (header24 & 63) / 63;
+  let p_dc = (header24 >> 6 & 63) / 31.5 - 1;
+  let q_dc = (header24 >> 12 & 63) / 31.5 - 1;
+  let l_scale = (header24 >> 18 & 31) / 31;
+  let hasAlpha = header24 >> 23;
+  let p_scale = (header16 >> 3 & 63) / 63;
+  let q_scale = (header16 >> 9 & 63) / 63;
+  let isLandscape = header16 >> 15;
+  let lx = max(3, isLandscape ? hasAlpha ? 5 : 7 : header16 & 7);
+  let ly = max(3, isLandscape ? header16 & 7 : hasAlpha ? 5 : 7);
+  let a_dc = hasAlpha ? (hash[5] & 15) / 15 : 1;
+  let a_scale = (hash[5] >> 4) / 15;
+  let ac_start = hasAlpha ? 6 : 5;
+  let ac_index = 0;
+  let decodeChannel = (nx, ny, scale) => {
+    let ac = [];
+    for (let cy = 0; cy < ny; cy++)
+      for (let cx = cy ? 0 : 1; cx * ny < nx * (ny - cy); cx++)
+        ac.push(((hash[ac_start + (ac_index >> 1)] >> ((ac_index++ & 1) << 2) & 15) / 7.5 - 1) * scale);
+    return ac;
+  };
+  let l_ac = decodeChannel(lx, ly, l_scale);
+  let p_ac = decodeChannel(3, 3, p_scale * 1.25);
+  let q_ac = decodeChannel(3, 3, q_scale * 1.25);
+  let a_ac = hasAlpha && decodeChannel(5, 5, a_scale);
+  let ratio = thumbHashToApproximateAspectRatio(hash);
+  let w = round(ratio > 1 ? 32 : 32 * ratio);
+  let h = round(ratio > 1 ? 32 / ratio : 32);
+  let rgba = new Uint8Array(w * h * 4), fx = [], fy = [];
+  for (let y = 0, i = 0; y < h; y++) {
+    for (let x = 0; x < w; x++, i += 4) {
+      let l = l_dc, p = p_dc, q = q_dc, a = a_dc;
+      for (let cx = 0, n = max(lx, hasAlpha ? 5 : 3); cx < n; cx++)
+        fx[cx] = cos(PI / w * (x + 0.5) * cx);
+      for (let cy = 0, n = max(ly, hasAlpha ? 5 : 3); cy < n; cy++)
+        fy[cy] = cos(PI / h * (y + 0.5) * cy);
+      for (let cy = 0, j = 0; cy < ly; cy++)
+        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx * ly < lx * (ly - cy); cx++, j++)
+          l += l_ac[j] * fx[cx] * fy2;
+      for (let cy = 0, j = 0; cy < 3; cy++) {
+        for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 3 - cy; cx++, j++) {
+          let f = fx[cx] * fy2;
+          p += p_ac[j] * f;
+          q += q_ac[j] * f;
+        }
+      }
+      if (hasAlpha)
+        for (let cy = 0, j = 0; cy < 5; cy++)
+          for (let cx = cy ? 0 : 1, fy2 = fy[cy] * 2; cx < 5 - cy; cx++, j++)
+            a += a_ac[j] * fx[cx] * fy2;
+      let b = l - 2 / 3 * p;
+      let r = (3 * l - b + q) / 2;
+      let g = r - q;
+      rgba[i] = max(0, 255 * min(1, r));
+      rgba[i + 1] = max(0, 255 * min(1, g));
+      rgba[i + 2] = max(0, 255 * min(1, b));
+      rgba[i + 3] = max(0, 255 * min(1, a));
+    }
+  }
+  return { w, h, rgba };
+}
+function thumbHashToApproximateAspectRatio(hash) {
+  let header = hash[3];
+  let hasAlpha = hash[2] & 128;
+  let isLandscape = hash[4] & 128;
+  let lx = isLandscape ? hasAlpha ? 5 : 7 : header & 7;
+  let ly = isLandscape ? header & 7 : hasAlpha ? 5 : 7;
+  return lx / ly;
+}
+function rgbaToDataURL(w, h, rgba) {
+  let row = w * 4 + 1;
+  let idat = 6 + h * (5 + row);
+  let bytes = [
+    137,
+    80,
+    78,
+    71,
+    13,
+    10,
+    26,
+    10,
+    0,
+    0,
+    0,
+    13,
+    73,
+    72,
+    68,
+    82,
+    0,
+    0,
+    w >> 8,
+    w & 255,
+    0,
+    0,
+    h >> 8,
+    h & 255,
+    8,
+    6,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    idat >>> 24,
+    idat >> 16 & 255,
+    idat >> 8 & 255,
+    idat & 255,
+    73,
+    68,
+    65,
+    84,
+    120,
+    1
+  ];
+  let table = [
+    0,
+    498536548,
+    997073096,
+    651767980,
+    1994146192,
+    1802195444,
+    1303535960,
+    1342533948,
+    -306674912,
+    -267414716,
+    -690576408,
+    -882789492,
+    -1687895376,
+    -2032938284,
+    -1609899400,
+    -1111625188
+  ];
+  let a = 1, b = 0;
+  for (let y = 0, i = 0, end = row - 1; y < h; y++, end += row - 1) {
+    bytes.push(y + 1 < h ? 0 : 1, row & 255, row >> 8, ~row & 255, row >> 8 ^ 255, 0);
+    for (b = (b + a) % 65521; i < end; i++) {
+      let u = rgba[i] & 255;
+      bytes.push(u);
+      a = (a + u) % 65521;
+      b = (b + a) % 65521;
+    }
+  }
+  bytes.push(
+    b >> 8,
+    b & 255,
+    a >> 8,
+    a & 255,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    73,
+    69,
+    78,
+    68,
+    174,
+    66,
+    96,
+    130
+  );
+  for (let [start, end] of [[12, 29], [37, 41 + idat]]) {
+    let c = ~0;
+    for (let i = start; i < end; i++) {
+      c ^= bytes[i];
+      c = c >>> 4 ^ table[c & 15];
+      c = c >>> 4 ^ table[c & 15];
+    }
+    c = ~c;
+    bytes[end++] = c >>> 24;
+    bytes[end++] = c >> 16 & 255;
+    bytes[end++] = c >> 8 & 255;
+    bytes[end++] = c & 255;
+  }
+  return "data:image/png;base64," + btoa(String.fromCharCode(...bytes));
+}
+function thumbHashToDataURL(hash) {
+  let image = thumbHashToRGBA(hash);
+  return rgbaToDataURL(image.w, image.h, image.rgba);
+}
+
+// src/sandbox/photoframe/engine/thumbhash.ts
+function thumbhashToDataUrl(base64) {
+  try {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return thumbHashToDataURL(bytes);
+  } catch {
+    return null;
+  }
+}
+
+// src/sandbox/photoframe/engine/load-image.ts
+var inFlightLoads = /* @__PURE__ */ new WeakMap();
+function loadsFor(context) {
+  let loads = inFlightLoads.get(context);
+  if (!loads) {
+    loads = /* @__PURE__ */ new Map();
+    inFlightLoads.set(context, loads);
+  }
+  return loads;
+}
+async function fetchImageBlob(context, backend, config, asset, size, cacheKey) {
+  if (config.cacheEnabled) {
+    const result = await context.blobs.fetch({
+      key: cacheKey,
+      request: { ...backend.imageRequest(asset, size), responseType: "binary" },
+      policy: cachePolicyFromConfig(config)
+    });
+    return result.blob;
+  }
+  const response = await context.http({ ...backend.imageRequest(asset, size), responseType: "binary" });
+  if (!response.ok) throw new Error(`Asset fetch failed (${response.status})`);
+  return response.data;
+}
+async function loadImageBlob(context, backend, config, asset, size = "preview") {
+  const cacheKey = `${asset.id}:${size}`;
+  const policyKey = config.cacheEnabled ? `${config.cacheMaxMB}:${config.cacheExpirationDays}` : "uncached";
+  const loadKey = `${backend.poolCacheKey()}:${cacheKey}:${policyKey}`;
+  const loads = loadsFor(context);
+  const existing = loads.get(loadKey);
+  if (existing) return existing;
+  const load = fetchImageBlob(context, backend, config, asset, size, cacheKey);
+  loads.set(loadKey, load);
+  try {
+    return await load;
+  } finally {
+    loads.delete(loadKey);
+  }
+}
+
+// src/sandbox/photoframe/engine/useSlideshow.ts
+var import_react2 = __toESM(require_react(), 1);
 
 // src/sandbox/react.tsx
 var import_react = __toESM(require_react(), 1);
@@ -24207,4209 +24540,968 @@ function defineReactWidget(Component) {
     }
   };
 }
+function useWidgetData(context, options) {
+  const [snapshot, setSnapshot] = (0, import_react.useState)({
+    data: void 0,
+    isLoading: true,
+    isStale: false,
+    fetchedAt: null,
+    error: null
+  });
+  const refetchRef = (0, import_react.useRef)(() => void 0);
+  const keyId = JSON.stringify(options.key);
+  (0, import_react.useEffect)(() => {
+    const sub = context.useData({
+      ...options,
+      onUpdate: (snap) => setSnapshot(snap)
+    });
+    refetchRef.current = () => sub.refetch();
+    return () => sub.dispose();
+  }, [keyId]);
+  return { ...snapshot, refetch: () => refetchRef.current() };
+}
 
-// src/plugins/cast-receiver/widgets/CastWidget.tsx
-var import_react2 = __toESM(require_react(), 1);
+// src/sandbox/photoframe/engine/useSlideshow.ts
+var BATCH = 100;
+function shuffleDeck(items) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = result[i];
+    result[i] = result[j];
+    result[j] = tmp;
+  }
+  return result;
+}
+function useSlideshow(context, backend, config, tick) {
+  const configured = backend.isConfigured();
+  const panes = panesForLayout(config.layout);
+  const poolKey = (0, import_react2.useMemo)(() => backend.poolCacheKey(), [backend]);
+  const listTtlMs = config.listTtlMinutes * 60 * 1e3;
+  const {
+    data: assets,
+    error,
+    isLoading,
+    refetch
+  } = useWidgetData(context, {
+    key: ["photoframe", poolKey],
+    fetcher: () => backend.fetchAssets(BATCH),
+    enabled: configured,
+    staleTimeMs: listTtlMs,
+    staleMessage: "Offline \u2014 showing cached photos",
+    errorMessage: "No photos found"
+  });
+  const [deck, setDeck] = (0, import_react2.useState)([]);
+  const cursor = (0, import_react2.useRef)(0);
+  const [playing, setPlaying] = (0, import_react2.useState)(true);
+  const [slides, setSlides] = (0, import_react2.useState)([]);
+  const [progressKey, setProgressKey] = (0, import_react2.useState)(0);
+  const generation = (0, import_react2.useRef)(0);
+  (0, import_react2.useEffect)(() => {
+    if (!assets || assets.length === 0) {
+      setDeck([]);
+      return;
+    }
+    setDeck(assets.length > 2 ? shuffleDeck(assets) : [...assets]);
+    cursor.current = 0;
+  }, [assets]);
+  const showAt = (0, import_react2.useCallback)(
+    async (index) => {
+      if (deck.length === 0) return;
+      const gen = ++generation.current;
+      const picks = [];
+      for (let i = 0; i < panes; i += 1) {
+        const asset = deck[(index + i) % deck.length];
+        if (asset) picks.push(asset);
+      }
+      const preloadCount = Math.max(0, Math.min(5, config.preloadCount));
+      if (preloadCount > 0) {
+        for (let p = 1; p <= preloadCount; p += 1) {
+          const nextAsset = deck[(index + panes * p) % deck.length];
+          if (nextAsset && !nextAsset.directUrl) {
+            void loadImageBlob(context, backend, config, nextAsset).catch(() => null);
+          }
+        }
+      }
+      const settled = await Promise.all(
+        picks.map(async (asset) => {
+          try {
+            if (config.metadataShowAlbum && backend.enrichAsset) {
+              await backend.enrichAsset(asset).catch(() => void 0);
+            }
+            const source = asset.directUrl ? { kind: "direct", url: asset.directUrl } : { kind: "blob", blob: await loadImageBlob(context, backend, config, asset) };
+            const placeholder = asset.thumbhash ? thumbhashToDataUrl(asset.thumbhash) : null;
+            const face = config.transition === "kenburns" && backend.fetchFaceBox ? await backend.fetchFaceBox(asset).catch(() => null) : null;
+            return { asset, source, placeholder, face };
+          } catch {
+            return null;
+          }
+        })
+      );
+      if (gen !== generation.current) return;
+      const loaded = settled.filter((slide) => slide !== null);
+      if (loaded.length === 0) return;
+      setSlides(loaded);
+      setProgressKey((k) => k + 1);
+    },
+    [deck, context, backend, panes, config]
+  );
+  (0, import_react2.useEffect)(() => {
+    cursor.current = 0;
+    if (deck.length > 0) void showAt(0);
+  }, [deck]);
+  const next = (0, import_react2.useCallback)(() => {
+    const nextCursor = cursor.current + panes;
+    if (nextCursor >= deck.length) {
+      refetch();
+      cursor.current = 0;
+    } else {
+      cursor.current = nextCursor;
+    }
+    void showAt(cursor.current);
+  }, [panes, showAt, deck.length, refetch]);
+  const back = (0, import_react2.useCallback)(() => {
+    cursor.current = Math.max(0, cursor.current - panes);
+    void showAt(cursor.current);
+  }, [panes, showAt]);
+  const togglePlay = (0, import_react2.useCallback)(() => setPlaying((p) => !p), []);
+  const lastTick = (0, import_react2.useRef)(tick);
+  (0, import_react2.useEffect)(() => {
+    if (tick !== lastTick.current) {
+      lastTick.current = tick;
+      if (playing && configured) next();
+    }
+  }, [tick, playing, configured, next]);
+  return { slides, playing, error, isLoading, progressKey, next, back, togglePlay };
+}
 
-// src/plugins/cast-receiver/types.ts
-var CAST_DEFAULT_CONFIG = {
-  sourceKind: "idle",
-  sourceUrl: "",
-  relayUrl: "",
-  senderUrl: "",
-  outputMode: "audio-video",
-  overlayMode: "inline",
-  muted: false,
-  autoplay: true,
-  sasTimeoutSeconds: 60
+// src/sandbox/photoframe/view/AssetView.tsx
+var import_react4 = __toESM(require_react(), 1);
+var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
+function transitionClass(transition) {
+  switch (transition) {
+    case "kenburns":
+      return "pf-kenburns";
+    case "zoom":
+      return "pf-zoom";
+    case "pan":
+      return "pf-pan";
+    case "none":
+      return "pf-none";
+    default:
+      return "pf-fadeonly";
+  }
+}
+function AssetView({
+  slide,
+  fit,
+  transition,
+  durationSeconds,
+  intervalSeconds
+}) {
+  var _a;
+  const origin = slide.face ? `${(slide.face.cx * 100).toFixed(1)}% ${(slide.face.cy * 100).toFixed(1)}%` : "center";
+  const motionClass = transitionClass(transition);
+  const style = {
+    "--pf-origin": origin,
+    "--pf-motion-duration": `${intervalSeconds + durationSeconds}s`,
+    "--pf-fade-duration": `${durationSeconds}s`
+  };
+  const [blobUrl, setBlobUrl] = (0, import_react4.useState)(null);
+  (0, import_react4.useEffect)(() => {
+    if (slide.source.kind === "direct") {
+      setBlobUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(slide.source.blob);
+    setBlobUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [slide.source]);
+  const assetUrl = slide.source.kind === "direct" ? slide.source.url : blobUrl;
+  const isVideo = ((_a = slide.asset.type) == null ? void 0 : _a.toUpperCase()) === "VIDEO";
+  const imgRef = (0, import_react4.useRef)(null);
+  const [loaded, setLoaded] = (0, import_react4.useState)(false);
+  (0, import_react4.useEffect)(() => {
+    var _a2;
+    setLoaded(false);
+    if (!isVideo && ((_a2 = imgRef.current) == null ? void 0 : _a2.complete) && imgRef.current.naturalWidth > 0) setLoaded(true);
+  }, [assetUrl, isVideo]);
+  return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "pf-asset", style, children: [
+    slide.placeholder && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("img", { className: "pf-backdrop", src: slide.placeholder, alt: "", "aria-hidden": true }),
+    assetUrl && (isVideo ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+      "video",
+      {
+        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
+        "data-loaded": loaded,
+        src: assetUrl,
+        autoPlay: true,
+        loop: true,
+        muted: true,
+        playsInline: true,
+        onCanPlay: () => setLoaded(true)
+      },
+      slide.asset.id
+    ) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+      "img",
+      {
+        ref: imgRef,
+        className: `pf-photo pf-fit-${fit} ${loaded ? motionClass : ""}`,
+        "data-loaded": loaded,
+        src: assetUrl,
+        alt: "",
+        "aria-hidden": true,
+        onLoad: () => setLoaded(true)
+      },
+      slide.asset.id
+    ))
+  ] });
+}
+
+// src/sandbox/photoframe/view/MetadataOverlay.tsx
+var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
+function MetadataOverlay({ asset, position, options, locale }) {
+  if (position === "none") return null;
+  const meta = deriveMetadata(asset, options, locale);
+  if (!hasMetadata(meta)) return null;
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: `pf-caption pf-caption-${position}`, children: [
+    meta.location && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.location }),
+    meta.album && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-primary", children: meta.album }),
+    meta.date && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.date }),
+    meta.people && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.people }),
+    meta.tags && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-secondary", children: meta.tags }),
+    meta.description && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "pf-caption-desc", children: meta.description })
+  ] });
+}
+
+// src/sandbox/photoframe/view/ProgressBar.tsx
+var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
+function ProgressBar({
+  position,
+  durationSeconds,
+  playing,
+  cycleKey
+}) {
+  if (position === "none") return null;
+  const style = {
+    "--pf-progress-duration": `${durationSeconds}s`,
+    animationPlayState: playing ? "running" : "paused"
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: `pf-progress pf-progress-${position}`, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("span", { className: "pf-progress-fill", style }, cycleKey) });
+}
+
+// src/sandbox/photoframe/view/OverlayControls.tsx
+var import_react5 = __toESM(require_react(), 1);
+var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
+var HIDE_DELAY_MS = 2500;
+function OverlayControls({
+  playing,
+  onNext,
+  onBack,
+  onTogglePlay,
+  active,
+  labels
+}) {
+  const [visible, setVisible] = (0, import_react5.useState)(false);
+  const hideTimer = (0, import_react5.useRef)(null);
+  const reveal = (0, import_react5.useCallback)(() => {
+    setVisible(true);
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setVisible(false), HIDE_DELAY_MS);
+  }, []);
+  (0, import_react5.useEffect)(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
+  (0, import_react5.useEffect)(() => {
+    if (!active) return;
+    const handler = (e) => {
+      if (e.key === "ArrowRight") {
+        onNext();
+        reveal();
+      } else if (e.key === "ArrowLeft") {
+        onBack();
+        reveal();
+      } else if (e.key === " ") {
+        e.preventDefault();
+        onTogglePlay();
+        reveal();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [active, onNext, onBack, onTogglePlay, reveal]);
+  const act = (fn) => () => {
+    fn();
+    reveal();
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+    "div",
+    {
+      className: "pf-controls",
+      "data-active": active,
+      "data-visible": visible,
+      onPointerMove: reveal,
+      onPointerDown: reveal,
+      children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onBack), "aria-label": labels.previous, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronLeft, {}) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          "button",
+          {
+            type: "button",
+            className: "pf-zone pf-zone-center",
+            onClick: act(onTogglePlay),
+            "aria-label": playing ? labels.pause : labels.play,
+            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn pf-zone-btn-lg", children: playing ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PauseIcon, {}) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PlayIcon, {}) })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("button", { type: "button", className: "pf-zone pf-zone-side", onClick: act(onNext), "aria-label": labels.next, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { className: "pf-zone-btn", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ChevronRight, {}) }) })
+      ]
+    }
+  );
+}
+function ChevronLeft() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M15 6l-6 6 6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
+}
+function ChevronRight() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M9 6l6 6-6 6", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }) });
+}
+function PlayIcon() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M8 5v14l11-7z" }) });
+}
+function PauseIcon() {
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("svg", { viewBox: "0 0 24 24", fill: "currentColor", "aria-hidden": true, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("path", { d: "M7 5h4v14H7zM13 5h4v14h-4z" }) });
+}
+
+// src/sandbox/photoframe/view/PhotoFrameWidget.tsx
+var import_react6 = __toESM(require_react(), 1);
+var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+function PhotoFrameWidget({ context, backend, strings: strings2 }) {
+  const config = (0, import_react6.useMemo)(() => readFrameConfig(context.config), [context.config]);
+  const configured = backend.isConfigured();
+  const [tick, setTick] = (0, import_react6.useState)(0);
+  const show = useSlideshow(context, backend, config, tick);
+  const timerRef = (0, import_react6.useRef)(void 0);
+  const resetTimer = (0, import_react6.useCallback)(() => {
+    clearTimeout(timerRef.current);
+    if (!show.playing || !configured || document.hidden) return;
+    timerRef.current = window.setTimeout(
+      () => setTick((value) => value + 1),
+      Math.max(3, config.intervalSeconds) * 1e3
+    );
+  }, [show.playing, configured, config.intervalSeconds]);
+  (0, import_react6.useEffect)(() => {
+    resetTimer();
+    const onVisibility = () => resetTimer();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      clearTimeout(timerRef.current);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [resetTimer, show.progressKey]);
+  const handleNext = (0, import_react6.useCallback)(() => {
+    show.next();
+    resetTimer();
+  }, [show, resetTimer]);
+  const handleBack = (0, import_react6.useCallback)(() => {
+    show.back();
+    resetTimer();
+  }, [show, resetTimer]);
+  const metadataOptions = {
+    showDate: config.metadataShowDate,
+    showLocation: config.metadataShowLocation,
+    showDescription: config.metadataShowDescription,
+    showPeople: config.metadataShowPeople,
+    showAlbum: config.metadataShowAlbum,
+    showTags: config.metadataShowTags
+  };
+  if (!configured) {
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-frame pf-empty", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("strong", { children: strings2.title }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("p", { children: strings2.configure })
+    ] }) });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: `pf-frame pf-layout-${config.layout}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-panes", children: show.slides.map((slide) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)("div", { className: "pf-pane", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        AssetView,
+        {
+          slide,
+          fit: config.imageFit,
+          transition: config.transition,
+          durationSeconds: config.transitionSeconds,
+          intervalSeconds: config.intervalSeconds
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        MetadataOverlay,
+        {
+          asset: slide.asset,
+          position: config.metadataPosition,
+          options: metadataOptions,
+          locale: context.locale
+        }
+      )
+    ] }, slide.asset.id)) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      ProgressBar,
+      {
+        position: config.progressBar,
+        durationSeconds: Math.max(3, config.intervalSeconds),
+        playing: show.playing,
+        cycleKey: show.progressKey
+      }
+    ),
+    config.showControls && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      OverlayControls,
+      {
+        playing: show.playing,
+        onNext: handleNext,
+        onBack: handleBack,
+        onTogglePlay: show.togglePlay,
+        active: context.isEditing === false,
+        labels: strings2
+      }
+    ),
+    show.isLoading && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status", children: strings2.loading }),
+    show.error && show.slides.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)("div", { className: "pf-status pf-error", role: "alert", children: show.error })
+  ] });
+}
+
+// src/sandbox/sdk.ts
+function definePlugin(module) {
+  return module;
+}
+function injectStyle(id, css) {
+  if (document.getElementById(id)) return;
+  const style = document.createElement("style");
+  style.id = id;
+  style.textContent = css;
+  document.head.appendChild(style);
+}
+
+// src/sandbox/photoframe/entry/styles.ts
+var PHOTOFRAME_SANDBOX_CSS = `
+  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
+  body { width: 100%; height: 100%; }
+  .wg-plugin-root { width: 100%; height: 100%; }
+  .pf-frame { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  .pf-panes { display: flex; width: 100%; height: 100%; }
+  .pf-pane { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; container-type: size; }
+  .pf-layout-split .pf-pane + .pf-pane { border-left: 2px solid rgba(255,255,255,0.12); }
+  .pf-asset { position: absolute; inset: 0; overflow: hidden; }
+  .pf-backdrop, .pf-photo { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pf-backdrop { filter: blur(14px); transform: scale(1.1); }
+  .pf-fit-cover { object-fit: cover; }
+  .pf-fit-contain { object-fit: contain; }
+  .pf-photo { opacity: 0; transform-origin: var(--pf-origin, center); }
+  .pf-fadeonly, .pf-none { animation: pf-fade var(--pf-fade-duration, 1s) ease both; }
+  .pf-none { animation-duration: 0.01s; }
+  .pf-zoom { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-zoom var(--pf-motion-duration,16s) ease-out both; }
+  .pf-pan { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-pan var(--pf-motion-duration,16s) ease-in-out both; }
+  .pf-kenburns { animation: pf-fade var(--pf-fade-duration,1s) ease both, pf-kenburns var(--pf-motion-duration,16s) ease-in-out both; }
+  @keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pf-zoom { from { transform: scale(1); } to { transform: scale(1.18); } }
+  @keyframes pf-pan { from { transform: scale(1.12) translateX(2%); } to { transform: scale(1.12) translateX(-2%); } }
+  @keyframes pf-kenburns { from { transform: scale(1.02); } to { transform: scale(1.2); } }
+  .pf-caption { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 0.1em; max-width: 70%; padding: 14px 16px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,0.8); pointer-events: none; }
+  .pf-caption-bottom-right { right: 0; bottom: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 100%, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-bottom-left { left: 0; bottom: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 100%, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-top-right { right: 0; top: 0; align-items: flex-end; text-align: right; background: radial-gradient(120% 120% at 100% 0, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-top-left { left: 0; top: 0; align-items: flex-start; text-align: left; background: radial-gradient(120% 120% at 0 0, rgba(0,0,0,0.55), transparent 70%); }
+  .pf-caption-primary { font-size: clamp(15px, 2.4cqw, 26px); font-weight: 600; line-height: 1.15; }
+  .pf-caption-secondary { font-size: clamp(12px, 1.6cqw, 18px); font-weight: 300; opacity: 0.92; }
+  .pf-caption-desc { font-size: clamp(11px, 1.4cqw, 16px); font-weight: 300; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .pf-progress { position: absolute; left: 0; right: 0; height: 3px; z-index: 6; background: rgba(255,255,255,0.15); }
+  .pf-progress-top { top: 0; }
+  .pf-progress-bottom { bottom: 0; }
+  .pf-progress-fill { display: block; height: 100%; width: 0; background: #6ba7e8; animation: pf-progress var(--pf-progress-duration, 15s) linear forwards; }
+  @keyframes pf-progress { from { width: 0; } to { width: 100%; } }
+  .pf-controls { position: absolute; inset: 0; z-index: 7; display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .pf-controls[data-active='false'] { pointer-events: none; }
+  .pf-zone { border: none; background: transparent; display: grid; place-items: center; cursor: pointer; }
+  .pf-zone-btn { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px; color: #fff; background: rgba(0,0,0,0.32); backdrop-filter: blur(6px); box-shadow: 0 2px 12px rgba(0,0,0,0.4); opacity: 0; transform: scale(0.9); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; }
+  .pf-zone-btn-lg { width: 64px; height: 64px; }
+  .pf-controls[data-visible='true'] .pf-zone-btn { opacity: 1; transform: scale(1); }
+  @media (hover: hover) { .pf-zone:hover .pf-zone-btn { opacity: 1; transform: scale(1); } }
+  .pf-zone-btn svg { width: 55%; height: 55%; }
+  .pf-empty, .pf-status { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: rgba(255,255,255,0.7); }
+  .pf-status { background: rgba(0,0,0,0.35); }
+  .pf-empty p { margin-top: 8px; font-size: 13px; }
+  .pf-error { color: #ff8080; }
+`;
+
+// src/sandbox/photoframe/entry/define.tsx
+var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+function definePhotoFrameWidget(options) {
+  injectStyle(options.styleId ?? "photoframe-style", PHOTOFRAME_SANDBOX_CSS);
+  const renderer = defineReactWidget(({ context }) => {
+    const backend = options.createBackend(context, context.config);
+    return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(PhotoFrameWidget, { context, backend, strings: options.strings(context.locale) });
+  });
+  const module = {
+    widgets: { [options.widgetId]: renderer }
+  };
+  if (options.loadOptions) {
+    const load = options.loadOptions.bind(options);
+    module.loadOptions = (context, _widgetId, fieldKey, config) => load(context, fieldKey, config);
+  }
+  return definePlugin(module);
+}
+
+// src/plugins/immich/api/service-helpers.ts
+async function fetchFaceBoxHelper(req, url, headers) {
+  const res = await req({
+    url,
+    method: "GET",
+    headers,
+    proxy: "always"
+  });
+  if (!res.ok || !Array.isArray(res.data) || res.data.length === 0) return null;
+  const f = res.data[0];
+  if (!f || !f.imageWidth || !f.imageHeight) return null;
+  return {
+    cx: (f.boundingBoxX1 + f.boundingBoxX2) / 2 / f.imageWidth,
+    cy: (f.boundingBoxY1 + f.boundingBoxY2) / 2 / f.imageHeight
+  };
+}
+async function fetchMemoriesHelper(req, url, headers) {
+  const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+  const res = await req({
+    url: `${url}?for=${today}`,
+    method: "GET",
+    headers,
+    proxy: "always"
+  });
+  if (!res.ok) throw new Error(`Immich memories failed (${res.status})`);
+  const now = (/* @__PURE__ */ new Date()).getFullYear();
+  return (res.data ?? []).flatMap((memory) => {
+    var _a;
+    const years = ((_a = memory.data) == null ? void 0 : _a.year) ? now - memory.data.year : 0;
+    const title = years > 0 ? `${years} year${years > 1 ? "s" : ""} ago` : "Memory";
+    return (memory.assets ?? []).map((a) => ({ ...a, memoryTitle: title }));
+  });
+}
+async function fetchAssetAlbumsHelper(req, url, headers) {
+  try {
+    const res = await req({
+      url,
+      method: "GET",
+      headers,
+      proxy: "always"
+    });
+    if (!res.ok || !Array.isArray(res.data)) return [];
+    return res.data.map((a) => a.albumName).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+async function listAlbumsHelper(req, url, headers) {
+  const res = await req({
+    url,
+    method: "GET",
+    headers,
+    proxy: "always"
+  });
+  if (!res.ok) throw new Error(`Immich albums failed (${res.status})`);
+  return (res.data ?? []).map((a) => ({ label: a.albumName, value: a.id }));
+}
+async function listPeopleHelper(req, url, headers) {
+  const res = await req({
+    url,
+    method: "GET",
+    headers,
+    proxy: "always"
+  });
+  if (!res.ok) throw new Error(`Immich people failed (${res.status})`);
+  return (res.data.people ?? []).filter((p) => p.name).map((p) => ({ label: p.name, value: p.id }));
+}
+async function listTagsHelper(req, url, headers) {
+  const res = await req({
+    url,
+    method: "GET",
+    headers,
+    proxy: "always"
+  });
+  if (!res.ok) throw new Error(`Immich tags failed (${res.status})`);
+  return (res.data ?? []).map((t) => ({ label: t.value, value: t.id }));
+}
+
+// src/plugins/immich/api/service.ts
+function responseFailure(operation, response) {
+  var _a, _b;
+  const envelope = response.data && typeof response.data === "object" ? response.data : void 0;
+  const code = response.headers["x-dash-proxy-error"] ?? ((_a = envelope == null ? void 0 : envelope.error) == null ? void 0 : _a.code);
+  const requestId = response.headers["x-dash-request-id"] ?? ((_b = envelope == null ? void 0 : envelope.error) == null ? void 0 : _b.requestId);
+  const source = code ? "proxy" : "upstream";
+  return new Error(`${operation} failed at ${source} (${response.status})${code ? `: ${code}` : ""}${requestId ? ` [request ${requestId}]` : ""}`);
+}
+var PROXY = "always";
+var ImmichService = class {
+  constructor(transport, config) {
+    this.transport = transport;
+    this.config = config;
+  }
+  get base() {
+    return `${this.config.serverUrl.replace(/\/$/, "")}/api`;
+  }
+  get jsonHeaders() {
+    return {
+      // `apiKey` is the `{{secret:apiKey}}` sentinel (a secret field); the host
+      // HTTP layer substitutes the real key at egress, so it never enters this
+      // frame. Sending the sentinel verbatim here is correct.
+      "x-api-key": this.config.apiKey,
+      accept: "application/json",
+      "content-type": "application/json"
+    };
+  }
+  /** Typed request helper: the transport returns `unknown` data (RPC-crossed). */
+  async req(request) {
+    return await this.transport.request(request);
+  }
+  /**
+   * Pool-aware asset-list fetch. Pure network fetch: caching, staleness, and
+   * offline fallback are handled by the shared data layer (useWidgetData /
+   * TanStack Query), not here.
+   */
+  async fetchAssets(count) {
+    return this.fetchPool(count);
+  }
+  /** Stable identity for the asset pool; used as the shared query key. */
+  poolCacheKey() {
+    const c = this.config;
+    const f = (e) => `${e.include.join(",")}!${e.exclude.join(",")}`;
+    return `${c.serverUrl}|${c.poolMode}|${f(c.albums)}|${f(c.people)}|${f(c.tags)}|r${c.rating}|v${c.showVideos ? 1 : 0}|p${c.onlyWithPersons ? 1 : 0}`;
+  }
+  async fetchPool(count) {
+    switch (this.config.poolMode) {
+      case "memories":
+        return this.fetchMemories();
+      case "favorites":
+        return this.metadataSearch({ isFavorite: { eq: true } }, count);
+      case "random":
+      default:
+        return this.fetchRandom(count);
+    }
+  }
+  /**
+   * Builds the modern Immich v3+ structured SearchFilter.
+   * Crucially, combining `filter` with deprecated flat fields (e.g. top-level type,
+   * rating, or id arrays) triggers an HTTP 400 validation error on Immich server.
+   * All criteria are packaged inside `filter`.
+   */
+  buildSearchFilter(extraFilter = {}) {
+    const c = this.config;
+    const filter = { ...extraFilter };
+    if (!c.showVideos) {
+      filter.type = { in: ["IMAGE"] };
+    }
+    if (c.rating > 0) {
+      filter.rating = { ge: c.rating };
+    }
+    if (c.onlyWithPersons) {
+      filter.hasPeople = { eq: true };
+    }
+    const buildIds = (e) => {
+      const res = {};
+      if (e.include.length) res.any = e.include;
+      if (e.exclude.length) res.none = e.exclude;
+      return Object.keys(res).length > 0 ? res : null;
+    };
+    const albumIds = buildIds(c.albums);
+    if (albumIds) filter.albumIds = albumIds;
+    const personIds = buildIds(c.people);
+    if (personIds) filter.personIds = personIds;
+    const tagIds = buildIds(c.tags);
+    if (tagIds) filter.tagIds = tagIds;
+    return filter;
+  }
+  postProcessAssets(items) {
+    let result = items;
+    if (this.config.onlyWithPersons) {
+      result = result.filter((a) => a.people && a.people.length > 0);
+    }
+    if (this.config.people.exclude.length > 0) {
+      const excluded = new Set(this.config.people.exclude);
+      result = result.filter((a) => !a.people || !a.people.some((p) => excluded.has(p.id)));
+    }
+    if (this.config.tags.exclude.length > 0) {
+      const excluded = new Set(this.config.tags.exclude);
+      result = result.filter((a) => !a.tags || !a.tags.some((t) => excluded.has(t.id)));
+    }
+    return result;
+  }
+  async fetchRandom(count) {
+    const items = await this.metadataSearch({}, count);
+    for (let index = items.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [items[index], items[swapIndex]] = [items[swapIndex], items[index]];
+    }
+    return items;
+  }
+  async metadataSearch(extraFilter, count) {
+    var _a;
+    const filter = this.buildSearchFilter(extraFilter);
+    const hasFilter = Object.keys(filter).length > 0;
+    const body = {
+      size: count,
+      withExif: true,
+      withPeople: true,
+      ...hasFilter ? { filter } : {}
+    };
+    const res = await this.req({
+      url: `${this.base}/search/metadata`,
+      method: "POST",
+      headers: this.jsonHeaders,
+      body,
+      proxy: PROXY
+    });
+    if (!res.ok) throw responseFailure("Immich metadata search", res);
+    const items = ((_a = res.data.assets) == null ? void 0 : _a.items) ?? [];
+    return this.postProcessAssets(items);
+  }
+  async fetchMemories() {
+    const items = await fetchMemoriesHelper(this.req.bind(this), `${this.base}/memories`, this.jsonHeaders);
+    return this.postProcessAssets(items);
+  }
+  fetchAssetAlbums(assetId) {
+    return fetchAssetAlbumsHelper(this.req.bind(this), `${this.base}/albums?assetId=${assetId}`, this.jsonHeaders);
+  }
+  /**
+   * Build the request that returns an asset's image bytes. Pure — the shared
+   * SDK engine executes it with `responseType: 'binary'`, caches, and decodes.
+   */
+  imageRequest(assetId, _size = "preview") {
+    return {
+      url: `${this.base}/assets/${encodeURIComponent(assetId)}/original`,
+      method: "GET",
+      headers: { "x-api-key": this.config.apiKey },
+      proxy: PROXY
+    };
+  }
+  /** Browser-native playback URL; direct media cannot carry the brokered API key. */
+  videoUrl(assetId) {
+    return `${this.base}/assets/${assetId}/video/playback`;
+  }
+  /** Face center (0..1) of the first detected face, to bias Ken Burns origin. */
+  fetchFaceBox(assetId) {
+    return fetchFaceBoxHelper(this.req.bind(this), `${this.base}/faces?id=${assetId}`, this.jsonHeaders);
+  }
+  listAlbums() {
+    return listAlbumsHelper(this.req.bind(this), `${this.base}/albums`, this.jsonHeaders);
+  }
+  listPeople() {
+    return listPeopleHelper(this.req.bind(this), `${this.base}/people?withHidden=false`, this.jsonHeaders);
+  }
+  listTags() {
+    return listTagsHelper(this.req.bind(this), `${this.base}/tags`, this.jsonHeaders);
+  }
 };
 
-// src/plugins/cast-receiver/config/resolve.ts
+// src/plugins/immich/model/types.ts
+var IMMICH_DEFAULT_CONFIG = {
+  serverUrl: "",
+  apiKey: "",
+  poolMode: "random",
+  albums: { include: [], exclude: [] },
+  people: { include: [], exclude: [] },
+  tags: { include: [], exclude: [] },
+  rating: 0,
+  showVideos: false,
+  onlyWithPersons: false
+};
+
+// src/plugins/immich/model/config.ts
 function str(raw, fallback) {
   return typeof raw === "string" ? raw : fallback;
 }
-function bool(raw, fallback) {
+function num2(raw, fallback) {
+  return typeof raw === "number" && !Number.isNaN(raw) ? raw : fallback;
+}
+function bool2(raw, fallback) {
   return typeof raw === "boolean" ? raw : fallback;
 }
-function boundedSeconds(raw, fallback) {
-  return typeof raw === "number" && Number.isInteger(raw) && raw >= 10 && raw <= 300 ? raw : fallback;
+function strArray(raw) {
+  if (Array.isArray(raw)) return raw.filter((v) => typeof v === "string");
+  if (typeof raw === "string" && raw.length > 0) return raw.split(",").map((s) => s.trim());
+  return [];
 }
-var SOURCE_KINDS = ["idle", "website", "media", "youtube"];
-var OVERLAY_MODES = ["inline", "cover", "dim"];
-var OUTPUT_MODES = ["audio-video", "audio-only", "video-only"];
-function readCastConfig(raw) {
-  const d = CAST_DEFAULT_CONFIG;
-  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind) ? raw.sourceKind : d.sourceKind;
-  const overlayMode = OVERLAY_MODES.includes(raw.overlayMode) ? raw.overlayMode : d.overlayMode;
-  const outputMode = OUTPUT_MODES.includes(raw.outputMode) ? raw.outputMode : d.outputMode;
+var POOL_MODES = ["random", "favorites", "memories"];
+function entityFilter(raw, legacyIds) {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const v = raw;
+    return { include: strArray(v.include), exclude: strArray(v.exclude) };
+  }
+  return { include: strArray(legacyIds), exclude: [] };
+}
+function readImmichConfig(raw) {
+  const d = IMMICH_DEFAULT_CONFIG;
+  const poolMode = POOL_MODES.includes(raw.poolMode) ? raw.poolMode : d.poolMode;
   return {
-    sourceKind,
-    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
-    relayUrl: str(raw.relayUrl, d.relayUrl),
-    senderUrl: str(raw.senderUrl, d.senderUrl),
-    overlayMode,
-    muted: bool(raw.muted, d.muted),
-    outputMode,
-    autoplay: bool(raw.autoplay, d.autoplay),
-    sasTimeoutSeconds: boundedSeconds(raw.sasTimeoutSeconds, d.sasTimeoutSeconds)
+    serverUrl: str(raw.serverUrl, d.serverUrl),
+    apiKey: str(raw.apiKey, d.apiKey),
+    poolMode,
+    albums: entityFilter(raw.albums, raw.albumIds),
+    people: entityFilter(raw.people, raw.personIds),
+    tags: entityFilter(raw.tags, raw.tagIds),
+    rating: num2(raw.rating, d.rating),
+    showVideos: bool2(raw.showVideos, d.showVideos),
+    onlyWithPersons: bool2(raw.onlyWithPersons, d.onlyWithPersons)
   };
 }
-function parseYouTubeTarget(input) {
-  const trimmed = input.trim();
-  if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) return { videoId: trimmed };
-  let url;
-  try {
-    url = new URL(trimmed);
-  } catch {
-    return null;
+
+// src/plugins/immich/backend.ts
+var ImmichBackend = class {
+  service;
+  configured;
+  constructor(context, rawConfig) {
+    const config = readImmichConfig(rawConfig);
+    this.configured = config.serverUrl !== "" && config.apiKey !== "";
+    const transport = { request: (req) => context.http(req) };
+    this.service = new ImmichService(transport, config);
   }
-  if (!["www.youtube.com", "youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be", "www.youtube-nocookie.com"].includes(url.hostname)) return null;
-  if (url.protocol !== "https:") return null;
-  const path = url.pathname.split("/").filter(Boolean);
-  const candidate = url.hostname === "youtu.be" ? path[0] : path[0] === "embed" || path[0] === "shorts" ? path[1] : url.searchParams.get("v");
-  const videoId = candidate && /^[A-Za-z0-9_-]{11}$/.test(candidate) ? candidate : void 0;
-  const playlist = url.searchParams.get("list");
-  const playlistId = playlist && /^[A-Za-z0-9_-]{10,80}$/.test(playlist) ? playlist : void 0;
-  if (!videoId && !playlistId) return null;
-  const rawIndex = url.searchParams.get("index");
-  const parsedIndex = rawIndex ? Number(rawIndex) : void 0;
-  const index = playlistId && Number.isSafeInteger(parsedIndex) && parsedIndex >= 1 && parsedIndex <= 1e4 ? parsedIndex : void 0;
-  return { ...videoId ? { videoId } : {}, ...playlistId ? { playlistId } : {}, ...index ? { index } : {} };
-}
-function isHttpsUrl(value) {
-  try {
-    return new URL(value).protocol === "https:";
-  } catch {
-    return false;
+  isConfigured() {
+    return this.configured;
   }
-}
-function youTubeEmbedUrl(target, muted, autoplay = true) {
-  const parsed = typeof target === "string" ? { videoId: target } : target;
-  const params = new URLSearchParams({ autoplay: autoplay ? "1" : "0", mute: muted ? "1" : "0", rel: "0", modestbranding: "1", playsinline: "1" });
-  if (parsed.playlistId) {
-    params.set("listType", "playlist");
-    params.set("list", parsed.playlistId);
-    if (parsed.index) params.set("index", String(parsed.index - 1));
+  poolCacheKey() {
+    return this.service.poolCacheKey();
   }
-  const resource = parsed.videoId ?? "videoseries";
-  return `https://www.youtube-nocookie.com/embed/${resource}?${params.toString()}`;
-}
-function resolveCastTarget(config) {
-  if (config.sourceKind === "idle") return { kind: "idle" };
-  if (config.sourceKind === "youtube") {
-    const target = parseYouTubeTarget(config.sourceUrl);
-    return target ? { kind: "youtube", ...target, embedUrl: youTubeEmbedUrl(target, config.muted, config.autoplay) } : { kind: "idle" };
+  async fetchAssets(count) {
+    const assets = await this.service.fetchAssets(count);
+    return assets.map((asset) => asset.type.toUpperCase() === "VIDEO" ? { ...asset, directUrl: this.service.videoUrl(asset.id) } : asset);
   }
-  if (!isHttpsUrl(config.sourceUrl)) return { kind: "idle" };
-  return config.sourceKind === "media" ? { kind: "media", url: config.sourceUrl } : { kind: "website", url: config.sourceUrl };
+  imageRequest(asset, size) {
+    return this.service.imageRequest(asset.id, size);
+  }
+  fetchFaceBox(asset) {
+    return this.service.fetchFaceBox(asset.id);
+  }
+  async enrichAsset(asset) {
+    const immichAsset = asset;
+    if (immichAsset.albumName) return;
+    const albums = await this.service.fetchAssetAlbums(asset.id);
+    if (albums.length > 0) immichAsset.albumName = albums.join(", ");
+  }
+};
+async function loadImmichOptions(context, fieldKey, rawConfig) {
+  const config = readImmichConfig(rawConfig);
+  if (!config.serverUrl || !config.apiKey) {
+    throw new Error("Enter the server URL and API key first.");
+  }
+  const service = new ImmichService({ request: (req) => context.http(req) }, config);
+  if (fieldKey === "albums") return service.listAlbums();
+  if (fieldKey === "people") return service.listPeople();
+  return service.listTags();
 }
 
-// src/cast-protocol/identifiers.ts
-function parseRoomJoinCode(value) {
-  if (!/^\d{6}$/.test(value)) throw new Error("Room join code must contain exactly six digits");
-  return value;
-}
-function parseAuthCode(value) {
-  if (!/^\d{6}$/.test(value)) throw new Error("Auth code must contain exactly six digits");
-  return value;
-}
+// src/plugins/immich/locales/de.json
+var de_default = {
+  manifest: {
+    "Immich Photo Frame": "Immich-Bilderrahmen",
+    "Digital photo frame backed by an Immich server, with offline caching": "Digitaler Bilderrahmen f\xFCr Immich mit Offline-Zwischenspeicher",
+    "Photo Frame": "Bilderrahmen",
+    "ImmichFrame-style slideshow: pools, transitions, metadata, controls": "Immich-Diashow mit \xDCberg\xE4ngen, Metadaten und Steuerung",
+    Connection: "Verbindung",
+    Source: "Quelle",
+    Slideshow: "Diashow",
+    "Info overlay": "Info-Einblendung",
+    Caching: "Zwischenspeicher",
+    "Immich Server URL": "Immich-Server-URL",
+    "Base URL of your Immich instance (without /api).": "Basis-URL Ihrer Immich-Instanz (ohne /api).",
+    "API Key": "API-Schl\xFCssel",
+    "Immich \u2192 Account Settings \u2192 API Keys.": "Immich \u2192 Kontoeinstellungen \u2192 API-Schl\xFCssel.",
+    "Photo source": "Fotoquelle",
+    "All photos": "Alle Fotos",
+    Favorites: "Favoriten",
+    "Memories (on this day)": "Erinnerungen (an diesem Tag)",
+    Albums: "Alben",
+    People: "Personen",
+    Tags: "Schlagw\xF6rter",
+    "Tap once to include (\u2713), again to exclude (\u2212). Albums, people and tags are combined.": "Einmal tippen zum Einschlie\xDFen (\u2713), erneut tippen zum Ausschlie\xDFen (\u2212). Alben, Personen und Schlagw\xF6rter werden kombiniert.",
+    "Minimum rating (0 = any)": "Mindestbewertung (0 = beliebig)",
+    "Include videos": "Videos einschlie\xDFen",
+    "Only photos with people": "Nur Fotos mit Personen",
+    "Filter out photos where no person or face is detected.": "Fotos ohne erkannte Person oder Gesicht herausfiltern.",
+    "Seconds per photo": "Sekunden pro Foto",
+    "Preload upcoming photos": "Kommende Fotos vorladen",
+    "How many upcoming photos to pre-fetch into cache (0\u20135).": "Anzahl der kommenden Fotos, die vorgeladen werden (0\u20135).",
+    Layout: "Layout",
+    Single: "Einzeln",
+    "Split (two photos)": "Geteilt (zwei Fotos)",
+    Transition: "\xDCbergang",
+    Pan: "Schwenken",
+    Fade: "\xDCberblenden",
+    None: "Keiner",
+    "Transition seconds": "\xDCbergangsdauer",
+    "Image fit": "Bildanpassung",
+    "Cover (fill)": "Ausf\xFCllen",
+    "Contain (letterbox)": "Einpassen",
+    "Show play/next controls": "Wiedergabe-/Weiter-Steuerung anzeigen",
+    "Progress bar": "Fortschrittsbalken",
+    Bottom: "Unten",
+    Top: "Oben",
+    Hidden: "Ausgeblendet",
+    "Show a caption (location, date, people) in a corner of the photo.": "Bildunterschrift mit Ort, Datum und Personen in einer Ecke anzeigen.",
+    "Bottom right": "Unten rechts",
+    "Bottom left": "Unten links",
+    "Top right": "Oben rechts",
+    "Top left": "Oben links",
+    "Show location": "Ort anzeigen",
+    "Show date": "Datum anzeigen",
+    "Show people": "Personen anzeigen",
+    "Show album": "Album anzeigen",
+    "Show tags": "Schlagw\xF6rter anzeigen",
+    "Show description": "Beschreibung anzeigen",
+    "Cache photos locally": "Fotos lokal zwischenspeichern",
+    "Cache size limit (MB)": "Speicherlimit (MB)",
+    "Oldest images are evicted first when the limit is reached.": "Die \xE4ltesten Bilder werden zuerst entfernt, wenn das Limit erreicht ist.",
+    "Cache image expiration (days)": "Bildablauf (Tage)",
+    "Cached images older than this are removed (0 = never expire).": "\xC4ltere zwischengespeicherte Bilder werden entfernt (0 = nie).",
+    "Offline list validity (minutes)": "Offline-Listen-G\xFCltigkeit (Minuten)"
+  },
+  runtime: {
+    configure: "\xD6ffnen Sie die Einstellungen, um die URL und den API-Schl\xFCssel Ihres Immich-Servers hinzuzuf\xFCgen.",
+    loading: "Fotos werden geladen\u2026",
+    next: "Weiter",
+    pause: "Pause",
+    play: "Wiedergabe",
+    previous: "Zur\xFCck",
+    title: "Immich-Bilderrahmen"
+  }
+};
 
-// node_modules/@noble/ciphers/utils.js
-function isBytes(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in a && a.BYTES_PER_ELEMENT === 1;
-}
-var atitle = (title) => title ? `"${title}" ` : "";
-function abool(value, title = "") {
-  if (typeof value !== "boolean")
-    throw new TypeError(atitle(title) + "expected boolean, got type=" + typeof value);
-  return value;
-}
-function anumber(n, title = "") {
-  if (typeof n !== "number")
-    throw new TypeError(atitle(title) + "expected number, got " + typeof n);
-  if (!Number.isSafeInteger(n) || n < 0)
-    throw new RangeError(atitle(title) + "expected integer >= 0, got " + n);
-  return n;
-}
-function abytes(value, length, title = "") {
-  if (isBytes(value) && (length === void 0 || value.length === length))
-    return value;
-  if (length !== void 0)
-    anumber(length, "length");
-  const bytes = isBytes(value);
-  const ofLen = length !== void 0 ? ` of length ${length}` : "";
-  const got = bytes ? `length=${value.length}` : `type=${typeof value}`;
-  const message = atitle(title) + "expected Uint8Array" + ofLen + ", got " + got;
-  if (!bytes)
-    throw new TypeError(message);
-  throw new RangeError(message);
-}
-function aexists(instance, checkFinished = true) {
-  if (instance.destroyed)
-    throw new Error("hash was destroyed");
-  if (checkFinished && instance.finished)
-    throw new Error("digest() was already called");
-}
-function aoutput(out, instance) {
-  abytes(out, void 0, "output");
-  const min = instance.outputLen;
-  if (!(out.length >= min)) {
-    throw new RangeError('"output" expected length >= ' + min);
-  }
-}
-function aoutput32(out, instance) {
-  aoutput(out, instance);
-  if (!isAligned32(out))
-    throw new Error("invalid output, must be aligned");
-}
-function u8(arr) {
-  return new Uint8Array(arr.buffer, arr.byteOffset, arr.byteLength);
-}
-function u32(arr) {
-  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
-}
-function clean(...arrays) {
-  for (let i = 0; i < arrays.length; i++) {
-    arrays[i].fill(0);
-  }
-}
-function createView(arr) {
-  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
-}
-var isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
-function byteSwap(word) {
-  return word << 24 & 4278190080 | word << 8 & 16711680 | word >>> 8 & 65280 | word >>> 24 & 255;
-}
-var swap8IfBE = isLE ? (n) => n : (n) => byteSwap(n) >>> 0;
-function byteSwap32(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    arr[i] = byteSwap(arr[i]);
-  }
-  return arr;
-}
-var swap32IfBE = isLE ? (u) => u : byteSwap32;
-function equalBytes(a, b) {
-  a = abytes(a);
-  b = abytes(b);
-  if (a.length !== b.length)
-    return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++)
-    diff |= a[i] ^ b[i];
-  return diff === 0;
-}
-function wrapMacConstructor(keyLen, macCons, fromMsg) {
-  const mac = macCons;
-  const getArgs = fromMsg || (() => []);
-  const macC = (msg, key) => mac(key, ...getArgs(msg)).update(msg).digest();
-  const tmp = mac(new Uint8Array(keyLen), ...getArgs(new Uint8Array(0)));
-  macC.outputLen = tmp.outputLen;
-  macC.blockLen = tmp.blockLen;
-  macC.create = (key, ...args) => mac(key, ...args);
-  return macC;
-}
-var wrapCipher = /* @__NO_SIDE_EFFECTS__ */ (params, constructor) => {
-  function wrappedCipher(key, ...args) {
-    abytes(key, void 0, "key");
-    if (params.nonceLength !== void 0) {
-      const nonce = args[0];
-      abytes(nonce, params.varSizeNonce ? void 0 : params.nonceLength, "nonce");
-    }
-    const tagl = params.tagLength;
-    const aadStart = params.nonceLength !== void 0 ? 1 : 0;
-    if (!params.withAAD) {
-      for (let i = aadStart; i < args.length; i++)
-        if (isBytes(args[i]))
-          throw new Error("AAD not supported");
-    }
-    if (params.withAAD && args[aadStart] !== void 0)
-      abytes(args[aadStart], void 0, "AAD");
-    const cipher = constructor(key, ...args);
-    const checkOutput = (fnLength, output) => {
-      if (output !== void 0) {
-        if (fnLength !== 2)
-          throw new Error("cipher output not supported");
-        abytes(output, void 0, "output");
-      }
+// src/plugins/immich/sandbox.ts
+var EN = {
+  title: "Immich Photo Frame",
+  configure: "Open settings to add your Immich server URL and API key.",
+  loading: "Loading photos\u2026",
+  previous: "Previous",
+  next: "Next",
+  play: "Play",
+  pause: "Pause"
+};
+function strings(locale) {
+  if (locale.split("-")[0] === "de") {
+    const r = de_default.runtime;
+    return {
+      title: r.title,
+      configure: r.configure,
+      loading: r.loading,
+      previous: r.previous,
+      next: r.next,
+      play: r.play,
+      pause: r.pause
     };
-    let called = false;
-    const wrCipher = {
-      encrypt(data, output) {
-        if (called)
-          throw new Error("cannot encrypt() twice with same key + nonce");
-        called = true;
-        abytes(data, void 0, "data");
-        checkOutput(cipher.encrypt.length, output);
-        return cipher.encrypt(data, output);
-      },
-      decrypt(data, output) {
-        abytes(data, void 0, "data");
-        if (tagl && data.length < tagl)
-          throw new Error('"ciphertext" expected length >= tagLength=' + tagl);
-        checkOutput(cipher.decrypt.length, output);
-        return cipher.decrypt(data, output);
-      }
-    };
-    return wrCipher;
   }
-  Object.assign(wrappedCipher, params);
-  return wrappedCipher;
-};
-function getOutput(expectedLength, out, onlyAligned = true) {
-  if (out === void 0)
-    return new Uint8Array(expectedLength);
-  abytes(out, expectedLength, "output");
-  if (onlyAligned && !isAligned32(out))
-    throw new Error("invalid output, must be aligned");
-  return out;
-}
-function u64Lengths(dataLength, aadLength, isLE2) {
-  anumber(dataLength);
-  anumber(aadLength);
-  abool(isLE2);
-  const num = new Uint8Array(16);
-  const view = createView(num);
-  view.setBigUint64(0, BigInt(aadLength), isLE2);
-  view.setBigUint64(8, BigInt(dataLength), isLE2);
-  return num;
-}
-function isAligned32(bytes) {
-  return bytes.byteOffset % 4 === 0;
-}
-function copyBytes(bytes) {
-  return Uint8Array.from(abytes(bytes));
-}
-
-// node_modules/@noble/ciphers/_polyval.js
-var BLOCK_SIZE = 16;
-var ZEROS16 = /* @__PURE__ */ new Uint8Array(16);
-var ZEROS32 = /* @__PURE__ */ u32(ZEROS16);
-var POLY = 225;
-var mul2 = (s0, s1, s2, s3) => {
-  const hiBit = s3 & 1;
-  return {
-    s3: s2 << 31 | s3 >>> 1,
-    s2: s1 << 31 | s2 >>> 1,
-    s1: s0 << 31 | s1 >>> 1,
-    // NIST SP 800-38D §6.3 applies `V >> 1` and XORs R on carry. In this
-    // 4x32-bit split, R = 0xe1 || 0^120 lives in the top byte of s0.
-    s0: s0 >>> 1 ^ POLY << 24 & -(hiBit & 1)
-    // reduce % poly
-  };
-};
-var swapLE = (n) => (n >>> 0 & 255) << 24 | (n >>> 8 & 255) << 16 | (n >>> 16 & 255) << 8 | n >>> 24 & 255 | 0;
-var estimateWindow = (bytes) => {
-  if (bytes > 64 * 1024)
-    return 8;
-  if (bytes > 1024)
-    return 4;
-  return 2;
-};
-var GHASH = class {
-  blockLen = BLOCK_SIZE;
-  outputLen = BLOCK_SIZE;
-  s0 = 0;
-  s1 = 0;
-  s2 = 0;
-  s3 = 0;
-  finished = false;
-  destroyed = false;
-  t;
-  W;
-  windowSize;
-  // We select bits per window adaptively based on expectedLength
-  constructor(key, expectedLength) {
-    abytes(key, 16, "key");
-    key = copyBytes(key);
-    const kView = createView(key);
-    let k0 = kView.getUint32(0, false);
-    let k1 = kView.getUint32(4, false);
-    let k2 = kView.getUint32(8, false);
-    let k3 = kView.getUint32(12, false);
-    const doubles = [];
-    for (let i = 0; i < 128; i++) {
-      doubles.push({ s0: swapLE(k0), s1: swapLE(k1), s2: swapLE(k2), s3: swapLE(k3) });
-      ({ s0: k0, s1: k1, s2: k2, s3: k3 } = mul2(k0, k1, k2, k3));
-    }
-    const W = estimateWindow(expectedLength || 1024);
-    if (![1, 2, 4, 8].includes(W))
-      throw new Error("ghash: invalid window size, expected 2, 4 or 8");
-    this.W = W;
-    const bits = 128;
-    const windows = bits / W;
-    const windowSize = this.windowSize = 2 ** W;
-    const items = [];
-    for (let w = 0; w < windows; w++) {
-      for (let byte = 0; byte < windowSize; byte++) {
-        let s0 = 0, s1 = 0, s2 = 0, s3 = 0;
-        for (let j = 0; j < W; j++) {
-          const bit = byte >>> W - j - 1 & 1;
-          if (!bit)
-            continue;
-          const { s0: d0, s1: d1, s2: d2, s3: d3 } = doubles[W * w + j];
-          s0 ^= d0, s1 ^= d1, s2 ^= d2, s3 ^= d3;
-        }
-        items.push({ s0, s1, s2, s3 });
-      }
-    }
-    this.t = items;
-  }
-  _updateBlock(s0, s1, s2, s3) {
-    s0 ^= this.s0, s1 ^= this.s1, s2 ^= this.s2, s3 ^= this.s3;
-    const { W, t, windowSize } = this;
-    let o0 = 0, o1 = 0, o2 = 0, o3 = 0;
-    const mask = (1 << W) - 1;
-    let w = 0;
-    for (const num of [s0, s1, s2, s3]) {
-      for (let bytePos = 0; bytePos < 4; bytePos++) {
-        const byte = num >>> 8 * bytePos & 255;
-        for (let bitPos = 8 / W - 1; bitPos >= 0; bitPos--) {
-          const bit = byte >>> W * bitPos & mask;
-          const { s0: e0, s1: e1, s2: e2, s3: e3 } = t[w * windowSize + bit];
-          o0 ^= e0, o1 ^= e1, o2 ^= e2, o3 ^= e3;
-          w += 1;
-        }
-      }
-    }
-    this.s0 = o0;
-    this.s1 = o1;
-    this.s2 = o2;
-    this.s3 = o3;
-  }
-  update(data) {
-    aexists(this);
-    abytes(data);
-    data = copyBytes(data);
-    const b32 = u32(data);
-    const blocks = Math.floor(data.length / BLOCK_SIZE);
-    const left = data.length % BLOCK_SIZE;
-    for (let i = 0; i < blocks; i++) {
-      this._updateBlock(swap8IfBE(b32[i * 4 + 0]), swap8IfBE(b32[i * 4 + 1]), swap8IfBE(b32[i * 4 + 2]), swap8IfBE(b32[i * 4 + 3]));
-    }
-    if (left) {
-      ZEROS16.set(data.subarray(blocks * BLOCK_SIZE));
-      this._updateBlock(swap8IfBE(ZEROS32[0]), swap8IfBE(ZEROS32[1]), swap8IfBE(ZEROS32[2]), swap8IfBE(ZEROS32[3]));
-      clean(ZEROS32);
-    }
-    return this;
-  }
-  destroy() {
-    this.destroyed = true;
-    const { t } = this;
-    for (const elm of t) {
-      elm.s0 = 0, elm.s1 = 0, elm.s2 = 0, elm.s3 = 0;
-    }
-  }
-  digestInto(out) {
-    aexists(this);
-    aoutput32(out, this);
-    this.finished = true;
-    const { s0, s1, s2, s3 } = this;
-    const o32 = u32(out);
-    o32[0] = s0;
-    o32[1] = s1;
-    o32[2] = s2;
-    o32[3] = s3;
-    if (!isLE)
-      swap32IfBE(o32.subarray(0, BLOCK_SIZE / 4));
-  }
-  digest() {
-    const res = new Uint8Array(BLOCK_SIZE);
-    this.digestInto(res);
-    this.destroy();
-    return res;
-  }
-};
-var ghash = /* @__PURE__ */ wrapMacConstructor(16, (key, expectedLength) => new GHASH(key, expectedLength), (msg) => [msg.length]);
-
-// node_modules/@noble/ciphers/aes.js
-var BLOCK_SIZE2 = 16;
-var BLOCK_SIZE32 = 4;
-var EMPTY_BLOCK = /* @__PURE__ */ new Uint8Array(BLOCK_SIZE2);
-var POLY2 = 283;
-function validateKeyLength(key) {
-  if (![16, 24, 32].includes(key.length))
-    throw new Error('"aes key" expected Uint8Array of length 16/24/32, got length=' + key.length);
-}
-function mul22(n) {
-  return n << 1 ^ POLY2 & -(n >> 7);
-}
-function mul(a, b) {
-  let res = 0;
-  for (; b > 0; b >>= 1) {
-    res ^= a & -(b & 1);
-    a = mul22(a);
-  }
-  return res;
-}
-var sbox = /* @__PURE__ */ (() => {
-  const t = new Uint8Array(256);
-  for (let i = 0, x = 1; i < 256; i++, x ^= mul22(x))
-    t[i] = x;
-  const box = new Uint8Array(256);
-  box[0] = 99;
-  for (let i = 0; i < 255; i++) {
-    let x = t[255 - i];
-    x |= x << 8;
-    box[t[i]] = (x ^ x >> 4 ^ x >> 5 ^ x >> 6 ^ x >> 7 ^ 99) & 255;
-  }
-  clean(t);
-  return box;
-})();
-var rotr32_8 = (n) => n << 24 | n >>> 8;
-var rotl32_8 = (n) => n << 8 | n >>> 24;
-function genTtable(sbox2, fn) {
-  if (sbox2.length !== 256)
-    throw new Error("wrong sbox length");
-  const T0 = new Uint32Array(256).map((_, j) => fn(sbox2[j]));
-  const T1 = T0.map(rotl32_8);
-  const T2 = T1.map(rotl32_8);
-  const T3 = T2.map(rotl32_8);
-  const T01 = new Uint32Array(256 * 256);
-  const T23 = new Uint32Array(256 * 256);
-  const sbox22 = new Uint16Array(256 * 256);
-  for (let i = 0; i < 256; i++) {
-    for (let j = 0; j < 256; j++) {
-      const idx = i * 256 + j;
-      T01[idx] = T0[i] ^ T1[j];
-      T23[idx] = T2[i] ^ T3[j];
-      sbox22[idx] = sbox2[i] << 8 | sbox2[j];
-    }
-  }
-  return { sbox: sbox2, sbox2: sbox22, T0, T1, T2, T3, T01, T23 };
-}
-var tableEncoding = /* @__PURE__ */ genTtable(sbox, (s) => mul(s, 3) << 24 | s << 16 | s << 8 | mul(s, 2));
-var xPowers = /* @__PURE__ */ (() => {
-  const p = new Uint8Array(16);
-  for (let i = 0, x = 1; i < 16; i++, x = mul22(x))
-    p[i] = x;
-  return p;
-})();
-function expandKeyLE(key) {
-  abytes(key);
-  const len = key.length;
-  validateKeyLength(key);
-  const { sbox2 } = tableEncoding;
-  const toClean = [];
-  if (!isLE || !isAligned32(key))
-    toClean.push(key = copyBytes(key));
-  const k32 = swap32IfBE(u32(key));
-  const Nk = k32.length;
-  const subByte = (n) => applySbox(sbox2, n, n, n, n);
-  const xk = new Uint32Array(len + 28);
-  xk.set(k32);
-  for (let i = Nk; i < xk.length; i++) {
-    let t = xk[i - 1];
-    if (i % Nk === 0)
-      t = subByte(rotr32_8(t)) ^ xPowers[i / Nk - 1];
-    else if (Nk > 6 && i % Nk === 4)
-      t = subByte(t);
-    xk[i] = xk[i - Nk] ^ t;
-  }
-  clean(...toClean);
-  return xk;
-}
-function apply0123(T01, T23, s0, s1, s2, s3) {
-  return T01[s0 << 8 & 65280 | s1 >>> 8 & 255] ^ T23[s2 >>> 8 & 65280 | s3 >>> 24 & 255];
-}
-function applySbox(sbox2, s0, s1, s2, s3) {
-  return sbox2[s0 & 255 | s1 & 65280] | sbox2[s2 >>> 16 & 255 | s3 >>> 16 & 65280] << 16;
-}
-function encrypt(xk, s0, s1, s2, s3) {
-  const { sbox2, T01, T23 } = tableEncoding;
-  let k = 0;
-  s0 ^= xk[k++], s1 ^= xk[k++], s2 ^= xk[k++], s3 ^= xk[k++];
-  const rounds = xk.length / 4 - 2;
-  for (let i = 0; i < rounds; i++) {
-    const t02 = xk[k++] ^ apply0123(T01, T23, s0, s1, s2, s3);
-    const t12 = xk[k++] ^ apply0123(T01, T23, s1, s2, s3, s0);
-    const t22 = xk[k++] ^ apply0123(T01, T23, s2, s3, s0, s1);
-    const t32 = xk[k++] ^ apply0123(T01, T23, s3, s0, s1, s2);
-    s0 = t02, s1 = t12, s2 = t22, s3 = t32;
-  }
-  const t0 = xk[k++] ^ applySbox(sbox2, s0, s1, s2, s3);
-  const t1 = xk[k++] ^ applySbox(sbox2, s1, s2, s3, s0);
-  const t2 = xk[k++] ^ applySbox(sbox2, s2, s3, s0, s1);
-  const t3 = xk[k++] ^ applySbox(sbox2, s3, s0, s1, s2);
-  return { s0: t0, s1: t1, s2: t2, s3: t3 };
-}
-function ctr32(xk, isLE2, nonce, src, dst) {
-  abytes(nonce, BLOCK_SIZE2, "nonce");
-  abytes(src);
-  dst = getOutput(src.length, dst);
-  const ctr = nonce;
-  const c32 = u32(ctr);
-  const view = createView(ctr);
-  const src32 = u32(src);
-  const dst32 = u32(dst);
-  const ctrPos = isLE2 ? 0 : 12;
-  const srcLen = src.length;
-  let ctrNum = view.getUint32(ctrPos, isLE2);
-  for (let i = 0; i + 4 <= src32.length; i += 4) {
-    const { s0, s1, s2, s3 } = encrypt(xk, swap8IfBE(c32[0]), swap8IfBE(c32[1]), swap8IfBE(c32[2]), swap8IfBE(c32[3]));
-    dst32[i + 0] = src32[i + 0] ^ swap8IfBE(s0);
-    dst32[i + 1] = src32[i + 1] ^ swap8IfBE(s1);
-    dst32[i + 2] = src32[i + 2] ^ swap8IfBE(s2);
-    dst32[i + 3] = src32[i + 3] ^ swap8IfBE(s3);
-    ctrNum = ctrNum + 1 >>> 0;
-    view.setUint32(ctrPos, ctrNum, isLE2);
-  }
-  const start = BLOCK_SIZE2 * Math.floor(src32.length / BLOCK_SIZE32);
-  if (start < srcLen) {
-    const { s0, s1, s2, s3 } = encrypt(xk, swap8IfBE(c32[0]), swap8IfBE(c32[1]), swap8IfBE(c32[2]), swap8IfBE(c32[3]));
-    const b32 = new Uint32Array([s0, s1, s2, s3]);
-    swap32IfBE(b32);
-    const buf = u8(b32);
-    for (let i = start, pos = 0; i < srcLen; i++, pos++)
-      dst[i] = src[i] ^ buf[pos];
-    clean(b32);
-  }
-  return dst;
-}
-function computeTag(fn, isLE2, key, data, AAD) {
-  const aadLength = AAD ? AAD.length : 0;
-  const h = fn.create(key, data.length + aadLength);
-  if (AAD)
-    h.update(AAD);
-  const num = u64Lengths(8 * data.length, 8 * aadLength, isLE2);
-  h.update(data);
-  h.update(num);
-  const res = h.digest();
-  clean(num);
-  return res;
-}
-var gcm = /* @__PURE__ */ wrapCipher({ blockSize: 16, nonceLength: 12, tagLength: 16, withAAD: true, varSizeNonce: true }, function aesgcm(key, nonce, AAD) {
-  if (nonce.length < 8)
-    throw new Error("aes/gcm: invalid nonce length");
-  const tagLength = 16;
-  function _computeTag(authKey, tagMask, data) {
-    const tag = computeTag(ghash, false, authKey, data, AAD);
-    for (let i = 0; i < tagMask.length; i++)
-      tag[i] ^= tagMask[i];
-    return tag;
-  }
-  function deriveKeys() {
-    const xk = expandKeyLE(key);
-    const authKey = EMPTY_BLOCK.slice();
-    const counter = EMPTY_BLOCK.slice();
-    ctr32(xk, false, counter, counter, authKey);
-    if (nonce.length === 12) {
-      counter.set(nonce);
-    } else {
-      const nonceLen = EMPTY_BLOCK.slice();
-      const view = createView(nonceLen);
-      view.setBigUint64(8, BigInt(nonce.length * 8), false);
-      const g = ghash.create(authKey).update(nonce).update(nonceLen);
-      g.digestInto(counter);
-      g.destroy();
-    }
-    const tagMask = ctr32(xk, false, counter, EMPTY_BLOCK);
-    return { xk, authKey, counter, tagMask };
-  }
-  return {
-    encrypt(plaintext) {
-      const { xk, authKey, counter, tagMask } = deriveKeys();
-      const out = new Uint8Array(plaintext.length + tagLength);
-      const toClean = [xk, authKey, counter, tagMask];
-      if (!isAligned32(plaintext))
-        toClean.push(plaintext = copyBytes(plaintext));
-      ctr32(xk, false, counter, plaintext, out.subarray(0, plaintext.length));
-      const tag = _computeTag(authKey, tagMask, out.subarray(0, out.length - tagLength));
-      toClean.push(tag);
-      out.set(tag, plaintext.length);
-      clean(...toClean);
-      return out;
-    },
-    decrypt(ciphertext) {
-      const { xk, authKey, counter, tagMask } = deriveKeys();
-      const toClean = [xk, authKey, tagMask, counter];
-      if (!isAligned32(ciphertext))
-        toClean.push(ciphertext = copyBytes(ciphertext));
-      const data = ciphertext.subarray(0, -tagLength);
-      const passedTag = ciphertext.subarray(-tagLength);
-      const tag = _computeTag(authKey, tagMask, data);
-      toClean.push(tag);
-      if (!equalBytes(tag, passedTag)) {
-        clean(...toClean);
-        throw new Error("aes-gcm: invalid tag");
-      }
-      const out = ctr32(xk, false, counter, data);
-      clean(...toClean);
-      return out;
-    }
-  };
-});
-
-// node_modules/@noble/hashes/utils.js
-function isBytes2(a) {
-  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in a && a.BYTES_PER_ELEMENT === 1;
-}
-var atitle2 = (title) => title ? `"${title}" ` : "";
-function anumber2(n, title = "") {
-  if (typeof n !== "number")
-    throw new TypeError(atitle2(title) + "expected number, got " + typeof n);
-  if (!Number.isSafeInteger(n) || n < 0)
-    throw new RangeError(atitle2(title) + "expected integer >= 0, got " + n);
-  return n;
-}
-function abytes2(value, length, title = "") {
-  if (isBytes2(value) && (length === void 0 || value.length === length))
-    return value;
-  if (length !== void 0)
-    anumber2(length, "length");
-  const bytes = isBytes2(value);
-  const ofLen = length !== void 0 ? ` of length ${length}` : "";
-  const got = bytes ? `length=${value.length}` : `type=${typeof value}`;
-  const message = atitle2(title) + "expected Uint8Array" + ofLen + ", got " + got;
-  if (!bytes)
-    throw new TypeError(message);
-  throw new RangeError(message);
-}
-function ahash(h) {
-  if (typeof h !== "function" || typeof h.create !== "function")
-    throw new TypeError("expected hash wrapped by utils.createHasher");
-  anumber2(h.outputLen);
-  anumber2(h.blockLen);
-  if (h.outputLen < 1 || h.blockLen < 1)
-    throw new Error("hash blockLen / outputLen must be >= 1");
-}
-var aobject = (value, label) => {
-  if (value === null || typeof value !== "object" || Array.isArray(value))
-    throw new TypeError((label === "object" ? "" : `"${label}" `) + "expected object, got type=" + typeof value);
-};
-var aopts = (value, label) => {
-  aobject(value, label);
-  const proto = Object.getPrototypeOf(value);
-  if (proto !== Object.prototype && proto !== null)
-    throw new TypeError(`"${label}" expected plain object`);
-  if (Object.hasOwn(value, "__proto__"))
-    throw new TypeError(`"${label}.__proto__" is not allowed`);
-};
-function aexists2(instance, checkFinished = true) {
-  if (instance.destroyed)
-    throw new Error("hash was destroyed");
-  if (checkFinished && instance.finished)
-    throw new Error("digest() was already called");
-}
-function aoutput2(out, instance) {
-  abytes2(out, void 0, "output");
-  const min = instance.outputLen;
-  if (!(out.length >= min)) {
-    throw new RangeError('"output" expected length >= ' + min);
-  }
-}
-function clean2(...arrays) {
-  for (let i = 0; i < arrays.length; i++) {
-    arrays[i].fill(0);
-  }
-}
-function createView2(arr) {
-  return new DataView(arr.buffer, arr.byteOffset, arr.byteLength);
-}
-function rotr(word, shift) {
-  return word << 32 - shift | word >>> shift;
-}
-function checkOpts(defaults, opts, title = "opts") {
-  aopts(defaults, "defaults");
-  if (opts !== void 0)
-    aopts(opts, title);
-  const merged = Object.assign(/* @__PURE__ */ Object.create(null), defaults, opts);
-  return merged;
-}
-function createHasher(hashCons, info = {}) {
-  if (typeof hashCons !== "function")
-    throw new TypeError('"hashCons" expected function, got type=' + typeof hashCons);
-  info = checkOpts({}, info, "info");
-  const hashC = (msg, opts) => hashCons(opts).update(msg).digest();
-  const tmp = hashCons(void 0);
-  hashC.outputLen = tmp.outputLen;
-  hashC.blockLen = tmp.blockLen;
-  hashC.canXOF = tmp.canXOF;
-  hashC.create = (opts) => hashCons(opts);
-  Object.assign(hashC, info);
-  return Object.freeze(hashC);
-}
-var oidNist = (suffix) => ({
-  // Current NIST hashAlgs suffixes used here fit in one DER subidentifier octet.
-  // Larger suffix values would need base-128 OID encoding and a different length byte.
-  oid: Uint8Array.from([6, 9, 96, 134, 72, 1, 101, 3, 4, 2, suffix])
-});
-
-// node_modules/@noble/hashes/hmac.js
-var _HMAC = class {
-  oHash;
-  iHash;
-  blockLen;
-  outputLen;
-  canXOF = false;
-  finished = false;
-  destroyed = false;
-  constructor(hash, key) {
-    ahash(hash);
-    abytes2(key, void 0, "key");
-    this.iHash = hash.create();
-    if (typeof this.iHash.update !== "function")
-      throw new Error("expected Hash instance");
-    this.blockLen = this.iHash.blockLen;
-    this.outputLen = this.iHash.outputLen;
-    const blockLen = this.blockLen;
-    const pad = new Uint8Array(blockLen);
-    pad.set(key.length > blockLen ? hash.create().update(key).digest() : key);
-    for (let i = 0; i < pad.length; i++)
-      pad[i] ^= 54;
-    this.iHash.update(pad);
-    this.oHash = hash.create();
-    for (let i = 0; i < pad.length; i++)
-      pad[i] ^= 54 ^ 92;
-    this.oHash.update(pad);
-    clean2(pad);
-  }
-  update(buf) {
-    aexists2(this);
-    this.iHash.update(buf);
-    return this;
-  }
-  digestInto(out) {
-    aexists2(this);
-    aoutput2(out, this);
-    this.finished = true;
-    const buf = out.subarray(0, this.outputLen);
-    this.iHash.digestInto(buf);
-    this.oHash.update(buf);
-    this.oHash.digestInto(buf);
-    this.destroy();
-  }
-  digest() {
-    const out = new Uint8Array(this.oHash.outputLen);
-    this.digestInto(out);
-    return out;
-  }
-  _cloneInto(to) {
-    to || (to = Object.create(Object.getPrototypeOf(this), {}));
-    const { oHash, iHash, finished, destroyed, blockLen, outputLen, canXOF } = this;
-    to = to;
-    to.finished = finished;
-    to.destroyed = destroyed;
-    to.blockLen = blockLen;
-    to.outputLen = outputLen;
-    to.canXOF = canXOF;
-    to.oHash = oHash._cloneInto(to.oHash);
-    to.iHash = iHash._cloneInto(to.iHash);
-    return to;
-  }
-  clone() {
-    return this._cloneInto();
-  }
-  destroy() {
-    this.destroyed = true;
-    this.oHash.destroy();
-    this.iHash.destroy();
-  }
-};
-var hmac = /* @__PURE__ */ (() => {
-  const hmac_ = ((hash, key, message) => new _HMAC(hash, key).update(message).digest());
-  hmac_.create = (hash, key) => new _HMAC(hash, key);
-  return hmac_;
-})();
-
-// node_modules/@noble/hashes/hkdf.js
-var HKDF_COUNTER = /* @__PURE__ */ Uint8Array.of(0);
-var EMPTY_BUFFER = /* @__PURE__ */ Uint8Array.of();
-function expand(hash, prk, info, length = 32, _recycled) {
-  ahash(hash);
-  anumber2(length, "length");
-  abytes2(prk, void 0, "prk");
-  const olen = hash.outputLen;
-  if (prk.length < olen)
-    throw new Error('"prk" must be at least HashLen octets');
-  if (length > 255 * olen)
-    throw new Error("Length must be <= 255*HashLen");
-  const blocks = Math.ceil(length / olen);
-  if (info === void 0)
-    info = EMPTY_BUFFER;
-  else
-    abytes2(info, void 0, "info");
-  if (!blocks) {
-    if (_recycled)
-      clean2(prk);
-    return new Uint8Array();
-  }
-  const okm = _recycled && blocks === 1 ? prk : new Uint8Array(blocks * olen);
-  const { iHash, oHash } = hmac.create(hash, prk);
-  const T = _recycled ? prk : new Uint8Array(olen);
-  const worker = blocks > 1 ? (_recycled == null ? void 0 : _recycled.iHash) || hash.create() : void 0;
-  for (let counter = 0; counter < blocks - 1; counter++) {
-    HKDF_COUNTER[0] = counter + 1;
-    const iWork = iHash._cloneInto(worker);
-    if (counter)
-      iWork.update(T);
-    iWork.update(info).update(HKDF_COUNTER).digestInto(T);
-    oHash._cloneInto(worker).update(T).digestInto(T);
-    okm.set(T, olen * counter);
-  }
-  HKDF_COUNTER[0] = blocks;
-  if (blocks > 1)
-    iHash.update(T);
-  iHash.update(info).update(HKDF_COUNTER).digestInto(T);
-  oHash.update(T).digestInto(T);
-  okm.set(T, olen * (blocks - 1));
-  iHash.destroy();
-  oHash.destroy();
-  worker == null ? void 0 : worker.destroy();
-  if (T !== okm)
-    clean2(T);
-  clean2(HKDF_COUNTER);
-  if (length === okm.length)
-    return okm;
-  const res = okm.slice(0, length);
-  clean2(okm);
-  return res;
-}
-var hkdf = (hash, ikm, salt, info, length) => {
-  ahash(hash);
-  if (salt === void 0)
-    salt = new Uint8Array(hash.outputLen);
-  const HMAC = hmac.create(hash, salt).update(ikm);
-  return expand(hash, HMAC.digest(), info, length, HMAC);
-};
-
-// node_modules/@noble/hashes/_u64.js
-var fromNumH = (n) => n / 2 ** 32 | 0;
-var fromNumL = (n) => n >>> 0;
-function setU64FromNum(view, byteOffset, n, isLE2) {
-  const h = fromNumH(n);
-  const l = fromNumL(n);
-  view.setUint32(byteOffset, isLE2 ? l : h, isLE2);
-  view.setUint32(byteOffset + 4, isLE2 ? h : l, isLE2);
-}
-
-// node_modules/@noble/hashes/_md.js
-function Chi(a, b, c) {
-  return a & b ^ ~a & c;
-}
-function Maj(a, b, c) {
-  return a & b ^ a & c ^ b & c;
-}
-var HashMD = class {
-  blockLen;
-  outputLen;
-  canXOF = false;
-  padOffset;
-  isLE;
-  // For partial updates less than block size
-  buffer;
-  view;
-  finished = false;
-  length = 0;
-  pos = 0;
-  destroyed = false;
-  constructor(blockLen, outputLen, padOffset, isLE2) {
-    this.blockLen = blockLen;
-    this.outputLen = outputLen;
-    this.padOffset = padOffset;
-    this.isLE = isLE2;
-    this.buffer = new Uint8Array(blockLen);
-    this.view = createView2(this.buffer);
-  }
-  update(data) {
-    aexists2(this);
-    abytes2(data);
-    const { view, buffer, blockLen } = this;
-    const len = data.length;
-    let processed = false;
-    for (let pos = 0; pos < len; ) {
-      const take = Math.min(blockLen - this.pos, len - pos);
-      if (take === blockLen) {
-        const dataView = createView2(data);
-        for (; blockLen <= len - pos; pos += blockLen)
-          this.process(dataView, pos);
-        processed = true;
-        continue;
-      }
-      buffer.set(pos === 0 && take === len ? data : data.subarray(pos, pos + take), this.pos);
-      this.pos += take;
-      pos += take;
-      if (this.pos === blockLen) {
-        this.process(view, 0);
-        this.pos = 0;
-        processed = true;
-      }
-    }
-    this.length += data.length;
-    if (processed)
-      this.roundClean();
-    return this;
-  }
-  digestInto(out) {
-    aexists2(this);
-    aoutput2(out, this);
-    this.finished = true;
-    const { buffer, view, blockLen, isLE: isLE2 } = this;
-    let { pos } = this;
-    buffer[pos++] = 128;
-    buffer.fill(0, pos);
-    if (this.padOffset > blockLen - pos) {
-      this.process(view, 0);
-      buffer.fill(0);
-    }
-    setU64FromNum(view, blockLen - 8, this.length * 8, isLE2);
-    this.process(view, 0);
-    this.roundClean();
-    const oview = out === buffer ? view : createView2(out);
-    const len = this.outputLen;
-    const outLen = len / 4;
-    const state = this.get();
-    if (len % 4 || outLen > state.length)
-      throw new Error("invalid outputLen");
-    for (let i = 0; i < outLen; i++)
-      oview.setUint32(4 * i, state[i], isLE2);
-  }
-  digest() {
-    const { buffer, outputLen } = this;
-    this.digestInto(buffer);
-    const res = buffer.slice(0, outputLen);
-    this.destroy();
-    return res;
-  }
-  _cloneIntoMeta(to) {
-    const { buffer, length, finished, destroyed, pos } = this;
-    to.destroyed = destroyed;
-    to.finished = finished;
-    to.length = length;
-    to.pos = pos;
-    if (pos)
-      to.buffer.set(buffer);
-    return to;
-  }
-  clone() {
-    return this._cloneInto();
-  }
-};
-var SHA256_IV = /* @__PURE__ */ Uint32Array.from([
-  1779033703,
-  3144134277,
-  1013904242,
-  2773480762,
-  1359893119,
-  2600822924,
-  528734635,
-  1541459225
-]);
-
-// node_modules/@noble/hashes/sha2.js
-var SHA256_K = /* @__PURE__ */ Uint32Array.from([
-  1116352408,
-  1899447441,
-  3049323471,
-  3921009573,
-  961987163,
-  1508970993,
-  2453635748,
-  2870763221,
-  3624381080,
-  310598401,
-  607225278,
-  1426881987,
-  1925078388,
-  2162078206,
-  2614888103,
-  3248222580,
-  3835390401,
-  4022224774,
-  264347078,
-  604807628,
-  770255983,
-  1249150122,
-  1555081692,
-  1996064986,
-  2554220882,
-  2821834349,
-  2952996808,
-  3210313671,
-  3336571891,
-  3584528711,
-  113926993,
-  338241895,
-  666307205,
-  773529912,
-  1294757372,
-  1396182291,
-  1695183700,
-  1986661051,
-  2177026350,
-  2456956037,
-  2730485921,
-  2820302411,
-  3259730800,
-  3345764771,
-  3516065817,
-  3600352804,
-  4094571909,
-  275423344,
-  430227734,
-  506948616,
-  659060556,
-  883997877,
-  958139571,
-  1322822218,
-  1537002063,
-  1747873779,
-  1955562222,
-  2024104815,
-  2227730452,
-  2361852424,
-  2428436474,
-  2756734187,
-  3204031479,
-  3329325298
-]);
-var SHA256_W = /* @__PURE__ */ new Uint32Array(64);
-var SHA2_32B = class extends HashMD {
-  // We cannot use array here since array allows indexing by variable
-  // which means optimizer/compiler cannot use registers.
-  // Numeric initializers matter: starting the fields as `undefined` changes
-  // V8's field representation and makes sha256 3x slower (measured).
-  A = 0;
-  B = 0;
-  C = 0;
-  D = 0;
-  E = 0;
-  F = 0;
-  G = 0;
-  H = 0;
-  constructor(outputLen, IV) {
-    super(64, outputLen, 8, false);
-    this.A = IV[0] | 0;
-    this.B = IV[1] | 0;
-    this.C = IV[2] | 0;
-    this.D = IV[3] | 0;
-    this.E = IV[4] | 0;
-    this.F = IV[5] | 0;
-    this.G = IV[6] | 0;
-    this.H = IV[7] | 0;
-  }
-  get() {
-    const { A, B, C, D, E, F, G, H } = this;
-    return [A, B, C, D, E, F, G, H];
-  }
-  // prettier-ignore
-  set(A, B, C, D, E, F, G, H) {
-    this.A = A | 0;
-    this.B = B | 0;
-    this.C = C | 0;
-    this.D = D | 0;
-    this.E = E | 0;
-    this.F = F | 0;
-    this.G = G | 0;
-    this.H = H | 0;
-  }
-  _cloneInto(to) {
-    (to || (to = new this.constructor())).set(...this.get());
-    return this._cloneIntoMeta(to);
-  }
-  process(view, offset) {
-    for (let i = 0; i < 16; i++, offset += 4)
-      SHA256_W[i] = view.getUint32(offset, false);
-    for (let i = 16; i < 64; i++) {
-      const W15 = SHA256_W[i - 15];
-      const W2 = SHA256_W[i - 2];
-      const s0 = rotr(W15, 7) ^ rotr(W15, 18) ^ W15 >>> 3;
-      const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
-      SHA256_W[i] = s1 + SHA256_W[i - 7] + s0 + SHA256_W[i - 16] | 0;
-    }
-    let { A, B, C, D, E, F, G, H } = this;
-    for (let i = 0; i < 64; i++) {
-      const sigma1 = rotr(E, 6) ^ rotr(E, 11) ^ rotr(E, 25);
-      const T1 = H + sigma1 + Chi(E, F, G) + SHA256_K[i] + SHA256_W[i] | 0;
-      const sigma0 = rotr(A, 2) ^ rotr(A, 13) ^ rotr(A, 22);
-      const T2 = sigma0 + Maj(A, B, C) | 0;
-      H = G;
-      G = F;
-      F = E;
-      E = D + T1 | 0;
-      D = C;
-      C = B;
-      B = A;
-      A = T1 + T2 | 0;
-    }
-    A = A + this.A | 0;
-    B = B + this.B | 0;
-    C = C + this.C | 0;
-    D = D + this.D | 0;
-    E = E + this.E | 0;
-    F = F + this.F | 0;
-    G = G + this.G | 0;
-    H = H + this.H | 0;
-    this.set(A, B, C, D, E, F, G, H);
-  }
-  roundClean() {
-    clean2(SHA256_W);
-  }
-  destroy() {
-    this.destroyed = true;
-    this.set(0, 0, 0, 0, 0, 0, 0, 0);
-    clean2(this.buffer);
-  }
-};
-var _SHA256 = class extends SHA2_32B {
-  constructor() {
-    super(32, SHA256_IV);
-  }
-};
-var sha256 = /* @__PURE__ */ createHasher(
-  () => new _SHA256(),
-  /* @__PURE__ */ oidNist(1)
-);
-
-// src/cast-protocol/crypto.ts
-var KEY_BYTES = /* @__PURE__ */ new WeakMap();
-var CastCryptoKey = class _CastCryptoKey {
-  destroyed = false;
-  constructor(bytes) {
-    KEY_BYTES.set(this, bytes);
-  }
-  static take(bytes) {
-    if (bytes.length !== 32) throw new Error("Cast AES keys must be 32 bytes");
-    return new _CastCryptoKey(bytes);
-  }
-  destroy() {
-    if (this.destroyed) return;
-    this.destroyed = true;
-    const bytes = KEY_BYTES.get(this);
-    bytes == null ? void 0 : bytes.fill(0);
-    KEY_BYTES.delete(this);
-  }
-};
-function keyBytes(key) {
-  const bytes = KEY_BYTES.get(key);
-  if (!bytes) throw new Error("Cast crypto key is destroyed");
-  return bytes;
-}
-function castSha256(message) {
-  return sha256(message);
-}
-function castHmacSha256(key, message) {
-  return hmac(sha256, key, message);
-}
-function castHkdfSha256(key, salt, info) {
-  return CastCryptoKey.take(hkdf(sha256, key, salt, info, 32));
-}
-function castAesGcmEncrypt(key, iv, plaintext, additionalData) {
-  return gcm(keyBytes(key), iv, additionalData).encrypt(plaintext);
-}
-function castAesGcmDecrypt(key, iv, ciphertext, additionalData) {
-  return gcm(keyBytes(key), iv, additionalData).decrypt(ciphertext);
-}
-
-// src/cast-protocol/secure.ts
-var PROTOCOL_VERSION = 2;
-function destroyDirectionalKeys(keys) {
-  if (!keys) return;
-  keys.send.destroy();
-  keys.receive.destroy();
-}
-var encoder = new TextEncoder();
-function powDifficulty(challengeCount) {
-  if (!Number.isSafeInteger(challengeCount) || challengeCount < 1) throw new Error("Invalid challenge count");
-  return Math.min(10 + 2 * (challengeCount - 1), 24);
-}
-function createChallenge(count, now = Date.now(), lifetimeMs = 3e4) {
-  if (!Number.isSafeInteger(now) || lifetimeMs < 1) throw new Error("Invalid challenge lifetime");
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return { challenge: encode(bytes), count, difficulty: powDifficulty(count), expiresAt: now + lifetimeMs };
-}
-async function verifyProof(challenge, context, proverShare, nonce, difficulty) {
-  if (!Number.isSafeInteger(nonce) || nonce < 0 || nonce > 4294967295 || difficulty < 1 || difficulty > 24) return false;
-  const message = new Uint8Array(challenge.length + context.length + proverShare.length + 4);
-  message.set(challenge);
-  message.set(context, challenge.length);
-  message.set(proverShare, challenge.length + context.length);
-  new DataView(message.buffer).setUint32(message.length - 4, nonce, false);
-  const digest = await Promise.resolve(castSha256(message));
-  let bits = difficulty;
-  for (const byte of digest) {
-    const checked = Math.min(bits, 8);
-    if (byte >>> 8 - checked !== 0) return false;
-    bits -= checked;
-    if (!bits) return true;
-  }
-  return false;
-}
-function field(value) {
-  const bytes = encoder.encode(String(value));
-  const result = new Uint8Array(4 + bytes.length);
-  new DataView(result.buffer).setUint32(0, bytes.length, false);
-  result.set(bytes, 4);
-  return result;
-}
-function canonicalTranscript(input) {
-  const values = [
-    "dash-cast",
-    PROTOCOL_VERSION,
-    "sender",
-    "receiver",
-    input.sessionIdentity,
-    input.generation,
-    input.challenge,
-    input.challengeCount,
-    input.difficulty,
-    input.expiresAt,
-    input.proverNonce,
-    input.proverShare,
-    input.verifierShare
-  ];
-  const parts = values.map(field);
-  const result = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
-  let offset = 0;
-  for (const part of parts) {
-    result.set(part, offset);
-    offset += part.length;
-  }
-  return result;
-}
-async function deriveDirectionalKeys(sharedKey, transcript, role) {
-  await Promise.resolve();
-  const senderToReceiver = castHkdfSha256(sharedKey, transcript, encoder.encode("dash-cast/signaling/v2/sender-to-receiver"));
-  try {
-    const receiverToSender = castHkdfSha256(sharedKey, transcript, encoder.encode("dash-cast/signaling/v2/receiver-to-sender"));
-    return role === "sender" ? { send: senderToReceiver, receive: receiverToSender } : { send: receiverToSender, receive: senderToReceiver };
-  } catch (error) {
-    senderToReceiver.destroy();
-    throw error;
-  }
-}
-async function deriveBinding(sharedKey, transcript, role) {
-  await Promise.resolve();
-  const input = concat(transcript, encoder.encode(`channel-binding/${role}`));
-  const binding = castHmacSha256(sharedKey, input);
-  input.fill(0);
-  const encoded2 = encode(binding);
-  binding.fill(0);
-  return encoded2;
-}
-function sequenceIv(sequence) {
-  if (!Number.isSafeInteger(sequence) || sequence < 0) throw new Error("Invalid signaling sequence");
-  const iv = new Uint8Array(12);
-  new DataView(iv.buffer).setBigUint64(4, BigInt(sequence));
-  return iv;
-}
-function aad(direction, type, sequence) {
-  return encoder.encode(`dash-cast/signaling/v2/${direction}/${type}/${sequence}`);
-}
-function encode(bytes) {
-  let value = "";
-  for (const byte of bytes) value += String.fromCharCode(byte);
-  return btoa(value).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
-}
-function decode(value) {
-  const normalized = value.replaceAll("-", "+").replaceAll("_", "/");
-  const raw = atob(normalized);
-  const bytes = new Uint8Array(raw.length);
-  for (let index = 0; index < raw.length; index += 1) bytes[index] = raw.charCodeAt(index);
-  return bytes;
-}
-function concat(a, b) {
-  const result = new Uint8Array(a.length + b.length);
-  result.set(a);
-  result.set(b, a.length);
-  return result;
-}
-async function encryptSignal(key, sequence, message, type = "offer", direction = "sender") {
-  await Promise.resolve();
-  const plaintext = encoder.encode(JSON.stringify(message));
-  const ciphertext = encode(castAesGcmEncrypt(key, sequenceIv(sequence), plaintext, aad(direction, type, sequence)));
-  return { sequence, ciphertext };
-}
-async function decryptSignal(key, frame, lastSequence, type = "offer", direction = "sender") {
-  if (!Number.isSafeInteger(frame.sequence) || frame.sequence !== lastSequence + 1) throw new Error("Replayed or out-of-order signaling frame");
-  await Promise.resolve();
-  const plaintext = castAesGcmDecrypt(key, sequenceIv(frame.sequence), decode(frame.ciphertext), aad(direction, type, frame.sequence));
-  return { value: JSON.parse(new TextDecoder().decode(plaintext)), sequence: frame.sequence };
-}
-
-// src/cast-protocol/random.ts
-function generateAuthCode() {
-  const range = 4294967296;
-  const limit = range - range % 1e6;
-  const word = new Uint32Array(1);
-  do {
-    crypto.getRandomValues(word);
-  } while ((word[0] ?? range) >= limit);
-  return String((word[0] ?? 0) % 1e6).padStart(6, "0");
-}
-
-// src/cast-protocol/queue.ts
-var MAX_CAST_QUEUE_ITEMS = 100;
-var MAX_CAST_QUEUE_TITLE = 200;
-var MAX_CAST_QUEUE_REVISION = Number.MAX_SAFE_INTEGER;
-var ITEM_ID = /^[A-Za-z0-9_-]{16,64}$/;
-function record(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value) ? value : null;
-}
-function hasOnly(candidate, keys) {
-  return Object.keys(candidate).every((key) => keys.includes(key));
-}
-function itemId(value) {
-  return typeof value === "string" && ITEM_ID.test(value);
-}
-function revision(value) {
-  return Number.isSafeInteger(value) && Number(value) >= 0 && Number(value) <= MAX_CAST_QUEUE_REVISION;
-}
-function parseCastQueueItem(value) {
-  const candidate = record(value);
-  if (!candidate || !hasOnly(candidate, ["id", "command", "title"]) || !itemId(candidate.id)) return null;
-  const commandValue = record(candidate.command);
-  if (!commandValue || !hasOnly(commandValue, ["sourceKind", "sourceUrl", "muted", "paused", "volume", "outputMode"])) return null;
-  const command = parseCastCommand(commandValue);
-  if (!command || command.sourceKind === "idle") return null;
-  const title = candidate.title;
-  if (title !== void 0 && (typeof title !== "string" || title.length > MAX_CAST_QUEUE_TITLE)) return null;
-  return { id: candidate.id, command, ...title === void 0 ? {} : { title } };
-}
-function parseCastQueueMutation(value) {
-  const candidate = record(value);
-  if (!candidate || typeof candidate.type !== "string" || !revision(candidate.expectedRevision)) return null;
-  const expectedRevision = candidate.expectedRevision;
-  if (candidate.type === "queue-add") {
-    if (!hasOnly(candidate, ["type", "item", "index", "expectedRevision"])) return null;
-    const item = parseCastQueueItem(candidate.item);
-    const index = candidate.index;
-    if (!item || index !== void 0 && (!Number.isSafeInteger(index) || index < 0 || index > MAX_CAST_QUEUE_ITEMS)) return null;
-    return { type: candidate.type, item, expectedRevision, ...index === void 0 ? {} : { index } };
-  }
-  if (candidate.type === "queue-remove" || candidate.type === "queue-play") {
-    return hasOnly(candidate, ["type", "itemId", "expectedRevision"]) && itemId(candidate.itemId) ? { type: candidate.type, itemId: candidate.itemId, expectedRevision } : null;
-  }
-  if (candidate.type === "queue-paused" && hasOnly(candidate, ["type", "paused", "expectedRevision"]) && typeof candidate.paused === "boolean") {
-    return { type: candidate.type, paused: candidate.paused, expectedRevision };
-  }
-  if (candidate.type === "queue-move") {
-    return hasOnly(candidate, ["type", "itemId", "index", "expectedRevision"]) && itemId(candidate.itemId) && Number.isSafeInteger(candidate.index) && candidate.index >= 0 && candidate.index < MAX_CAST_QUEUE_ITEMS ? { type: candidate.type, itemId: candidate.itemId, index: candidate.index, expectedRevision } : null;
-  }
-  if (candidate.type === "queue-next" || candidate.type === "queue-previous" || candidate.type === "queue-clear") {
-    return hasOnly(candidate, ["type", "expectedRevision"]) ? { type: candidate.type, expectedRevision } : null;
-  }
-  if (candidate.type === "queue-autoplay" && hasOnly(candidate, ["type", "autoplay", "expectedRevision"]) && typeof candidate.autoplay === "boolean") {
-    return { type: candidate.type, autoplay: candidate.autoplay, expectedRevision };
-  }
-  if (candidate.type === "queue-output-mode" && hasOnly(candidate, ["type", "outputMode", "expectedRevision"]) && (candidate.outputMode === "audio-video" || candidate.outputMode === "audio-only" || candidate.outputMode === "video-only")) {
-    return { type: candidate.type, outputMode: candidate.outputMode, expectedRevision };
-  }
-  return null;
-}
-function parseCastQueueSnapshot(value) {
-  const candidate = record(value);
-  if (!candidate || !hasOnly(candidate, ["revision", "items", "currentItemId", "autoplay", "outputMode"]) || !Number.isSafeInteger(candidate.revision) || candidate.revision < 0 || candidate.revision > MAX_CAST_QUEUE_REVISION || !Array.isArray(candidate.items) || candidate.items.length > MAX_CAST_QUEUE_ITEMS || typeof candidate.autoplay !== "boolean" || candidate.outputMode !== "audio-video" && candidate.outputMode !== "audio-only" && candidate.outputMode !== "video-only") return null;
-  const items = [];
-  const ids = /* @__PURE__ */ new Set();
-  for (const value2 of candidate.items) {
-    const item = parseCastQueueItem(value2);
-    if (!item || ids.has(item.id)) return null;
-    ids.add(item.id);
-    items.push(item);
-  }
-  if (candidate.currentItemId !== null && (!itemId(candidate.currentItemId) || !ids.has(candidate.currentItemId))) return null;
-  return { revision: candidate.revision, items, currentItemId: candidate.currentItemId, autoplay: candidate.autoplay, outputMode: candidate.outputMode };
-}
-function createCastQueueSnapshot(autoplay = false) {
-  return { revision: 0, items: [], currentItemId: null, autoplay, outputMode: "audio-video" };
-}
-function applyCastQueueMutation(state, mutation) {
-  var _a, _b;
-  if (state.revision >= MAX_CAST_QUEUE_REVISION || mutation.expectedRevision !== state.revision) return null;
-  let items = state.items;
-  let currentItemId = state.currentItemId;
-  let autoplay = state.autoplay;
-  let outputMode = state.outputMode;
-  if (mutation.type === "queue-add") {
-    if (items.length >= MAX_CAST_QUEUE_ITEMS || items.some((item) => item.id === mutation.item.id)) return null;
-    items = [...items];
-    items.splice(Math.min(mutation.index ?? items.length, items.length), 0, mutation.item);
-  } else if (mutation.type === "queue-remove") {
-    const index = items.findIndex((item) => item.id === mutation.itemId);
-    if (index < 0) return null;
-    items = items.filter((item) => item.id !== mutation.itemId);
-    if (currentItemId === mutation.itemId) currentItemId = ((_a = items[Math.min(index, items.length - 1)]) == null ? void 0 : _a.id) ?? null;
-  } else if (mutation.type === "queue-move") {
-    const index = items.findIndex((item2) => item2.id === mutation.itemId);
-    if (index < 0) return null;
-    items = [...items];
-    const item = items.splice(index, 1)[0];
-    if (!item) return null;
-    items.splice(Math.min(mutation.index, items.length), 0, item);
-  } else if (mutation.type === "queue-play") {
-    const index = items.findIndex((item) => item.id === mutation.itemId);
-    if (index < 0) return null;
-    currentItemId = mutation.itemId;
-    items = items.map((item, itemIndex) => itemIndex === index ? { ...item, command: { ...item.command, paused: false } } : item);
-  } else if (mutation.type === "queue-paused") {
-    const index = items.findIndex((item) => item.id === currentItemId);
-    if (index < 0) return null;
-    items = items.map((item, itemIndex) => itemIndex === index ? { ...item, command: { ...item.command, paused: mutation.paused } } : item);
-  } else if (mutation.type === "queue-next" || mutation.type === "queue-previous") {
-    if (!items.length) return null;
-    const found = items.findIndex((item) => item.id === currentItemId);
-    const index = found < 0 ? mutation.type === "queue-next" ? -1 : 0 : found;
-    const delta = mutation.type === "queue-next" ? 1 : -1;
-    currentItemId = ((_b = items[(index + delta + items.length) % items.length]) == null ? void 0 : _b.id) ?? null;
-    items = items.map((item) => item.id === currentItemId ? { ...item, command: { ...item.command, paused: false } } : item);
-  } else if (mutation.type === "queue-clear") {
-    items = [];
-    currentItemId = null;
-  } else if (mutation.type === "queue-autoplay") autoplay = mutation.autoplay;
-  else outputMode = mutation.outputMode;
-  return { revision: state.revision + 1, items, currentItemId, autoplay, outputMode };
-}
-
-// src/cast-protocol/index.ts
-var MAX_CAST_MESSAGE_BYTES = 16 * 1024;
-function parseCastCommand(value) {
-  const sourceKind = value.sourceKind;
-  if (sourceKind !== "idle" && sourceKind !== "website" && sourceKind !== "media" && sourceKind !== "youtube") return null;
-  const sourceUrl = String(value.sourceUrl ?? "");
-  if (sourceUrl.length > 8192) return null;
-  const volume = typeof value.volume === "number" && Number.isFinite(value.volume) ? Math.min(1, Math.max(0, value.volume)) : void 0;
-  const outputMode = value.outputMode === "audio-only" || value.outputMode === "video-only" ? value.outputMode : "audio-video";
-  return {
-    sourceKind,
-    sourceUrl,
-    muted: value.muted === true,
-    outputMode,
-    ...typeof value.paused === "boolean" ? { paused: value.paused } : {},
-    ...volume === void 0 ? {} : { volume }
-  };
-}
-
-// src/core/cast/setup/setup-url.ts
-var MAX_CAST_URL_LENGTH = 2048;
-function parseBoundedUrl(value) {
-  if (value.length > MAX_CAST_URL_LENGTH) throw new TypeError("Cast setup URL is too long.");
-  const url = new URL(value);
-  if (url.username || url.password) throw new TypeError("Credentials are not allowed in Cast setup URLs.");
-  if (url.search || url.hash) throw new TypeError("Queries and fragments are not allowed in Cast setup URLs.");
-  return url;
-}
-function parseCastRelayUrl(value, kind) {
-  const url = parseBoundedUrl(value);
-  const accepted = kind === "http" ? url.protocol === "http:" || url.protocol === "https:" : url.protocol === "ws:" || url.protocol === "wss:";
-  if (!accepted) throw new TypeError(`Cast ${kind} URL uses an unsupported scheme.`);
-  if (kind === "http" && url.pathname !== "/" && url.pathname !== "") throw new TypeError("Cast relay HTTP URLs must be origins without a path.");
-  return url;
-}
-function castRelayHttpUrl(value) {
-  const url = parseBoundedUrl(value);
-  if (url.protocol === "ws:") url.protocol = "http:";
-  else if (url.protocol === "wss:") url.protocol = "https:";
-  return parseCastRelayUrl(url.href, "http");
-}
-
-// src/plugins/cast-receiver/session/pairing.ts
-async function createPairingSession(baseUrl, signal, validateOrigin) {
-  const base = parseCastRelayUrl(baseUrl, "http");
-  const response = await fetch(new URL("/v1/rooms", base), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "createRoomRequest", mode: "anonymous" }), signal });
-  if (!response.ok) throw new Error(`Relay rejected room (${response.status})`);
-  const value = await response.json();
-  if (!validRoom(value)) throw new Error("Relay returned an invalid room");
-  const created = value;
-  const websocket = new URL("/v1/socket", base);
-  websocket.protocol = websocket.protocol === "https:" ? "wss:" : "ws:";
-  await validateOrigin(websocket.href);
-  const authCode = parseAuthCode(generateAuthCode());
-  const roomJoinCode = parseRoomJoinCode(created.roomJoinCode);
-  return {
-    options: { mode: "pairing", relayUrl: websocket.href, roomJoinCode, authCode, generation: created.generation, attachmentTicket: created.receiverAttachmentTicket, ownerCapability: created.ownerCapability },
-    roomId: created.roomId,
-    ownerCapability: created.ownerCapability,
-    roomJoinCode,
-    authCode,
-    generation: created.generation,
-    expiresAt: Date.parse(created.expiresAt),
-    renew() {
-      return Promise.reject(new Error("Anonymous relay rooms cannot be renewed"));
-    },
-    async close() {
-      const cleanup = await fetch(new URL(`/v1/rooms/${created.roomId}`, base), { method: "DELETE", headers: { authorization: `DashRoom ${created.ownerCapability}` } });
-      if (!cleanup.ok && cleanup.status !== 404) throw new Error(`Relay cleanup failed (${cleanup.status})`);
-    }
-  };
-}
-function validRoom(value) {
-  if (!value || typeof value !== "object") return false;
-  const room = value;
-  return room.kind === "anonymousRoomView" && typeof room.roomId === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.roomId) && typeof room.roomJoinCode === "string" && /^\d{6}$/.test(room.roomJoinCode) && typeof room.generation === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.generation) && typeof room.receiverAttachmentTicket === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.receiverAttachmentTicket) && typeof room.ownerCapability === "string" && /^[A-Za-z0-9_-]{43}$/.test(room.ownerCapability) && typeof room.expiresAt === "string" && Date.parse(room.expiresAt) > Date.now();
-}
-
-// src/plugins/cast-receiver/session/resume-lifecycle.ts
-async function provisionReceiverResume(relayUrl, room, peer, store, signal) {
-  const base = castRelayHttpUrl(relayUrl);
-  const response = await fetch(new URL("/v1/resume/provision", base), {
-    method: "POST",
-    headers: headers(room),
-    body: JSON.stringify({ kind: "provisionResumeRequest", roomId: room.roomId, bindingId: peer.bindingId, expiresAt: peer.expiresAt }),
-    signal
-  });
-  if (!response.ok) throw new Error(`Relay resume provisioning failed (${response.status})`);
-  let rollbackPromise;
-  const rollback = () => rollbackPromise ?? (rollbackPromise = revoke(base, room, peer.bindingId));
-  let expiresAt;
-  try {
-    expiresAt = parseProvisioned(await response.json(), peer);
-  } catch (error) {
-    await rollback();
-    throw error;
-  }
-  const binding = {
-    bindingId: peer.bindingId,
-    resumePassword: peer.resumePassword,
-    roomId: room.roomId,
-    ownerCapability: room.ownerCapability,
-    expiresAt
-  };
-  const previous = await store.get();
-  try {
-    await store.replace([...previous.filter((item) => item.bindingId !== peer.bindingId), binding]);
-  } catch (error) {
-    await store.replace(previous).catch(() => void 0);
-    await rollback();
-    throw error;
-  }
-  return { binding, previous, rollback };
-}
-function parseProvisioned(value, requested) {
-  if (!value || typeof value !== "object") throw new Error("Relay returned an invalid resume binding");
-  const record2 = value;
-  const expiresAt = typeof record2.expiresAt === "string" ? Date.parse(record2.expiresAt) : Number.NaN;
-  if (record2.bindingId !== requested.bindingId || !Number.isSafeInteger(expiresAt) || expiresAt <= Date.now() || expiresAt > requested.expiresAt) throw new Error("Relay returned an invalid resume binding");
-  return expiresAt;
-}
-function headers(room) {
-  return { authorization: `DashRoom ${room.ownerCapability}`, "content-type": "application/json" };
-}
-async function revoke(base, room, bindingId) {
-  await fetch(new URL("/v1/resume/revoke", base), { method: "POST", headers: headers(room), body: JSON.stringify({ kind: "revokeResumeRequest", bindingId }) }).catch(() => void 0);
-}
-
-// src/core/cast/setup/receiver-client.ts
-var CastResumeLookupError = class extends Error {
-  constructor(message, authority) {
-    super(message);
-    this.authority = authority;
-    this.name = "CastResumeLookupError";
-  }
-};
-async function createResumeSession(relayUrl, bindingId, resumePassword, ownerCapability, signal) {
-  if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId) || !/^[A-Za-z0-9_-]{43}$/.test(ownerCapability) || resumePassword.length !== 32) throw new CastResumeLookupError("Stored Cast resume credentials are invalid", "invalid");
-  const base = castRelayHttpUrl(relayUrl);
-  const response = await fetch(new URL("/v1/resume/reconnect", base), { method: "POST", headers: { authorization: `DashRoom ${ownerCapability}`, "content-type": "application/json" }, body: JSON.stringify({ kind: "reconnectResumeRequest", bindingId }), ...signal ? { signal } : {} });
-  if (!response.ok) throw resumeError(response.status);
-  const value = await response.json();
-  if (!validResumeClaim(value, bindingId)) throw new CastResumeLookupError("Cast relay returned an invalid resume reconnect", "invalid");
-  const websocket = new URL("/v1/socket", base);
-  websocket.protocol = websocket.protocol === "https:" ? "wss:" : "ws:";
-  return { mode: "resume", relayUrl: websocket.href, attachmentTicket: value.ticket, generation: value.generation, resumeBindingId: bindingId, resumePassword };
-}
-function validResumeClaim(value, bindingId) {
-  if (!value || typeof value !== "object") return false;
-  const claim = value;
-  return claim.bindingId === bindingId && typeof claim.ticket === "string" && /^[A-Za-z0-9_-]{43}$/.test(claim.ticket) && typeof claim.generation === "string" && /^[A-Za-z0-9_-]{43}$/.test(claim.generation) && typeof claim.expiresAt === "string" && Date.parse(claim.expiresAt) > Date.now();
-}
-function resumeError(status) {
-  if (status === 404) return new CastResumeLookupError("Cast resume binding was not found", "not-found");
-  if (status === 400 || status === 403) return new CastResumeLookupError("Cast resume claim was rejected", "rejected");
-  return new CastResumeLookupError(`Cast resume lookup failed (${status})`, "transient");
-}
-
-// src/core/cast/setup/resume-binding.ts
-var MAX_CAST_RESUME_LIFETIME_MS = 30 * 24 * 60 * 60 * 1e3;
-
-// src/core/cast/protocol/data-message.ts
-var exact = (value, keys) => {
-  const actual = Object.keys(value);
-  return actual.length === keys.length && actual.every((key) => keys.includes(key));
-};
-function encoded32(value) {
-  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value)) return false;
-  try {
-    const decoded = decode(value);
-    return decoded.length === 32 && encode(decoded) === value;
-  } catch {
-    return false;
-  }
-}
-function validGeneration(value) {
-  return typeof value === "string" && /^[A-Za-z0-9_-]{16,64}$/.test(value);
-}
-function validPresentationEpoch(value) {
-  return Number.isSafeInteger(value) && Number(value) > 0;
-}
-function parseDataMessage(input, now = Date.now()) {
-  let value;
-  try {
-    value = JSON.parse(input);
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const message = value;
-  if (message.type === "binding" && exact(message, ["type", "proof"]) && encoded32(message.proof)) return { type: "binding", proof: message.proof };
-  if (message.type === "resume-binding" && exact(message, ["type", "bindingId", "resumePassword", "expiresAt"]) && encoded32(message.bindingId) && encoded32(message.resumePassword) && Number.isSafeInteger(message.expiresAt) && Number(message.expiresAt) > now && Number(message.expiresAt) <= now + MAX_CAST_RESUME_LIFETIME_MS) {
-    return message;
-  }
-  if ((message.type === "resume-binding-ack" || message.type === "resume-binding-revoke") && exact(message, ["type", "bindingId"]) && encoded32(message.bindingId)) return message;
-  if (message.type === "command" && exact(message, ["type", "command", "epoch"]) && validPresentationEpoch(message.epoch) && message.command && typeof message.command === "object" && !Array.isArray(message.command)) {
-    const command = parseCastCommand(message.command);
-    return command ? { type: "command", command, epoch: message.epoch } : null;
-  }
-  if ((message.type === "presentation-start" || message.type === "presenter-revoke") && exact(message, ["type", "epoch"]) && validPresentationEpoch(message.epoch)) return message;
-  if (message.type === "stream" && exact(message, ["type", "active", "epoch"]) && typeof message.active === "boolean" && validPresentationEpoch(message.epoch)) return message;
-  if (message.type === "sas-confirm" && exact(message, message.binding === void 0 ? ["type", "generation"] : ["type", "generation", "binding"]) && validGeneration(message.generation)) {
-    if (message.binding === void 0) return { type: "sas-confirm", generation: message.generation };
-    if (!message.binding || typeof message.binding !== "object" || Array.isArray(message.binding)) return null;
-    const binding = message.binding;
-    if (!exact(binding, ["bindingId", "resumePassword", "expiresAt"]) || !encoded32(binding.bindingId) || !encoded32(binding.resumePassword) || !Number.isSafeInteger(binding.expiresAt) || Number(binding.expiresAt) <= now || Number(binding.expiresAt) > now + MAX_CAST_RESUME_LIFETIME_MS) return null;
-    return { type: "sas-confirm", generation: message.generation, binding };
-  }
-  if (message.type === "sas-ack" && exact(message, ["type", "generation"]) && validGeneration(message.generation)) return message;
-  if (message.type === "queue-mutation" && exact(message, ["type", "mutation"])) {
-    const mutation = parseCastQueueMutation(message.mutation);
-    return mutation ? { type: "queue-mutation", mutation } : null;
-  }
-  if (message.type === "queue-snapshot" && exact(message, ["type", "snapshot", "conflict", "pairingVisible"]) && typeof message.conflict === "boolean" && typeof message.pairingVisible === "boolean") {
-    const snapshot = parseCastQueueSnapshot(message.snapshot);
-    return snapshot ? { type: "queue-snapshot", snapshot, conflict: message.conflict, pairingVisible: message.pairingVisible } : null;
-  }
-  if (message.type === "pair-display-request" && exact(message, ["type", "visible"]) && typeof message.visible === "boolean") return { type: "pair-display-request", visible: message.visible };
-  return null;
-}
-
-// src/core/cast/session/transport/presentation-epoch.ts
-var CastAuthenticationError = class extends Error {
-  code = "CAST_AUTHENTICATION_FAILED";
-  constructor(cause) {
-    super("Cast authentication failed", { cause });
-    this.name = "CastAuthenticationError";
-  }
-};
-function acceptsIncomingTrack(currentEpoch, offerEpoch) {
-  return validPresentationEpoch(offerEpoch) && offerEpoch >= currentEpoch;
-}
-function ownsActiveStream(currentEpoch, trackEpoch, currentStream, trackStream) {
-  return trackEpoch === currentEpoch && currentStream === trackStream;
-}
-
-// src/core/cast/session/transport/channel-connection.ts
-function requiredOptions(options) {
-  if (!options.generation || options.generation.length > 128 || !/^[A-Za-z0-9_-]{43}$/.test(options.attachmentTicket)) throw new Error("Secure cast credentials are required");
-  if (options.mode === "pairing") {
-    if (!/^\d{6}$/.test(options.roomJoinCode)) throw new Error("Invalid room join code");
-    if (!/^\d{6}$/.test(options.authCode)) throw new Error("Invalid auth code");
-  } else if (options.resumePassword.length !== 32 || !/^[A-Za-z0-9_-]{43}$/.test(options.resumeBindingId)) throw new Error("Invalid resume credentials");
-  return options;
-}
-function socketFor(options, _role, onOpen, prepare) {
-  const protocol = `dash-relay-v1.ticket.${options.attachmentTicket}`;
-  const socket = new WebSocket(options.relayUrl, protocol);
-  prepare == null ? void 0 : prepare(socket);
-  socket.onopen = () => {
-    onOpen == null ? void 0 : onOpen(socket);
-  };
-  return socket;
-}
-function peerFor(_options) {
-  return new RTCPeerConnection();
-}
-async function applySignal(peer, secure, signal) {
-  if (signal.type === "ice") {
-    await peer.addIceCandidate(signal.candidate);
-  } else if (signal.type === "offer") {
-    await peer.setRemoteDescription(signal.description);
-    await peer.setLocalDescription(await peer.createAnswer());
-    await secure.send({ type: "answer", description: peer.localDescription });
-  } else {
-    await peer.setRemoteDescription(signal.description);
-  }
-}
-function activateChannel(channel, pairing, onBound, onMessage) {
-  let bound = false;
-  channel.onopen = () => channel.send(JSON.stringify({ type: "binding", proof: pairing.sendBinding }));
-  channel.onmessage = ({ data }) => {
-    if (typeof data !== "string") return;
-    const value = parseDataMessage(data);
-    if (!value) return;
-    if (!bound) {
-      if (value.type !== "binding" || value.proof !== pairing.receiveBinding) {
-        channel.close();
-        return;
-      }
-      bound = true;
-      onBound();
-      return;
-    }
-    onMessage(value);
-  };
-}
-
-// src/core/cast/crypto/web/spake.source.ts
-var SIZE = { handle: 16, scalar: 32, share: 65, confirm: 32, secret: 32 };
-var encoder2 = new TextEncoder();
-var SpakeError = class extends Error {
-  constructor() {
-    super("SPAKE2+ operation failed");
-    this.name = "SpakeError";
-  }
-};
-var Secret = class {
-  value;
-  constructor(value) {
-    this.value = value;
-  }
-  bytes() {
-    if (!this.value) throw new SpakeError();
-    return this.value.slice();
-  }
-  destroy() {
-    if (this.value) {
-      this.value.fill(0);
-      this.value = void 0;
-    }
-  }
-};
-function equal(a, b) {
-  if (a.length !== b.length) return false;
-  let difference = 0;
-  for (let i = 0; i < a.length; ++i) difference |= a[i] ^ b[i];
-  return difference === 0;
-}
-var Spake = class _Spake {
-  constructor(native) {
-    this.native = native;
-  }
-  static fromNativeForTest(native) {
-    return new _Spake(native);
-  }
-  static async load(bytes, trustedSha256) {
-    if (trustedSha256.length !== 32) throw new SpakeError();
-    const raw = bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    const digest = castSha256(raw);
-    if (!equal(digest, trustedSha256)) throw new SpakeError();
-    const holder = {};
-    const entropy = (pointer, length) => {
-      if (!holder.instance || !Number.isInteger(pointer) || !Number.isInteger(length) || pointer < 0 || length < 0 || length > 65536) return -1;
-      const exports = holder.instance.exports;
-      const byteLength = exports.memory.buffer.byteLength;
-      if (pointer > byteLength - length) return -1;
-      try {
-        crypto.getRandomValues(new Uint8Array(exports.memory.buffer, pointer, length));
-        return 0;
-      } catch {
-        return -1;
-      }
-    };
-    const result = await WebAssembly.instantiate(raw, {
-      env: { getentropy: entropy, emscripten_notify_memory_growth: () => void 0 },
-      wasi_snapshot_preview1: {
-        random_get: entropy,
-        fd_write: () => 0,
-        fd_close: () => 0,
-        fd_seek: () => 0,
-        proc_exit: () => {
-          throw new SpakeError();
-        }
-      }
-    });
-    const instance = result instanceof WebAssembly.Instance ? result : result.instance;
-    holder.instance = instance;
-    const initialize = instance.exports._initialize;
-    if (typeof initialize === "function") initialize();
-    const required = [
-      "memory",
-      "malloc",
-      "free",
-      "ds_register",
-      "ds_register_resume",
-      "ds_prover_new",
-      "ds_prover_share",
-      "ds_prover_finish",
-      "ds_verifier_new",
-      "ds_verifier_process",
-      "ds_verifier_finish",
-      "ds_destroy"
-    ];
-    for (const name of required) if (!(name in instance.exports)) throw new SpakeError();
-    const native = {
-      HEAPU8: new Uint8Array(instance.exports.memory.buffer),
-      _malloc: instance.exports.malloc,
-      _free: instance.exports.free,
-      _ds_register: instance.exports.ds_register,
-      _ds_register_resume: instance.exports.ds_register_resume,
-      _ds_prover_new: instance.exports.ds_prover_new,
-      _ds_prover_share: instance.exports.ds_prover_share,
-      _ds_prover_finish: instance.exports.ds_prover_finish,
-      _ds_verifier_new: instance.exports.ds_verifier_new,
-      _ds_verifier_process: instance.exports.ds_verifier_process,
-      _ds_verifier_finish: instance.exports.ds_verifier_finish,
-      _ds_destroy: instance.exports.ds_destroy
-    };
-    Object.defineProperty(native, "HEAPU8", { get: () => new Uint8Array(instance.exports.memory.buffer) });
-    return new _Spake(native);
-  }
-  allocate(length) {
-    if (!Number.isInteger(length) || length <= 0) throw new SpakeError();
-    const pointer = this.native._malloc(length);
-    if (!pointer || pointer > this.native.HEAPU8.length - length) {
-      if (pointer) this.native._free(pointer);
-      throw new SpakeError();
-    }
-    return pointer;
-  }
-  buffers(inputs, outputs, operation) {
-    const lengths = [...inputs.map((value) => value.length), ...outputs];
-    const pointers = [];
-    try {
-      for (const length of lengths) pointers.push(this.allocate(length));
-      inputs.forEach((value, index) => this.native.HEAPU8.set(value, pointers[index]));
-      if (!operation(pointers)) throw new SpakeError();
-      return outputs.map((length, index) => {
-        const pointer = pointers[inputs.length + index];
-        if (pointer === void 0) throw new SpakeError();
-        return this.native.HEAPU8.slice(pointer, pointer + length);
-      });
-    } finally {
-      pointers.forEach((pointer, index) => {
-        this.native.HEAPU8.fill(0, pointer, pointer + lengths[index]);
-        this.native._free(pointer);
-      });
-    }
-  }
-  context(generation) {
-    const generationBytes = encoder2.encode(generation);
-    const prefix = encoder2.encode("dash-cast/spake2plus/v2/room-generation/");
-    if (!generationBytes.length || prefix.length + 4 + generationBytes.length > 256) throw new SpakeError();
-    const result = new Uint8Array(prefix.length + 4 + generationBytes.length);
-    result.set(prefix);
-    new DataView(result.buffer).setUint32(prefix.length, generationBytes.length, false);
-    result.set(generationBytes, prefix.length + 4);
-    return result;
-  }
-  resumeContext(bindingId, generation) {
-    const identity = encoder2.encode(`${bindingId}/${generation}`);
-    const prefix = encoder2.encode("dash-cast/spake2plus/resume/v1/sender-receiver/");
-    if (!/^[A-Za-z0-9_-]{43}$/.test(bindingId) || !generation || prefix.length + 4 + identity.length > 256) throw new SpakeError();
-    const result = new Uint8Array(prefix.length + 4 + identity.length);
-    result.set(prefix);
-    new DataView(result.buffer).setUint32(prefix.length, identity.length, false);
-    result.set(identity, prefix.length + 4);
-    return result;
-  }
-  register(code) {
-    if (!/^\d{6}$/.test(code)) throw new SpakeError();
-    const values = this.buffers([encoder2.encode(code)], [32, 32, 65], (p) => this.native._ds_register(p[0], 6, p[1], 32, p[2], 32, p[3], 65));
-    return { w0: new Secret(values[0]), w1: new Secret(values[1]), registration: values[2] };
-  }
-  registerResume(password) {
-    if (password.length !== 32) throw new SpakeError();
-    const values = this.buffers([password], [32, 32, 65], (p) => this.native._ds_register_resume(p[0], 32, p[1], 32, p[2], 32, p[3], 65));
-    return { w0: new Secret(values[0]), w1: new Secret(values[1]), registration: values[2] };
-  }
-  prover(context, w0, w1) {
-    if (w0.length !== 32 || w1.length !== 32) throw new SpakeError();
-    const [handle] = this.buffers([w0, w1, context], [16], (p) => this.native._ds_prover_new(p[0], 32, p[1], 32, p[2], context.length, p[3], 16));
-    return new Prover(this.native, handle, this.buffers.bind(this));
-  }
-  verifier(context, w0, registration) {
-    if (w0.length !== 32 || registration.length !== 65) throw new SpakeError();
-    const [handle] = this.buffers([w0, registration, context], [16], (p) => this.native._ds_verifier_new(p[0], 32, p[1], 65, p[2], context.length, p[3], 16));
-    return new Verifier(this.native, handle, this.buffers.bind(this));
-  }
-};
-var Session = class {
-  constructor(native, handle, buffers) {
-    this.native = native;
-    this.handle = handle;
-    this.buffers = buffers;
-  }
-  live = true;
-  requireLive() {
-    if (!this.live) throw new SpakeError();
-  }
-  terminal(operation) {
-    this.requireLive();
-    try {
-      return operation();
-    } catch (error) {
-      this.destroy();
-      throw error;
-    } finally {
-      this.live = false;
-      this.handle.fill(0);
-    }
-  }
-  destroy() {
-    if (!this.live) return;
-    try {
-      const pointer = this.native._malloc(SIZE.handle);
-      if (!pointer || pointer > this.native.HEAPU8.length - SIZE.handle) {
-        if (pointer) this.native._free(pointer);
-        throw new SpakeError();
-      }
-      try {
-        this.native.HEAPU8.set(this.handle, pointer);
-        this.native._ds_destroy(pointer, SIZE.handle);
-      } finally {
-        this.native.HEAPU8.fill(0, pointer, pointer + SIZE.handle);
-        this.native._free(pointer);
-      }
-    } finally {
-      this.live = false;
-      this.handle.fill(0);
-    }
-  }
-};
-var Prover = class extends Session {
-  shared = false;
-  share() {
-    this.requireLive();
-    if (this.shared) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    try {
-      const [share] = this.buffers([this.handle], [65], (p) => this.native._ds_prover_share(p[0], 16, p[1], 65));
-      this.shared = true;
-      return share;
-    } catch (error) {
-      this.destroy();
-      throw error;
-    }
-  }
-  finish(share, confirmation) {
-    if (share.length !== 65 || confirmation.length !== 32) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    return this.terminal(() => {
-      const values = this.buffers([this.handle, share, confirmation], [32, 32], (p) => this.native._ds_prover_finish(p[0], 16, p[1], 65, p[2], 32, p[3], 32, p[4], 32));
-      return { confirmation: values[0], key: new Secret(values[1]) };
-    });
-  }
-};
-var Verifier = class extends Session {
-  processed = false;
-  process(share) {
-    this.requireLive();
-    if (this.processed || share.length !== 65) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    try {
-      const values = this.buffers([this.handle, share], [65, 32], (p) => this.native._ds_verifier_process(p[0], 16, p[1], 65, p[2], 65, p[3], 32));
-      this.processed = true;
-      return { share: values[0], confirmation: values[1] };
-    } catch (error) {
-      this.destroy();
-      throw error;
-    }
-  }
-  finish(confirmation) {
-    if (confirmation.length !== 32) {
-      this.destroy();
-      throw new SpakeError();
-    }
-    return this.terminal(() => new Secret(this.buffers([this.handle, confirmation], [32], (p) => this.native._ds_verifier_finish(p[0], 16, p[1], 32, p[2], 32))[0]));
-  }
-};
-
-// src/core/cast/crypto/runtime.ts
-function ownedBuffer(bytes) {
-  const copy = new Uint8Array(bytes.byteLength);
-  copy.set(bytes);
-  return copy.buffer;
-}
-function loadSpake(asset) {
-  return Spake.load(ownedBuffer(asset.bytes), decode(asset.sha256));
-}
-
-// src/core/cast/protocol/handshake.ts
-async function deriveSas(shared, transcript) {
-  await Promise.resolve();
-  for (let counter = 0; counter < 256; counter += 1) {
-    const label = new TextEncoder().encode(`dash-secure-webrtc/sas/v1/${counter}`);
-    const input = new Uint8Array(label.length + transcript.length);
-    input.set(label);
-    input.set(transcript, label.length);
-    const output = castHmacSha256(shared, input);
-    input.fill(0);
-    const value = new DataView(output.buffer, output.byteOffset, output.byteLength).getUint32(0, false);
-    output.fill(0);
-    if (value < 4294e6) return String(value % 1e6).padStart(6, "0");
-  }
-  throw new Error("Unable to derive session authentication code");
-}
-async function complete(shared, transcript, role) {
-  let keys;
-  try {
-    const sas = await deriveSas(shared, transcript);
-    keys = await deriveDirectionalKeys(shared, transcript, role);
-    const sendBinding = await deriveBinding(shared, transcript, role);
-    const receiveBinding = await deriveBinding(shared, transcript, role === "sender" ? "receiver" : "sender");
-    return { keys, sendBinding, receiveBinding, sas };
-  } catch (error) {
-    destroyDirectionalKeys(keys);
-    throw error;
-  } finally {
-    shared.fill(0);
-  }
-}
-var ReceiverHandshake = class {
-  constructor(spake, identity) {
-    this.spake = spake;
-    this.identity = identity;
-  }
-  request;
-  challenge;
-  transcript;
-  verifier;
-  destroy() {
-    var _a;
-    (_a = this.verifier) == null ? void 0 : _a.destroy();
-    delete this.verifier;
-  }
-  createVerifier() {
-    const registration = this.identity.mode === "resume" ? this.spake.registerResume(this.identity.resumePassword) : this.spake.register(this.identity.authCode);
-    const w0 = registration.w0.bytes();
-    const context = this.identity.mode === "resume" ? this.spake.resumeContext(this.identity.resumeBindingId, this.identity.generation) : this.spake.context(this.identity.generation);
-    try {
-      return this.spake.verifier(context, w0, registration.registration);
-    } finally {
-      w0.fill(0);
-      registration.w0.destroy();
-      registration.w1.destroy();
-      registration.registration.fill(0);
-    }
-  }
-  challengeFor(request, count) {
-    var _a;
-    if (this.transcript) throw new Error("Cast verification already started");
-    (_a = this.verifier) == null ? void 0 : _a.destroy();
-    this.verifier = this.createVerifier();
-    this.request = request;
-    this.challenge = createChallenge(count);
-    return { type: "challenge", ...this.challenge };
-  }
-  async process(value) {
-    const request = this.request;
-    const challenge = this.challenge;
-    const verifier = this.verifier;
-    if (!request || !challenge || !verifier || value.challenge !== challenge.challenge || value.share !== request.share || value.nonce !== request.nonce || challenge.expiresAt <= Date.now() || !await verifyProof(decode(value.challenge), this.identity.mode === "resume" ? this.spake.resumeContext(this.identity.resumeBindingId, this.identity.generation) : this.spake.context(this.identity.generation), decode(value.share), value.proof, challenge.difficulty) || this.request !== request || this.challenge !== challenge || this.verifier !== verifier || challenge.expiresAt <= Date.now()) {
-      throw new Error("Invalid cast proof");
-    }
-    const processed = verifier.process(decode(value.share));
-    const transcriptIdentity = this.identity.mode === "pairing" ? this.identity.roomJoinCode : this.identity.resumeBindingId;
-    this.transcript = canonicalTranscript({
-      sessionIdentity: transcriptIdentity,
-      generation: this.identity.generation,
-      challenge: challenge.challenge,
-      challengeCount: challenge.count,
-      difficulty: challenge.difficulty,
-      expiresAt: challenge.expiresAt,
-      proverNonce: value.nonce,
-      proverShare: value.share,
-      verifierShare: encode(processed.share)
-    });
-    return { type: "verifier", share: encode(processed.share), confirmation: encode(processed.confirmation) };
-  }
-  async finish(value) {
-    if (!this.transcript || !this.verifier) throw new Error("Cast verifier not ready");
-    const secret = this.verifier.finish(decode(value.confirmation));
-    const shared = secret.bytes();
-    secret.destroy();
-    return complete(shared, this.transcript, "receiver");
-  }
-};
-
-// src/core/cast/protocol/signaling.ts
-var socketSequences = /* @__PURE__ */ new WeakMap();
-var exact2 = (value, keys) => Object.keys(value).length === keys.length && keys.every((key) => key in value);
-var encoded = (value, bytes) => typeof value === "string" && /^[A-Za-z0-9_-]+$/.test(value) && decode(value).length === bytes;
-var boundedString = (value) => typeof value === "string" && value.length <= MAX_CAST_MESSAGE_BYTES;
-function parseDescription(value, type) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  if (!exact2(candidate, ["type", "sdp"]) || candidate.type !== type || !boundedString(candidate.sdp)) return null;
-  return { type, sdp: candidate.sdp };
-}
-function parseIceCandidate(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const candidate = value;
-  const keys = Object.keys(candidate);
-  if (!keys.includes("candidate") || keys.some((key) => !["candidate", "sdpMid", "sdpMLineIndex", "usernameFragment"].includes(key)) || !boundedString(candidate.candidate)) return null;
-  if ("sdpMid" in candidate && candidate.sdpMid !== null && !boundedString(candidate.sdpMid)) return null;
-  if ("usernameFragment" in candidate && candidate.usernameFragment !== null && !boundedString(candidate.usernameFragment)) return null;
-  if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
-  return candidate;
-}
-function sendWire(socket, value, channel) {
-  const state = socketSequences.get(socket) ?? { sent: 0, received: 0 };
-  const inner = JSON.stringify(value);
-  if (inner.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
-  const type = value.type === "signal" ? "signal" : value.type === "receiver-ready" ? "resume" : channel ?? "pairing";
-  socket.send(JSON.stringify({ kind: "wsFrame", v: 1, seq: state.sent, type, payload: encode(new TextEncoder().encode(inner)) }));
-  state.sent += 1;
-  socketSequences.set(socket, state);
-}
-function parseWire(data, socket, expectedChannel) {
-  return parseWireFrame(data, socket, expectedChannel);
-}
-function parseWireFrame(data, socket, expectedChannel) {
-  if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES * 2) return null;
-  let outer;
-  try {
-    outer = JSON.parse(data);
-  } catch {
-    return null;
-  }
-  if (!outer || typeof outer !== "object") return null;
-  const frame = outer;
-  if (!exact2(frame, ["kind", "v", "seq", "type", "payload"]) || frame.kind !== "wsFrame" || frame.v !== 1 || !Number.isSafeInteger(frame.seq) || !["pairing", "signal", "resume"].includes(String(frame.type)) || typeof frame.payload !== "string" || !/^[A-Za-z0-9_-]+$/.test(frame.payload)) return null;
-  let value;
-  try {
-    const bytes = decode(frame.payload);
-    if (encode(bytes) !== frame.payload) return null;
-    value = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-  } catch {
-    return null;
-  }
-  if (!value || typeof value !== "object" || !("type" in value)) return null;
-  const candidate = value;
-  const expectedType = candidate.type === "signal" ? "signal" : candidate.type === "receiver-ready" ? "resume" : expectedChannel ?? "pairing";
-  if (frame.type !== expectedType) return null;
-  let parsed = null;
-  if (candidate.type === "receiver-ready" && exact2(candidate, ["type"])) parsed = candidate;
-  else if (candidate.type === "challenge-request" && exact2(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) parsed = candidate;
-  else if (candidate.type === "challenge" && exact2(candidate, ["type", "challenge", "count", "difficulty", "expiresAt"]) && encoded(candidate.challenge, 32) && Number.isSafeInteger(candidate.count) && Number.isSafeInteger(candidate.difficulty) && Number.isSafeInteger(candidate.expiresAt)) parsed = candidate;
-  else if (candidate.type === "prover" && exact2(candidate, ["type", "challenge", "share", "nonce", "proof"]) && encoded(candidate.challenge, 32) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce) && Number.isSafeInteger(candidate.proof)) parsed = candidate;
-  else if (candidate.type === "verifier" && exact2(candidate, ["type", "share", "confirmation"]) && encoded(candidate.share, 65) && encoded(candidate.confirmation, 32)) parsed = candidate;
-  else if (candidate.type === "confirm" && exact2(candidate, ["type", "confirmation"]) && encoded(candidate.confirmation, 32)) parsed = candidate;
-  else if (candidate.type === "signal" && exact2(candidate, ["type", "signalType", "sequence", "ciphertext"]) && ["offer", "answer", "ice"].includes(String(candidate.signalType)) && Number.isSafeInteger(candidate.sequence) && typeof candidate.ciphertext === "string" && /^[A-Za-z0-9_-]+$/.test(candidate.ciphertext)) parsed = candidate;
-  if (!parsed) return null;
-  if (socket) {
-    const state = socketSequences.get(socket) ?? { sent: 0, received: 0 };
-    if (frame.seq !== state.received) return null;
-    state.received += 1;
-    socketSequences.set(socket, state);
-  }
-  return parsed;
-}
-var EncryptedSignaling = class {
-  constructor(socket, keys, role) {
-    this.socket = socket;
-    this.keys = keys;
-    this.role = role;
-  }
-  sent = 1;
-  received = 0;
-  sendQueue = Promise.resolve();
-  receiveQueue = Promise.resolve();
-  applyQueue = Promise.resolve();
-  closed = false;
-  close() {
-    if (this.closed) return;
-    this.closed = true;
-    destroyDirectionalKeys(this.keys);
-  }
-  send(signal) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.sendQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      const type = signal.type;
-      const payload2 = type === "ice" ? signal.candidate : signal.type === "offer" ? { description: signal.description, presentationEpoch: signal.presentationEpoch } : signal.description;
-      const sequence = this.sent;
-      const frame = await encryptSignal(this.keys.send, sequence, payload2, type, this.role);
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      sendWire(this.socket, { type: "signal", signalType: type, ...frame });
-      this.sent = sequence + 1;
-    });
-    this.sendQueue = pending.catch(() => void 0);
-    return pending;
-  }
-  receive(value) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.receiveQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      const remote = this.role === "sender" ? "receiver" : "sender";
-      const opened = await decryptSignal(this.keys.receive, value, this.received, value.signalType, remote);
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      this.received = opened.sequence;
-      if (value.signalType === "ice") {
-        const candidate = parseIceCandidate(opened.value);
-        if (!candidate) throw new Error("Invalid Cast ICE candidate");
-        return { type: "ice", candidate };
-      }
-      if (value.signalType === "offer") {
-        const offer = opened.value;
-        if (!offer || typeof offer !== "object" || Array.isArray(offer)) throw new Error("Invalid Cast offer metadata");
-        const metadata = offer;
-        const description2 = exact2(metadata, ["description", "presentationEpoch"]) ? parseDescription(metadata.description, "offer") : null;
-        if (!description2 || !Number.isSafeInteger(metadata.presentationEpoch) || Number(metadata.presentationEpoch) < 0) throw new Error("Invalid Cast offer metadata");
-        return { type: "offer", description: description2, presentationEpoch: Number(metadata.presentationEpoch) };
-      }
-      const description = parseDescription(opened.value, "answer");
-      if (!description) throw new Error("Invalid Cast answer");
-      return { type: "answer", description };
-    });
-    this.receiveQueue = pending.then(() => void 0, () => void 0);
-    return pending;
-  }
-  apply(operation) {
-    if (this.closed) return Promise.reject(new Error("Encrypted signaling is closed"));
-    const pending = this.applyQueue.then(async () => {
-      if (this.closed) throw new Error("Encrypted signaling is closed");
-      await operation();
-    });
-    this.applyQueue = pending.catch(() => void 0);
-    return pending;
-  }
-};
-
-// src/core/cast/session/receiver/receiver-channel-handler.ts
-function handleReceiverDataMessage(message, ctx) {
-  var _a, _b;
-  if (message.type === "resume-binding") {
-    if (!ctx.trusted) {
-      ctx.closeChannel();
-      return;
-    }
-    const persisted = ctx.onResumeBinding ? ctx.onResumeBinding(message) : Promise.reject(new Error("Cast resume storage is unavailable"));
-    void persisted.then(() => ctx.send({ type: "resume-binding-ack", bindingId: message.bindingId })).catch(ctx.fail);
-    return;
-  }
-  if (message.type === "resume-binding-revoke") {
-    if (ctx.trusted) void ((_a = ctx.onResumeRevoke) == null ? void 0 : _a.call(ctx, message.bindingId).catch(ctx.fail));
-    return;
-  }
-  if (message.type === "sas-confirm") {
-    if (ctx.trusted || message.generation !== ctx.options.generation || !ctx.state.sas) {
-      ctx.closeChannel();
-      return;
-    }
-    const pending = message.binding;
-    const persisted = pending ? ctx.onResumeBinding ? ctx.onResumeBinding(pending) : Promise.reject(new Error("Cast resume storage is unavailable")) : Promise.resolve();
-    void persisted.then(() => {
-      var _a2;
-      if (pending) ctx.send({ type: "resume-binding-ack", bindingId: pending.bindingId });
-      ctx.setTrusted(true);
-      ctx.state.sasTrusted = true;
-      delete ctx.state.sas;
-      ctx.send({ type: "sas-ack", generation: ctx.options.generation });
-      (_a2 = ctx.onConnection) == null ? void 0 : _a2.call(ctx, { generation: ctx.options.generation, trusted: true });
-      ctx.emit();
-    }).catch(ctx.fail);
-    return;
-  }
-  if (!ctx.trusted) return;
-  if (message.type === "queue-mutation" || message.type === "pair-display-request") {
-    (_b = ctx.onAuthenticatedMessage) == null ? void 0 : _b.call(ctx, message, ctx.send);
-    return;
-  }
-  if (message.type === "presentation-start") {
-    if (message.epoch > ctx.state.presentationEpoch) {
-      ctx.state.presentationEpoch = message.epoch;
-      ctx.state.command = null;
-      ctx.state.screenStream = ctx.pendingStream;
-      ctx.state.status = "casting";
-      ctx.emit();
-    }
-    return;
-  }
-  if (message.type === "stream") {
-    if (message.epoch !== ctx.state.presentationEpoch) return;
-    if (!message.active) {
-      ctx.state.screenStream = null;
-      ctx.state.command = null;
-      ctx.state.status = "paired";
-      ctx.emit();
-    } else if (ctx.pendingStream) {
-      ctx.state.screenStream = ctx.pendingStream;
-      ctx.state.command = null;
-      ctx.state.status = "casting";
-      ctx.emit();
-    }
-    return;
-  }
-  if (message.type !== "command" || message.epoch < ctx.state.presentationEpoch) return;
-  ctx.state.presentationEpoch = message.epoch;
-  ctx.state.command = message.command.sourceKind === "idle" ? null : message.command;
-  ctx.state.screenStream = null;
-  ctx.setPendingStream(null);
-  ctx.state.status = message.command.sourceKind === "idle" ? "paired" : "casting";
-  ctx.emit();
-}
-
-// src/core/cast/session/receiver/receiver-track-handler.ts
-function handleReceiverTrack(ev, ctx) {
-  queueMicrotask(() => {
-    const trackEpoch = ctx.transceiverEpochs.get(ev.transceiver) ?? ctx.applyingOfferEpoch;
-    if (trackEpoch === void 0 || !acceptsIncomingTrack(ctx.state.presentationEpoch, trackEpoch)) {
-      ev.track.stop();
-      return;
-    }
-    const activeStream = ev.streams[0] ?? ctx.getPendingStream() ?? new MediaStream();
-    if (!activeStream.getTracks().includes(ev.track)) activeStream.addTrack(ev.track);
-    ctx.setPendingStream(activeStream);
-    ev.track.addEventListener("ended", () => {
-      if (!ownsActiveStream(ctx.state.presentationEpoch, trackEpoch, ctx.state.screenStream, activeStream)) return;
-      activeStream.removeTrack(ev.track);
-      if (activeStream.getTracks().length === 0) {
-        ctx.setPendingStream(null);
-        ctx.state.screenStream = null;
-        ctx.state.command = null;
-        ctx.state.status = "paired";
-        ctx.emit();
-      }
-    }, { once: true });
-    if (trackEpoch !== ctx.state.presentationEpoch) return;
-    ctx.state.screenStream = activeStream;
-    ctx.state.command = null;
-    ctx.state.status = "casting";
-    ctx.emit();
-  });
-}
-
-// src/core/cast/session/receiver/receiver-signaling.ts
-async function handleReceiverSignalWire(wire, signaling, peer, ctx) {
-  try {
-    const signal = await signaling.receive(wire);
-    if (signal.type === "offer") {
-      ctx.setApplyingOfferEpoch(signal.presentationEpoch);
-      try {
-        await peer.setRemoteDescription(signal.description);
-      } finally {
-        ctx.setApplyingOfferEpoch(void 0);
-      }
-      for (const transceiver of peer.getTransceivers()) {
-        ctx.transceiverEpochs.set(transceiver, signal.presentationEpoch);
-      }
-      await peer.setLocalDescription(await peer.createAnswer());
-      await signaling.send({ type: "answer", description: peer.localDescription });
-    } else {
-      await applySignal(peer, signaling, signal);
-    }
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "OperationError") {
-      throw new CastAuthenticationError(error);
-    }
-    throw error;
-  }
-}
-
-// src/core/cast/session/receiver/receiver-wire-handler.ts
-async function processReceiverWireMessage(data, ctx) {
-  if (typeof data === "string" && data === '{"kind":"relayPeerReady","v":1}') return;
-  const wire = parseWire(data, ctx.active, ctx.options.mode);
-  if (!wire) throw new Error("Invalid cast message");
-  const handshake = ctx.getHandshake();
-  if (wire.type === "challenge-request") {
-    sendWire(ctx.active, handshake.challengeFor(wire, ctx.incrementCount()), ctx.options.mode);
-    return;
-  }
-  if (wire.type === "prover") {
-    sendWire(ctx.active, await handshake.process(wire), ctx.options.mode);
-    return;
-  }
-  if (wire.type === "confirm") {
-    let result;
-    try {
-      result = await handshake.finish(wire);
-    } catch (error) {
-      throw new CastAuthenticationError(error);
-    }
-    const { keys, ...activePairing } = result;
-    let peer;
-    let signaling;
-    try {
-      peer = peerFor(ctx.options);
-      signaling = new EncryptedSignaling(ctx.active, keys, "receiver");
-      ctx.setPeer(peer);
-      ctx.setSignaling(signaling);
-      ctx.setPairing(activePairing);
-    } catch (error) {
-      keys.send.destroy();
-      keys.receive.destroy();
-      throw error;
-    }
-    if (ctx.options.mode === "resume") delete ctx.state.sas;
-    else ctx.state.sas = activePairing.sas;
-    peer.onicecandidate = ({ candidate }) => {
-      if (candidate) void signaling.send({ type: "ice", candidate: candidate.toJSON() }).catch(ctx.fail);
-    };
-    peer.onconnectionstatechange = () => {
-      if (peer.connectionState === "closed" || peer.connectionState === "failed" || peer.connectionState === "disconnected") {
-        ctx.disconnect();
-      }
-    };
-    peer.ontrack = (trackEvent) => {
-      handleReceiverTrack(trackEvent, {
-        state: ctx.state,
-        applyingOfferEpoch: ctx.getApplyingOfferEpoch(),
-        transceiverEpochs: ctx.transceiverEpochs,
-        getPendingStream: ctx.getPendingStream,
-        setPendingStream: ctx.setPendingStream,
-        emit: ctx.emit
-      });
-    };
-    peer.ondatachannel = ({ channel: incoming }) => {
-      ctx.setChannel(incoming);
-      const pairing = ctx.getPairing();
-      if (!pairing) {
-        incoming.close();
-        return;
-      }
-      const send = (outgoing) => {
-        if (incoming.readyState === "open") incoming.send(JSON.stringify(outgoing));
-      };
-      activateChannel(
-        incoming,
-        pairing,
-        () => {
-          var _a;
-          ctx.state.peerCount = 1;
-          ctx.state.status = "paired";
-          const isTrusted = ctx.options.mode === "resume";
-          ctx.setTrusted(isTrusted);
-          if (isTrusted) {
-            ctx.state.sasTrusted = true;
-            (_a = ctx.onConnection) == null ? void 0 : _a.call(ctx, { generation: ctx.options.generation, trusted: true });
-          }
-          ctx.emit();
-        },
-        (message) => {
-          handleReceiverDataMessage(message, {
-            state: ctx.state,
-            trusted: ctx.getTrusted(),
-            setTrusted: ctx.setTrusted,
-            options: ctx.options,
-            pendingStream: ctx.getPendingStream(),
-            setPendingStream: ctx.setPendingStream,
-            emit: ctx.emit,
-            fail: ctx.fail,
-            closeChannel: () => incoming.close(),
-            send,
-            onResumeBinding: ctx.onResumeBinding,
-            onResumeRevoke: ctx.onResumeRevoke,
-            onAuthenticatedMessage: ctx.onAuthenticatedMessage,
-            onConnection: ctx.onConnection
-          });
-        }
-      );
-      incoming.onclose = ctx.disconnect;
-    };
-    return;
-  }
-  if (wire.type === "signal") {
-    const signaling = ctx.getSignaling();
-    const peer = ctx.getPeer();
-    if (signaling && peer) {
-      await handleReceiverSignalWire(wire, signaling, peer, {
-        applyingOfferEpoch: ctx.getApplyingOfferEpoch(),
-        setApplyingOfferEpoch: ctx.setApplyingOfferEpoch,
-        transceiverEpochs: ctx.transceiverEpochs
-      });
-    }
-  }
-}
-
-// src/core/cast/session/receiver/receiver-teardown.ts
-function closeReceiver(ctx) {
-  var _a, _b, _c, _d, _e, _f, _g, _h;
-  if (ctx.getTrusted()) (_a = ctx.onConnection) == null ? void 0 : _a.call(ctx, { generation: ctx.generation, trusted: false });
-  ctx.setTrusted(false);
-  (_b = ctx.setClosed) == null ? void 0 : _b.call(ctx, true);
-  (_c = ctx.setPendingStream) == null ? void 0 : _c.call(ctx, null);
-  (_d = ctx.clearScreenStream) == null ? void 0 : _d.call(ctx);
-  (_e = ctx.getActiveHandshake()) == null ? void 0 : _e.destroy();
-  ctx.setActiveHandshake(void 0);
-  (_f = ctx.getSignaling()) == null ? void 0 : _f.close();
-  ctx.setSignaling(void 0);
-  ctx.setPairing(void 0);
-  (_g = ctx.getSocket()) == null ? void 0 : _g.close();
-  (_h = ctx.getPeer()) == null ? void 0 : _h.close();
-}
-function rejectReceiverSas(ctx) {
-  var _a, _b, _c, _d;
-  ctx.setTrusted(false);
-  (_a = ctx.getActiveHandshake()) == null ? void 0 : _a.destroy();
-  ctx.setActiveHandshake(void 0);
-  (_b = ctx.getSignaling()) == null ? void 0 : _b.close();
-  ctx.setSignaling(void 0);
-  ctx.setPairing(void 0);
-  (_c = ctx.getChannel()) == null ? void 0 : _c.close();
-  (_d = ctx.getPeer()) == null ? void 0 : _d.close();
-}
-function revokePresenterHelper(trusted, channel, epoch) {
-  if (trusted && (channel == null ? void 0 : channel.readyState) === "open" && Number.isSafeInteger(epoch) && epoch > 0) {
-    channel.send(JSON.stringify({ type: "presenter-revoke", epoch }));
-  }
-}
-function sendReceiverMessageHelper(trusted, channel, message) {
-  if (trusted && (channel == null ? void 0 : channel.readyState) === "open") {
-    channel.send(JSON.stringify(message));
-  }
-}
-
-// src/core/cast/session/receiver/receiver-session.ts
-function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
-  const options = requiredOptions(optionsInput);
-  const state = { status: "connecting", command: null, presentationEpoch: 0, screenStream: null, peerCount: 0, error: null };
-  let peer;
-  let channel;
-  let pendingStream = null;
-  const transceiverEpochs = /* @__PURE__ */ new WeakMap();
-  let closed = false;
-  let socketAttempts = 0;
-  let socket;
-  let signaling;
-  let pairing;
-  let applyingOfferEpoch;
-  let activeHandshake;
-  let trusted = options.mode === "resume";
-  const listening = Promise.withResolvers();
-  const emit = () => {
-    if (!closed) onState({ ...state });
-  };
-  const disconnect = () => {
-    if (closed || state.peerCount === 0) return;
-    trusted = false;
-    onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: false });
-    state.peerCount = 0;
-    state.status = "disconnected";
-    emit();
-    signaling == null ? void 0 : signaling.close();
-    if (options.mode !== "resume") socket.close();
-    peer == null ? void 0 : peer.close();
-    peer = void 0;
-    channel = void 0;
-    signaling = void 0;
-    pairing = void 0;
-  };
-  const fail = (error) => {
-    activeHandshake == null ? void 0 : activeHandshake.destroy();
-    activeHandshake = void 0;
-    signaling == null ? void 0 : signaling.close();
-    signaling = void 0;
-    pairing = void 0;
-    state.status = "error";
-    state.error = error instanceof CastAuthenticationError ? "Cast authentication failed" : error instanceof Error ? error.message : String(error);
-    emit();
-  };
-  const initialPending = [];
-  let bindReady;
-  socket = socketFor(
-    options,
-    "receiver",
-    (active) => bindReady == null ? void 0 : bindReady(active, initialPending),
-    (active) => {
-      active.onmessage = (event) => initialPending.push(event);
-    }
-  );
-  void loadSpake(asset).then((spake) => {
-    const bindSocket = (active, pending) => {
-      let handshake = new ReceiverHandshake(spake, options);
-      activeHandshake = handshake;
-      let count = 0;
-      listening.resolve();
-      const wireCtx = {
-        active,
-        options,
-        state,
-        getHandshake: () => handshake,
-        setHandshake: (h) => {
-          handshake = h;
-          activeHandshake = h;
-        },
-        getCount: () => count,
-        incrementCount: () => ++count,
-        getPeer: () => peer,
-        setPeer: (p) => {
-          peer = p;
-        },
-        getChannel: () => channel,
-        setChannel: (c) => {
-          channel = c;
-        },
-        getSignaling: () => signaling,
-        setSignaling: (s) => {
-          signaling = s;
-        },
-        getPairing: () => pairing,
-        setPairing: (p) => {
-          pairing = p;
-        },
-        getTrusted: () => trusted,
-        setTrusted: (t) => {
-          trusted = t;
-        },
-        getPendingStream: () => pendingStream,
-        setPendingStream: (s) => {
-          pendingStream = s;
-        },
-        transceiverEpochs,
-        getApplyingOfferEpoch: () => applyingOfferEpoch,
-        setApplyingOfferEpoch: (e) => {
-          applyingOfferEpoch = e;
-        },
-        disconnect,
-        emit,
-        fail,
-        onResumeBinding,
-        onResumeRevoke,
-        onAuthenticatedMessage,
-        onConnection
-      };
-      const receive = ({ data }) => {
-        void processReceiverWireMessage(data, wireCtx).catch(fail);
-      };
-      active.onmessage = receive;
-      active.onclose = (event) => {
-        handshake.destroy();
-        if (activeHandshake === handshake) activeHandshake = void 0;
-        if (!closed && options.mode === "resume" && state.peerCount === 0 && event.code === 1008 && socketAttempts < 7) {
-          const delay = 100 * 2 ** socketAttempts++;
-          window.setTimeout(() => {
-            if (closed) return;
-            const retryPending = [];
-            const retry = socketFor(options, "receiver", (retrySocket) => bindSocket(retrySocket, retryPending));
-            retry.onmessage = (retryEvent) => retryPending.push(retryEvent);
-            socket = retry;
-          }, delay);
-          return;
-        }
-        disconnect();
-      };
-      pending.splice(0).forEach(receive);
-    };
-    bindReady = bindSocket;
-    if (socket.readyState === WebSocket.OPEN) bindSocket(socket, initialPending);
-  }).catch(fail);
-  emit();
-  const tearDownContext = {
-    getTrusted: () => trusted,
-    setTrusted: (t) => {
-      trusted = t;
-    },
-    setClosed: (c) => {
-      closed = c;
-    },
-    setPendingStream: (s) => {
-      pendingStream = s;
-    },
-    clearScreenStream: () => {
-      state.screenStream = null;
-    },
-    getActiveHandshake: () => activeHandshake,
-    setActiveHandshake: (h) => {
-      activeHandshake = h;
-    },
-    getSignaling: () => signaling,
-    setSignaling: (s) => {
-      signaling = s;
-    },
-    setPairing: (p) => {
-      pairing = p;
-    },
-    getSocket: () => socket,
-    getPeer: () => peer,
-    getChannel: () => channel,
-    generation: options.generation,
-    onConnection
-  };
-  return {
-    listening: listening.promise,
-    close() {
-      closeReceiver(tearDownContext);
-    },
-    confirmSas(accepted) {
-      if (accepted && (channel == null ? void 0 : channel.readyState) === "open") {
-        channel.send(JSON.stringify({ type: "sas-ack", generation: options.generation }));
-        trusted = true;
-        state.sasTrusted = true;
-        delete state.sas;
-        onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
-        emit();
-      } else rejectReceiverSas(tearDownContext);
-    },
-    revokePresenter(epoch) {
-      revokePresenterHelper(trusted, channel, epoch);
-    },
-    send(message) {
-      sendReceiverMessageHelper(trusted, channel, message);
-    }
-  };
-}
-
-// src/plugins/cast-receiver/receiver.ts
-function createPluginReceiver(options, asset, onState, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection) {
-  return createCastReceiver(options, (state) => onState({
-    status: state.status,
-    command: state.command,
-    presentationEpoch: state.presentationEpoch,
-    stream: state.screenStream,
-    peerCount: state.peerCount,
-    error: state.error,
-    ...state.sas ? { sas: state.sas } : {},
-    ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
-  }), asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection);
-}
-
-// src/plugins/cast-receiver/session/screen-session.ts
-function errorMessage(error) {
-  if (error instanceof Error) return error.message;
-  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
-  return String(error);
-}
-function createScreenSession(context) {
-  const config = readCastConfig(context.config);
-  const state = {
-    status: "connecting",
-    command: null,
-    presentationEpoch: 0,
-    stream: null,
-    peerCount: 0,
-    error: null,
-    roomJoinCode: "",
-    authCode: "",
-    relayUrl: config.relayUrl,
-    senderUrl: config.senderUrl,
-    queue: createCastQueueSnapshot(config.autoplay),
-    pairingReveal: 0,
-    pairingVisible: false
-  };
-  const listeners = /* @__PURE__ */ new Set();
-  const listeningBindings = /* @__PURE__ */ new Set();
-  const pendingBindingInstalls = /* @__PURE__ */ new Map();
-  const resumeEntries = /* @__PURE__ */ new Map();
-  const dormantBindings = /* @__PURE__ */ new Map();
-  const connected = /* @__PURE__ */ new Set();
-  const abort = new AbortController();
-  const pendingConnectionEvents = /* @__PURE__ */ new Map();
-  let pairing, livePresenter, sasOwner, renewal, sasTimer, disposed = false;
-  let authoritativeEpoch = 0;
-  let lifecycle = Promise.resolve();
-  let observedDecisionVersion = 0;
-  const publish = (patch) => {
-    if ("sas" in patch && patch.sas === void 0) delete state.sas;
-    if ("sasTrusted" in patch && patch.sasTrusted === void 0) delete state.sasTrusted;
-    if (state.sasTrusted === true && patch.sasTrusted === void 0) delete patch.sasTrusted;
-    Object.assign(state, patch);
-    listeners.forEach((listener) => listener({ ...state }));
-    const hostState = {
-      status: state.status,
-      command: state.command,
-      presentationEpoch: state.presentationEpoch,
-      peerCount: state.peerCount,
-      error: state.error,
-      roomJoinCode: state.roomJoinCode,
-      authCode: state.authCode,
-      relayUrl: state.relayUrl,
-      senderUrl: state.senderUrl,
-      pairingReveal: state.pairingReveal,
-      pairingVisible: state.pairingVisible,
-      ...state.sas ? { sas: state.sas } : {},
-      ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
-    };
-    void context.setCastState(hostState);
-  };
-  const report = (error) => {
-    const message = errorMessage(error);
-    context.log("error", "Cast receiver operation failed", { "error.message": message });
-    publish({ status: "error", error: message });
-  };
-  const enqueue = (operation) => {
-    lifecycle = lifecycle.then(operation).catch(report);
-  };
-  const dismissalInterval = context.getCastState ? window.setInterval(() => {
-    void context.getCastState().then((hostState) => {
-      var _a;
-      if (disposed || !sasOwner || !(hostState == null ? void 0 : hostState.sasDecision) || typeof hostState.sasDecision !== "object") return;
-      const action = hostState.sasDecision;
-      if (action.sas !== state.sas || !Number.isSafeInteger(action.version) || Number(action.version) <= observedDecisionVersion || action.decision !== "accept" && action.decision !== "dismiss") return;
-      observedDecisionVersion = Number(action.version);
-      const entry = sasOwner;
-      sasOwner = void 0;
-      clearTimeout(sasTimer);
-      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(action.decision === "accept");
-      if (action.decision === "dismiss") entry.trusted = false;
-      delete state.sas;
-      delete state.sasTrusted;
-      publish({});
-    }).catch(report);
-  }, 200) : void 0;
-  const applyConnection = (entry, expectedGeneration, event) => {
-    var _a, _b;
-    if (event.generation !== expectedGeneration) return;
-    entry.trusted = event.trusted;
-    if (event.trusted) {
-      delete state.sas;
-      publish({ sasTrusted: true });
-      (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
-    }
-  };
-  const broadcastQueue = (conflictEntry) => {
-    var _a, _b;
-    for (const entry of connected) if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: entry === conflictEntry, pairingVisible: state.pairingVisible });
-  };
-  const authenticatedMessage = (entry) => (message, send) => {
-    var _a, _b;
-    if (!entry.trusted) return;
-    if (message.type === "pair-display-request") {
-      publish({ pairingVisible: message.visible, pairingReveal: message.visible ? state.pairingReveal + 1 : state.pairingReveal });
-      broadcastQueue();
-      return;
-    }
-    const next = applyCastQueueMutation(state.queue, message.mutation);
-    if (!next) {
-      send({ type: "queue-snapshot", snapshot: state.queue, conflict: true, pairingVisible: state.pairingVisible });
-      return;
-    }
-    state.queue = next;
-    const current = next.items.find((item) => item.id === next.currentItemId);
-    const sourceChanged = Boolean(current && (((_a = state.command) == null ? void 0 : _a.sourceKind) !== current.command.sourceKind || state.command.sourceUrl !== current.command.sourceUrl));
-    const command = current ? { ...current.command, outputMode: next.outputMode } : null;
-    if (current && sourceChanged) {
-      authoritativeEpoch += 1;
-      entry.epochOffset = authoritativeEpoch - entry.state.presentationEpoch;
-      if (livePresenter) {
-        livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch);
-        (_b = livePresenter.receiver) == null ? void 0 : _b.revokePresenter(livePresenter.state.presentationEpoch);
-        livePresenter = void 0;
-      }
-      publish({ queue: next, command, stream: null, presentationEpoch: authoritativeEpoch, status: "casting" });
-    } else if (!current && next.currentItemId === null && state.command && next.items.length === 0) {
-      authoritativeEpoch += 1;
-      livePresenter = void 0;
-      publish({ queue: next, command: null, stream: null, presentationEpoch: authoritativeEpoch, status: connected.size ? "paired" : "disconnected" });
-    } else publish({ queue: next, ...command ? { command } : {} });
-    broadcastQueue();
-  };
-  const aggregate = (entry) => {
-    var _a;
-    const latest = entry.state;
-    const live = latest.stream !== null;
-    const command = latest.command !== null && latest.command.sourceKind !== "idle";
-    const stale = latest.presentationEpoch <= entry.revokedEpoch;
-    if ((live || command) && !stale) {
-      const epoch = latest.presentationEpoch;
-      if (livePresenter !== entry && latest.presentationEpoch > entry.revokedEpoch && epoch <= authoritativeEpoch) {
-        entry.epochOffset = authoritativeEpoch + 1 - latest.presentationEpoch;
-      }
-      const globalEpoch = latest.presentationEpoch + entry.epochOffset;
-      if (globalEpoch > authoritativeEpoch) {
-        authoritativeEpoch = globalEpoch;
-        if (livePresenter && livePresenter !== entry) {
-          livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch);
-          (_a = livePresenter.receiver) == null ? void 0 : _a.revokePresenter(livePresenter.state.presentationEpoch);
-        }
-        livePresenter = entry;
-        publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
-      } else if (livePresenter === entry && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
-    } else if (livePresenter === entry && state.stream !== null && latest.presentationEpoch > entry.revokedEpoch && latest.presentationEpoch + entry.epochOffset === authoritativeEpoch) {
-      livePresenter = void 0;
-      publish({ stream: null, command: null, status: connected.size > 0 ? "paired" : "disconnected", peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
-    } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
-    if (latest.sas && sasOwner !== entry) {
-      sasOwner = entry;
-      delete state.sas;
-      publish({ sasTrusted: true });
-      return;
-    }
-    if (sasOwner === entry && latest.sasTrusted === true) {
-      sasOwner = void 0;
-      clearTimeout(sasTimer);
-      delete state.sas;
-      publish({ sasTrusted: true });
-      context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
-      return;
-    }
-    publish({});
-    context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
-  };
-  const disposeEntry = async (entry) => {
-    var _a;
-    connected.delete(entry);
-    if (pairing === entry) pairing = void 0;
-    if (sasOwner === entry) sasOwner = void 0;
-    (_a = entry.receiver) == null ? void 0 : _a.close();
-    publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size > 0 ? "paired" : "disconnected" });
-    await entry.room.close();
-  };
-  const startResumeBinding = async (binding) => {
-    if (listeningBindings.has(binding.bindingId)) return;
-    listeningBindings.add(binding.bindingId);
-    const listen = async () => {
-      try {
-        const options = await createResumeSession(config.relayUrl, binding.bindingId, decode(binding.resumePassword), binding.ownerCapability, abort.signal);
-        const asset = await context.secureWebRtcCryptoAsset();
-        const entry = {
-          room: { options, roomJoinCode: "", authCode: "", expiresAt: binding.expiresAt, close: () => Promise.resolve() },
-          state: { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null },
-          connected: false,
-          trusted: true,
-          resumeBinding: binding,
-          revokedEpoch: 0,
-          epochOffset: authoritativeEpoch
-        };
-        resumeEntries.set(binding.bindingId, entry);
-        entry.receiver = createPluginReceiver(options, asset, (next) => {
-          var _a, _b, _c;
-          entry.state = next;
-          if (next.peerCount > 0 && !entry.connected) {
-            entry.connected = true;
-            connected.add(entry);
-            (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
-          }
-          if (next.peerCount === 0 && entry.connected) {
-            entry.connected = false;
-            connected.delete(entry);
-            resumeEntries.delete(binding.bindingId);
-            listeningBindings.delete(binding.bindingId);
-            if (sasOwner === entry) {
-              sasOwner = void 0;
-              clearTimeout(sasTimer);
-            }
-            (_c = entry.receiver) == null ? void 0 : _c.close();
-            publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
-            if (!disposed) enqueue(listen);
-            return;
-          }
-          aggregate(entry);
-        }, void 0, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : void 0, authenticatedMessage(entry), ({ trusted }) => {
-          entry.trusted = trusted;
-          if (trusted) {
-            delete state.sas;
-            publish({ sasTrusted: true });
-          }
-        });
-        await entry.receiver.listening;
-      } catch (error) {
-        listeningBindings.delete(binding.bindingId);
-        if (!abort.signal.aborted) context.log("error", "Failed to start Cast resume listener", { error: error instanceof Error ? error.message : String(error) });
-      }
-    };
-    await listen();
-  };
-  const resume = async () => {
-    const bindings = context.castResume ? await context.castResume.get() : [];
-    for (const binding of bindings) if (!dormantBindings.has(binding.bindingId)) void startResumeBinding(binding);
-  };
-  const allocate = async () => {
-    if (disposed || pairing) return;
-    const room = await createPairingSession(config.relayUrl, abort.signal, (url) => context.validateNativeOrigin("signaling", url));
-    if (disposed) {
-      await room.close();
-      return;
-    }
-    const asset = await context.secureWebRtcCryptoAsset();
-    const initialState = { status: "connecting", command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null };
-    const pendingStates = [];
-    const entry = { room, state: initialState, connected: false, trusted: false, revokedEpoch: 0, epochOffset: authoritativeEpoch };
-    const applyState = (next) => {
-      var _a, _b, _c;
-      entry.state = next;
-      if (next.peerCount > 0 && !entry.connected) {
-        entry.connected = true;
-        connected.add(entry);
-        if (entry.trusted) (_b = (_a = entry.receiver) == null ? void 0 : _a.send) == null ? void 0 : _b.call(_a, { type: "queue-snapshot", snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
-        if (pairing === entry) {
-          pairing = void 0;
-          clearTimeout(renewal);
-          enqueue(allocate);
-        }
-      }
-      if (next.peerCount === 0 && entry.connected) {
-        entry.connected = false;
-        connected.delete(entry);
-        if (sasOwner === entry) {
-          sasOwner = void 0;
-          clearTimeout(sasTimer);
-        }
-        (_c = entry.receiver) == null ? void 0 : _c.close();
-        const settle = entry.bindingInstall ?? Promise.resolve();
-        void settle.then(() => {
-          const binding = entry.resumeBinding;
-          if (!binding) {
-            void entry.room.close();
-            return;
-          }
-          dormantBindings.set(binding.bindingId, binding);
-          if (connected.size === 0) {
-            const pending = [...dormantBindings.values()];
-            dormantBindings.clear();
-            pending.forEach((candidate) => void startResumeBinding(candidate));
-          }
-        }, () => {
-          void entry.room.close();
-        });
-        publish({ peerCount: connected.size, status: state.command || state.stream ? "casting" : connected.size ? "paired" : "disconnected" });
-        return;
-      }
-      aggregate(entry);
-    };
-    let initialized = false;
-    const installBinding = async (binding) => {
-      await provisionReceiverResume(config.relayUrl, room, binding, context.castResume, abort.signal);
-      entry.resumeBinding = { ...binding, ownerCapability: room.ownerCapability };
-    };
-    entry.receiver = createPluginReceiver(room.options, asset, (next) => {
-      if (initialized) applyState(next);
-      else pendingStates.push(next);
-    }, (binding) => {
-      const existing = pendingBindingInstalls.get(binding.bindingId);
-      if (existing) return existing;
-      const install = installBinding(binding);
-      entry.bindingInstall = install;
-      pendingBindingInstalls.set(binding.bindingId, install);
-      void install.finally(() => {
-        if (pendingBindingInstalls.get(binding.bindingId) === install) pendingBindingInstalls.delete(binding.bindingId);
-      }).catch(() => void 0);
-      return install;
-    }, async (bindingId) => {
-      var _a;
-      dormantBindings.delete(bindingId);
-      await context.castResume.delete(bindingId);
-      const resumeEntry = resumeEntries.get(bindingId);
-      if (resumeEntry) {
-        resumeEntries.delete(bindingId);
-        listeningBindings.delete(bindingId);
-        connected.delete(resumeEntry);
-        (_a = resumeEntry.receiver) == null ? void 0 : _a.close();
-      }
-    }, authenticatedMessage(entry), (event) => {
-      if (!initialized) {
-        const pending = pendingConnectionEvents.get(entry) ?? [];
-        pending.push(event);
-        pendingConnectionEvents.set(entry, pending);
-        return;
-      }
-      applyConnection(entry, room.options.generation, event);
-    });
-    pairing = entry;
-    initialized = true;
-    pendingStates.forEach(applyState);
-    for (const event of pendingConnectionEvents.get(entry) ?? []) applyConnection(entry, room.options.generation, event);
-    pendingConnectionEvents.delete(entry);
-    if (pairing === entry) publish({ roomJoinCode: room.roomJoinCode, authCode: room.authCode, error: null });
-    if (pairing === entry) {
-      clearTimeout(renewal);
-      renewal = setTimeout(() => enqueue(async () => {
-        if (pairing === entry) {
-          await disposeEntry(entry);
-          await allocate();
-        }
-      }), Math.max(1e3, room.expiresAt - Date.now() - 3e4));
-    }
-  };
-  if (!config.relayUrl) report("Configure and approve a signaling origin.");
-  else {
-    enqueue(resume);
-    enqueue(allocate);
-  }
-  return {
-    state,
-    subscribe(listener) {
-      listeners.add(listener);
-      listener({ ...state });
-      return () => listeners.delete(listener);
-    },
-    confirmSas(accepted) {
-      var _a;
-      if (!sasOwner) return;
-      const entry = sasOwner;
-      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(accepted);
-      sasOwner = void 0;
-      clearTimeout(sasTimer);
-      delete state.sas;
-      delete state.sasTrusted;
-      publish({});
-    },
-    close() {
-      var _a;
-      disposed = true;
-      abort.abort();
-      clearInterval(dismissalInterval);
-      clearTimeout(renewal);
-      clearTimeout(sasTimer);
-      const entries = /* @__PURE__ */ new Set([...resumeEntries.values(), ...connected, ...pairing ? [pairing] : []]);
-      for (const entry of entries) {
-        (_a = entry.receiver) == null ? void 0 : _a.close();
-        if (!entry.resumeBinding) void entry.room.close();
-      }
-      resumeEntries.clear();
-      dormantBindings.clear();
-      listeningBindings.clear();
-      connected.clear();
-      pairing = void 0;
-      livePresenter = void 0;
-      sasOwner = void 0;
-      listeners.clear();
-    }
-  };
-}
-
-// src/plugins/cast-receiver/widgets/CastWidget.tsx
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
-function applyPlayback(media, paused, volume, muted) {
-  media.volume = volume;
-  media.muted = muted;
-  if (paused) media.pause();
-  else void media.play().catch(() => void 0);
-}
-function CastWidget({ context }) {
-  const config = (0, import_react2.useMemo)(() => readCastConfig(context.config), [context.config]);
-  const [receiver, setReceiver] = (0, import_react2.useState)(() => ({
-    status: "connecting",
-    command: null,
-    presentationEpoch: 0,
-    stream: null,
-    peerCount: 0,
-    error: null,
-    roomJoinCode: "",
-    authCode: "",
-    relayUrl: config.relayUrl,
-    senderUrl: config.senderUrl,
-    queue: createCastQueueSnapshot(config.autoplay),
-    pairingReveal: 0,
-    pairingVisible: false
-  }));
-  const videoRef = (0, import_react2.useRef)(null);
-  (0, import_react2.useEffect)(() => {
-    const sessionContext = { ...context, config: { ...config } };
-    const session = createScreenSession(sessionContext);
-    const unsubscribe = session.subscribe(setReceiver);
-    return () => {
-      unsubscribe();
-      session.close();
-    };
-  }, [config.relayUrl, config.senderUrl]);
-  const effectiveConfig = (0, import_react2.useMemo)(() => receiver.command ? { ...config, ...receiver.command, outputMode: receiver.queue.outputMode } : { ...config, sourceKind: "idle", outputMode: receiver.queue.outputMode }, [config, receiver.command, receiver.queue.outputMode]);
-  const target = (0, import_react2.useMemo)(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
-  const paused = effectiveConfig.paused ?? false;
-  const volume = effectiveConfig.volume ?? 1;
-  const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
-  (0, import_react2.useLayoutEffect)(() => {
-    const video = videoRef.current;
-    if (!video || !receiver.stream) return;
-    video.srcObject = receiver.stream;
-    applyPlayback(video, paused, volume, effectiveConfig.muted);
-    return () => {
-      video.pause();
-      video.srcObject = null;
-      video.removeAttribute("src");
-      video.load();
-    };
-  }, [effectiveConfig.muted, paused, receiver.stream, volume]);
-  (0, import_react2.useEffect)(() => {
-    const stream = receiver.stream;
-    if (!stream) return;
-    const tracks = stream.getTracks();
-    const describe = () => {
-      if (tracks.every((track) => track.readyState === "ended")) context.reportStatus("error", "The shared stream ended.");
-      else if (stream.getAudioTracks().length === 0) context.reportStatus("error", "This shared stream has no audio.");
-      else context.reportStatus("ok", "");
-    };
-    tracks.forEach((track) => track.addEventListener("ended", describe));
-    describe();
-    return () => tracks.forEach((track) => track.removeEventListener("ended", describe));
-  }, [context, receiver.stream]);
-  (0, import_react2.useEffect)(() => {
-    const next = receiver.stream ? null : target.kind === "youtube" ? {
-      provider: "youtube",
-      ...target.videoId ? { videoId: target.videoId } : {},
-      muted: effectiveConfig.muted,
-      paused,
-      volume,
-      outputMode: effectiveConfig.outputMode,
-      ...target.playlistId ? { playlistId: target.playlistId } : {},
-      ...target.index ? { index: target.index } : {}
-    } : target.kind === "website" ? { provider: "website", url: target.url } : null;
-    const updatePresentation = async () => {
-      await context.setPresentation(next);
-      await context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
-    };
-    void updatePresentation().catch((error) => {
-      const message = error instanceof Error ? error.message : typeof error === "object" && error !== null && "message" in error && typeof error.message === "string" ? error.message : String(error);
-      context.log("error", "Failed to update Cast presentation", { "error.message": message });
-      context.reportStatus("error", message);
-    });
-    return void 0;
-  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
-  (0, import_react2.useEffect)(() => {
-    const video = videoRef.current;
-    if (video && target.kind === "media") applyPlayback(
-      video,
-      paused,
-      volume,
-      effectiveConfig.muted || effectiveConfig.outputMode === "video-only"
-    );
-  }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
-  if (receiver.stream) return effectiveConfig.outputMode !== "audio-only" && receiver.stream.getVideoTracks().length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty", "aria-label": context.locale.startsWith("de") ? "Audio\xFCbertragung aktiv" : "Audio casting active" });
-  if (target.kind === "youtube" || target.kind === "website") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-active", "data-overlay": config.overlayMode });
-  if (target.kind === "media") return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: `cast-root cast-active ${effectiveConfig.outputMode === "audio-only" ? "cast-audio-only" : ""}`, "data-overlay": config.overlayMode, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("video", { ref: videoRef, className: "cast-media", src: target.url, autoPlay: true, muted: effectiveConfig.muted || effectiveConfig.outputMode === "video-only", playsInline: true, controls: true }) });
-  return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "cast-root cast-empty" });
-}
-
-// src/plugins/cast-receiver/widgets/PairingWidget.tsx
-var import_react4 = __toESM(require_react(), 1);
-
-// src/vendor/asn1-per-ts/BitBuffer.ts
-var BitBuffer = class _BitBuffer {
-  _data;
-  _bitLength;
-  _offset;
-  constructor(data, bitLength, offset) {
-    this._data = data;
-    this._bitLength = bitLength;
-    this._offset = offset;
-  }
-  /** Allocate a writable buffer with optional initial byte capacity. */
-  static alloc(initialByteCapacity = 256) {
-    return new _BitBuffer(new Uint8Array(initialByteCapacity), 0, 0);
-  }
-  /** Wrap existing bytes as a buffer for reading. */
-  static from(data, bitLength) {
-    const bl = bitLength ?? data.length * 8;
-    const copy = new Uint8Array(data);
-    return new _BitBuffer(copy, bl, 0);
-  }
-  /** Parse a binary string ('0' and '1' characters) into a buffer. */
-  static fromBinaryString(bits) {
-    const buf = _BitBuffer.alloc(Math.ceil(bits.length / 8) || 1);
-    for (const ch of bits) {
-      if (ch !== "0" && ch !== "1") {
-        throw new Error(`Invalid binary character: '${ch}'`);
-      }
-      buf.writeBit(ch === "1" ? 1 : 0);
-    }
-    buf.reset();
-    return buf;
-  }
-  /** Total number of valid bits. */
-  get bitLength() {
-    return this._bitLength;
-  }
-  /** Current cursor position in bits. */
-  get offset() {
-    return this._offset;
-  }
-  /** Bits remaining from cursor to end. */
-  get remaining() {
-    return this._bitLength - this._offset;
-  }
-  /** Write a single bit. */
-  writeBit(bit) {
-    this.ensureCapacity(this._offset + 1);
-    const byteIndex = this._offset >> 3;
-    const bitIndex = 7 - (this._offset & 7);
-    const currentByte = this._data[byteIndex] ?? 0;
-    if (bit) {
-      this._data[byteIndex] = currentByte | 1 << bitIndex;
-    } else {
-      this._data[byteIndex] = currentByte & ~(1 << bitIndex);
-    }
-    this._offset++;
-    if (this._offset > this._bitLength) {
-      this._bitLength = this._offset;
-    }
-  }
-  /** Read a single bit. */
-  readBit() {
-    if (this._offset >= this._bitLength) {
-      throw new Error("BitBuffer: read past end of buffer");
-    }
-    const byteIndex = this._offset >> 3;
-    const bitIndex = 7 - (this._offset & 7);
-    this._offset++;
-    return (this._data[byteIndex] ?? 0) >> bitIndex & 1;
-  }
-  /**
-   * Write the lowest `count` bits of `value` (MSB first).
-   * @param value  unsigned integer (0..2^32-1)
-   * @param count  number of bits to write (0..32)
-   */
-  writeBits(value, count) {
-    if (count === 0) return;
-    if (count < 0 || count > 32) {
-      throw new Error(`writeBits: count must be 0..32, got ${count}`);
-    }
-    for (let i = count - 1; i >= 0; i--) {
-      this.writeBit(value >> i & 1);
-    }
-  }
-  /**
-   * Read `count` bits and return as unsigned integer.
-   * @param count  number of bits to read (0..32)
-   */
-  readBits(count) {
-    if (count === 0) return 0;
-    if (count < 0 || count > 32) {
-      throw new Error(`readBits: count must be 0..32, got ${count}`);
-    }
-    let result = 0;
-    for (let i = 0; i < count; i++) {
-      result = result << 1 | this.readBit();
-    }
-    return result >>> 0;
-  }
-  /** Write arbitrary-width bits from a bigint value (MSB first). */
-  writeBigBits(value, count) {
-    if (count === 0) return;
-    for (let i = count - 1; i >= 0; i--) {
-      this.writeBit(Number(value >> BigInt(i) & 1n));
-    }
-  }
-  /** Read arbitrary-width bits into a bigint. */
-  readBigBits(count) {
-    if (count === 0) return 0n;
-    let result = 0n;
-    for (let i = 0; i < count; i++) {
-      result = result << 1n | BigInt(this.readBit());
-    }
-    return result;
-  }
-  /** Write raw bytes (each byte = 8 bits). */
-  writeOctets(data) {
-    for (let i = 0; i < data.length; i++) {
-      this.writeBits(data[i] ?? 0, 8);
-    }
-  }
-  /**
-   * Write exactly `bitLength` bits from a left-aligned byte array.
-   * This is the inverse of extractBits(): the source bits are
-   * packed MSB-first starting from bit 0 of data[0].
-   */
-  writeRawBits(data, bitLength) {
-    if (bitLength === 0) return;
-    if (bitLength < 0 || bitLength > data.length * 8) {
-      throw new Error(
-        `writeRawBits: bitLength (${bitLength}) out of range [0, ${data.length * 8}]`
-      );
-    }
-    for (let i = 0; i < bitLength; i++) {
-      const byteIndex = i >> 3;
-      const bitIndex = 7 - (i & 7);
-      const bit = (data[byteIndex] ?? 0) >> bitIndex & 1;
-      this.writeBit(bit);
-    }
-  }
-  /** Read raw bytes. */
-  readOctets(byteCount) {
-    const result = new Uint8Array(byteCount);
-    for (let i = 0; i < byteCount; i++) {
-      result[i] = this.readBits(8);
-    }
-    return result;
-  }
-  /** Return compact Uint8Array with trailing bits zero-padded. */
-  toUint8Array() {
-    const byteLen = Math.ceil(this._bitLength / 8);
-    return this._data.slice(0, byteLen);
-  }
-  /** Return binary string representation. */
-  toBinaryString() {
-    let result = "";
-    const savedOffset = this._offset;
-    this._offset = 0;
-    for (let i = 0; i < this._bitLength; i++) {
-      result += this.readBit().toString();
-    }
-    this._offset = savedOffset;
-    return result;
-  }
-  /** Return hex string representation. */
-  toHex() {
-    const bytes = this.toUint8Array();
-    return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
-  }
-  /**
-   * Extract a range of bits into a new byte-aligned Uint8Array.
-   *
-   * The extracted bits are left-aligned in the output: bit 0 of the result
-   * corresponds to bit `startBit` of the source. Trailing bits in the last
-   * byte are zero-padded.
-   */
-  extractBits(startBit, bitCount) {
-    if (bitCount === 0) return new Uint8Array(0);
-    const out = _BitBuffer.alloc(Math.ceil(bitCount / 8));
-    for (let i = 0; i < bitCount; i++) {
-      const srcByte = startBit + i >> 3;
-      const srcBitIdx = 7 - (startBit + i & 7);
-      const bit = (this._data[srcByte] ?? 0) >> srcBitIdx & 1;
-      out.writeBit(bit);
-    }
-    return out.toUint8Array();
-  }
-  /** Reset cursor to 0. */
-  reset() {
-    this._offset = 0;
-  }
-  /** Seek to absolute bit offset. */
-  seek(bitOffset) {
-    if (bitOffset < 0 || bitOffset > this._bitLength) {
-      throw new Error(`seek: offset ${bitOffset} out of range [0, ${this._bitLength}]`);
-    }
-    this._offset = bitOffset;
-  }
-  ensureCapacity(bitsNeeded) {
-    const bytesNeeded = Math.ceil(bitsNeeded / 8);
-    if (bytesNeeded <= this._data.length) return;
-    let newSize = this._data.length;
-    while (newSize < bytesNeeded) {
-      newSize *= 2;
-    }
-    const newData = new Uint8Array(newSize);
-    newData.set(this._data);
-    this._data = newData;
-  }
-};
-
-// src/vendor/asn1-per-ts/RawBytes.ts
-var RawBytes = class {
-  data;
-  bitLength;
-  constructor(data, bitLength) {
-    this.data = data;
-    this.bitLength = bitLength ?? data.length * 8;
-    if (this.bitLength < 0) {
-      throw new Error(`RawBytes: bitLength must be non-negative, got ${this.bitLength}`);
-    }
-    if (this.bitLength > data.length * 8) {
-      throw new Error(
-        `RawBytes: bitLength (${this.bitLength}) exceeds data capacity (${data.length * 8} bits)`
-      );
-    }
-  }
-};
-function isRawBytes(value) {
-  return value instanceof RawBytes;
-}
-
-// src/vendor/asn1-per-ts/helpers.ts
-function constrainedWholeNumberBitCount(min, max) {
-  const range = max - min + 1;
-  if (range <= 0) throw new Error(`Invalid constraint: min=${min} > max=${max}`);
-  return range === 1 ? 0 : Math.ceil(Math.log2(range));
-}
-function encodeConstrainedWholeNumber(buffer, value, min, max) {
-  if (value < min || value > max) {
-    throw new Error(`Value ${value} out of constrained range [${min}, ${max}]`);
-  }
-  buffer.writeBits(value - min, constrainedWholeNumberBitCount(min, max));
-}
-function decodeConstrainedWholeNumber(buffer, min, max) {
-  return buffer.readBits(constrainedWholeNumberBitCount(min, max)) + min;
-}
-function encodeUnconstrainedLength(buffer, length) {
-  if (length < 0) throw new Error(`Length must be non-negative, got ${length}`);
-  if (length < 128) {
-    buffer.writeBit(0);
-    buffer.writeBits(length, 7);
-  } else if (length < 16384) {
-    buffer.writeBits(2, 2);
-    buffer.writeBits(length, 14);
-  } else {
-    throw new Error(`Length ${length} >= 16384 requires fragmented encoding`);
-  }
-}
-function decodeUnconstrainedLength(buffer) {
-  if (buffer.readBit() === 0) return buffer.readBits(7);
-  if (buffer.readBit() === 0) return buffer.readBits(14);
-  throw new Error("Fragmented length determinant decoding is not supported");
-}
-function encodeConstrainedLength(buffer, length, min, max) {
-  if (length < min || length > max) throw new Error(`Length ${length} out of range [${min}, ${max}]`);
-  if (max - min + 1 <= 65536) encodeConstrainedWholeNumber(buffer, length, min, max);
-  else encodeUnconstrainedLength(buffer, length);
-}
-function decodeConstrainedLength(buffer, min, max) {
-  return max - min + 1 <= 65536 ? decodeConstrainedWholeNumber(buffer, min, max) : decodeUnconstrainedLength(buffer);
-}
-function encodeNormallySmallNumber(buffer, value) {
-  if (value < 0) throw new Error(`Normally small number must be non-negative, got ${value}`);
-  if (value < 64) {
-    buffer.writeBit(0);
-    buffer.writeBits(value, 6);
-  } else {
-    buffer.writeBit(1);
-    encodeSemiConstrainedWholeNumber(buffer, value, 0);
-  }
-}
-function decodeNormallySmallNumber(buffer) {
-  return buffer.readBit() === 0 ? buffer.readBits(6) : decodeSemiConstrainedWholeNumber(buffer, 0);
-}
-function encodeSemiConstrainedWholeNumber(buffer, value, min) {
-  if (value < min) throw new Error(`Value ${value} below minimum ${min}`);
-  const bytes = unsignedIntegerToBytes(value - min);
-  encodeUnconstrainedLength(buffer, bytes.length);
-  buffer.writeOctets(bytes);
-}
-function decodeSemiConstrainedWholeNumber(buffer, min) {
-  return bytesToUnsignedInteger(buffer.readOctets(decodeUnconstrainedLength(buffer))) + min;
-}
-function encodeUnconstrainedWholeNumber(buffer, value) {
-  const bytes = signedIntegerToBytes(value);
-  encodeUnconstrainedLength(buffer, bytes.length);
-  buffer.writeOctets(bytes);
-}
-function decodeUnconstrainedWholeNumber(buffer) {
-  return bytesToSignedInteger(buffer.readOctets(decodeUnconstrainedLength(buffer)));
-}
-function unsignedIntegerToBytes(value) {
-  if (value === 0) return new Uint8Array([0]);
-  const bytes = [];
-  for (let remaining = value; remaining > 0; remaining = Math.floor(remaining / 256)) {
-    bytes.unshift(remaining & 255);
-  }
-  return new Uint8Array(bytes);
-}
-function bytesToUnsignedInteger(bytes) {
-  let value = 0;
-  for (const byte of bytes) value = value * 256 + byte;
-  return value;
-}
-function signedIntegerToBytes(value) {
-  if (value >= 0) {
-    const bytes2 = unsignedIntegerToBytes(value);
-    if (((bytes2[0] ?? 0) & 128) === 0) return bytes2;
-    const prefixed = new Uint8Array(bytes2.length + 1);
-    prefixed.set(bytes2, 1);
-    return prefixed;
-  }
-  const bytes = [];
-  let remaining = BigInt(value);
-  do {
-    bytes.unshift(Number(remaining & 0xffn));
-    remaining >>= 8n;
-  } while (remaining !== -1n || ((bytes[0] ?? 0) & 128) === 0);
-  return new Uint8Array(bytes);
-}
-function bytesToSignedInteger(bytes) {
-  if (bytes.length === 0) return 0;
-  let value = 0n;
-  for (const byte of bytes) value = value * 256n + BigInt(byte);
-  if (((bytes[0] ?? 0) & 128) !== 0) value -= 1n << BigInt(bytes.length * 8);
-  return Number(value);
-}
-function encodeValue(buffer, codec, value) {
-  if (isRawBytes(value)) buffer.writeRawBits(value.data, value.bitLength);
-  else codec.encode(buffer, value);
-}
-
-// src/vendor/asn1-per-ts/integer-helpers.ts
-function assertSafeInteger(value, name) {
-  if (!Number.isSafeInteger(value)) {
-    throw new Error(`${name} must be a safe integer, got ${value}`);
-  }
-}
-function constrainedBitCount(min, max) {
-  assertSafeInteger(min, "Minimum");
-  assertSafeInteger(max, "Maximum");
-  const range = BigInt(max) - BigInt(min) + 1n;
-  if (range <= 0n) throw new Error(`Invalid constraint: min=${min} > max=${max}`);
-  if (range === 1n) return 0;
-  return (range - 1n).toString(2).length;
-}
-function encodeConstrainedInteger(buffer, value, min, max) {
-  assertSafeInteger(value, "Value");
-  const bitCount = constrainedBitCount(min, max);
-  if (value < min || value > max) {
-    throw new Error(`Value ${value} out of constrained range [${min}, ${max}]`);
-  }
-  buffer.writeBigBits(BigInt(value) - BigInt(min), bitCount);
-}
-function decodeConstrainedInteger(buffer, min, max) {
-  const bitCount = constrainedBitCount(min, max);
-  const value = buffer.readBigBits(bitCount) + BigInt(min);
-  if (value > BigInt(max)) {
-    throw new Error(`Decoded value ${value} out of constrained range [${min}, ${max}]`);
-  }
-  const result = Number(value);
-  assertSafeInteger(result, "Decoded value");
-  return result;
-}
-function bigintToUnsignedBytes(value) {
-  if (value === 0n) return new Uint8Array([0]);
-  const bytes = [];
-  for (let remaining = value; remaining > 0n; remaining >>= 8n) {
-    bytes.unshift(Number(remaining & 0xffn));
-  }
-  return new Uint8Array(bytes);
-}
-function encodeSemiConstrainedInteger(buffer, value, min) {
-  assertSafeInteger(value, "Value");
-  assertSafeInteger(min, "Minimum");
-  if (value < min) throw new Error(`Value ${value} below minimum ${min}`);
-  const bytes = bigintToUnsignedBytes(BigInt(value) - BigInt(min));
-  encodeUnconstrainedLength(buffer, bytes.length);
-  buffer.writeOctets(bytes);
-}
-function decodeSemiConstrainedInteger(buffer, min) {
-  assertSafeInteger(min, "Minimum");
-  const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
-  let offset = 0n;
-  for (const byte of bytes) offset = offset * 256n + BigInt(byte);
-  const value = offset + BigInt(min);
-  const result = Number(value);
-  assertSafeInteger(result, "Decoded value");
-  return result;
-}
-
-// src/vendor/asn1-per-ts/codecs/IntegerCodec.ts
-var IntegerCodec = class {
-  constraints;
-  constructor(constraints = {}) {
-    if (constraints.min !== void 0) assertSafeInteger(constraints.min, "Minimum");
-    if (constraints.max !== void 0) assertSafeInteger(constraints.max, "Maximum");
-    if (constraints.min !== void 0 && constraints.max !== void 0) {
-      constrainedBitCount(constraints.min, constraints.max);
-    }
-    this.constraints = constraints;
-  }
-  get constraintType() {
-    if (this.constraints.min !== void 0 && this.constraints.max !== void 0) {
-      return "constrained";
-    }
-    return this.constraints.min !== void 0 ? "semi-constrained" : "unconstrained";
-  }
-  get bitWidth() {
-    const { min, max } = this.constraints;
-    return min !== void 0 && max !== void 0 ? constrainedBitCount(min, max) : void 0;
-  }
-  encode(buffer, value) {
-    assertSafeInteger(value, "Value");
-    const { min, max, extensible } = this.constraints;
-    if (min !== void 0 && max !== void 0) {
-      if (extensible && (value < min || value > max)) {
-        buffer.writeBit(1);
-        encodeUnconstrainedWholeNumber(buffer, value);
-      } else {
-        if (extensible) buffer.writeBit(0);
-        encodeConstrainedInteger(buffer, value, min, max);
-      }
-    } else if (min !== void 0) {
-      encodeSemiConstrainedInteger(buffer, value, min);
-    } else {
-      encodeUnconstrainedWholeNumber(buffer, value);
-    }
-  }
-  decode(buffer) {
-    const { min, max, extensible } = this.constraints;
-    let value;
-    if (min !== void 0 && max !== void 0) {
-      value = extensible && buffer.readBit() === 1 ? decodeUnconstrainedWholeNumber(buffer) : decodeConstrainedInteger(buffer, min, max);
-    } else if (min !== void 0) {
-      value = decodeSemiConstrainedInteger(buffer, min);
-    } else {
-      value = decodeUnconstrainedWholeNumber(buffer);
-    }
-    assertSafeInteger(value, "Decoded value");
-    return value;
-  }
-};
-
-// src/vendor/asn1-per-ts/codecs/EnumeratedCodec.ts
-var EnumeratedCodec = class {
-  rootValues;
-  extValues;
-  _extensible;
-  rootIndexMap;
-  extIndexMap;
-  constructor(options) {
-    if (options.values.length === 0) {
-      throw new Error("Enumerated type must have at least one root value");
-    }
-    this.rootValues = options.values;
-    this.extValues = options.extensionValues ?? [];
-    this._extensible = options.extensionValues !== void 0;
-    this.rootIndexMap = new Map(options.values.map((v, i) => [v, i]));
-    this.extIndexMap = new Map(this.extValues.map((v, i) => [v, i]));
-  }
-  get extensible() {
-    return this._extensible;
-  }
-  encode(buffer, value) {
-    const rootIdx = this.rootIndexMap.get(value);
-    if (this.extensible) {
-      if (rootIdx !== void 0) {
-        buffer.writeBit(0);
-        encodeConstrainedWholeNumber(buffer, rootIdx, 0, this.rootValues.length - 1);
-      } else {
-        const extIdx = this.extIndexMap.get(value);
-        if (extIdx === void 0) {
-          throw new Error(`Unknown enumerated value: '${value}'`);
-        }
-        buffer.writeBit(1);
-        encodeNormallySmallNumber(buffer, extIdx);
-      }
-    } else {
-      if (rootIdx === void 0) {
-        throw new Error(`Unknown enumerated value: '${value}'`);
-      }
-      encodeConstrainedWholeNumber(buffer, rootIdx, 0, this.rootValues.length - 1);
-    }
-  }
-  decode(buffer) {
-    if (this.extensible) {
-      const extBit = buffer.readBit();
-      if (extBit === 0) {
-        const idx3 = decodeConstrainedWholeNumber(buffer, 0, this.rootValues.length - 1);
-        const value3 = this.rootValues[idx3];
-        if (value3 === void 0) throw new Error(`Root index ${idx3} out of range for enumerated type`);
-        return value3;
-      }
-      const idx2 = decodeNormallySmallNumber(buffer);
-      const value2 = this.extValues[idx2];
-      if (value2 === void 0) {
-        throw new Error(`Extension index ${idx2} out of range for enumerated type`);
-      }
-      return value2;
-    }
-    const idx = decodeConstrainedWholeNumber(buffer, 0, this.rootValues.length - 1);
-    const value = this.rootValues[idx];
-    if (value === void 0) throw new Error(`Root index ${idx} out of range for enumerated type`);
-    return value;
-  }
-};
-
-// src/vendor/asn1-per-ts/codecs/NullCodec.ts
-var NullCodec = class {
-  encode(_buffer, _value) {
-  }
-  decode(_buffer) {
-    return null;
-  }
-};
-
-// src/vendor/asn1-per-ts/codecs/ChoiceCodec.ts
-var ChoiceCodec = class {
-  alternatives;
-  extensionAlternatives;
-  extensible;
-  constructor(options) {
-    if (options.alternatives.length === 0) throw new Error("CHOICE must have at least one alternative");
-    this.alternatives = options.alternatives;
-    this.extensionAlternatives = options.extensionAlternatives ?? [];
-    this.extensible = options.extensionAlternatives !== void 0;
-  }
-  encode(buffer, value) {
-    const rootIndex = this.alternatives.findIndex((alternative) => alternative.name === value.key);
-    if (rootIndex >= 0) {
-      const alternative = this.alternatives[rootIndex];
-      if (alternative === void 0) throw new Error(`Unknown CHOICE alternative: '${value.key}'`);
-      if (this.extensible) buffer.writeBit(0);
-      if (this.alternatives.length > 1) {
-        encodeConstrainedWholeNumber(buffer, rootIndex, 0, this.alternatives.length - 1);
-      }
-      encodeValue(buffer, alternative.codec, value.value);
-      return;
-    }
-    const extensionIndex = this.extensionAlternatives.findIndex(
-      (alternative) => alternative.name === value.key
-    );
-    if (!this.extensible || extensionIndex < 0) {
-      throw new Error(`Unknown CHOICE alternative: '${value.key}'`);
-    }
-    const extension = this.extensionAlternatives[extensionIndex];
-    if (extension === void 0) throw new Error(`Unknown CHOICE alternative: '${value.key}'`);
-    buffer.writeBit(1);
-    encodeNormallySmallNumber(buffer, extensionIndex);
-    const encoded2 = BitBuffer.alloc();
-    encodeValue(encoded2, extension.codec, value.value);
-    const bytes = encoded2.toUint8Array();
-    encodeUnconstrainedLength(buffer, bytes.length);
-    buffer.writeOctets(bytes);
-  }
-  decode(buffer) {
-    const isExtension = this.extensible && buffer.readBit() === 1;
-    if (isExtension) {
-      const index2 = decodeNormallySmallNumber(buffer);
-      const alternative2 = this.extensionAlternatives[index2];
-      if (alternative2 === void 0) throw new Error(`Extension index ${index2} out of range for CHOICE`);
-      const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
-      const inner = BitBuffer.from(bytes);
-      const value = alternative2.codec.decode(inner);
-      if (inner.remaining > 7) throw new Error("Trailing CHOICE open type content");
-      while (inner.remaining > 0) {
-        if (inner.readBit() !== 0) throw new Error("Nonzero CHOICE open type padding");
-      }
-      return { key: alternative2.name, value };
-    }
-    const index = this.alternatives.length > 1 ? decodeConstrainedWholeNumber(buffer, 0, this.alternatives.length - 1) : 0;
-    const alternative = this.alternatives[index];
-    if (alternative === void 0) throw new Error(`Alternative index ${index} out of range for CHOICE`);
-    return { key: alternative.name, value: alternative.codec.decode(buffer) };
-  }
-};
-
-// src/vendor/asn1-per-ts/codecs/SequenceCodec.ts
-var SequenceCodec = class {
-  fields;
-  extensionFields;
-  optionalFields;
-  extensible;
-  constructor(options) {
-    this.fields = options.fields;
-    this.extensionFields = options.extensionFields ?? [];
-    this.extensible = options.extensionFields !== void 0;
-    this.optionalFields = this.fields.filter(
-      (field2) => field2.optional === true || field2.defaultValue !== void 0
-    );
-  }
-  get preambleBitCount() {
-    return this.optionalFields.length;
-  }
-  encode(buffer, value) {
-    const hasExtensions = this.extensible && this.extensionFields.some((field2) => value[field2.name] !== void 0);
-    if (this.extensible) buffer.writeBit(hasExtensions ? 1 : 0);
-    for (const field2 of this.optionalFields) {
-      const fieldValue = value[field2.name];
-      buffer.writeBit(
-        fieldValue !== void 0 && !Object.is(fieldValue, field2.defaultValue) ? 1 : 0
-      );
-    }
-    for (const field2 of this.fields) {
-      const fieldValue = value[field2.name];
-      if (field2.optional === true || field2.defaultValue !== void 0) {
-        if (fieldValue !== void 0 && !Object.is(fieldValue, field2.defaultValue)) {
-          encodeValue(buffer, field2.codec, fieldValue);
-        }
-      } else {
-        if (fieldValue === void 0) throw new Error(`Missing mandatory field: '${field2.name}'`);
-        encodeValue(buffer, field2.codec, fieldValue);
-      }
-    }
-    if (hasExtensions) this.encodeExtensions(buffer, value);
-  }
-  decode(buffer) {
-    const result = {};
-    const hasExtensions = this.extensible && buffer.readBit() === 1;
-    const presence = this.optionalFields.map(() => buffer.readBit() === 1);
-    let optionalIndex = 0;
-    for (const field2 of this.fields) {
-      if (field2.optional === true || field2.defaultValue !== void 0) {
-        if (presence[optionalIndex++]) result[field2.name] = field2.codec.decode(buffer);
-        else if (field2.defaultValue !== void 0) result[field2.name] = field2.defaultValue;
-      } else {
-        result[field2.name] = field2.codec.decode(buffer);
-      }
-    }
-    if (hasExtensions) this.decodeExtensions(buffer, result);
-    return result;
-  }
-  encodeExtensions(buffer, value) {
-    encodeNormallySmallNumber(buffer, this.extensionFields.length - 1);
-    for (const field2 of this.extensionFields) {
-      buffer.writeBit(value[field2.name] !== void 0 ? 1 : 0);
-    }
-    for (const field2 of this.extensionFields) {
-      const fieldValue = value[field2.name];
-      if (fieldValue === void 0) continue;
-      const encoded2 = BitBuffer.alloc();
-      encodeValue(encoded2, field2.codec, fieldValue);
-      encodeUnconstrainedLength(buffer, encoded2.toUint8Array().length);
-      buffer.writeOctets(encoded2.toUint8Array());
-    }
-  }
-  decodeExtensions(buffer, result) {
-    const count = decodeNormallySmallNumber(buffer) + 1;
-    const presence = Array.from({ length: count }, () => buffer.readBit() === 1);
-    for (let index = 0; index < count; index++) {
-      if (!presence[index]) continue;
-      const bytes = buffer.readOctets(decodeUnconstrainedLength(buffer));
-      const field2 = this.extensionFields[index];
-      if (field2 !== void 0) result[field2.name] = field2.codec.decode(BitBuffer.from(bytes));
-    }
-  }
-};
-
-// src/vendor/asn1-per-ts/codecs/IA5StringCodec.ts
-var IA5StringCodec = class {
-  constraints;
-  alphabet;
-  indexes;
-  bitsPerCharacter;
-  constructor(constraints = {}) {
-    this.constraints = constraints;
-    this.alphabet = constraints.alphabet === void 0 ? Array.from({ length: 128 }, (_, index) => String.fromCharCode(index)) : [...new Set([...constraints.alphabet].sort())];
-    this.indexes = new Map(this.alphabet.map((character, index) => [character, index]));
-    this.bitsPerCharacter = this.alphabet.length <= 1 ? 0 : Math.ceil(Math.log2(this.alphabet.length));
-  }
-  encode(buffer, value) {
-    const characters = [...value];
-    const inRoot = this.isRootLength(characters.length);
-    if (this.constraints.extensible) buffer.writeBit(inRoot ? 0 : 1);
-    if (!inRoot && !this.constraints.extensible) this.assertRootLength(characters.length);
-    this.encodeLength(buffer, characters.length, inRoot);
-    for (const character of characters) {
-      const index = this.indexes.get(character);
-      if (index === void 0) throw new Error(`Character '${character}' not in permitted alphabet`);
-      buffer.writeBits(index, this.bitsPerCharacter);
-    }
-  }
-  decode(buffer) {
-    const inRoot = !this.constraints.extensible || buffer.readBit() === 0;
-    const length = this.decodeLength(buffer, inRoot);
-    let result = "";
-    for (let index = 0; index < length; index++) {
-      const alphabetIndex = buffer.readBits(this.bitsPerCharacter);
-      const character = this.alphabet[alphabetIndex];
-      if (character === void 0) throw new Error(`Character index ${alphabetIndex} out of alphabet range`);
-      result += character;
-    }
-    return result;
-  }
-  isRootLength(length) {
-    const { fixedSize, minSize, maxSize } = this.constraints;
-    if (fixedSize !== void 0) return length === fixedSize;
-    if (minSize !== void 0 && maxSize !== void 0) return length >= minSize && length <= maxSize;
-    return true;
-  }
-  assertRootLength(length) {
-    const { fixedSize, minSize, maxSize } = this.constraints;
-    if (fixedSize !== void 0) throw new Error(`String length ${length} does not match fixed size ${fixedSize}`);
-    if (minSize !== void 0 && maxSize !== void 0) {
-      throw new Error(`String length ${length} out of range [${minSize}, ${maxSize}]`);
-    }
-  }
-  encodeLength(buffer, length, inRoot) {
-    const { fixedSize, minSize, maxSize } = this.constraints;
-    if (inRoot && fixedSize !== void 0) return;
-    if (inRoot && minSize !== void 0 && maxSize !== void 0) {
-      encodeConstrainedLength(buffer, length, minSize, maxSize);
-    } else {
-      encodeUnconstrainedLength(buffer, length);
-    }
-  }
-  decodeLength(buffer, inRoot) {
-    const { fixedSize, minSize, maxSize } = this.constraints;
-    if (inRoot && fixedSize !== void 0) return fixedSize;
-    if (inRoot && minSize !== void 0 && maxSize !== void 0) {
-      return decodeConstrainedLength(buffer, minSize, maxSize);
-    }
-    return decodeUnconstrainedLength(buffer);
-  }
-};
-
-// src/core/cast/setup/pairing-url-schema.ts
-var nullCodec = new NullCodec();
-var labelString = new IA5StringCodec({ minSize: 1, maxSize: 255 });
-var replacement = new SequenceCodec({ fields: [
-  { name: "removeLabels", codec: new IntegerCodec({ min: 1, max: 15 }) },
-  { name: "addLabels", codec: labelString }
-] });
-var relayHost = new ChoiceCodec({ alternatives: [
-  { name: "same", codec: nullCodec },
-  { name: "replaceLeft", codec: replacement },
-  { name: "absolute", codec: labelString }
-] });
-var relayPort = new ChoiceCodec({ alternatives: [
-  { name: "default", codec: nullCodec },
-  { name: "explicit", codec: new IntegerCodec({ min: 1, max: 65535 }) }
-] });
-var relayOrigin = new SequenceCodec({ fields: [
-  { name: "scheme", codec: new EnumeratedCodec({ values: ["http", "https"] }) },
-  { name: "host", codec: relayHost },
-  { name: "port", codec: relayPort }
-] });
-var relayLocation = new ChoiceCodec({ alternatives: [
-  { name: "conventional", codec: nullCodec },
-  { name: "custom", codec: relayOrigin }
-] });
-var payloadV0 = new SequenceCodec({ fields: [
-  { name: "roomCode", codec: new IntegerCodec({ min: 0, max: 9999 }) },
-  { name: "authCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
-  { name: "relay", codec: relayLocation }
-] });
-var payloadV1 = new SequenceCodec({ fields: [
-  { name: "roomJoinCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
-  { name: "authCode", codec: new IntegerCodec({ min: 0, max: 999999 }) },
-  { name: "relay", codec: relayLocation }
-] });
-var pairingInfoCodec = new ChoiceCodec({
-  alternatives: [{ name: "v0", codec: payloadV0 }],
-  extensionAlternatives: [{ name: "v1", codec: payloadV1 }]
-});
-function encodePairingInfoV1(value) {
-  const buffer = BitBuffer.alloc(64);
-  pairingInfoCodec.encode(buffer, { key: "v1", value });
-  return { bytes: buffer.toUint8Array(), bitLength: buffer.bitLength };
-}
-
-// src/core/cast/setup/pairing-url.ts
-function invalid(message = "Invalid Cast pairing payload.") {
-  throw new TypeError(message);
-}
-function encodeBase64Url(bytes) {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-function validateCodes(codes) {
-  if (!/^\d{6}$/.test(codes.roomJoinCode)) return invalid("Room join code must contain exactly six digits.");
-  if (!/^\d{6}$/.test(codes.authCode)) return invalid("Auth code must contain exactly six digits.");
-  return { roomJoinCode: Number(codes.roomJoinCode), authCode: Number(codes.authCode) };
-}
-function parseOrigin(value, label) {
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    return invalid(`Invalid ${label} URL.`);
-  }
-  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.pathname !== "/" || url.search || url.hash) return invalid(`Invalid ${label} URL.`);
-  return url;
-}
-function conventionalRelay(sender) {
-  return `${sender.protocol}//relay.${sender.hostname}${sender.port ? `:${sender.port}` : ""}`;
-}
-function hostDelta(sender, relay) {
-  if (sender === relay) return { key: "same", value: null };
-  const senderLabels = sender.split(".");
-  const relayLabels = relay.split(".");
-  let common = 0;
-  while (common < senderLabels.length && common < relayLabels.length && senderLabels.at(-1 - common) === relayLabels.at(-1 - common)) common += 1;
-  const removeLabels = senderLabels.length - common;
-  const addLabels = relayLabels.slice(0, relayLabels.length - common).join(".");
-  return common > 0 && removeLabels >= 1 && removeLabels <= 15 && addLabels.length >= 1 && addLabels.length <= 255 ? { key: "replaceLeft", value: { removeLabels, addLabels } } : { key: "absolute", value: relay };
-}
-function payload(codes, relay, sender) {
-  if (relay.origin === conventionalRelay(sender)) return { ...codes, relay: { key: "conventional", value: null } };
-  const origin = { scheme: relay.protocol.slice(0, -1), host: hostDelta(sender.hostname, relay.hostname), port: relay.port ? { key: "explicit", value: Number(relay.port) } : { key: "default", value: null } };
-  return { ...codes, relay: { key: "custom", value: origin } };
-}
-function encodeCastPairingPayload(codes, relayUrl, senderOrigin) {
-  const sender = parseOrigin(senderOrigin, "Cast sender");
-  const relay = parseOrigin(relayUrl, "Cast relay");
-  return encodeBase64Url(encodePairingInfoV1(payload(validateCodes(codes), relay, sender)).bytes);
-}
-function createCastPairingUrl(senderUrl, relayUrl, codes) {
-  const sender = parseOrigin(senderUrl, "Cast sender");
-  sender.hash = encodeCastPairingPayload(codes, relayUrl, sender.origin);
-  return sender.href;
-}
-
-// src/plugins/cast-receiver/session/session-store.ts
-var import_react3 = __toESM(require_react(), 1);
-var INITIAL = {
-  status: "connecting",
-  command: null,
-  presentationEpoch: 0,
-  stream: null,
-  peerCount: 0,
-  error: null,
-  roomJoinCode: "",
-  authCode: "",
-  relayUrl: "",
-  senderUrl: "",
-  pairingReveal: 0
-};
-var playbackState = INITIAL;
-function useCastPlayback(context) {
-  const [state, setState] = (0, import_react3.useState)(playbackState);
-  (0, import_react3.useEffect)(() => {
-    let cancelled = false;
-    const refresh = async () => {
-      const next = await context.getCastState();
-      if (!cancelled && next) {
-        playbackState = next;
-        setState(playbackState);
-      }
-    };
-    void refresh();
-    const interval = window.setInterval(() => void refresh(), 200);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [context]);
-  return state;
-}
-
-// src/plugins/cast-receiver/widgets/PairingWidget.tsx
-var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
-var EN = { title: "Cast pairing", devices: "Connected devices" };
-var DE = { title: "Cast-Kopplung", devices: "Verbundene Ger\xE4te" };
-function PairingWidget({ context }) {
-  const receiver = useCastPlayback(context);
-  const config = (0, import_react4.useMemo)(() => readCastConfig(context.config), [context.config]);
-  const strings = context.locale.startsWith("de") ? DE : EN;
-  const [defaultSenderUrl, setDefaultSenderUrl] = (0, import_react4.useState)("");
-  const { roomJoinCode, authCode } = receiver;
-  const relayUrl = receiver.relayUrl || config.relayUrl;
-  const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
-  const url = (0, import_react4.useMemo)(() => roomJoinCode && authCode && senderUrl && relayUrl ? createCastPairingUrl(senderUrl, relayUrl, { roomJoinCode, authCode }) : "", [authCode, relayUrl, roomJoinCode, senderUrl]);
-  const observedReveal = (0, import_react4.useRef)(receiver.pairingReveal);
-  const observedDismissal = (0, import_react4.useRef)(receiver.dismissSas);
-  (0, import_react4.useEffect)(() => {
-    if (!receiver.senderUrl && !config.senderUrl) void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error) => context.reportStatus("error", String(error)));
-  }, [config.senderUrl, context, receiver.senderUrl]);
-  (0, import_react4.useEffect)(() => {
-    if (receiver.dismissSas && receiver.dismissSas !== observedDismissal.current && receiver.sas) {
-      observedDismissal.current = receiver.dismissSas;
-      void context.dismissCastSas();
-    }
-  }, [context, receiver]);
-  (0, import_react4.useEffect)(() => {
-    if (receiver.sasTrusted === true && receiver.pairingReveal === 0) void context.setPairingDetails(null);
-  }, [context, receiver.pairingReveal, receiver.sasTrusted]);
-  const details = (0, import_react4.useMemo)(() => url && roomJoinCode && authCode ? { roomJoinCode, authCode, url, ...receiver.sas ? { sas: receiver.sas } : {} } : null, [authCode, receiver.sas, roomJoinCode, url]);
-  (0, import_react4.useEffect)(() => {
-    if (receiver.sas && receiver.sasTrusted !== true && details) void context.setPairingDetails(details);
-  }, [context, details, receiver.sas, receiver.sasTrusted]);
-  (0, import_react4.useEffect)(() => {
-    if (receiver.pairingVisible === false && !receiver.sas) void context.setPairingDetails(null);
-  }, [context, receiver.pairingVisible, receiver.sas]);
-  (0, import_react4.useEffect)(() => {
-    const prior = observedReveal.current;
-    observedReveal.current = receiver.pairingReveal;
-    if (receiver.pairingReveal > prior && !receiver.sas && details) void context.setPairingDetails(details);
-  }, [context, details, receiver.pairingReveal, receiver.sas]);
-  const label = `${strings.title}. ${strings.devices}: ${receiver.peerCount}`;
-  const connected = receiver.peerCount > 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cast-pairing-root", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { type: "button", className: "cast-pairing-button", onClick: () => {
-    if (details) void context.setPairingDetails(details);
-  }, disabled: !details, "aria-label": label, title: label, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `cast-pairing-status ${connected ? "cast-pairing-status-connected" : ""}`, "aria-hidden": "true" })
-  ] }) });
-}
-
-// src/plugins/cast-receiver/styles.ts
-var CAST_SANDBOX_CSS = `
-  html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; color: #fff; }
-  body, button { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  .wg-plugin-root, .cast-root, .cast-pairing-root { width: 100%; height: 100%; }
-  .cast-pairing-root { display: flex; justify-content: flex-end; align-items: flex-start; container-type: size; }
-  .cast-root { position: relative; overflow: hidden; }
-  .cast-empty { background: transparent; pointer-events: none; }
-  .cast-active[data-overlay='cover'] { background: #000; }
-  .cast-active[data-overlay='dim'] { background: rgba(0,0,0,0.6); }
-  .cast-active[data-overlay='inline'] { background: transparent; }
-  .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
-  .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
-  .cast-pairing-button { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; display: block; padding: 0; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; box-sizing: border-box; opacity: 1; transition: background .15s ease; }
-  .cast-pairing-button:hover:not(:disabled), .cast-pairing-button:focus-visible { background: rgba(255,255,255,.08); }
-  .cast-pairing-button:disabled { opacity: .45; cursor: default; }
-  .cast-pairing-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
-  .cast-pairing-button svg { position: absolute; inset-block-start: 8%; inset-inline-end: 8%; width: 32%; height: 32%; fill: currentColor; }
-  .cast-pairing-status { position: absolute; inset-block-start: 5%; inset-inline-end: 5%; width: 7%; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; background: #9ca3af; }
-  .cast-pairing-status-connected { background: #22c55e; }
-`;
-
-// src/plugins/cast-receiver/sandbox.ts
-injectStyle("cast-receiver-style", CAST_SANDBOX_CSS);
-var sandbox_default = definePlugin({
-  widgets: {
-    "cast-receiver.screen": defineReactWidget(CastWidget),
-    "cast-receiver.pairing": defineReactWidget(PairingWidget)
-  }
+  return EN;
+}
+var sandbox_default = definePhotoFrameWidget({
+  widgetId: "immich.photoframe",
+  styleId: "immich-style",
+  strings,
+  createBackend: (context, config) => new ImmichBackend(context, config),
+  loadOptions: (context, fieldKey, config) => loadImmichOptions(context, fieldKey, config)
 });
 export {
   sandbox_default as default

@@ -3,6 +3,7 @@ import type { ReactWidgetProps } from '@/sandbox/react';
 import { createCastPairingUrl } from '@/core/cast/setup/pairing-url';
 import { useCastPlayback } from '../session/session-store';
 import { readCastConfig } from '../config/resolve';
+import { PLUGIN_FAILURE_CATEGORIES, PLUGIN_PUBLIC_FAILURE_MESSAGES, pluginFailure } from '@/sandbox/telemetry';
 const EN = { title: 'Cast pairing', devices: 'Connected devices' };
 const DE = { title: 'Cast-Kopplung', devices: 'Verbundene Geräte' };
 
@@ -12,7 +13,7 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const { roomJoinCode, authCode } = receiver; const relayUrl = receiver.relayUrl || config.relayUrl; const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
   const url = useMemo(() => roomJoinCode && authCode && senderUrl && relayUrl ? createCastPairingUrl(senderUrl, relayUrl, { roomJoinCode, authCode }) : '', [authCode, relayUrl, roomJoinCode, senderUrl]);
   const observedReveal = useRef(receiver.pairingReveal); const observedDismissal = useRef(receiver.dismissSas);
-  useEffect(() => { if (!receiver.senderUrl && !config.senderUrl) void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((error: unknown) => context.reportStatus('error', String(error))); }, [config.senderUrl, context, receiver.senderUrl]);
+  useEffect(() => { if (!receiver.senderUrl && !config.senderUrl) void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((cause: unknown) => context.telemetry.disclose(pluginFailure('cast.sender_url.load', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency))); }, [config.senderUrl, context, receiver.senderUrl]);
   useEffect(() => { if (receiver.dismissSas && receiver.dismissSas !== observedDismissal.current && receiver.sas) { observedDismissal.current = receiver.dismissSas; void context.dismissCastSas(); } }, [context, receiver]);
   useEffect(() => { if (receiver.sasTrusted === true && receiver.pairingReveal === 0) void context.setPairingDetails(null); }, [context, receiver.pairingReveal, receiver.sasTrusted]);
   const details = useMemo(() => url && roomJoinCode && authCode ? { roomJoinCode, authCode, url, ...(receiver.sas ? { sas: receiver.sas } : {}) } : null, [authCode, receiver.sas, roomJoinCode, url]);

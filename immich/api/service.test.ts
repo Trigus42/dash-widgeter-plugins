@@ -30,15 +30,15 @@ function service(transport: ImmichTransport, cfg: ImmichConfig = config): Immich
 // Caching / staleness now live in the shared data layer (useWidgetData); the
 // service is a pure API client, so we only test pool routing + parsing here.
 describe('ImmichService pool routing', () => {
-  it('random → POST /search/random with api key + proxy always', async () => {
+  it('random → POST /search/metadata with api key + proxy always', async () => {
     const { transport, calls } = stubHttp(() => ({
       ok: true,
       status: 200,
-      data: [{ id: 'a1', type: 'IMAGE', originalFileName: 'a.jpg' }],
+      data: { assets: { items: [{ id: 'a1', type: 'IMAGE', originalFileName: 'a.jpg' }] } },
     }));
     const assets = await service(transport).fetchAssets(5);
     expect(assets).toHaveLength(1);
-    expect(calls[0]?.url).toBe('http://immich.local/api/search/random');
+    expect(calls[0]?.url).toBe('http://immich.local/api/search/metadata');
     expect(calls[0]?.headers?.['x-api-key']).toBe('secret-key');
     expect(calls[0]?.proxy).toBe('always');
   });
@@ -95,7 +95,7 @@ describe('ImmichService pool routing', () => {
     const { transport, calls } = stubHttp(() => ({
       ok: true,
       status: 200,
-      data: [{ id: 'p1', type: 'IMAGE', originalFileName: 'p.jpg', people: [{ id: '1', name: 'Alice' }] }],
+      data: { assets: { items: [{ id: 'p1', type: 'IMAGE', originalFileName: 'p.jpg', people: [{ id: '1', name: 'Alice' }] }] } },
     }));
     const assets = await service(transport, withPeopleCfg).fetchAssets(5);
     expect(assets).toHaveLength(1);
@@ -128,7 +128,16 @@ describe('ImmichService pool routing', () => {
 
   it('throws on a non-ok response so the data layer can fall back to cache', async () => {
     const { transport } = stubHttp(() => ({ ok: false, status: 500, data: null }));
-    await expect(service(transport).fetchAssets(5)).rejects.toThrow(/random search failed/);
+    await expect(service(transport).fetchAssets(5)).rejects.toThrow(/metadata search failed/);
+  });
+
+  it('distinguishes proxy-generated failures from upstream responses', async () => {
+    const transport: ImmichTransport = { request: () => Promise.resolve({
+      ok: false, status: 502, headers: { 'x-dash-proxy-error': 'upstream_unreachable', 'x-dash-request-id': 'request-123' }, data: { error: { code: 'upstream_unreachable' } },
+    }) };
+    await expect(service(transport).fetchAssets(5)).rejects.toThrow('metadata search failed at proxy (502): upstream_unreachable [request request-123]');
+    const upstream = stubHttp(() => ({ ok: false, status: 502, data: 'upstream body' })).transport;
+    await expect(service(upstream).fetchAssets(5)).rejects.toThrow('metadata search failed at upstream (502)');
   });
 
   it('derives a stable pool key that changes with the selection', () => {
@@ -142,18 +151,12 @@ describe('ImmichService pool routing', () => {
 });
 
 describe('ImmichService.imageRequest', () => {
-  it('builds a thumbnail request with the api-key header and proxy, by size', () => {
+  it('builds an original-image request with the api-key header and proxy', () => {
     const req = service(stubHttp(() => ({ ok: true, status: 200, data: [] })).transport)
       .imageRequest('asset-1', 'preview');
-    expect(req.url).toBe('http://immich.local/api/assets/asset-1/thumbnail?size=preview');
+    expect(req.url).toBe('http://immich.local/api/assets/asset-1/original');
     expect(req.headers?.['x-api-key']).toBe('secret-key');
     expect(req.proxy).toBe('always');
     expect(req.method).toBe('GET');
-  });
-
-  it('honors the thumbnail size tier', () => {
-    const req = service(stubHttp(() => ({ ok: true, status: 200, data: [] })).transport)
-      .imageRequest('a2', 'thumbnail');
-    expect(req.url).toContain('size=thumbnail');
   });
 });

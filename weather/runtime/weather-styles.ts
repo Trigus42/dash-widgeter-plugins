@@ -19,7 +19,7 @@ export const WEATHER_SANDBOX_CSS = `
   .weather-current svg { width: min(90cqh,30cqw); height: min(90cqh,30cqw); flex-shrink: 0; }
   .weather-temp { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
   .weather-value { font-size: min(52cqh,22cqw); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-  .weather-desc { font-size: min(20cqh,8cqw); color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-desc { font-size: min(20cqh,8cqw); line-height: 1.15; color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow-wrap: anywhere; }
   .weather-loc { font-size: min(17cqh,7cqw); color: rgba(255,255,255,0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .weather-forecast { display: flex; justify-content: space-between; gap: 3%; margin-top: 8px; }
   .weather-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6%; flex: 1; min-width: 0; }

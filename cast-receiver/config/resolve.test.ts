@@ -15,6 +15,12 @@ describe('readCastConfig', () => {
     expect(readCastConfig({ sourceKind: 'spotify' }).sourceKind).toBe('idle');
     expect(readCastConfig({ sourceKind: 'youtube' }).sourceKind).toBe('youtube');
   });
+  it('defaults both pairing visibility options off and preserves explicit booleans', () => {
+    expect(readCastConfig({})).toMatchObject({ hidePairingWhileInactive: false, neverHidePairing: false });
+    expect(readCastConfig({ hidePairingWhileInactive: true, neverHidePairing: true }))
+      .toMatchObject({ hidePairingWhileInactive: true, neverHidePairing: true });
+  });
+
 
 
   it('bounds the SAS timeout and defaults to 60 seconds', () => {

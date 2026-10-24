@@ -3,6 +3,7 @@ import type { ReactWidgetProps } from '@/sandbox/react';
 import { readCastConfig, resolveCastTarget } from '../config/resolve';
 import { createCastQueueSnapshot } from '@/cast-protocol';
 import { createScreenSession, type ScreenSession } from '../session/screen-session';
+import { PLUGIN_FAILURE_CATEGORIES, PLUGIN_PUBLIC_FAILURE_MESSAGES, pluginFailure } from '@/sandbox/telemetry';
 
 function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number, muted: boolean): void {
   media.volume = volume;
@@ -63,11 +64,8 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
       await context.setPresentation(next);
       await context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');
     };
-    void updatePresentation().catch((error: unknown) => {
-      const message = error instanceof Error ? error.message : typeof error === 'object' && error !== null
-        && 'message' in error && typeof error.message === 'string' ? error.message : String(error);
-      context.log('error', 'Failed to update Cast presentation', { 'error.message': message });
-      context.reportStatus('error', message);
+    void updatePresentation().catch((cause: unknown) => {
+      context.telemetry.disclose(pluginFailure('cast.presentation.update', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency));
     });
     return undefined;
   }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);

@@ -317,4 +317,20 @@ describe('screen session room lifecycle', () => {
     expect(mocks.createResumeSession).not.toHaveBeenCalled(); await revokes[0]!('a'.repeat(43)); states[1]!({ status: 'disconnected', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }); await lifecycleTick();
     expect(mocks.createResumeSession).toHaveBeenCalledTimes(1); expect(mocks.createResumeSession).toHaveBeenCalledWith(expect.any(String), 'b'.repeat(43), expect.any(Uint8Array), rooms[1]!.ownerCapability, expect.any(AbortSignal)); session.close();
   });
+  it('logs an actionable transferred failure before publishing error state', async () => {
+    const transferredFailure = { name: 'Error', message: 'Penpal signaling request failed', cause: { reason: 'Relay certificate rejected' } };
+    mocks.createPairingSession.mockRejectedValueOnce(transferredFailure);
+    const calls: string[] = [];
+    const setCastState = vi.fn(() => { calls.push('publish'); return Promise.resolve(); });
+    const failure = vi.fn(); const disclose = vi.fn(() => calls.push('log'));
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState, reportStatus: vi.fn(), telemetry: { failure, disclose } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context);
+    await vi.waitFor(() => expect(session.state.status).toBe('error'));
+    expect(session.state.error).toBe('The plugin service is temporarily unavailable.');
+    expect(disclose).toHaveBeenCalledWith(expect.objectContaining({ category: 'plugin.dependency.transport', operation: 'cast.session', publicMessage: 'The plugin service is temporarily unavailable.' }));
+    expect(failure).not.toHaveBeenCalled();
+    expect(calls).toEqual(['log', 'publish']);
+    session.close();
+  });
 });

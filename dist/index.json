@@ -380,8 +380,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-84eb34f916871b03f374a6e163eb58da4ccfdc47052189ecf4a9939e0e622e3d.js",
-      "sha256": "84eb34f916871b03f374a6e163eb58da4ccfdc47052189ecf4a9939e0e622e3d"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/weather-d49ea21f1abd33b58ce3b14fdaf104dd3898c8f1283787f730f84508bd0b83e3.js",
+      "sha256": "d49ea21f1abd33b58ce3b14fdaf104dd3898c8f1283787f730f84508bd0b83e3"
     },
     {
       "manifest": {
@@ -1009,8 +1009,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-5ebf2618264428d66dc29b42713579149c8f781969d2f55d07cb4d7880b76c7b.js",
-      "sha256": "5ebf2618264428d66dc29b42713579149c8f781969d2f55d07cb4d7880b76c7b"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/immich-99c7e8fbc655304c3b47576448138a6987fdcb626c0c1704a5d3b05c55d6dff0.js",
+      "sha256": "99c7e8fbc655304c3b47576448138a6987fdcb626c0c1704a5d3b05c55d6dff0"
     },
     {
       "manifest": {
@@ -1850,7 +1850,9 @@
               "overlayMode": "inline",
               "muted": false,
               "autoplay": true,
-              "sasTimeoutSeconds": 60
+              "sasTimeoutSeconds": 60,
+              "hidePairingWhileInactive": false,
+              "neverHidePairing": false
             },
             "defaultAppearance": {
               "background": "none",
@@ -1952,6 +1954,20 @@
                 "type": "number",
                 "help": "Hide the verification code after 10–300 seconds without trusting automatically.",
                 "section": "Connection"
+              },
+              {
+                "key": "hidePairingWhileInactive",
+                "label": "Auto-hide while Cast is inactive",
+                "type": "boolean",
+                "help": "Hide the Cast button until you interact with the dashboard, even when nothing is casting.",
+                "section": "Pairing"
+              },
+              {
+                "key": "neverHidePairing",
+                "label": "Never hide Cast button",
+                "type": "boolean",
+                "help": "Keep the Cast button visible at all times. This takes precedence over auto-hide.",
+                "section": "Pairing"
               }
             ]
           },
@@ -1967,7 +1983,9 @@
             "defaultConfig": {
               "relayUrl": "",
               "senderUrl": "",
-              "sasTimeoutSeconds": 60
+              "sasTimeoutSeconds": 60,
+              "hidePairingWhileInactive": false,
+              "neverHidePairing": false
             },
             "defaultAppearance": {
               "background": "none",
@@ -1998,13 +2016,27 @@
                 "type": "number",
                 "help": "Hide the verification code after 10–300 seconds without trusting automatically.",
                 "section": "Connection"
+              },
+              {
+                "key": "hidePairingWhileInactive",
+                "label": "Auto-hide while Cast is inactive",
+                "type": "boolean",
+                "help": "Hide the Cast button until you interact with the dashboard, even when nothing is casting.",
+                "section": "Pairing"
+              },
+              {
+                "key": "neverHidePairing",
+                "label": "Never hide Cast button",
+                "type": "boolean",
+                "help": "Keep the Cast button visible at all times. This takes precedence over auto-hide.",
+                "section": "Pairing"
               }
             ]
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-586232387c1a52b35c006148222c452a8dea8f65c4060bb8c4ef864ecec7f672.js",
-      "sha256": "586232387c1a52b35c006148222c452a8dea8f65c4060bb8c4ef864ecec7f672"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-9b1a954b77de7dfc6ba13410ba6cc9c1e1ed9a22ae397ae2ea3396332db2b549.js",
+      "sha256": "9b1a954b77de7dfc6ba13410ba6cc9c1e1ed9a22ae397ae2ea3396332db2b549"
     }
   ]
 }

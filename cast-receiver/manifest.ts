@@ -46,6 +46,8 @@ const settings: WidgetSettingField[] = [
   { key: 'muted', label: 'Start muted', type: 'boolean', section: 'Presentation' },
   { key: 'autoplay', label: 'Autoplay', type: 'boolean', help: 'Start queued and YouTube presentations automatically.', section: 'Presentation' },
   { key: 'sasTimeoutSeconds', label: 'Security code timeout (seconds)', type: 'number', help: 'Hide the verification code after 10–300 seconds without trusting automatically.', section: 'Connection' },
+  { key: 'hidePairingWhileInactive', label: 'Auto-hide while Cast is inactive', type: 'boolean', help: 'Hide the Cast button until you interact with the dashboard, even when nothing is casting.', section: 'Pairing' },
+  { key: 'neverHidePairing', label: 'Never hide Cast button', type: 'boolean', help: 'Keep the Cast button visible at all times. This takes precedence over auto-hide.', section: 'Pairing' },
 ];
 
 export const castManifest: PluginManifest = {
@@ -84,7 +86,7 @@ export const castManifest: PluginManifest = {
       defaultW: 2,
       defaultH: 2,
       defaultZIndex: OVERLAY_Z,
-      defaultConfig: { relayUrl: '', senderUrl: '', sasTimeoutSeconds: CAST_DEFAULT_CONFIG.sasTimeoutSeconds },
+      defaultConfig: { relayUrl: '', senderUrl: '', sasTimeoutSeconds: CAST_DEFAULT_CONFIG.sasTimeoutSeconds, hidePairingWhileInactive: false, neverHidePairing: false },
       defaultAppearance: { background: 'none', backgroundOpacity: 0 },
       nativeNetwork: [],
       webRtc: false,

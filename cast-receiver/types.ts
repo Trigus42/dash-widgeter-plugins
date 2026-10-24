@@ -20,6 +20,8 @@ export interface CastConfig extends CastCommand {
   senderUrl: string;
   autoplay: boolean;
   sasTimeoutSeconds: number;
+  hidePairingWhileInactive: boolean;
+  neverHidePairing: boolean;
 }
 
 export const CAST_DEFAULT_CONFIG: CastConfig = {
@@ -32,4 +34,6 @@ export const CAST_DEFAULT_CONFIG: CastConfig = {
   muted: false,
   autoplay: true,
   sasTimeoutSeconds: 60,
+  hidePairingWhileInactive: false,
+  neverHidePairing: false,
 };
