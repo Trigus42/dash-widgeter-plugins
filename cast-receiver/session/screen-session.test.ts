@@ -105,6 +105,24 @@ describe('screen session room lifecycle', () => {
     for (const call of setCastState.mock.calls) expect(() => structuredClone(call[0])).not.toThrow();
     session.close();
   });
+  it('clears the active stream when its presenter stops sharing', async () => {
+    const room = { roomJoinCode: '111111', authCode: '444444', expiresAt: Date.now() + 60_000,
+      options: {}, renew: vi.fn(), close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValue(room);
+    let callback: ((state: { status: 'casting' | 'paired'; command: null; stream: MediaStream | null; presentationEpoch: number; peerCount: number; error: null }) => void) | undefined;
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: NonNullable<typeof callback>) => {
+      callback = onState; return { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn() };
+    });
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()),
+      reportStatus: vi.fn(), log: vi.fn() } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(callback).toBeTypeOf('function'));
+    const stream = {} as MediaStream;
+    callback?.({ status: 'casting', command: null, stream, presentationEpoch: 1, peerCount: 1, error: null });
+    expect(session.state.stream).toBe(stream);
+    callback?.({ status: 'paired', command: null, stream: null, presentationEpoch: 1, peerCount: 1, error: null });
+    expect(session.state.stream).toBeNull(); expect(session.state.status).toBe('paired'); session.close();
+  });
   it('keeps a trusted fresh-pair receiver alive while allocating the next pairing room', async () => {
     const rooms = ['111111', '222222'].map((roomJoinCode, index) => ({
       roomJoinCode, authCode: '444444', expiresAt: Date.now() + 60_000, options: { generation: `generation-${index}` }, close: vi.fn(() => Promise.resolve()),

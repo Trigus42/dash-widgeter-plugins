@@ -6,6 +6,12 @@ import { applyCastQueueMutation, createCastQueueSnapshot, decode, type CastQueue
 import type { DataMessage } from '@/core/cast/protocol/data-message';
 import { createPluginReceiver, type PluginReceiver, type ReceiverState } from '../receiver';
 import { readCastConfig } from '../config/resolve';
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') return error.message;
+  return String(error);
+}
+
 
 export interface ScreenSession {
   state: ReceiverState & { roomJoinCode: string; authCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number; pairingVisible: boolean };
@@ -43,8 +49,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     void context.setCastState(hostState);
   };
   const report = (error: unknown): void => {
-    context.log('error', 'Cast receiver operation failed', { error: error instanceof Error ? error.message : String(error) });
-    publish({ status: 'error', error: error instanceof Error ? error.message : String(error) });
+    const message = errorMessage(error);
+    context.log('error', 'Cast receiver operation failed', { 'error.message': message });
+    publish({ status: 'error', error: message });
   };
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
@@ -107,7 +114,10 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         if (livePresenter && livePresenter !== entry) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); }
         livePresenter = entry;
         publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
-      } else if (livePresenter === entry && (live || command) && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
+      } else if (livePresenter === entry && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
+    } else if (livePresenter === entry && state.stream !== null && latest.presentationEpoch > entry.revokedEpoch
+        && latest.presentationEpoch + entry.epochOffset === authoritativeEpoch) {
+      livePresenter = undefined; publish({ stream: null, command: null, status: connected.size > 0 ? 'paired' : 'disconnected', peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
       sasOwner = entry;

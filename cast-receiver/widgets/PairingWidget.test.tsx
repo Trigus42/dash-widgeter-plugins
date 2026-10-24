@@ -68,6 +68,8 @@ describe('PairingWidget', () => {
       .querySelector('.cast-pairing-status')?.classList.contains('cast-pairing-status-connected')).toBe(true);
   });
 
+
+
   it('keeps the launch click behavior unchanged', () => {
     mocks.useCastPlayback.mockReturnValue(baseState);
     const ctx = context();

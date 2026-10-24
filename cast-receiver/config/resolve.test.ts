@@ -16,6 +16,7 @@ describe('readCastConfig', () => {
     expect(readCastConfig({ sourceKind: 'youtube' }).sourceKind).toBe('youtube');
   });
 
+
   it('bounds the SAS timeout and defaults to 60 seconds', () => {
     expect(readCastConfig({}).sasTimeoutSeconds).toBe(60);
     expect(readCastConfig({ sasTimeoutSeconds: 10 }).sasTimeoutSeconds).toBe(10);

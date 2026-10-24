@@ -1785,7 +1785,7 @@
       "manifest": {
         "id": "cast-receiver",
         "name": "Cast Receiver",
-        "version": "4.6.1",
+        "version": "4.6.3",
         "description": "Remote receiver for YouTube, screen sharing, websites, and media",
         "translations": {
           "de": {
@@ -1840,7 +1840,7 @@
             "minH": 3,
             "defaultW": 30,
             "defaultH": 25,
-            "defaultZIndex": 10,
+            "defaultZIndex": 100,
             "defaultConfig": {
               "sourceKind": "idle",
               "sourceUrl": "",
@@ -1970,8 +1970,8 @@
               "sasTimeoutSeconds": 60
             },
             "defaultAppearance": {
-              "background": "glass",
-              "backgroundOpacity": 0.55
+              "background": "none",
+              "backgroundOpacity": 0
             },
             "nativeNetwork": [],
             "webRtc": false,
@@ -2003,8 +2003,8 @@
           }
         ]
       },
-      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-5c90cb583eb6642324e51c5543eb5a864cec867f59cb9fb5ec4442996df4fd40.js",
-      "sha256": "5c90cb583eb6642324e51c5543eb5a864cec867f59cb9fb5ec4442996df4fd40"
+      "bundleUrl": "https://raw.githubusercontent.com/Trigus42/dash-widgeter-plugins/main/dist/cast-receiver-586232387c1a52b35c006148222c452a8dea8f65c4060bb8c4ef864ecec7f672.js",
+      "sha256": "586232387c1a52b35c006148222c452a8dea8f65c4060bb8c4ef864ecec7f672"
     }
   ]
 }

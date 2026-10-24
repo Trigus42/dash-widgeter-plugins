@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactWidgetProps } from '@/sandbox/react';
 import { readCastConfig, resolveCastTarget } from '../config/resolve';
 import { createCastQueueSnapshot } from '@/cast-protocol';
@@ -30,12 +30,17 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const hasVisiblePresentation = effectiveConfig.outputMode !== 'audio-only' && (
     receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== 'idle'
   );
-  useEffect(() => {
+  useLayoutEffect(() => {
     const video = videoRef.current;
     if (!video || !receiver.stream) return;
     video.srcObject = receiver.stream;
     applyPlayback(video, paused, volume, effectiveConfig.muted);
-    return () => { video.srcObject = null; };
+    return () => {
+      video.pause();
+      video.srcObject = null;
+      video.removeAttribute('src');
+      video.load();
+    };
   }, [effectiveConfig.muted, paused, receiver.stream, volume]);
   useEffect(() => {
     const stream = receiver.stream;
@@ -58,8 +63,12 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
       await context.setPresentation(next);
       await context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');
     };
-    void updatePresentation().catch((error: unknown) =>
-      context.reportStatus('error', error instanceof Error ? error.message : String(error)));
+    void updatePresentation().catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : typeof error === 'object' && error !== null
+        && 'message' in error && typeof error.message === 'string' ? error.message : String(error);
+      context.log('error', 'Failed to update Cast presentation', { 'error.message': message });
+      context.reportStatus('error', message);
+    });
     return undefined;
   }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
   useEffect(() => {

@@ -26348,19 +26348,19 @@ function parseIceCandidate(value) {
   if ("sdpMLineIndex" in candidate && candidate.sdpMLineIndex !== null && (!Number.isSafeInteger(candidate.sdpMLineIndex) || Number(candidate.sdpMLineIndex) < 0)) return null;
   return candidate;
 }
-function sendWire(socket, value) {
+function sendWire(socket, value, channel) {
   const state = socketSequences.get(socket) ?? { sent: 0, received: 0 };
   const inner = JSON.stringify(value);
   if (inner.length > MAX_CAST_MESSAGE_BYTES) throw new Error("Cast signaling message is too large");
-  const type = value.type === "signal" ? "signal" : value.type === "receiver-ready" ? "resume" : "pairing";
+  const type = value.type === "signal" ? "signal" : value.type === "receiver-ready" ? "resume" : channel ?? "pairing";
   socket.send(JSON.stringify({ kind: "wsFrame", v: 1, seq: state.sent, type, payload: encode(new TextEncoder().encode(inner)) }));
   state.sent += 1;
   socketSequences.set(socket, state);
 }
-function parseWire(data, socket) {
-  return parseWireFrame(data, socket);
+function parseWire(data, socket, expectedChannel) {
+  return parseWireFrame(data, socket, expectedChannel);
 }
-function parseWireFrame(data, socket) {
+function parseWireFrame(data, socket, expectedChannel) {
   if (typeof data !== "string" || data.length > MAX_CAST_MESSAGE_BYTES * 2) return null;
   let outer;
   try {
@@ -26381,8 +26381,8 @@ function parseWireFrame(data, socket) {
   }
   if (!value || typeof value !== "object" || !("type" in value)) return null;
   const candidate = value;
-  const innerType = candidate.type === "signal" ? "signal" : candidate.type === "receiver-ready" ? "resume" : "pairing";
-  if (frame.type !== innerType) return null;
+  const expectedType = candidate.type === "signal" ? "signal" : candidate.type === "receiver-ready" ? "resume" : expectedChannel ?? "pairing";
+  if (frame.type !== expectedType) return null;
   let parsed = null;
   if (candidate.type === "receiver-ready" && exact2(candidate, ["type"])) parsed = candidate;
   else if (candidate.type === "challenge-request" && exact2(candidate, ["type", "share", "nonce"]) && encoded(candidate.share, 65) && Number.isSafeInteger(candidate.nonce)) parsed = candidate;
@@ -26604,15 +26604,16 @@ async function handleReceiverSignalWire(wire, signaling, peer, ctx) {
 
 // src/core/cast/session/receiver/receiver-wire-handler.ts
 async function processReceiverWireMessage(data, ctx) {
-  const wire = parseWire(data, ctx.active);
+  if (typeof data === "string" && data === '{"kind":"relayPeerReady","v":1}') return;
+  const wire = parseWire(data, ctx.active, ctx.options.mode);
   if (!wire) throw new Error("Invalid cast message");
   const handshake = ctx.getHandshake();
   if (wire.type === "challenge-request") {
-    sendWire(ctx.active, handshake.challengeFor(wire, ctx.incrementCount()));
+    sendWire(ctx.active, handshake.challengeFor(wire, ctx.incrementCount()), ctx.options.mode);
     return;
   }
   if (wire.type === "prover") {
-    sendWire(ctx.active, await handshake.process(wire));
+    sendWire(ctx.active, await handshake.process(wire), ctx.options.mode);
     return;
   }
   if (wire.type === "confirm") {
@@ -26960,6 +26961,11 @@ function createPluginReceiver(options, asset, onState, onResumeBinding, onResume
 }
 
 // src/plugins/cast-receiver/session/screen-session.ts
+function errorMessage(error) {
+  if (error instanceof Error) return error.message;
+  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") return error.message;
+  return String(error);
+}
 function createScreenSession(context) {
   const config = readCastConfig(context.config);
   const state = {
@@ -27012,7 +27018,11 @@ function createScreenSession(context) {
     };
     void context.setCastState(hostState);
   };
-  const report = (error) => publish({ status: "error", error: error instanceof Error ? error.message : String(error) });
+  const report = (error) => {
+    const message = errorMessage(error);
+    context.log("error", "Cast receiver operation failed", { "error.message": message });
+    publish({ status: "error", error: message });
+  };
   const enqueue = (operation) => {
     lifecycle = lifecycle.then(operation).catch(report);
   };
@@ -27100,23 +27110,16 @@ function createScreenSession(context) {
         }
         livePresenter = entry;
         publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
-      } else if (livePresenter === entry && (live || command) && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
+      } else if (livePresenter === entry && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
+    } else if (livePresenter === entry && state.stream !== null && latest.presentationEpoch > entry.revokedEpoch && latest.presentationEpoch + entry.epochOffset === authoritativeEpoch) {
+      livePresenter = void 0;
+      publish({ stream: null, command: null, status: connected.size > 0 ? "paired" : "disconnected", peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
       sasOwner = entry;
-      delete state.sasTrusted;
-      clearTimeout(sasTimer);
-      sasTimer = setTimeout(() => {
-        var _a2;
-        if (sasOwner === entry) {
-          sasOwner = void 0;
-          (_a2 = entry.receiver) == null ? void 0 : _a2.confirmSas(false);
-          entry.trusted = false;
-          delete state.sas;
-          delete state.sasTrusted;
-          publish({});
-        }
-      }, config.sasTimeoutSeconds * 1e3);
+      delete state.sas;
+      publish({ sasTrusted: true });
+      return;
     }
     if (sasOwner === entry && latest.sasTrusted === true) {
       sasOwner = void 0;
@@ -27126,19 +27129,7 @@ function createScreenSession(context) {
       context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
       return;
     }
-    if (sasOwner === entry && !latest.sas) {
-      sasOwner = void 0;
-      clearTimeout(sasTimer);
-    }
-    const ownedSas = sasOwner == null ? void 0 : sasOwner.state.sas;
-    if (!ownedSas) {
-      delete state.sas;
-      if (state.sasTrusted !== true) delete state.sasTrusted;
-    }
-    publish({
-      ...ownedSas ? { sas: ownedSas } : {},
-      ...ownedSas && (sasOwner == null ? void 0 : sasOwner.state.sasTrusted) !== void 0 ? { sasTrusted: sasOwner.state.sasTrusted } : {}
-    });
+    publish({});
     context.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
   };
   const disposeEntry = async (entry) => {
@@ -27198,8 +27189,9 @@ function createScreenSession(context) {
           }
         });
         await entry.receiver.listening;
-      } catch {
+      } catch (error) {
         listeningBindings.delete(binding.bindingId);
+        if (!abort.signal.aborted) context.log("error", "Failed to start Cast resume listener", { error: error instanceof Error ? error.message : String(error) });
       }
     };
     await listen();
@@ -27402,13 +27394,16 @@ function CastWidget({ context }) {
   const paused = effectiveConfig.paused ?? false;
   const volume = effectiveConfig.volume ?? 1;
   const hasVisiblePresentation = effectiveConfig.outputMode !== "audio-only" && (receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== "idle");
-  (0, import_react2.useEffect)(() => {
+  (0, import_react2.useLayoutEffect)(() => {
     const video = videoRef.current;
     if (!video || !receiver.stream) return;
     video.srcObject = receiver.stream;
     applyPlayback(video, paused, volume, effectiveConfig.muted);
     return () => {
+      video.pause();
       video.srcObject = null;
+      video.removeAttribute("src");
+      video.load();
     };
   }, [effectiveConfig.muted, paused, receiver.stream, volume]);
   (0, import_react2.useEffect)(() => {
@@ -27439,7 +27434,11 @@ function CastWidget({ context }) {
       await context.setPresentation(next);
       await context.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
     };
-    void updatePresentation().catch((error) => context.reportStatus("error", error instanceof Error ? error.message : String(error)));
+    void updatePresentation().catch((error) => {
+      const message = error instanceof Error ? error.message : typeof error === "object" && error !== null && "message" in error && typeof error.message === "string" ? error.message : String(error);
+      context.log("error", "Failed to update Cast presentation", { "error.message": message });
+      context.reportStatus("error", message);
+    });
     return void 0;
   }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
   (0, import_react2.useEffect)(() => {
@@ -28374,12 +28373,12 @@ function PairingWidget({ context }) {
   }, [context, details, receiver.pairingReveal, receiver.sas]);
   const label = `${strings.title}. ${strings.devices}: ${receiver.peerCount}`;
   const connected = receiver.peerCount > 0;
-  return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { type: "button", className: "cast-pairing-button", onClick: () => {
+  return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "cast-pairing-root", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("button", { type: "button", className: "cast-pairing-button", onClick: () => {
     if (details) void context.setPairingDetails(details);
   }, disabled: !details, "aria-label": label, title: label, children: [
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("path", { d: "M1 18v3h3a3 3 0 0 0-3-3Zm0-5v3a5 5 0 0 1 5 5h3a8 8 0 0 0-8-8Zm0-5v3c5.5 0 10 4.5 10 10h3C14 13.8 8.2 8 1 8Zm3-5a3 3 0 0 0-3 3v1h3V6h16v12h-5v3h5a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H4Z" }) }),
     /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: `cast-pairing-status ${connected ? "cast-pairing-status-connected" : ""}`, "aria-hidden": "true" })
-  ] });
+  ] }) });
 }
 
 // src/plugins/cast-receiver/styles.ts
@@ -28387,6 +28386,7 @@ var CAST_SANDBOX_CSS = `
   html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; color: #fff; }
   body, button { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
   .wg-plugin-root, .cast-root, .cast-pairing-root { width: 100%; height: 100%; }
+  .cast-pairing-root { display: flex; justify-content: flex-end; align-items: flex-start; container-type: size; }
   .cast-root { position: relative; overflow: hidden; }
   .cast-empty { background: transparent; pointer-events: none; }
   .cast-active[data-overlay='cover'] { background: #000; }
@@ -28394,12 +28394,12 @@ var CAST_SANDBOX_CSS = `
   .cast-active[data-overlay='inline'] { background: transparent; }
   .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
   .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
-  .cast-pairing-button { position: relative; width: 44px; height: 44px; min-width: 44px; min-height: 44px; display: grid; place-items: center; padding: 10px; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; }
-  .cast-pairing-button:hover:not(:disabled) { background: rgba(255,255,255,.08); }
+  .cast-pairing-button { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; display: block; padding: 0; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; box-sizing: border-box; opacity: 1; transition: background .15s ease; }
+  .cast-pairing-button:hover:not(:disabled), .cast-pairing-button:focus-visible { background: rgba(255,255,255,.08); }
   .cast-pairing-button:disabled { opacity: .45; cursor: default; }
-  .cast-pairing-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; background: rgba(255,255,255,.08); }
-  .cast-pairing-button svg { width: 24px; height: 24px; fill: currentColor; }
-  .cast-pairing-status { position: absolute; inset-block-start: 7px; inset-inline-end: 7px; width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; background: #9ca3af; }
+  .cast-pairing-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+  .cast-pairing-button svg { position: absolute; inset-block-start: 8%; inset-inline-end: 8%; width: 32%; height: 32%; fill: currentColor; }
+  .cast-pairing-status { position: absolute; inset-block-start: 5%; inset-inline-end: 5%; width: 7%; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; background: #9ca3af; }
   .cast-pairing-status-connected { background: #22c55e; }
 `;
 
