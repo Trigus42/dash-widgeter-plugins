@@ -42,7 +42,10 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       ...(state.sas ? { sas: state.sas } : {}), ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
     void context.setCastState(hostState);
   };
-  const report = (error: unknown): void => publish({ status: 'error', error: error instanceof Error ? error.message : String(error) });
+  const report = (error: unknown): void => {
+    context.log('error', 'Cast receiver operation failed', { error: error instanceof Error ? error.message : String(error) });
+    publish({ status: 'error', error: error instanceof Error ? error.message : String(error) });
+  };
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
     void context.getCastState().then((hostState) => {
@@ -107,19 +110,20 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       } else if (livePresenter === entry && (live || command) && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
     } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
-      sasOwner = entry; delete state.sasTrusted; clearTimeout(sasTimer); sasTimer = setTimeout(() => {
-        if (sasOwner === entry) { sasOwner = undefined; entry.receiver?.confirmSas(false); entry.trusted = false; delete state.sas; delete state.sasTrusted; publish({}); }
-      }, config.sasTimeoutSeconds * 1_000);
+      sasOwner = entry;
+      delete state.sas;
+      publish({ sasTrusted: true });
+      return;
     }
     if (sasOwner === entry && latest.sasTrusted === true) {
-      sasOwner = undefined; clearTimeout(sasTimer); delete state.sas;
-      publish({ sasTrusted: true }); context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? ''); return;
+      sasOwner = undefined;
+      clearTimeout(sasTimer);
+      delete state.sas;
+      publish({ sasTrusted: true });
+      context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
+      return;
     }
-    if (sasOwner === entry && !latest.sas) { sasOwner = undefined; clearTimeout(sasTimer); }
-    const ownedSas = sasOwner?.state.sas;
-    if (!ownedSas) { delete state.sas; if (state.sasTrusted !== true) delete state.sasTrusted; }
-    publish({ ...(ownedSas ? { sas: ownedSas } : {}),
-      ...(ownedSas && sasOwner?.state.sasTrusted !== undefined ? { sasTrusted: sasOwner.state.sasTrusted } : {}) });
+    publish({});
     context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
   };
   const disposeEntry = async (entry: ReceiverEntry): Promise<void> => {
@@ -149,8 +153,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           aggregate(entry);
         }, undefined, context.castResume ? (bindingId) => context.castResume.delete(bindingId) : undefined, authenticatedMessage(entry), ({ trusted }) => { entry.trusted = trusted; if (trusted) { delete state.sas; publish({ sasTrusted: true }); } });
         await entry.receiver.listening;
-      } catch {
+      } catch (error) {
         listeningBindings.delete(binding.bindingId);
+        if (!abort.signal.aborted) context.log('error', 'Failed to start Cast resume listener', { error: error instanceof Error ? error.message : String(error) });
       }
     };
     await listen();
