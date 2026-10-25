@@ -28194,20 +28194,181 @@ var SecretSanitizingProcessor = class {
   }
 };
 
+// src/protocol/telemetry-otel/sink.ts
+function flatten(record2) {
+  const attrs = { ...record2.attributes };
+  attrs["event.subsystem"] = record2.scope;
+  if (record2.event !== void 0) attrs["event.name"] = record2.event;
+  if (record2.category !== void 0) attrs["event.category"] = record2.category;
+  if (record2.operation !== void 0) attrs["event.operation"] = record2.operation;
+  if (record2.correlationId !== void 0) attrs["correlation.id"] = record2.correlationId;
+  if (record2.error !== void 0) {
+    attrs["error.type"] = record2.error.name;
+    attrs["error.message"] = record2.error.message;
+    if (record2.error.stack !== void 0) attrs["error.stack"] = record2.error.stack;
+  }
+  return attrs;
+}
+function createOtelSink(loggerFor) {
+  return (record2) => {
+    loggerFor(record2.scope).emit({
+      severityNumber: record2.severityNumber,
+      severityText: record2.severityText,
+      body: record2.message,
+      ...record2.event !== void 0 ? { eventName: record2.event } : {},
+      timestamp: record2.timestamp,
+      attributes: flatten(record2)
+    });
+  };
+}
+
+// src/core/telemetry/otel-sink.ts
+function createOtelSink2() {
+  const loggers = /* @__PURE__ */ new Map();
+  return createOtelSink((scope) => {
+    let logger = loggers.get(scope);
+    if (!logger) {
+      logger = logs.getLogger(scope);
+      loggers.set(scope, logger);
+    }
+    return logger;
+  });
+}
+
+// src/protocol/telemetry/levels.ts
+var SEVERITY_NUMBER = {
+  trace: 1,
+  debug: 5,
+  info: 9,
+  warn: 13,
+  error: 17,
+  fatal: 21
+};
+var SEVERITY_TEXT = {
+  trace: "TRACE",
+  debug: "DEBUG",
+  info: "INFO",
+  warn: "WARN",
+  error: "ERROR",
+  fatal: "FATAL"
+};
+var LEVEL_BY_SEVERITY = [
+  [SEVERITY_NUMBER.fatal, "fatal"],
+  [SEVERITY_NUMBER.error, "error"],
+  [SEVERITY_NUMBER.warn, "warn"],
+  [SEVERITY_NUMBER.info, "info"],
+  [SEVERITY_NUMBER.debug, "debug"],
+  [SEVERITY_NUMBER.trace, "trace"]
+];
+
+// src/protocol/telemetry/categories.ts
+var CATEGORY_POLICY = {
+  cancelled: { defaultLevel: "info", publicMessage: "The operation was cancelled.", retryable: true, httpStatus: 499 },
+  invalid_input: { defaultLevel: "warn", publicMessage: "The request is invalid.", retryable: false, httpStatus: 400 },
+  permission_denied: { defaultLevel: "warn", publicMessage: "The request is not permitted.", retryable: false, httpStatus: 403 },
+  rate_limited: { defaultLevel: "warn", publicMessage: "Too many requests. Try again shortly.", retryable: true, httpStatus: 429 },
+  capacity_exceeded: { defaultLevel: "warn", publicMessage: "The service is at capacity. Try again shortly.", retryable: true, httpStatus: 429 },
+  dependency_transport: { defaultLevel: "error", publicMessage: "The destination could not be reached.", retryable: true, httpStatus: 502 },
+  dependency_response: { defaultLevel: "error", publicMessage: "The destination returned an unusable response.", retryable: false, httpStatus: 502 },
+  data_integrity: { defaultLevel: "error", publicMessage: "The data could not be verified.", retryable: false, httpStatus: 502 },
+  local_infrastructure: { defaultLevel: "error", publicMessage: "The operation could not be completed.", retryable: true, httpStatus: 500 },
+  configuration: { defaultLevel: "fatal", publicMessage: "The service is misconfigured.", retryable: false, httpStatus: 500 },
+  internal: { defaultLevel: "error", publicMessage: "The operation could not be completed.", retryable: false, httpStatus: 500 }
+};
+var DEFAULT_CATEGORY = "internal";
+function categoryPolicy(category) {
+  return CATEGORY_POLICY[category];
+}
+
+// src/protocol/telemetry/record.ts
+function normalizeError(error) {
+  if (error === void 0 || error === null) return void 0;
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      ...typeof error.stack === "string" ? { stack: error.stack } : {}
+    };
+  }
+  if (typeof error === "string") return { name: "Error", message: error };
+  if (typeof error === "object" && "message" in error && typeof error.message === "string") {
+    const name = "name" in error && typeof error.name === "string" ? error.name : "Error";
+    return { name, message: error.message };
+  }
+  return { name: "Error", message: "Unknown failure" };
+}
+function withSeverity(level) {
+  return { severityNumber: SEVERITY_NUMBER[level], severityText: SEVERITY_TEXT[level] };
+}
+function buildRecord(input) {
+  const error = normalizeError(input.error);
+  return {
+    scope: input.scope,
+    level: input.level,
+    ...withSeverity(input.level),
+    timestamp: input.timestamp ?? Date.now(),
+    message: input.message,
+    ...input.event !== void 0 ? { event: input.event } : {},
+    ...input.category !== void 0 ? { category: input.category } : {},
+    ...input.operation !== void 0 ? { operation: input.operation } : {},
+    ...error !== void 0 ? { error } : {},
+    ...input.correlationId !== void 0 ? { correlationId: input.correlationId } : {},
+    attributes: input.attributes ?? {}
+  };
+}
+function buildFailureRecord(input) {
+  const category = input.category ?? DEFAULT_CATEGORY;
+  const policy = categoryPolicy(category);
+  const level = input.level ?? policy.defaultLevel;
+  return buildRecord({
+    scope: input.scope,
+    level,
+    message: input.message ?? policy.publicMessage,
+    operation: input.operation,
+    category,
+    ...input.error !== void 0 ? { error: input.error } : {},
+    ...input.correlationId !== void 0 ? { correlationId: input.correlationId } : {},
+    ...input.attributes !== void 0 ? { attributes: input.attributes } : {},
+    ...input.timestamp !== void 0 ? { timestamp: input.timestamp } : {}
+  });
+}
+
+// src/protocol/telemetry/logger.ts
+function merge(base, extra) {
+  if (!extra || Object.keys(extra).length === 0) return base;
+  if (Object.keys(base).length === 0) return extra;
+  return { ...base, ...extra };
+}
+function createLogger(scope, sink2, bound = {}) {
+  const log = (level, message, error, attributes) => {
+    sink2(buildRecord({ scope, level, message, error, attributes: merge(bound, attributes) }));
+  };
+  return {
+    trace: (message, attributes) => log("trace", message, void 0, attributes),
+    debug: (message, attributes) => log("debug", message, void 0, attributes),
+    info: (message, attributes) => log("info", message, void 0, attributes),
+    warn: (message, attributes) => log("warn", message, void 0, attributes),
+    error: (message, error, attributes) => log("error", message, error, attributes),
+    fatal: (message, error, attributes) => log("fatal", message, error, attributes),
+    event: (name, attributes, level = "info") => {
+      sink2(buildRecord({ scope, level, message: name, event: name, attributes: merge(bound, attributes) }));
+    },
+    failure: (input) => {
+      const record2 = buildFailureRecord({ ...input, scope, attributes: merge(bound, input.attributes) });
+      sink2(record2);
+      return record2;
+    },
+    child: (attributes) => createLogger(scope, sink2, merge(bound, attributes))
+  };
+}
+
+// src/protocol/telemetry/index.ts
+function publicFailure(category = "internal", message) {
+  return { category, message: message ?? categoryPolicy(category).publicMessage };
+}
+
 // src/core/telemetry/index.ts
 var APP_LOGGER_SCOPE = "dash-widgeter";
-var TELEMETRY_EVENTS = {
-  hostFailure: "host.operation.failed",
-  globalError: "host.global.error",
-  globalRejection: "host.global.unhandled_rejection",
-  widgetStatus: "widget.status.changed"
-};
-var SEVERITY = {
-  debug: { number: SeverityNumber.DEBUG, text: "DEBUG" },
-  info: { number: SeverityNumber.INFO, text: "INFO" },
-  warn: { number: SeverityNumber.WARN, text: "WARN" },
-  error: { number: SeverityNumber.ERROR, text: "ERROR" }
-};
 var ringBuffer = new RingBufferLogRecordExporter(500);
 var forwarder = new ForwardingLogRecordExporter();
 var useConsole = false;
@@ -28216,44 +28377,13 @@ var provider = new LoggerProvider({
   processors: [
     new SecretSanitizingProcessor(new SimpleLogRecordProcessor({ exporter: ringBuffer })),
     new SecretSanitizingProcessor(new SimpleLogRecordProcessor({ exporter: forwarder })),
-    ...useConsole ? [
-      new SecretSanitizingProcessor(
-        new SimpleLogRecordProcessor({ exporter: new ReadableConsoleLogRecordExporter() })
-      )
-    ] : []
+    ...useConsole ? [new SecretSanitizingProcessor(new SimpleLogRecordProcessor({ exporter: new ReadableConsoleLogRecordExporter() }))] : []
   ]
 });
 logs.setGlobalLoggerProvider(provider);
-function errorFields(error) {
-  if (error instanceof Error) return { "error.type": error.name, "error.message": error.message };
-  if (typeof error === "string") return { "error.message": error };
-  if (error && typeof error === "object" && "message" in error && typeof error.message === "string") {
-    return { "error.message": error.message };
-  }
-  return { "error.message": "Unknown failure" };
-}
-function emit(otel, level, message, bound, extra) {
-  const severity = SEVERITY[level];
-  otel.emit({
-    severityNumber: severity.number,
-    severityText: severity.text,
-    body: message,
-    attributes: { ...bound, ...extra }
-  });
-}
+var sink = createOtelSink2();
 function reportFailure(details) {
-  const otel = logs.getLogger(details.subsystem);
-  emit(otel, "error", TELEMETRY_EVENTS.hostFailure, {}, {
-    "event.name": TELEMETRY_EVENTS.hostFailure,
-    "event.subsystem": details.subsystem,
-    "event.operation": details.operation,
-    "event.category": details.category ?? "internal",
-    ...details.error === void 0 ? {} : errorFields(details.error),
-    ...details.fields
-  });
-}
-function publicFailure(message) {
-  return { category: "internal", message };
+  return createLogger(details.scope, sink).failure(details);
 }
 
 // src/core/cast/crypto/web/spake.source.ts
@@ -29080,7 +29210,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
   let activeHandshake;
   let trusted = options.mode === "resume";
   const listening = Promise.withResolvers();
-  const emit2 = () => {
+  const emit = () => {
     if (!closed) onState({ ...state });
   };
   const disconnect = () => {
@@ -29089,7 +29219,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
     onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: false });
     state.peerCount = 0;
     state.status = "disconnected";
-    emit2();
+    emit();
     signaling == null ? void 0 : signaling.close();
     if (options.mode !== "resume") socket.close();
     peer == null ? void 0 : peer.close();
@@ -29105,9 +29235,9 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
     signaling = void 0;
     pairing = void 0;
     state.status = "error";
-    reportFailure({ subsystem: "cast-receiver", operation: "session.establish", category: error instanceof CastAuthenticationError ? "permission_denied" : "dependency_transport", error });
-    state.error = publicFailure("Cast connection failed").message;
-    emit2();
+    reportFailure({ scope: "cast-receiver", operation: "session.establish", category: error instanceof CastAuthenticationError ? "permission_denied" : "dependency_transport", error });
+    state.error = publicFailure("internal", "Cast connection failed").message;
+    emit();
   };
   const initialPending = [];
   let bindReady;
@@ -29166,7 +29296,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
           applyingOfferEpoch = e;
         },
         disconnect,
-        emit: emit2,
+        emit,
         fail,
         onResumeBinding,
         onResumeRevoke,
@@ -29198,7 +29328,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
     bindReady = bindSocket;
     if (socket.readyState === WebSocket.OPEN) bindSocket(socket, initialPending);
   }).catch(fail);
-  emit2();
+  emit();
   const tearDownContext = {
     getTrusted: () => trusted,
     setTrusted: (t) => {
@@ -29242,7 +29372,7 @@ function createCastReceiver(optionsInput, onState, asset, onResumeBinding, onRes
         state.sasTrusted = true;
         delete state.sas;
         onConnection == null ? void 0 : onConnection({ generation: options.generation, trusted: true });
-        emit2();
+        emit();
       } else rejectReceiverSas(tearDownContext);
     },
     revokePresenter(epoch) {
@@ -29268,26 +29398,8 @@ function createPluginReceiver(options, asset, onState, onResumeBinding, onResume
   }), asset, onResumeBinding, onResumeRevoke, onAuthenticatedMessage, onConnection);
 }
 
-// src/sandbox/telemetry.ts
-var PLUGIN_FAILURE_CATEGORIES = {
-  cancellation: "plugin.operation.cancelled",
-  dependencyResponse: "plugin.dependency.response",
-  dependencyTransport: "plugin.dependency.transport",
-  dataIntegrity: "plugin.data.integrity",
-  internal: "plugin.internal",
-  policyDenied: "plugin.policy.denied"
-};
-var PLUGIN_PUBLIC_FAILURE_MESSAGES = {
-  dependency: "The plugin service is temporarily unavailable.",
-  internal: "The plugin could not complete the operation.",
-  invalidData: "The plugin received an invalid response.",
-  permission: "The plugin does not have permission to complete the operation."
-};
-function pluginFailure(operation, cause, category = PLUGIN_FAILURE_CATEGORIES.internal, publicMessage = PLUGIN_PUBLIC_FAILURE_MESSAGES.internal, attributes) {
-  return { operation, cause, category, publicMessage, ...attributes ? { attributes } : {} };
-}
-
 // src/plugins/cast-receiver/session/screen-session.ts
+var CAST_UNAVAILABLE_MESSAGE = publicFailure("dependency_transport", "The plugin service is temporarily unavailable.").message;
 function createScreenSession(context2) {
   const config = readCastConfig(context2.config);
   const state = {
@@ -29340,12 +29452,12 @@ function createScreenSession(context2) {
       ...state.sasTrusted === void 0 ? {} : { sasTrusted: state.sasTrusted }
     };
     void context2.setCastState(hostState).catch((cause) => {
-      context2.telemetry.failure(pluginFailure("cast.state.publish", cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+      context2.telemetry.failure({ operation: "cast.state.publish", category: "dependency_transport", cause });
     });
   };
   const report = (cause) => {
-    context2.telemetry.disclose(pluginFailure("cast.session", cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency));
-    publish({ status: "error", error: PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency });
+    context2.telemetry.disclose({ operation: "cast.session", category: "dependency_transport", cause, publicMessage: CAST_UNAVAILABLE_MESSAGE });
+    publish({ status: "error", error: CAST_UNAVAILABLE_MESSAGE });
   };
   const enqueue = (operation) => {
     lifecycle = lifecycle.then(operation).catch(report);
@@ -29532,7 +29644,7 @@ function createScreenSession(context2) {
         await entry.receiver.listening;
       } catch (cause) {
         listeningBindings.delete(binding.bindingId);
-        if (!abort.signal.aborted) context2.telemetry.failure(pluginFailure("cast.resume.listen", cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+        if (!abort.signal.aborted) context2.telemetry.failure({ operation: "cast.resume.listen", category: "dependency_transport", cause });
       }
     };
     await listen();
@@ -29542,7 +29654,7 @@ function createScreenSession(context2) {
     for (const binding of bindings) {
       if (!dormantBindings.has(binding.bindingId)) {
         void startResumeBinding(binding).catch((cause) => {
-          if (!abort.signal.aborted) context2.telemetry.failure(pluginFailure("cast.resume.start", cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+          if (!abort.signal.aborted) context2.telemetry.failure({ operation: "cast.resume.start", category: "dependency_transport", cause });
         });
       }
     }
@@ -29759,7 +29871,6 @@ function CastWidget({ context: context2 }) {
     const tracks = stream.getTracks();
     const describe = () => {
       if (tracks.every((track) => track.readyState === "ended")) context2.reportStatus("error", "The shared stream ended.");
-      else if (stream.getAudioTracks().length === 0) context2.reportStatus("error", "This shared stream has no audio.");
       else context2.reportStatus("ok", "");
     };
     tracks.forEach((track) => track.addEventListener("ended", describe));
@@ -29782,7 +29893,7 @@ function CastWidget({ context: context2 }) {
       await context2.setPresentationMode(hasVisiblePresentation ? "active" : "normal");
     };
     void updatePresentation().catch((cause) => {
-      context2.telemetry.disclose(pluginFailure("cast.presentation.update", cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency));
+      context2.telemetry.disclose({ operation: "cast.presentation.update", category: "dependency_transport", cause, publicMessage: publicFailure("dependency_transport", "The plugin service is temporarily unavailable.").message });
     });
     return void 0;
   }, [context2, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
@@ -30693,7 +30804,7 @@ function PairingWidget({ context: context2 }) {
   const observedReveal = (0, import_react4.useRef)(receiver.pairingReveal);
   const observedDismissal = (0, import_react4.useRef)(receiver.dismissSas);
   (0, import_react4.useEffect)(() => {
-    if (!receiver.senderUrl && !config.senderUrl) void context2.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((cause) => context2.telemetry.disclose(pluginFailure("cast.sender_url.load", cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency)));
+    if (!receiver.senderUrl && !config.senderUrl) void context2.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((cause) => context2.telemetry.disclose({ operation: "cast.sender_url.load", category: "dependency_transport", cause, publicMessage: publicFailure("dependency_transport", "The plugin service is temporarily unavailable.").message }));
   }, [config.senderUrl, context2, receiver.senderUrl]);
   (0, import_react4.useEffect)(() => {
     if (receiver.dismissSas && receiver.dismissSas !== observedDismissal.current && receiver.sas) {

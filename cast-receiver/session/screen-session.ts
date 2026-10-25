@@ -6,7 +6,9 @@ import { applyCastQueueMutation, createCastQueueSnapshot, decode, type CastQueue
 import type { DataMessage } from '@/core/cast/protocol/data-message';
 import { createPluginReceiver, type PluginReceiver, type ReceiverState } from '../receiver';
 import { readCastConfig } from '../config/resolve';
-import { PLUGIN_FAILURE_CATEGORIES, PLUGIN_PUBLIC_FAILURE_MESSAGES, pluginFailure } from '@/sandbox/telemetry';
+import { publicFailure } from '@/protocol/telemetry';
+
+const CAST_UNAVAILABLE_MESSAGE = publicFailure('dependency_transport', 'The plugin service is temporarily unavailable.').message;
 
 
 export interface ScreenSession {
@@ -44,12 +46,12 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       screenInstanceId: context.instanceId,
       ...(state.sas ? { sas: state.sas } : {}), ...(state.sasTrusted === undefined ? {} : { sasTrusted: state.sasTrusted }) };
     void context.setCastState(hostState).catch((cause: unknown) => {
-      context.telemetry.failure(pluginFailure('cast.state.publish', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+      context.telemetry.failure({ operation: 'cast.state.publish', category: 'dependency_transport', cause });
     });
   };
   const report = (cause: unknown): void => {
-    context.telemetry.disclose(pluginFailure('cast.session', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency));
-    publish({ status: 'error', error: PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency });
+    context.telemetry.disclose({ operation: 'cast.session', category: 'dependency_transport', cause, publicMessage: CAST_UNAVAILABLE_MESSAGE });
+    publish({ status: 'error', error: CAST_UNAVAILABLE_MESSAGE });
   };
   const enqueue = (operation: () => Promise<void>): void => { lifecycle = lifecycle.then(operation).catch(report); };
   const dismissalInterval = context.getCastState ? window.setInterval(() => {
@@ -172,7 +174,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         await entry.receiver.listening;
       } catch (cause) {
         listeningBindings.delete(binding.bindingId);
-        if (!abort.signal.aborted) context.telemetry.failure(pluginFailure('cast.resume.listen', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+        if (!abort.signal.aborted) context.telemetry.failure({ operation: 'cast.resume.listen', category: 'dependency_transport', cause });
       }
     };
     await listen();
@@ -182,7 +184,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     for (const binding of bindings) {
       if (!dormantBindings.has(binding.bindingId)) {
         void startResumeBinding(binding).catch((cause: unknown) => {
-          if (!abort.signal.aborted) context.telemetry.failure(pluginFailure('cast.resume.start', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport));
+          if (!abort.signal.aborted) context.telemetry.failure({ operation: 'cast.resume.start', category: 'dependency_transport', cause });
         });
       }
     }

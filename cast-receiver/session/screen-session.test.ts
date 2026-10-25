@@ -328,7 +328,7 @@ describe('screen session room lifecycle', () => {
     const session = createScreenSession(context);
     await vi.waitFor(() => expect(session.state.status).toBe('error'));
     expect(session.state.error).toBe('The plugin service is temporarily unavailable.');
-    expect(disclose).toHaveBeenCalledWith(expect.objectContaining({ category: 'plugin.dependency.transport', operation: 'cast.session', publicMessage: 'The plugin service is temporarily unavailable.' }));
+    expect(disclose).toHaveBeenCalledWith(expect.objectContaining({ category: 'dependency_transport', operation: 'cast.session', publicMessage: 'The plugin service is temporarily unavailable.' }));
     expect(failure).not.toHaveBeenCalled();
     expect(calls).toEqual(['log', 'publish']);
     session.close();

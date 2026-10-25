@@ -3,7 +3,7 @@ import type { ReactWidgetProps } from '@/sandbox/react';
 import { readCastConfig, resolveCastTarget } from '../config/resolve';
 import { createCastQueueSnapshot } from '@/cast-protocol';
 import { createScreenSession, type ScreenSession } from '../session/screen-session';
-import { PLUGIN_FAILURE_CATEGORIES, PLUGIN_PUBLIC_FAILURE_MESSAGES, pluginFailure } from '@/sandbox/telemetry';
+import { publicFailure } from '@/protocol/telemetry';
 
 function applyPlayback(media: HTMLMediaElement, paused: boolean, volume: number, muted: boolean): void {
   media.volume = volume;
@@ -48,8 +48,9 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     if (!stream) return;
     const tracks = stream.getTracks();
     const describe = (): void => {
+      // A screen share legitimately carries video with no audio track; that is
+      // a normal state, not a failure, so it must not raise the error indicator.
       if (tracks.every((track) => track.readyState === 'ended')) context.reportStatus('error', 'The shared stream ended.');
-      else if (stream.getAudioTracks().length === 0) context.reportStatus('error', 'This shared stream has no audio.');
       else context.reportStatus('ok', '');
     };
     tracks.forEach((track) => track.addEventListener('ended', describe)); describe();
@@ -65,7 +66,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
       await context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');
     };
     void updatePresentation().catch((cause: unknown) => {
-      context.telemetry.disclose(pluginFailure('cast.presentation.update', cause, PLUGIN_FAILURE_CATEGORIES.dependencyTransport, PLUGIN_PUBLIC_FAILURE_MESSAGES.dependency));
+      context.telemetry.disclose({ operation: 'cast.presentation.update', category: 'dependency_transport', cause, publicMessage: publicFailure('dependency_transport', 'The plugin service is temporarily unavailable.').message });
     });
     return undefined;
   }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
