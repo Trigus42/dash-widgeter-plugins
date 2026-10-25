@@ -44,7 +44,7 @@ describe('screen session room lifecycle', () => {
     session.close();
   });
 
-  it('trusts a sender after sender-side SAS confirmation without receiver interaction', async () => {
+  it('displays the receiver SAS for comparison and defers trust to the sender', async () => {
     const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let callback: ((state: Record<string, unknown>) => void) | undefined;
@@ -57,11 +57,12 @@ describe('screen session room lifecycle', () => {
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState, reportStatus: vi.fn(), log: vi.fn() } as unknown as GuestWidgetContext;
     const session = createScreenSession(context); await vi.waitFor(() => expect(callback).toBeTypeOf('function'));
     callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
-    expect(session.state.sas).toBeUndefined(); expect(session.state.sasTrusted).toBe(true);
-    expect(receiver.confirmSas).not.toHaveBeenCalled(); expect(setCastState).not.toHaveBeenCalledWith(expect.objectContaining({ sas: '654321' }));
+    expect(session.state.sas).toBe('654321'); expect(session.state.sasTrusted).not.toBe(true);
+    expect(receiver.confirmSas).not.toHaveBeenCalled();
+    expect(setCastState).toHaveBeenCalledWith(expect.objectContaining({ sas: '654321' }));
     session.close();
   });
-  it('publishes the trusted SAS transition so pairing UI can close', async () => {
+  it('publishes the sender-confirmed SAS transition so pairing UI can close', async () => {
     const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: {}, close: vi.fn(() => Promise.resolve()) };
     mocks.createPairingSession.mockResolvedValueOnce(pairing);
     let callback: ((state: Record<string, unknown>) => void) | undefined;
@@ -72,10 +73,30 @@ describe('screen session room lifecycle', () => {
       secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn() } as unknown as GuestWidgetContext;
     const session = createScreenSession(context); await vi.waitFor(() => expect(callback).toBeTypeOf('function'));
     callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
+    expect(session.state.sas).toBe('654321');
     callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sasTrusted: true });
     expect(session.state.sas).toBeUndefined(); expect(session.state.sasTrusted).toBe(true);
     callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null });
     expect(session.state.sasTrusted).toBe(true); session.close();
+  });
+  it('hides and rejects the receiver SAS after the configured timeout elapses', async () => {
+    vi.useFakeTimers();
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 600_000, options: {}, close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValue(pairing);
+    let callback: ((state: Record<string, unknown>) => void) | undefined;
+    const receiver = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    mocks.createPluginReceiver.mockImplementation((_options, _asset, onState: (state: Record<string, unknown>) => void) => {
+      callback = onState; return receiver;
+    });
+    const context = { config: { relayUrl: 'https://relay.example', senderUrl: '/cast.html', sasTimeoutSeconds: 10 }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()), reportStatus: vi.fn(), log: vi.fn(), telemetry: { disclose: vi.fn(), failure: vi.fn() } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context); await vi.waitFor(() => expect(callback).toBeTypeOf('function'));
+    callback?.({ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
+    expect(session.state.sas).toBe('654321');
+    await vi.advanceTimersByTimeAsync(10_001);
+    expect(session.state.sas).toBeUndefined(); expect(session.state.sasTrusted).not.toBe(true);
+    expect(receiver.confirmSas).toHaveBeenCalledWith(false);
+    session.close();
   });
 
   it('keeps another connected room alive when one receiver disconnects', async () => {

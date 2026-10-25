@@ -29485,12 +29485,12 @@ function createScreenSession(context2) {
         publish({ peerCount: 0, command: null, stream: null, status: "disconnected" });
         return;
       }
-      if (!sasOwner || record2.action !== "sas" || record2.sas !== state.sas || record2.decision !== "accept" && record2.decision !== "dismiss") return;
+      if (!sasOwner || record2.action !== "sas" || record2.sas !== state.sas || record2.decision !== "dismiss") return;
       const entry = sasOwner;
       sasOwner = void 0;
       clearTimeout(sasTimer);
-      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(record2.decision === "accept");
-      if (record2.decision === "dismiss") entry.trusted = false;
+      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(false);
+      entry.trusted = false;
       delete state.sas;
       delete state.sasTrusted;
       publish({});
@@ -29570,9 +29570,18 @@ function createScreenSession(context2) {
     } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
       sasOwner = entry;
-      delete state.sas;
-      publish({ sasTrusted: true });
-      return;
+      delete state.sasTrusted;
+      clearTimeout(sasTimer);
+      sasTimer = setTimeout(() => {
+        var _a2;
+        if (sasOwner !== entry) return;
+        sasOwner = void 0;
+        (_a2 = entry.receiver) == null ? void 0 : _a2.confirmSas(false);
+        entry.trusted = false;
+        delete state.sas;
+        delete state.sasTrusted;
+        publish({});
+      }, config.sasTimeoutSeconds * 1e3);
     }
     if (sasOwner === entry && latest.sasTrusted === true) {
       sasOwner = void 0;
@@ -29582,7 +29591,19 @@ function createScreenSession(context2) {
       context2.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
       return;
     }
-    publish({});
+    if (sasOwner === entry && !latest.sas) {
+      sasOwner = void 0;
+      clearTimeout(sasTimer);
+    }
+    const ownedSas = sasOwner == null ? void 0 : sasOwner.state.sas;
+    if (!ownedSas) {
+      delete state.sas;
+      if (state.sasTrusted !== true) delete state.sasTrusted;
+    }
+    publish({
+      ...ownedSas ? { sas: ownedSas } : {},
+      ...ownedSas && (sasOwner == null ? void 0 : sasOwner.state.sasTrusted) !== void 0 ? { sasTrusted: sasOwner.state.sasTrusted } : {}
+    });
     context2.reportStatus(latest.error ? "error" : "ok", latest.error ?? "");
   };
   const disposeEntry = async (entry) => {
@@ -29777,17 +29798,6 @@ function createScreenSession(context2) {
       listeners.add(listener);
       listener({ ...state });
       return () => listeners.delete(listener);
-    },
-    confirmSas(accepted) {
-      var _a;
-      if (!sasOwner) return;
-      const entry = sasOwner;
-      (_a = entry.receiver) == null ? void 0 : _a.confirmSas(accepted);
-      sasOwner = void 0;
-      clearTimeout(sasTimer);
-      delete state.sas;
-      delete state.sasTrusted;
-      publish({});
     },
     close() {
       var _a;

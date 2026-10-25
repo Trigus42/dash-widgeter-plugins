@@ -14,7 +14,6 @@ const CAST_UNAVAILABLE_MESSAGE = publicFailure('dependency_transport', 'The plug
 export interface ScreenSession {
   state: ReceiverState & { roomJoinCode: string; authCode: string; relayUrl: string; senderUrl: string; queue: CastQueueSnapshot; pairingReveal: number; pairingVisible: boolean };
   subscribe(listener: (state: ScreenSession['state']) => void): () => void;
-  confirmSas(accepted: boolean): void;
   close(): void;
 }
 interface ReceiverEntry { room: { options: CastSessionOptions; roomJoinCode: string; authCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; trusted: boolean; resumeBinding?: { bindingId: string; resumePassword: string; expiresAt: number; ownerCapability: string }; bindingInstall?: Promise<void>; revokedEpoch: number; epochOffset: number }
@@ -68,11 +67,9 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         publish({ peerCount: 0, command: null, stream: null, status: 'disconnected' });
         return;
       }
-      if (!sasOwner || record.action !== 'sas' || record.sas !== state.sas
-          || (record.decision !== 'accept' && record.decision !== 'dismiss')) return;
+      if (!sasOwner || record.action !== 'sas' || record.sas !== state.sas || record.decision !== 'dismiss') return;
       const entry = sasOwner; sasOwner = undefined; clearTimeout(sasTimer);
-      entry.receiver?.confirmSas(record.decision === 'accept');
-      if (record.decision === 'dismiss') entry.trusted = false;
+      entry.receiver?.confirmSas(false); entry.trusted = false;
       delete state.sas; delete state.sasTrusted; publish({});
     }).catch(report);
   }, 200) : undefined;
@@ -129,20 +126,21 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       livePresenter = undefined; publish({ stream: null, command: null, status: connected.size > 0 ? 'paired' : 'disconnected', peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
-      sasOwner = entry;
-      delete state.sas;
-      publish({ sasTrusted: true });
-      return;
+      sasOwner = entry; delete state.sasTrusted; clearTimeout(sasTimer);
+      sasTimer = setTimeout(() => {
+        if (sasOwner !== entry) return;
+        sasOwner = undefined; entry.receiver?.confirmSas(false); entry.trusted = false; delete state.sas; delete state.sasTrusted; publish({});
+      }, config.sasTimeoutSeconds * 1_000);
     }
     if (sasOwner === entry && latest.sasTrusted === true) {
-      sasOwner = undefined;
-      clearTimeout(sasTimer);
-      delete state.sas;
-      publish({ sasTrusted: true });
-      context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
-      return;
+      sasOwner = undefined; clearTimeout(sasTimer); delete state.sas;
+      publish({ sasTrusted: true }); context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? ''); return;
     }
-    publish({});
+    if (sasOwner === entry && !latest.sas) { sasOwner = undefined; clearTimeout(sasTimer); }
+    const ownedSas = sasOwner?.state.sas;
+    if (!ownedSas) { delete state.sas; if (state.sasTrusted !== true) delete state.sasTrusted; }
+    publish({ ...(ownedSas ? { sas: ownedSas } : {}),
+      ...(ownedSas && sasOwner?.state.sasTrusted !== undefined ? { sasTrusted: sasOwner.state.sasTrusted } : {}) });
     context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
   };
   const disposeEntry = async (entry: ReceiverEntry): Promise<void> => {
@@ -237,7 +235,6 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   };
   if (!config.relayUrl) report('Configure and approve a signaling origin.'); else { enqueue(resume); enqueue(allocate); }
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
-    confirmSas(accepted) { if (!sasOwner) return; const entry = sasOwner; entry.receiver?.confirmSas(accepted); sasOwner = undefined; clearTimeout(sasTimer); delete state.sas; delete state.sasTrusted; publish({}); },
     close() { disposed = true; abort.abort(); clearInterval(dismissalInterval); clearTimeout(renewal); clearTimeout(sasTimer); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
       for (const entry of entries) { entry.receiver?.close(); if (!entry.resumeBinding) void entry.room.close(); }
       resumeEntries.clear(); dormantBindings.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; listeners.clear(); } };
