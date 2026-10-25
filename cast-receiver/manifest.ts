@@ -1,4 +1,4 @@
-import { OVERLAY_Z, type PluginManifest, type WidgetSettingField } from '@/types';
+import { BACKGROUND_Z, OVERLAY_Z, type PluginManifest, type WidgetSettingField } from '@/types';
 import { CAST_DEFAULT_CONFIG } from './types';
 import de from './locales/de.json';
 
@@ -69,7 +69,7 @@ export const castManifest: PluginManifest = {
       minH: 3,
       defaultW: 30,
       defaultH: 25,
-      defaultZIndex: OVERLAY_Z,
+      defaultZIndex: BACKGROUND_Z,
       defaultConfig: { ...CAST_DEFAULT_CONFIG },
       defaultAppearance: { background: 'none', backgroundOpacity: 0 },
       nativeNetwork: ['signaling'],
