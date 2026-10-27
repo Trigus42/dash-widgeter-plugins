@@ -22,9 +22,12 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     // Session identity changes only with its connection settings; other render context updates must preserve the live peer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.relayUrl, config.senderUrl]);
+  // A live sender command wins; otherwise fall back to the widget's own
+  // statically configured source (sourceKind/sourceUrl). The default source is
+  // 'idle', so an unconfigured receiver still just shows the pairing screen.
   const effectiveConfig = useMemo(() => receiver.command
     ? { ...config, ...receiver.command, outputMode: receiver.queue.outputMode }
-    : { ...config, sourceKind: 'idle' as const, outputMode: receiver.queue.outputMode }, [config, receiver.command, receiver.queue.outputMode]);
+    : { ...config, outputMode: receiver.queue.outputMode }, [config, receiver.command, receiver.queue.outputMode]);
   const target = useMemo(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   const paused = effectiveConfig.paused ?? false;
   const volume = effectiveConfig.volume ?? 1;

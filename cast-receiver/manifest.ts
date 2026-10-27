@@ -29,7 +29,7 @@ const settings: WidgetSettingField[] = [
     label: 'Cast target',
     type: 'text',
     placeholder: 'https://… or a YouTube link',
-    help: 'An HTTPS website/media URL or YouTube link/id.',
+    help: 'Shown on this display even without a paired sender. Use an HTTPS website/media URL, or a YouTube link/id, matching the type above.',
     section: 'Cast',
   },
   {

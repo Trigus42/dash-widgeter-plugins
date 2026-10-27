@@ -11,7 +11,7 @@
     "Media stream (video/audio URL)": "Medienstream (Video-/Audio-URL)",
     "YouTube video": "YouTube-Video",
     "Cast target": "Cast-Ziel",
-    "An https website or media URL, or a YouTube link/id (per the type above).": "Eine https-Website oder Medien-URL oder ein YouTube-Link/-ID (gemäß Typ oben).",
+    "Shown on this display even without a paired sender. Use an HTTPS website/media URL, or a YouTube link/id, matching the type above.": "Wird auf diesem Display auch ohne gekoppelten Sender angezeigt. Eine HTTPS-Website-/Medien-URL oder ein YouTube-Link/-ID verwenden, passend zum Typ oben.",
     "Pairing code": "Kopplungscode",
     "Shown while idle so a sender knows which screen it controls.": "Wird im Leerlauf angezeigt, damit ein Sender weiß, welchen Bildschirm er steuert.",
     "Overlay style": "Überlagerungsstil",
