@@ -27,4 +27,18 @@ describe('plugin cast receiver facade', () => {
     callback?.({ status: 'paired', command: null, presentationEpoch: 0, screenStream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false });
     expect(states).toEqual([{ status: 'paired', command: null, presentationEpoch: 0, stream: null, peerCount: 1, error: null, sas: '654321', sasTrusted: false }]);
   });
+
+  it('forwards relay URLs and their clearing without converting them to native streams', () => {
+    const states: object[] = [];
+    createPluginReceiver({ mode: 'pairing', relayUrl: 'wss://relay.test', roomJoinCode: parseRoomJoinCode('123456'), authCode: parseAuthCode('654321'), generation: 'abcdefghijklmnop', attachmentTicket: 'T'.repeat(43) },
+      { bytes: new Uint8Array(), sha256: 'digest' }, (state) => states.push(state));
+    const callback = createCastReceiver.mock.calls.at(-1)?.[1];
+    const relayMedia = { url: 'blob:relay', hasVideo: true, epoch: 1 };
+    callback?.({ status: 'casting', command: null, presentationEpoch: 1, screenStream: null, relayMedia, peerCount: 1, error: null });
+    callback?.({ status: 'paired', command: null, presentationEpoch: 1, screenStream: null, relayMedia: null, peerCount: 1, error: null });
+    expect(states).toEqual([
+      { status: 'casting', command: null, presentationEpoch: 1, stream: null, relayMedia, peerCount: 1, error: null },
+      { status: 'paired', command: null, presentationEpoch: 1, stream: null, relayMedia: null, peerCount: 1, error: null },
+    ]);
+  });
 });

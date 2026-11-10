@@ -58,8 +58,8 @@ export const castManifest: PluginManifest = {
   translations: { de: de.manifest },
   executionType: 'sandboxed',
   capabilities: [],
-  nativeNetwork: [{ id: 'signaling', label: 'Cast signaling', purpose: 'Pair peers and exchange WebRTC connection details', surface: 'connect', origins: [], allowCustomOrigins: true }],
-  webRtc: { label: 'Direct peer connection', purpose: 'Receive commands and media directly from paired senders' },
+  nativeNetwork: [{ id: 'signaling', label: 'Cast relay connection', purpose: 'Pair senders and carry end-to-end encrypted playback control and screen/audio fallback', surface: 'connect', origins: [], allowCustomOrigins: true }],
+  webRtc: { label: 'Direct peer connection', purpose: 'Receive screen and audio directly when available; encrypted relay fallback remains available' },
   widgets: [
     {
       id: 'cast-receiver.screen',

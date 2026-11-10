@@ -16,7 +16,7 @@ export interface ScreenSession {
   subscribe(listener: (state: ScreenSession['state']) => void): () => void;
   close(): void;
 }
-interface ReceiverEntry { room: { options: CastSessionOptions; roomJoinCode: string; authCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; trusted: boolean; resumeBinding?: { bindingId: string; resumePassword: string; expiresAt: number; ownerCapability: string }; bindingInstall?: Promise<void>; revokedEpoch: number; epochOffset: number }
+interface ReceiverEntry { room: { options: CastSessionOptions; roomJoinCode: string; authCode: string; expiresAt: number; close(): Promise<void> }; receiver?: PluginReceiver; state: ReceiverState; connected: boolean; trusted: boolean; retired?: boolean; resumeBinding?: { bindingId: string; resumePassword: string; expiresAt: number; ownerCapability: string }; bindingInstall?: Promise<void>; revokedEpoch: number; epochOffset: number }
 type TimerHandle = number | NodeJS.Timeout;
 
 
@@ -36,6 +36,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   let lifecycle: Promise<void> = Promise.resolve();
   let observedDecisionVersion = 0;
   const publish = (patch: Partial<ScreenSession['state']>): void => {
+    if ('stream' in patch && !('relayMedia' in patch)) patch.relayMedia = null;
     if ('sas' in patch && patch.sas === undefined) delete state.sas;
     if ('sasTrusted' in patch && patch.sasTrusted === undefined) delete state.sasTrusted;
     if (state.sasTrusted === true && patch.sasTrusted === undefined) delete patch.sasTrusted;
@@ -62,7 +63,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       observedDecisionVersion = Number(record.version);
       if (record.action === 'unlink') {
         const entries = [...connected];
-        entries.forEach((entry) => { connected.delete(entry); entry.receiver?.close(); void entry.room.close(); });
+        entries.forEach((entry) => { entry.retired = true; connected.delete(entry); entry.receiver?.close(); void entry.room.close(); });
         resumeEntries.clear(); dormantBindings.clear(); listeningBindings.clear(); livePresenter = undefined;
         publish({ peerCount: 0, command: null, stream: null, status: 'disconnected' });
         return;
@@ -82,7 +83,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     for (const entry of connected) if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: entry === conflictEntry, pairingVisible: state.pairingVisible });
   };
   const authenticatedMessage = (entry: ReceiverEntry) => (message: Extract<DataMessage, { type: 'queue-mutation' | 'pair-display-request' }>, send: (outgoing: DataMessage) => void): void => {
-    if (!entry.trusted) return;
+    if (disposed || entry.retired || !entry.trusted) return;
     if (message.type === 'pair-display-request') {
       publish({ pairingVisible: message.visible, pairingReveal: message.visible ? state.pairingReveal + 1 : state.pairingReveal });
       broadcastQueue();
@@ -99,14 +100,15 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       if (livePresenter) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); livePresenter = undefined; }
       publish({ queue: next, command, stream: null, presentationEpoch: authoritativeEpoch, status: 'casting' });
     } else if (!current && next.currentItemId === null && state.command && next.items.length === 0) {
-      authoritativeEpoch += 1; livePresenter = undefined;
+      authoritativeEpoch += 1;
+      if (livePresenter) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); livePresenter = undefined; }
       publish({ queue: next, command: null, stream: null, presentationEpoch: authoritativeEpoch, status: connected.size ? 'paired' : 'disconnected' });
     } else publish({ queue: next, ...(command ? { command } : {}) });
     broadcastQueue();
   };
   const aggregate = (entry: ReceiverEntry): void => {
-    const latest = entry.state;
-    const live = latest.stream !== null;
+    const latest = { ...entry.state, relayMedia: !entry.state.stream && entry.state.relayMedia?.epoch === entry.state.presentationEpoch ? entry.state.relayMedia : null };
+    const live = latest.stream !== null || Boolean(latest.relayMedia);
     const command = latest.command !== null && latest.command.sourceKind !== 'idle';
     const stale = latest.presentationEpoch <= entry.revokedEpoch;
     if ((live || command) && !stale) {
@@ -120,9 +122,10 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         if (livePresenter && livePresenter !== entry) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); }
         livePresenter = entry;
         publish({ ...latest, presentationEpoch: authoritativeEpoch, peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
-      } else if (livePresenter === entry && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, command: latest.command, status: latest.status, peerCount: connected.size });
-    } else if (livePresenter === entry && state.stream !== null && latest.presentationEpoch > entry.revokedEpoch
+      } else if (livePresenter === entry && globalEpoch === authoritativeEpoch) publish({ stream: latest.stream, relayMedia: latest.relayMedia, command: latest.command, status: latest.status, peerCount: connected.size });
+    } else if (livePresenter === entry && (state.stream !== null || state.relayMedia) && latest.presentationEpoch > entry.revokedEpoch
         && latest.presentationEpoch + entry.epochOffset === authoritativeEpoch) {
+      entry.revokedEpoch = Math.max(entry.revokedEpoch, latest.presentationEpoch);
       livePresenter = undefined; publish({ stream: null, command: null, status: connected.size > 0 ? 'paired' : 'disconnected', peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     } else publish({ peerCount: connected.size, roomJoinCode: state.roomJoinCode, authCode: state.authCode });
     if (latest.sas && sasOwner !== entry) {
@@ -143,9 +146,14 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       ...(ownedSas && sasOwner?.state.sasTrusted !== undefined ? { sasTrusted: sasOwner.state.sasTrusted } : {}) });
     context.reportStatus(latest.error ? 'error' : 'ok', latest.error ?? '');
   };
+  const clearDisconnectedMedia = (entry: ReceiverEntry): void => {
+    if (livePresenter !== entry || (!state.stream && !state.relayMedia)) return;
+    entry.revokedEpoch = Math.max(entry.revokedEpoch, entry.state.presentationEpoch); livePresenter = undefined;
+    publish({ stream: null, command: null });
+  };
   const disposeEntry = async (entry: ReceiverEntry): Promise<void> => {
-    connected.delete(entry); if (pairing === entry) pairing = undefined; if (sasOwner === entry) sasOwner = undefined; entry.receiver?.close();
-    publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size > 0 ? 'paired' : 'disconnected' });
+    entry.retired = true; connected.delete(entry); if (pairing === entry) pairing = undefined; if (sasOwner === entry) sasOwner = undefined; clearDisconnectedMedia(entry); entry.receiver?.close();
+    publish({ peerCount: connected.size, status: state.command || state.stream || state.relayMedia ? 'casting' : connected.size > 0 ? 'paired' : 'disconnected' });
     await entry.room.close();
   };
   const startResumeBinding = async (binding: NonNullable<ReceiverEntry['resumeBinding']>): Promise<void> => {
@@ -159,12 +167,12 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           state: { status: 'connecting', command: null, presentationEpoch: 0, stream: null, peerCount: 0, error: null }, connected: false, trusted: true, resumeBinding: binding, revokedEpoch: 0, epochOffset: authoritativeEpoch };
         resumeEntries.set(binding.bindingId, entry);
         entry.receiver = createPluginReceiver(options, asset, (next) => {
-          entry.state = next;
+          if (disposed || entry.retired) return; entry.state = next;
           if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
           if (next.peerCount === 0 && entry.connected) {
-            entry.connected = false; connected.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
+            entry.retired = true; entry.connected = false; connected.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
             if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
-            entry.receiver?.close(); publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size ? 'paired' : 'disconnected' });
+            clearDisconnectedMedia(entry); entry.receiver?.close(); publish({ peerCount: connected.size, status: state.command || state.stream || state.relayMedia ? 'casting' : connected.size ? 'paired' : 'disconnected' });
             if (!disposed) enqueue(listen); return;
           }
           aggregate(entry);
@@ -196,14 +204,14 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     const pendingStates: ReceiverState[] = [];
     const entry: ReceiverEntry = { room, state: initialState, connected: false, trusted: false, revokedEpoch: 0, epochOffset: authoritativeEpoch };
     const applyState = (next: ReceiverState): void => {
-      entry.state = next;
+      if (disposed || entry.retired) return; entry.state = next;
       if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry);
         if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
         if (pairing === entry) { pairing = undefined; clearTimeout(renewal); enqueue(allocate); } }
       if (next.peerCount === 0 && entry.connected) {
-        entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
-        entry.receiver?.close(); const settle = entry.bindingInstall ?? Promise.resolve(); void settle.then(() => { const binding = entry.resumeBinding; if (!binding) { void entry.room.close(); return; } dormantBindings.set(binding.bindingId, binding); if (connected.size === 0) { const pending = [...dormantBindings.values()]; dormantBindings.clear(); pending.forEach((candidate) => void startResumeBinding(candidate)); } }, () => { void entry.room.close(); });
-        publish({ peerCount: connected.size, status: state.command || state.stream ? 'casting' : connected.size ? 'paired' : 'disconnected' }); return;
+        entry.retired = true; entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
+        clearDisconnectedMedia(entry); entry.receiver?.close(); const settle = entry.bindingInstall ?? Promise.resolve(); void settle.then(() => { const binding = entry.resumeBinding; if (!binding) { void entry.room.close(); return; } dormantBindings.set(binding.bindingId, binding); if (connected.size === 0) { const pending = [...dormantBindings.values()]; dormantBindings.clear(); pending.forEach((candidate) => void startResumeBinding(candidate)); } }, () => { void entry.room.close(); });
+        publish({ peerCount: connected.size, status: state.command || state.stream || state.relayMedia ? 'casting' : connected.size ? 'paired' : 'disconnected' }); return;
       }
       aggregate(entry);
     };
@@ -221,7 +229,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       dormantBindings.delete(bindingId);
       await context.castResume.delete(bindingId);
       const resumeEntry = resumeEntries.get(bindingId);
-      if (resumeEntry) { resumeEntries.delete(bindingId); listeningBindings.delete(bindingId); connected.delete(resumeEntry); resumeEntry.receiver?.close(); }
+      if (resumeEntry) { resumeEntry.retired = true; resumeEntries.delete(bindingId); listeningBindings.delete(bindingId); connected.delete(resumeEntry); clearDisconnectedMedia(resumeEntry); resumeEntry.receiver?.close(); }
     }, authenticatedMessage(entry), (event) => {
       if (!initialized) { const pending = pendingConnectionEvents.get(entry) ?? []; pending.push(event); pendingConnectionEvents.set(entry, pending); return; }
       applyConnection(entry, room.options.generation, event);
@@ -237,5 +245,5 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
     close() { disposed = true; abort.abort(); clearInterval(dismissalInterval); clearTimeout(renewal); clearTimeout(sasTimer); const entries = new Set([...resumeEntries.values(), ...connected, ...(pairing ? [pairing] : [])]);
       for (const entry of entries) { entry.receiver?.close(); if (!entry.resumeBinding) void entry.room.close(); }
-      resumeEntries.clear(); dormantBindings.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; listeners.clear(); } };
+      state.stream = null; state.relayMedia = null; resumeEntries.clear(); dormantBindings.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; listeners.clear(); } };
 }

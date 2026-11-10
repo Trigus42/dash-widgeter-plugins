@@ -31,21 +31,22 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   const target = useMemo(() => resolveCastTarget(effectiveConfig), [effectiveConfig]);
   const paused = effectiveConfig.paused ?? false;
   const volume = effectiveConfig.volume ?? 1;
+  const liveMedia = Boolean(receiver.stream || receiver.relayMedia);
   const hasVisiblePresentation = effectiveConfig.outputMode !== 'audio-only' && (
-    receiver.stream ? receiver.stream.getVideoTracks().length > 0 : target.kind !== 'idle'
+    receiver.stream ? receiver.stream.getVideoTracks().length > 0 : receiver.relayMedia ? receiver.relayMedia.hasVideo : target.kind !== 'idle'
   );
   useLayoutEffect(() => {
     const video = videoRef.current;
-    if (!video || !receiver.stream) return;
-    video.srcObject = receiver.stream;
-    applyPlayback(video, paused, volume, effectiveConfig.muted);
+    if (!video || !liveMedia) return;
+    if (receiver.stream) video.srcObject = receiver.stream;
+    else if (receiver.relayMedia) video.src = receiver.relayMedia.url;
     return () => {
       video.pause();
       video.srcObject = null;
       video.removeAttribute('src');
       video.load();
     };
-  }, [effectiveConfig.muted, paused, receiver.stream, volume]);
+  }, [hasVisiblePresentation, liveMedia, receiver.relayMedia, receiver.stream]);
   useEffect(() => {
     const stream = receiver.stream;
     if (!stream) return;
@@ -60,7 +61,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     return () => tracks.forEach((track) => track.removeEventListener('ended', describe));
   }, [context, receiver.stream]);
   useEffect(() => {
-    const next = receiver.stream ? null : target.kind === 'youtube'
+    const next = liveMedia ? null : target.kind === 'youtube'
       ? { provider: 'youtube' as const, ...(target.videoId ? { videoId: target.videoId } : {}), muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode,
         ...(target.playlistId ? { playlistId: target.playlistId } : {}), ...(target.index ? { index: target.index } : {}) }
       : target.kind === 'website' ? { provider: 'website' as const, url: target.url } : null;
@@ -72,15 +73,16 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
       context.telemetry.disclose({ operation: 'cast.presentation.update', category: 'dependency_transport', cause, publicMessage: publicFailure('dependency_transport', 'The plugin service is temporarily unavailable.').message });
     });
     return undefined;
-  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, paused, receiver.stream, target, volume]);
+  }, [context, effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, liveMedia, paused, target, volume]);
   useEffect(() => {
     const video = videoRef.current;
-    if (video && target.kind === 'media') applyPlayback(video, paused, volume,
+    if (video && (liveMedia || target.kind === 'media')) applyPlayback(video, paused, volume,
       effectiveConfig.muted || effectiveConfig.outputMode === 'video-only');
-  }, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
-  if (receiver.stream) return effectiveConfig.outputMode !== 'audio-only' && receiver.stream.getVideoTracks().length > 0
-    ? <video ref={videoRef} className="cast-media" autoPlay muted={effectiveConfig.muted || effectiveConfig.outputMode === 'video-only'} playsInline controls />
-    : <div className="cast-root cast-empty" aria-label={context.locale.startsWith('de') ? 'Audioübertragung aktiv' : 'Audio casting active'} />;
+  }, [effectiveConfig.muted, effectiveConfig.outputMode, hasVisiblePresentation, liveMedia, paused, receiver.relayMedia?.epoch, receiver.relayMedia?.url, receiver.stream, target, volume]);
+  if (liveMedia) {
+    const media = <video ref={videoRef} className="cast-media" hidden={!hasVisiblePresentation} autoPlay muted={effectiveConfig.muted || effectiveConfig.outputMode === 'video-only'} playsInline controls={hasVisiblePresentation} />;
+    return hasVisiblePresentation ? media : <div className="cast-root cast-empty" aria-label={context.locale.startsWith('de') ? 'Audioübertragung aktiv' : 'Audio casting active'}>{media}</div>;
+  }
   if (target.kind === 'youtube' || target.kind === 'website') return <div className="cast-root cast-active" data-overlay={config.overlayMode} />;
   if (target.kind === 'media') return <div className={`cast-root cast-active ${effectiveConfig.outputMode === 'audio-only' ? 'cast-audio-only' : ''}`} data-overlay={config.overlayMode}>
     <video ref={videoRef} className="cast-media" src={target.url} autoPlay muted={effectiveConfig.muted || effectiveConfig.outputMode === 'video-only'} playsInline controls />
