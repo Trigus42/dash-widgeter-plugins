@@ -98,7 +98,9 @@ function StreamMedia({ context, stream, relayUrl, relayHasAudio, paused, volume,
 
 /** MediaStream stays in its plugin realm; only ordinary cast state crosses RPC. */
 export function LivePlayback(props: Props): React.JSX.Element {
-  return <PlaybackPlayer live audioOnly={props.audioOnly} locale={props.context.locale} className="cast-live-player">
-    <StreamMedia {...props} />
-  </PlaybackPlayer>;
+  return <div aria-hidden={!props.visible} inert={!props.visible} style={{ width: '100%', height: '100%', ...(!props.visible ? { opacity: 0, pointerEvents: 'none' as const } : {}) }}>
+    <PlaybackPlayer live audioOnly={props.audioOnly} locale={props.context.locale} className="cast-live-player">
+      <StreamMedia {...props} />
+    </PlaybackPlayer>
+  </div>;
 }

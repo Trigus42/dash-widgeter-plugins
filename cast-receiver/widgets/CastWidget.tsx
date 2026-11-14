@@ -5,7 +5,7 @@ import { createCastQueueSnapshot } from '@/cast-protocol';
 import { createScreenSession } from '../session/screen-session';
 import type { ScreenSession } from '../session/session-publication';
 import { publicFailure } from '@/protocol/telemetry';
-import { isAudioPresentation, type MediaPresentation } from '@/protocol/media';
+import { isForegroundPresentation, type MediaPresentation } from '@/protocol/media';
 
 import { LivePlayback } from './LivePlayback';
 
@@ -33,7 +33,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
   } : null, [effectiveConfig.muted, effectiveConfig.outputMode, paused, target, volume]);
   const hasVisiblePresentation = effectiveConfig.outputMode !== 'audio-only' && (
     receiver.stream ? receiver.stream.getVideoTracks().length > 0 : receiver.relayMedia ? receiver.relayMedia.hasVideo
-      : mediaPresentation ? !isAudioPresentation(mediaPresentation) : target.kind !== 'idle'
+      : mediaPresentation ? isForegroundPresentation(mediaPresentation) : target.kind !== 'idle'
   );
   useEffect(() => {
     const stream = receiver.stream;
@@ -52,7 +52,7 @@ export function CastWidget({ context }: ReactWidgetProps): React.JSX.Element {
     const next = liveMedia ? null : target.kind === 'youtube'
       ? { provider: 'youtube' as const, ...(target.videoId ? { videoId: target.videoId } : {}), muted: effectiveConfig.muted, paused, volume, outputMode: effectiveConfig.outputMode,
         ...(target.playlistId ? { playlistId: target.playlistId } : {}), ...(target.index ? { index: target.index } : {}) }
-      : target.kind === 'website' ? { provider: 'website' as const, url: target.url } : mediaPresentation;
+      : target.kind === 'website' ? { provider: 'website' as const, url: target.url, outputMode: effectiveConfig.outputMode } : mediaPresentation;
     const updatePresentation = async (): Promise<void> => {
       await context.setPresentation(next);
       await context.setPresentationMode(hasVisiblePresentation ? 'active' : 'normal');

@@ -59,13 +59,18 @@ describe('CastWidget static source fallback', () => {
     ['audio', 'https://media.example/track.mp3'],
     ['spotify', 'https://open.spotify.com/track/123'], ['soundcloud', 'https://soundcloud.com/artist/track'],
     ['mixcloud', 'https://mixcloud.com/artist/mix/'],
-  ])('keeps the %s audio adapter in normal presentation mode', async (adapter, sourceUrl) => {
+  ])('elevates foreground %s playback and lowers background without losing the source', async (adapter, sourceUrl) => {
     mocks.state = baseReceiverState();
     const ctx = context({ sourceKind: 'media', sourceUrl, adapter, muted: false });
     const { container } = render(<CastWidget context={ctx} />);
     expect(container.querySelector('video')).toBeNull();
     expect(ctx.setPresentation).toHaveBeenCalledWith(expect.objectContaining({ provider: 'media', adapter, src: sourceUrl }));
-    await waitFor(() => expect(ctx.setPresentationMode).toHaveBeenLastCalledWith('normal'));
+    await waitFor(() => expect(ctx.setPresentationMode).toHaveBeenLastCalledWith('active'));
+    mocks.state = { ...baseReceiverState(), queue: { ...createCastQueueSnapshot(true), outputMode: 'audio-only' } };
+    const background = context({ sourceKind: 'media', sourceUrl, adapter, muted: false });
+    render(<CastWidget context={background} />);
+    await waitFor(() => expect(background.setPresentationMode).toHaveBeenLastCalledWith('normal'));
+    expect(background.setPresentation).toHaveBeenCalledWith(expect.objectContaining({ src: sourceUrl, outputMode: 'audio-only', muted: false }));
   });
 
   it('forwards live media adapter and playback controls, while legacy commands default to video', () => {
@@ -81,7 +86,7 @@ describe('CastWidget static source fallback', () => {
     mocks.state = baseReceiverState();
     const ctx = context({ sourceKind: 'media', adapter: 'spotify', sourceUrl: 'https://open.spotify.com.evil.test/track/123' });
     const { container } = render(<CastWidget context={ctx} />);
-    expect(ctx.setPresentation).toHaveBeenCalledWith({ provider: 'website', url: 'https://open.spotify.com.evil.test/track/123' });
+    expect(ctx.setPresentation).toHaveBeenCalledWith({ provider: 'website', url: 'https://open.spotify.com.evil.test/track/123', outputMode: 'audio-video' });
     expect(container.querySelector('video')).toBeNull();
   });
 
