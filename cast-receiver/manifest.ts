@@ -3,33 +3,20 @@ import { CAST_DEFAULT_CONFIG } from './types';
 import de from './locales/de.json';
 
 /**
- * Host-side manifest for the Cast receiver. URL content renders in this
- * null-origin sandbox with explicit website/media grants. WebRTC screen streams
- * are rendered by the host inside the same movable, resizable grid item because
- * MediaStream objects do not cross the plugin RPC boundary.
+ * Host-side manifest for the Cast receiver. Linked websites and media use the
+ * host presentation interface; live WebRTC and encrypted relay streams retain
+ * plugin-local playback under the existing reviewed sandbox grants.
  */
 
 const settings: WidgetSettingField[] = [
   { key: 'relayUrl', label: 'Signaling URL', type: 'text', placeholder: 'https://signal.example', help: 'Must match the signaling origin approved in plugin permissions.', section: 'Connection' },
   { key: 'senderUrl', label: 'Sender URL', type: 'text', hidden: true, section: 'Connection' },
   {
-    key: 'sourceKind',
-    label: 'What to cast',
-    type: 'select',
-    section: 'Cast',
-    options: [
-      { label: 'Nothing (show pairing code)', value: 'idle' },
-      { label: 'Website', value: 'website' },
-      { label: 'Media stream (video/audio URL)', value: 'media' },
-      { label: 'YouTube video', value: 'youtube' },
-    ],
-  },
-  {
     key: 'sourceUrl',
     label: 'Cast target',
     type: 'text',
     placeholder: 'https://… or a YouTube link',
-    help: 'Shown on this display even without a paired sender. Use an HTTPS website/media URL, or a YouTube link/id, matching the type above.',
+    help: 'Shown on this display even without a paired sender. Paste an HTTPS website or media URL, or a YouTube link/id. The source and playback adapter are recognized automatically. Leave blank to show pairing instead.',
     section: 'Cast',
   },
   {
@@ -53,7 +40,7 @@ const settings: WidgetSettingField[] = [
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '4.6.3',
+  version: '4.7.3',
   description: 'Remote receiver for YouTube, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',

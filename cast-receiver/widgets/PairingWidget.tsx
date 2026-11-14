@@ -13,13 +13,19 @@ export function PairingWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const { roomJoinCode, authCode } = receiver; const relayUrl = receiver.relayUrl || config.relayUrl; const senderUrl = receiver.senderUrl || config.senderUrl || defaultSenderUrl;
   const url = useMemo(() => roomJoinCode && authCode && senderUrl && relayUrl ? createCastPairingUrl(senderUrl, relayUrl, { roomJoinCode, authCode }) : '', [authCode, relayUrl, roomJoinCode, senderUrl]);
   const observedReveal = useRef(receiver.pairingReveal); const observedDismissal = useRef(receiver.dismissSas);
+  const pendingReveal = useRef(false);
   useEffect(() => { if (!receiver.senderUrl && !config.senderUrl) void context.castDefaultSenderUrl().then(setDefaultSenderUrl).catch((cause: unknown) => context.telemetry.disclose({ operation: 'cast.sender_url.load', category: 'dependency_transport', cause, publicMessage: publicFailure('dependency_transport', 'The plugin service is temporarily unavailable.').message })); }, [config.senderUrl, context, receiver.senderUrl]);
   useEffect(() => { if (receiver.dismissSas && receiver.dismissSas !== observedDismissal.current && receiver.sas) { observedDismissal.current = receiver.dismissSas; void context.dismissCastSas(); } }, [context, receiver]);
   useEffect(() => { if (receiver.sasTrusted === true && receiver.pairingReveal === 0) void context.setPairingDetails(null); }, [context, receiver.pairingReveal, receiver.sasTrusted]);
   const details = useMemo(() => url && roomJoinCode && authCode ? { roomJoinCode, authCode, url, ...(receiver.sas ? { sas: receiver.sas } : {}) } : null, [authCode, receiver.sas, roomJoinCode, url]);
   useEffect(() => { if (receiver.sas && receiver.sasTrusted !== true && details) void context.setPairingDetails(details); }, [context, details, receiver.sas, receiver.sasTrusted]);
   useEffect(() => { if (receiver.pairingVisible === false && !receiver.sas) void context.setPairingDetails(null); }, [context, receiver.pairingVisible, receiver.sas]);
-  useEffect(() => { const prior = observedReveal.current; observedReveal.current = receiver.pairingReveal; if (receiver.pairingReveal > prior && !receiver.sas && details) void context.setPairingDetails(details); }, [context, details, receiver.pairingReveal, receiver.sas]);
+  useEffect(() => {
+    const prior = observedReveal.current; observedReveal.current = receiver.pairingReveal;
+    if (receiver.pairingVisible === false || receiver.pairingReveal < prior) pendingReveal.current = false;
+    else if (receiver.pairingReveal > prior) pendingReveal.current = true;
+    if (pendingReveal.current && !receiver.sas && details) { pendingReveal.current = false; void context.setPairingDetails(details); }
+  }, [context, details, receiver.pairingReveal, receiver.pairingVisible, receiver.sas]);
   const label = `${strings.title}. ${strings.devices}: ${receiver.peerCount}`; const connected = receiver.peerCount > 0;
   return <div className="cast-pairing-root">
     <button type="button" className="cast-pairing-button" onClick={() => {

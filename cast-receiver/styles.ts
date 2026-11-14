@@ -10,6 +10,7 @@ export const CAST_SANDBOX_CSS = `
   .cast-active[data-overlay='inline'] { background: transparent; }
   .cast-audio-only .cast-media { opacity: 0; pointer-events: none; }
   .cast-media { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: contain; background: #000; }
+  .cast-live-player { width: 100%; height: 100%; color-scheme: dark; }
   .cast-pairing-button { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; display: block; padding: 0; border: 0; border-radius: 8px; color: inherit; background: transparent; cursor: pointer; box-sizing: border-box; opacity: 1; transition: background .15s ease; }
   .cast-pairing-button:hover:not(:disabled), .cast-pairing-button:focus-visible { background: rgba(255,255,255,.08); }
   .cast-pairing-button:disabled { opacity: .45; cursor: default; }

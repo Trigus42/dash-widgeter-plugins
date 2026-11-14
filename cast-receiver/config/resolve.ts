@@ -1,4 +1,5 @@
-import { CAST_DEFAULT_CONFIG, type CastConfig, type CastSourceKind } from '../types';
+import { CAST_DEFAULT_CONFIG, type CastConfig } from '../types';
+import { inferMediaSource, isMediaAdapter, validateMediaSource, type MediaAdapter } from '@/protocol/media';
 
 function str(raw: unknown, fallback: string): string {
   return typeof raw === 'string' ? raw : fallback;
@@ -10,16 +11,22 @@ function boundedSeconds(raw: unknown, fallback: number): number {
   return typeof raw === 'number' && Number.isInteger(raw) && raw >= 10 && raw <= 300 ? raw : fallback;
 }
 
-const SOURCE_KINDS: CastSourceKind[] = ['idle', 'website', 'media', 'youtube'];
 const OVERLAY_MODES = ['inline', 'cover', 'dim'] as const;
 const OUTPUT_MODES = ['audio-video', 'audio-only', 'video-only'] as const;
 
 /** Coerce persisted (unknown JSON) config into a validated CastConfig. */
 export function readCastConfig(raw: Record<string, unknown>): CastConfig {
   const d = CAST_DEFAULT_CONFIG;
-  const sourceKind = SOURCE_KINDS.includes(raw.sourceKind as CastSourceKind)
-    ? (raw.sourceKind as CastSourceKind)
-    : d.sourceKind;
+  const sourceUrl = str(raw.sourceUrl, d.sourceUrl).trim();
+  let sourceKind = d.sourceKind;
+  let adapter = d.adapter;
+  if (sourceUrl) {
+    try {
+      const inferred = inferMediaSource(sourceUrl);
+      sourceKind = inferred.sourceKind;
+      adapter = inferred.adapter ?? d.adapter;
+    } catch { /* Invalid or incomplete static targets stay idle. */ }
+  }
   const overlayMode = (OVERLAY_MODES as readonly string[]).includes(raw.overlayMode as string)
     ? (raw.overlayMode as CastConfig['overlayMode'])
     : d.overlayMode;
@@ -27,7 +34,8 @@ export function readCastConfig(raw: Record<string, unknown>): CastConfig {
     ? raw.outputMode as CastConfig['outputMode'] : d.outputMode;
   return {
     sourceKind,
-    sourceUrl: str(raw.sourceUrl, d.sourceUrl),
+    sourceUrl,
+    adapter,
     relayUrl: str(raw.relayUrl, d.relayUrl),
     senderUrl: str(raw.senderUrl, d.senderUrl),
     overlayMode,
@@ -76,13 +84,13 @@ export function isHttpsUrl(value: string): boolean {
 
 /**
  * What the receiver should render, derived purely from config. Returns a
- * discriminated result the widget maps to an <iframe>, a <video>, or the idle
+ * discriminated result the widget maps to a host presentation or the idle
  * pairing screen — never throws, so a half-entered target just stays idle.
  */
 export type CastTarget =
   | { kind: 'idle' }
   | { kind: 'website'; url: string }
-  | { kind: 'media'; url: string }
+  | { kind: 'media'; url: string; adapter: MediaAdapter }
   | { kind: 'youtube'; videoId?: string; embedUrl: string; playlistId?: string; index?: number };
 
 /** Privacy-friendly YouTube embed with bounded playlist navigation. */
@@ -100,8 +108,12 @@ export function resolveCastTarget(config: CastConfig): CastTarget {
     const target = parseYouTubeTarget(config.sourceUrl);
     return target ? { kind: 'youtube', ...target, embedUrl: youTubeEmbedUrl(target, config.muted, config.autoplay) } : { kind: 'idle' };
   }
+  if (config.sourceKind === 'media') {
+    const adapter = config.adapter ?? 'video';
+    if (!isMediaAdapter(adapter)) return { kind: 'idle' };
+    try { return { kind: 'media', url: validateMediaSource(adapter, config.sourceUrl.trim()), adapter }; }
+    catch { return { kind: 'idle' }; }
+  }
   if (!isHttpsUrl(config.sourceUrl)) return { kind: 'idle' };
-  return config.sourceKind === 'media'
-    ? { kind: 'media', url: config.sourceUrl }
-    : { kind: 'website', url: config.sourceUrl };
+  return { kind: 'website', url: config.sourceUrl };
 }

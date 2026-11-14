@@ -27,7 +27,7 @@ async function setup() {
   return { session, updates, messages, connections, receivers, setCastState };
 }
 const state = (epoch: number, relayMedia: ReceiverState['relayMedia'] = null, peerCount = 1): ReceiverState => ({ status: relayMedia ? 'casting' : peerCount ? 'paired' : 'disconnected', command: null, presentationEpoch: epoch, stream: null, relayMedia, peerCount, error: null });
-const relay = (epoch: number, url = 'blob:relay') => ({ epoch, url, hasVideo: true });
+const relay = (epoch: number, url = 'blob:relay') => ({ epoch, url, hasVideo: true, hasAudio: true });
 
 describe('screen session relay presentation isolation', () => {
   afterEach(() => { vi.resetAllMocks(); });

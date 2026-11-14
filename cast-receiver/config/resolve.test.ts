@@ -9,12 +9,34 @@ import {
 import { CAST_DEFAULT_CONFIG } from '../types';
 
 describe('readCastConfig', () => {
-  it('defaults to idle and coerces unknown enums', () => {
-    expect(readCastConfig({}).sourceKind).toBe('idle');
-    expect(readCastConfig({ sourceKind: 'bogus' }).sourceKind).toBe('idle');
-    expect(readCastConfig({ sourceKind: 'spotify' }).sourceKind).toBe('idle');
-    expect(readCastConfig({ sourceKind: 'youtube' }).sourceKind).toBe('youtube');
+  it('defaults to idle regardless of stale saved source selectors', () => {
+    for (const sourceKind of [undefined, 'bogus', 'spotify', 'youtube', 'media', 'website']) {
+      expect(readCastConfig({ sourceKind }).sourceKind).toBe('idle');
+      expect(readCastConfig({ sourceKind, sourceUrl: '   ' }).sourceKind).toBe('idle');
+    }
   });
+
+  it.each([
+    ['https://www.twitch.tv/videos/106400740', 'media', 'twitch'],
+    ['https://media.example/live.m3u8', 'media', 'hlsjs'],
+    ['https://media.example/live.mpd', 'media', 'dash'],
+    ['https://media.example/audio.mp3', 'media', 'audio'],
+    ['https://media.example/video.mp4', 'media', 'video'],
+    ['https://example.com/page', 'website', 'video'],
+    ['dQw4w9WgXcQ', 'youtube', 'video'],
+  ])('infers %s instead of stale selectors', (sourceUrl, sourceKind, adapter) => {
+    expect(readCastConfig({ sourceUrl, sourceKind: 'idle', adapter: 'unsupported' }))
+      .toMatchObject({ sourceUrl, sourceKind, adapter });
+    expect(readCastConfig({ sourceUrl, sourceKind: 'website', adapter: 'spotify' }))
+      .toMatchObject({ sourceUrl, sourceKind, adapter });
+  });
+
+  it.each(['not a url', 'http://example.com/video.mp4', 'https://user:secret@example.com/video.mp4'])('keeps malformed or unsafe static target %s idle', (sourceUrl) => {
+      const config = readCastConfig({ sourceUrl, sourceKind: 'media', adapter: 'video' });
+      expect(config.sourceKind).toBe('idle');
+      expect(resolveCastTarget(config)).toEqual({ kind: 'idle' });
+    });
+
   it('defaults both pairing visibility options off and preserves explicit booleans', () => {
     expect(readCastConfig({})).toMatchObject({ hidePairingWhileInactive: false, neverHidePairing: false });
     expect(readCastConfig({ hidePairingWhileInactive: true, neverHidePairing: true }))
@@ -50,12 +72,12 @@ describe('youTubeVideoId', () => {
 
 describe('YouTube playlists', () => {
   it('preserves validated list and index parameters in the embed URL', () => {
-    const target = resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc&index=12' });
+    const target = resolveCastTarget(readCastConfig({ sourceUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc&index=12' }));
     expect(target).toMatchObject({ kind: 'youtube', videoId: 'dQw4w9WgXcQ', playlistId: 'PL1234567890abc', index: 12 });
     if (target.kind === 'youtube') { expect(target.embedUrl).toContain('list=PL1234567890abc'); expect(target.embedUrl).toContain('index=11'); }
   });
   it('resolves playlist-only URLs with zero-based provider indexes', () => {
-    const target = resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://www.youtube.com/playlist?list=PL1234567890abc&index=12' });
+    const target = resolveCastTarget(readCastConfig({ sourceUrl: 'https://www.youtube.com/playlist?list=PL1234567890abc&index=12' }));
     expect(target).toMatchObject({ kind: 'youtube', playlistId: 'PL1234567890abc', index: 12 });
     if (target.kind === 'youtube') {
       expect(target.videoId).toBeUndefined();
@@ -65,7 +87,7 @@ describe('YouTube playlists', () => {
     }
   });
   it('normalizes YouTube Music watch URLs and rejects insecure or lookalike hosts', () => {
-    expect(resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc' }))
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'https://music.youtube.com/watch?v=dQw4w9WgXcQ&list=PL1234567890abc' })))
       .toMatchObject({ kind: 'youtube', videoId: 'dQw4w9WgXcQ', playlistId: 'PL1234567890abc' });
     expect(resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'http://music.youtube.com/watch?v=dQw4w9WgXcQ' })).toEqual({ kind: 'idle' });
     expect(resolveCastTarget({ ...CAST_DEFAULT_CONFIG, sourceKind: 'youtube', sourceUrl: 'https://music.youtube.com.example/watch?v=dQw4w9WgXcQ' })).toEqual({ kind: 'idle' });
@@ -104,33 +126,56 @@ describe('resolveCastTarget', () => {
   });
 
   it('website requires an https url, else idle', () => {
-    expect(resolveCastTarget({ ...base, sourceKind: 'website', sourceUrl: 'https://a.test' })).toEqual({
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'https://a.test' }))).toEqual({
       kind: 'website',
       url: 'https://a.test',
     });
-    expect(resolveCastTarget({ ...base, sourceKind: 'website', sourceUrl: 'http://a.test' })).toEqual({
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'http://a.test' }))).toEqual({
       kind: 'idle',
     });
   });
 
   it('media requires an https url, else idle', () => {
-    expect(resolveCastTarget({ ...base, sourceKind: 'media', sourceUrl: 'https://a.test/v.mp4' })).toEqual({
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'https://a.test/v.mp4' }))).toEqual({
       kind: 'media',
       url: 'https://a.test/v.mp4',
+      adapter: 'video',
     });
     expect(resolveCastTarget({ ...base, sourceKind: 'media', sourceUrl: '' })).toEqual({ kind: 'idle' });
   });
 
+  it('preserves explicit internal command adapters instead of inferring again', () => {
+    expect(resolveCastTarget({ ...base, sourceKind: 'media', adapter: 'hlsjs', sourceUrl: 'https://media.example/live.m3u8' }))
+      .toEqual({ kind: 'media', adapter: 'hlsjs', url: 'https://media.example/live.m3u8' });
+    expect(resolveCastTarget({ ...base, sourceKind: 'media', adapter: 'spotify', sourceUrl: 'https://open.spotify.com/track/123' }))
+      .toEqual({ kind: 'media', adapter: 'spotify', url: 'https://open.spotify.com/track/123' });
+    expect(resolveCastTarget({ ...base, sourceKind: 'media', adapter: 'shaka', sourceUrl: 'https://media.example/stream' }))
+      .toEqual({ kind: 'media', adapter: 'shaka', url: 'https://media.example/stream' });
+  });
+
+  it.each([
+    'http://open.spotify.com/track/123', 'javascript:alert(1)', 'data:text/html,hello',
+    'https://user:secret@open.spotify.com/track/123', 'https://open.spotify.com.evil.test/track/123',
+    'https://evil.test/?source=https://open.spotify.com/track/123',
+  ])('rejects insecure or hostile provider source %s', (sourceUrl) => {
+    expect(resolveCastTarget({ ...base, sourceKind: 'media', adapter: 'spotify', sourceUrl })).toEqual({ kind: 'idle' });
+  });
+
   it('youtube resolves to a nocookie embed, else idle', () => {
-    const target = resolveCastTarget({ ...base, sourceKind: 'youtube', sourceUrl: 'https://youtu.be/dQw4w9WgXcQ' });
+    const target = resolveCastTarget(readCastConfig({ sourceUrl: 'https://youtu.be/dQw4w9WgXcQ' }));
     expect(target.kind).toBe('youtube');
     if (target.kind === 'youtube') expect(target.embedUrl).toContain('youtube-nocookie.com');
-    expect(resolveCastTarget({ ...base, sourceKind: 'youtube', sourceUrl: 'garbage' })).toEqual({ kind: 'idle' });
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'garbage' }))).toEqual({ kind: 'idle' });
   });
 
 
   it('preserves an HTTPS website URL exactly', () => {
-    expect(resolveCastTarget({ ...base, sourceKind: 'website', sourceUrl: 'https://jellyfin.arr.taube.ovh/web/' }))
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'https://jellyfin.arr.taube.ovh/web/' })))
       .toEqual({ kind: 'website', url: 'https://jellyfin.arr.taube.ovh/web/' });
+  });
+
+  it('resolves Twitch static targets without source or adapter settings', () => {
+    expect(resolveCastTarget(readCastConfig({ sourceUrl: 'https://www.twitch.tv/videos/106400740' })))
+      .toEqual({ kind: 'media', adapter: 'twitch', url: 'https://www.twitch.tv/videos/106400740' });
   });
 });

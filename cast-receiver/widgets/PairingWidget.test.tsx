@@ -51,6 +51,29 @@ describe('PairingWidget', () => {
     expect(setPairingDetails).not.toHaveBeenCalled();
   });
 
+  it('retains a fresh reveal until reconnect supplies QR details', async () => {
+    let state = { ...baseState, roomJoinCode: '', authCode: '', pairingVisible: false };
+    mocks.useCastPlayback.mockImplementation(() => state);
+    const ctx = context(); const setPairingDetails = vi.fn(() => Promise.resolve()); ctx.setPairingDetails = setPairingDetails;
+    const view = render(<PairingWidget context={ctx} />); setPairingDetails.mockClear();
+    state = { ...state, pairingReveal: 1, pairingVisible: true }; view.rerender(<PairingWidget context={ctx} />);
+    expect(setPairingDetails).not.toHaveBeenCalled();
+    state = { ...state, roomJoinCode: baseState.roomJoinCode, authCode: baseState.authCode }; view.rerender(<PairingWidget context={ctx} />);
+    await waitFor(() => expect(setPairingDetails).toHaveBeenCalledWith(expect.objectContaining({ roomJoinCode: '123456', authCode: '789012' })));
+  });
+
+  it('cancels a pending reveal when the sender explicitly hides pairing', async () => {
+    let state = { ...baseState, roomJoinCode: '', authCode: '', pairingVisible: false };
+    mocks.useCastPlayback.mockImplementation(() => state);
+    const ctx = context(); const setPairingDetails = vi.fn(() => Promise.resolve()); ctx.setPairingDetails = setPairingDetails;
+    const view = render(<PairingWidget context={ctx} />);
+    state = { ...state, pairingReveal: 1, pairingVisible: true }; view.rerender(<PairingWidget context={ctx} />);
+    state = { ...state, pairingVisible: false }; view.rerender(<PairingWidget context={ctx} />);
+    setPairingDetails.mockClear();
+    state = { ...state, roomJoinCode: baseState.roomJoinCode, authCode: baseState.authCode }; view.rerender(<PairingWidget context={ctx} />);
+    await Promise.resolve(); expect(setPairingDetails).not.toHaveBeenCalled();
+  });
+
   it('renders a localized icon-only control and reflects connection health', () => {
     mocks.useCastPlayback.mockReturnValue({ ...baseState, peerCount: 0 });
     const ctx = context(); ctx.locale = 'de';

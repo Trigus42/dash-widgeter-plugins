@@ -5,13 +5,8 @@
     "Full-bleed receiver that shows cast content and a pairing code when idle": "Vollflächiger Empfänger, der Cast-Inhalte und im Leerlauf einen Kopplungscode anzeigt",
     "Cast": "Cast",
     "Presentation": "Darstellung",
-    "What to cast": "Was gecastet wird",
-    "Nothing (show pairing code)": "Nichts (Kopplungscode anzeigen)",
-    "Website": "Website",
-    "Media stream (video/audio URL)": "Medienstream (Video-/Audio-URL)",
-    "YouTube video": "YouTube-Video",
     "Cast target": "Cast-Ziel",
-    "Shown on this display even without a paired sender. Use an HTTPS website/media URL, or a YouTube link/id, matching the type above.": "Wird auf diesem Display auch ohne gekoppelten Sender angezeigt. Eine HTTPS-Website-/Medien-URL oder ein YouTube-Link/-ID verwenden, passend zum Typ oben.",
+    "Shown on this display even without a paired sender. Paste an HTTPS website or media URL, or a YouTube link/id. The source and playback adapter are recognized automatically. Leave blank to show pairing instead.": "Wird auf diesem Display auch ohne gekoppelten Sender angezeigt. Eine HTTPS-Website- oder Medien-URL oder einen YouTube-Link/eine YouTube-ID einfügen. Quelle und Wiedergabeadapter werden automatisch erkannt. Leer lassen, um stattdessen die Kopplung anzuzeigen.",
     "Pairing code": "Kopplungscode",
     "Shown while idle so a sender knows which screen it controls.": "Wird im Leerlauf angezeigt, damit ein Sender weiß, welchen Bildschirm er steuert.",
     "Overlay style": "Überlagerungsstil",
@@ -29,6 +24,8 @@
     "idleTitle": "Bereit zum Casten",
     "idleHint": "Lege ein Cast-Ziel in den Einstellungen fest oder sende eines von einem gekoppelten Gerät.",
     "pairingLabel": "Kopplungscode",
-    "openSender": "Sender öffnen"
+    "openSender": "Sender öffnen",
+    "playbackBlocked": "Zum Abspielen ist eine Benutzerinteraktion erforderlich.",
+    "playbackFailed": "Die übertragenen Medien konnten nicht abgespielt werden."
   }
 }

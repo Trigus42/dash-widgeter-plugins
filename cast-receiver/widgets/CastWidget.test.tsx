@@ -1,7 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { act, cleanup, render, waitFor } from '@testing-library/react';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 import { createCastQueueSnapshot } from '@/cast-protocol';
+import type { MediaAdapter } from '@/protocol/media';
 
 /**
  * Regression: a Cast receiver with no paired sender used to force sourceKind to
@@ -26,17 +27,25 @@ function baseReceiverState(): Record<string, unknown> {
     roomJoinCode: '', authCode: '', relayUrl: '', senderUrl: '', queue: createCastQueueSnapshot(true), pairingReveal: 0, pairingVisible: false };
 }
 
-function context(config: Record<string, unknown>): GuestWidgetContext {
+type TestWidgetContext = Omit<GuestWidgetContext, 'setPresentation' | 'setPresentationMode'> & {
+  setPresentation: Mock<(this: void, presentation: Parameters<GuestWidgetContext['setPresentation']>[0]) => Promise<void>>;
+  setPresentationMode: Mock<(this: void, mode: 'normal' | 'active') => Promise<void>>;
+};
+
+function context(config: Record<string, unknown>): TestWidgetContext {
   return { config, locale: 'en', setPresentation: vi.fn(() => Promise.resolve()), setPresentationMode: vi.fn(() => Promise.resolve()),
-    reportStatus: vi.fn(), telemetry: { disclose: vi.fn() } } as unknown as GuestWidgetContext;
+    reportStatus: vi.fn(), telemetry: { disclose: vi.fn() } } as unknown as TestWidgetContext;
 }
 
 describe('CastWidget static source fallback', () => {
-  it('renders a statically configured media URL without a sender command', () => {
+  afterEach(() => cleanup());
+  it('delegates a statically configured media URL to host presentation without plugin-local playback', async () => {
     mocks.state = baseReceiverState();
-    const { container } = render(<CastWidget context={context({ relayUrl: '', senderUrl: '', sourceKind: 'media', sourceUrl: 'https://media.example/clip.mp4', overlayMode: 'inline', muted: true })} />);
-    const video = container.querySelector('video.cast-media');
-    expect(video?.getAttribute('src')).toBe('https://media.example/clip.mp4');
+    const ctx = context({ relayUrl: '', senderUrl: '', sourceKind: 'media', sourceUrl: 'https://media.example/clip.mp4', overlayMode: 'inline', muted: true });
+    const { container } = render(<CastWidget context={ctx} />);
+    expect(container.querySelector('video')).toBeNull();
+    expect(ctx.setPresentation).toHaveBeenCalledWith({ provider: 'media', adapter: 'video', src: 'https://media.example/clip.mp4', paused: false, muted: true, volume: 1, outputMode: 'audio-video' });
+    await waitFor(() => expect(ctx.setPresentationMode).toHaveBeenCalledWith('active'));
   });
 
   it('stays on the idle pairing screen when no source is configured', () => {
@@ -44,6 +53,43 @@ describe('CastWidget static source fallback', () => {
     const { container } = render(<CastWidget context={context({ relayUrl: '', senderUrl: '', sourceKind: 'idle', sourceUrl: '', overlayMode: 'inline', muted: false })} />);
     expect(container.querySelector('video.cast-media')).toBeNull();
     expect(container.querySelector('.cast-empty')).not.toBeNull();
+  });
+
+  it.each<[MediaAdapter, string]>([
+    ['audio', 'https://media.example/track.mp3'],
+    ['spotify', 'https://open.spotify.com/track/123'], ['soundcloud', 'https://soundcloud.com/artist/track'],
+    ['mixcloud', 'https://mixcloud.com/artist/mix/'],
+  ])('keeps the %s audio adapter in normal presentation mode', async (adapter, sourceUrl) => {
+    mocks.state = baseReceiverState();
+    const ctx = context({ sourceKind: 'media', sourceUrl, adapter, muted: false });
+    const { container } = render(<CastWidget context={ctx} />);
+    expect(container.querySelector('video')).toBeNull();
+    expect(ctx.setPresentation).toHaveBeenCalledWith(expect.objectContaining({ provider: 'media', adapter, src: sourceUrl }));
+    await waitFor(() => expect(ctx.setPresentationMode).toHaveBeenLastCalledWith('normal'));
+  });
+
+  it('forwards live media adapter and playback controls, while legacy commands default to video', () => {
+    mocks.state = { ...baseReceiverState(), command: { sourceKind: 'media', adapter: 'dash', sourceUrl: 'https://media.example/live.mpd', paused: true, muted: true, volume: 0.3 } };
+    const ctx = context({ sourceKind: 'media', adapter: 'spotify', sourceUrl: 'https://open.spotify.com/track/123' });
+    render(<CastWidget context={ctx} />);
+    expect(ctx.setPresentation).toHaveBeenLastCalledWith({ provider: 'media', adapter: 'dash', src: 'https://media.example/live.mpd', paused: true, muted: true, volume: 0.3, outputMode: 'audio-video' });
+    act(() => mocks.listener?.({ ...baseReceiverState(), command: { sourceKind: 'media', sourceUrl: 'https://media.example/clip.mp4', muted: false } }));
+    expect(ctx.setPresentation).toHaveBeenLastCalledWith(expect.objectContaining({ provider: 'media', adapter: 'video' }));
+  });
+
+  it('treats an unrecognized lookalike domain as a website, not an authorized provider', () => {
+    mocks.state = baseReceiverState();
+    const ctx = context({ sourceKind: 'media', adapter: 'spotify', sourceUrl: 'https://open.spotify.com.evil.test/track/123' });
+    const { container } = render(<CastWidget context={ctx} />);
+    expect(ctx.setPresentation).toHaveBeenCalledWith({ provider: 'website', url: 'https://open.spotify.com.evil.test/track/123' });
+    expect(container.querySelector('video')).toBeNull();
+  });
+
+  it('retains the existing YouTube host presentation path', () => {
+    mocks.state = baseReceiverState();
+    const ctx = context({ sourceKind: 'youtube', sourceUrl: 'https://youtu.be/dQw4w9WgXcQ', muted: false });
+    render(<CastWidget context={ctx} />);
+    expect(ctx.setPresentation).toHaveBeenCalledWith(expect.objectContaining({ provider: 'youtube', videoId: 'dQw4w9WgXcQ' }));
   });
 });
 
@@ -59,51 +105,79 @@ describe('CastWidget live media playback', () => {
   });
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
-  it('plays a relay URL instead of a provider and detaches it on stop', () => {
-    mocks.state = { ...baseReceiverState(), presentationEpoch: 1, relayMedia: { url: 'blob:relay', hasVideo: true, epoch: 1 } };
-    const ctx = context({ sourceKind: 'website', sourceUrl: 'https://example.test', muted: false });
+  it('plays a relay URL instead of a provider and detaches it on stop', async () => {
+    mocks.state = { ...baseReceiverState(), presentationEpoch: 1, relayMedia: { url: 'blob:relay', hasVideo: true, hasAudio: true, epoch: 1 } };
+    const ctx = context({ sourceKind: 'media', adapter: 'hlsjs', sourceUrl: 'https://media.example/live.m3u8', muted: false });
     const { container } = render(<CastWidget context={ctx} />);
     const video = container.querySelector('video')!;
     expect(video.getAttribute('src')).toBe('blob:relay'); expect(video.hidden).toBe(false);
-    expect(play).toHaveBeenCalled();
+    await waitFor(() => expect(play).toHaveBeenCalled());
+    expect(video.controls).toBe(false);
+    expect(ctx.setPresentation).toHaveBeenCalledWith(null);
     act(() => mocks.listener?.({ ...baseReceiverState(), relayMedia: null }));
     expect(video.getAttribute('src')).toBeNull(); expect(video.srcObject).toBeNull();
     expect(container.querySelector('video')).toBeNull();
+    await waitFor(() => expect(ctx.setPresentation).toHaveBeenLastCalledWith(expect.objectContaining({ provider: 'media', adapter: 'hlsjs' })));
+  });
+  it('sets mute before attaching an audio-less relay URL and playing it', async () => {
+    mocks.state = { ...baseReceiverState(), presentationEpoch: 1, relayMedia: { url: 'blob:relay', hasVideo: true, hasAudio: false, epoch: 1 } };
+    const received: boolean[] = [];
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'src')!;
+    vi.spyOn(HTMLMediaElement.prototype, 'src', 'set').mockImplementation(function (this: HTMLMediaElement, value: string) {
+      received.push(this.muted && this.defaultMuted); descriptor.set?.call(this, value);
+    });
+    const { container } = render(<CastWidget context={context({ muted: false })} />);
+    await waitFor(() => expect(play).toHaveBeenCalled());
+    expect(received).toEqual([true]);
+    expect(container.querySelector('video')?.muted).toBe(true);
   });
 
-  it.each([false, true])('retains hidden relay playback with hasVideo=%s in audio-only mode', (hasVideo) => {
+  it.each([false, true])('retains hidden relay playback with hasVideo=%s in audio-only mode', async (hasVideo) => {
     const queue = { ...createCastQueueSnapshot(true), outputMode: 'audio-only' };
-    mocks.state = { ...baseReceiverState(), queue, relayMedia: { url: 'blob:audio', hasVideo, epoch: 1 }, presentationEpoch: 1,
+    mocks.state = { ...baseReceiverState(), queue, relayMedia: { url: 'blob:audio', hasVideo, hasAudio: true, epoch: 1 }, presentationEpoch: 1,
       command: { sourceKind: 'idle', sourceUrl: '', muted: false, volume: 0.4 } };
     const { container } = render(<CastWidget context={context({ muted: false })} />);
     const video = container.querySelector('video')!;
     expect(video.hidden).toBe(true); expect(video.getAttribute('src')).toBe('blob:audio');
-    expect(play).toHaveBeenCalled(); expect(video.muted).toBe(false); expect(video.volume).toBe(0.4);
+    await waitFor(() => expect(play).toHaveBeenCalled()); expect(video.muted).toBe(false); expect(video.volume).toBe(0.4);
     expect(container.querySelector('[aria-label="Audio casting active"]')).not.toBeNull();
   });
 
-  it('plays an audio-only relay without showing a picture in the default output mode', () => {
-    mocks.state = { ...baseReceiverState(), relayMedia: { url: 'blob:audio', hasVideo: false, epoch: 1 }, presentationEpoch: 1 };
+  it('plays an audio-only relay without showing a picture in the default output mode', async () => {
+    mocks.state = { ...baseReceiverState(), relayMedia: { url: 'blob:audio', hasVideo: false, hasAudio: true, epoch: 1 }, presentationEpoch: 1 };
     const { container } = render(<CastWidget context={context({ muted: false })} />);
     const video = container.querySelector('video')!;
-    expect(video.hidden).toBe(true); expect(video.getAttribute('src')).toBe('blob:audio'); expect(play).toHaveBeenCalled();
+    expect(video.hidden).toBe(true); expect(video.getAttribute('src')).toBe('blob:audio'); await waitFor(() => expect(play).toHaveBeenCalled());
   });
 
-  it('keeps audio-only native streams attached to a hidden playback element', () => {
+  it('keeps audio-only native streams attached to a hidden playback element', async () => {
     const stream = Object.assign(new window.MediaStream(), { getTracks: () => [] });
     mocks.state = { ...baseReceiverState(), stream };
     const { container } = render(<CastWidget context={context({ muted: false })} />);
     const video = container.querySelector('video')!;
-    expect(video.hidden).toBe(true); expect(video.srcObject).toBe(stream); expect(play).toHaveBeenCalled();
+    expect(video.hidden).toBe(true); expect(video.srcObject).toBe(stream); await waitFor(() => expect(play).toHaveBeenCalled());
   });
 
-  it('updates relay playback controls without detaching and switches to a native source', () => {
-    mocks.state = { ...baseReceiverState(), relayMedia: { url: 'blob:relay', hasVideo: true, epoch: 1 }, presentationEpoch: 1 };
+  it('retains a live video stream even when the configured adapter is audio-only', async () => {
+    const stream = Object.assign(new window.MediaStream(), { getTracks: () => [] });
+    vi.spyOn(stream, 'getVideoTracks').mockReturnValue([{} as MediaStreamTrack]);
+    mocks.state = { ...baseReceiverState(), stream };
+    const ctx = context({ sourceKind: 'media', adapter: 'spotify', sourceUrl: 'https://open.spotify.com/track/123', muted: false });
+    const { container } = render(<CastWidget context={ctx} />);
+    const video = container.querySelector('video')!;
+    expect(video.hidden).toBe(false); expect(video.srcObject).toBe(stream); await waitFor(() => expect(play).toHaveBeenCalled());
+    expect(ctx.setPresentation).toHaveBeenCalledWith(null);
+    await waitFor(() => expect(ctx.setPresentationMode).toHaveBeenLastCalledWith('active'));
+  });
+
+  it('updates relay playback controls without detaching and switches to a native source', async () => {
+    mocks.state = { ...baseReceiverState(), relayMedia: { url: 'blob:relay', hasVideo: true, hasAudio: true, epoch: 1 }, presentationEpoch: 1 };
     const { container } = render(<CastWidget context={context({ muted: false })} />);
     const video = container.querySelector('video')!;
+    await waitFor(() => expect(play).toHaveBeenCalled());
     load.mockClear();
     act(() => mocks.listener?.({ ...mocks.state, command: { sourceKind: 'idle', sourceUrl: '', muted: true, volume: 0.2, paused: true } }));
-    expect(video.muted).toBe(true); expect(video.volume).toBe(0.2); expect(pause).toHaveBeenCalled();
+    await waitFor(() => expect(video.volume).toBe(0.2)); expect(video.muted).toBe(true); expect(pause).toHaveBeenCalled();
     expect(load).not.toHaveBeenCalled();
     const stream = Object.assign(new window.MediaStream(), { getTracks: () => [] });
     vi.spyOn(stream, 'getVideoTracks').mockReturnValue([{} as MediaStreamTrack]);

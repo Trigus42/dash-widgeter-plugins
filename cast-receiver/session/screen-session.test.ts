@@ -11,6 +11,32 @@ import { createScreenSession } from './screen-session';
 
 const lifecycleTick = async (): Promise<void> => { await Promise.resolve(); await Promise.resolve(); };
 describe('screen session room lifecycle', () => {
+  it('logs a queue application rejection once and preserves the explicit conflict response', async () => {
+    const pairing = { roomJoinCode: '123411', authCode: '111111', expiresAt: Date.now() + 60_000, options: { generation: 'test-generation' }, close: vi.fn(() => Promise.resolve()) };
+    mocks.createPairingSession.mockResolvedValueOnce(pairing);
+    const receiver = { listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() };
+    mocks.createPluginReceiver.mockReturnValue(receiver);
+    const failure = vi.fn();
+    const context = { config: { relayUrl: 'wss://relay.example', senderUrl: '/cast.html' }, validateNativeOrigin: vi.fn(() => Promise.resolve()),
+      secureWebRtcCryptoAsset: vi.fn(() => Promise.resolve({ bytes: new Uint8Array(), sha256: 'x' })), setCastState: vi.fn(() => Promise.resolve()),
+      telemetry: { failure, ingest: vi.fn(), disclose: vi.fn() } } as unknown as GuestWidgetContext;
+    const session = createScreenSession(context);
+    await vi.waitFor(() => expect(mocks.createPluginReceiver).toHaveBeenCalled());
+    const call = mocks.createPluginReceiver.mock.calls[0]!;
+    const onConnection = call[6] as (event: { generation: string; trusted: boolean }) => void;
+    const onMessage = call[5] as (message: { type: 'queue-mutation'; mutation: { type: 'queue-clear'; expectedRevision: number } }, send: typeof receiver.send) => void;
+    onConnection({ generation: 'test-generation', trusted: true });
+    const queue = session.state.queue;
+    receiver.send.mockClear();
+    onMessage({ type: 'queue-mutation', mutation: { type: 'queue-clear', expectedRevision: 1 } }, receiver.send);
+    expect(session.state.queue).toBe(queue);
+    expect(failure).toHaveBeenCalledOnce();
+    expect(failure).toHaveBeenCalledWith({ operation: 'cast.queue.apply', category: 'invalid_input', attributes: { stage: 'queue.apply', revision: 0 } });
+    expect(receiver.send).toHaveBeenCalledOnce();
+    expect(receiver.send).toHaveBeenCalledWith({ type: 'queue-snapshot', snapshot: queue, conflict: true, pairingVisible: false });
+    session.close();
+  });
+
   afterEach(() => { vi.useRealTimers(); vi.clearAllMocks(); mocks.provisionReceiverResume.mockImplementation(async (_relayUrl, room, peer, store) => { await store.replace([{ bindingId: peer.bindingId, resumePassword: peer.resumePassword, roomId: room.roomId, ownerCapability: room.ownerCapability, expiresAt: peer.expiresAt }]); }); });
   it('rotates an unpaired room at expiry', async () => {
     vi.useFakeTimers(); vi.setSystemTime(1_000);
