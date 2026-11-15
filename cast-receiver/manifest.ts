@@ -40,11 +40,11 @@ const settings: WidgetSettingField[] = [
 export const castManifest: PluginManifest = {
   id: 'cast-receiver',
   name: 'Cast Receiver',
-  version: '4.7.4',
+  version: '4.8.0',
   description: 'Remote receiver for YouTube, screen sharing, websites, and media',
   translations: { de: de.manifest },
   executionType: 'sandboxed',
-  capabilities: [],
+  capabilities: ['device.volume.read', 'device.volume.write'],
   nativeNetwork: [{ id: 'signaling', label: 'Cast relay connection', purpose: 'Pair senders and carry end-to-end encrypted playback control and screen/audio fallback', surface: 'connect', origins: [], allowCustomOrigins: true }],
   webRtc: { label: 'Direct peer connection', purpose: 'Receive screen and audio directly when available; encrypted relay fallback remains available' },
   widgets: [

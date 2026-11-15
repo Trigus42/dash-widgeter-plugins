@@ -3,6 +3,10 @@ import { BACKGROUND_Z, OVERLAY_Z } from '@/types';
 import { castManifest } from './manifest';
 
 describe('cast receiver manifest', () => {
+  it('declares individually reviewed receiver device volume grants', () => {
+    expect(castManifest.version).toBe('4.8.0');
+    expect(castManifest.capabilities).toEqual(['device.volume.read', 'device.volume.write']);
+  });
   it('declares separate transparent presentation and pairing widgets', () => {
     const screen = castManifest.widgets?.find((widget) => widget.id === 'cast-receiver.screen');
     const pairing = castManifest.widgets?.find((widget) => widget.id === 'cast-receiver.pairing');

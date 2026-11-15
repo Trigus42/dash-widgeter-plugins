@@ -3,13 +3,13 @@ import { createPairingSession } from './pairing';
 import { provisionReceiverResume } from './resume-lifecycle';
 import { createResumeSession } from '@/core/cast/setup/receiver-client';
 import { createCastQueueSnapshot, decode } from '@/cast-protocol';
-import type { DataMessage } from '@/core/cast/protocol/data-message';
 import { createPluginReceiver, type ReceiverState } from '../receiver';
 import { readCastConfig } from '../config/resolve';
 import { publicFailure } from '@/protocol/telemetry';
-import { applyReceivedQueueMutation } from './queue-application';
 import { closeResumeRoom as closeResumeRoomAt, closeRevokedReceivers, retireReceiver, type ReceiverEntry } from './receiver-entry';
 import { publishSessionState, type ScreenSession, type TimerHandle } from './session-publication';
+import { createAuthenticatedHandler } from './authenticated-handler';
+import { ReceiverPlatformHandler } from './platform-handler';
 
 const CAST_UNAVAILABLE_MESSAGE = publicFailure('dependency_transport', 'The plugin service is temporarily unavailable.').message;
 export function createScreenSession(context: GuestWidgetContext): ScreenSession {
@@ -33,6 +33,13 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   const sessionId = crypto.randomUUID();
   const closeResumeRoom = (binding: NonNullable<ReceiverEntry['resumeBinding']>): Promise<void> => closeResumeRoomAt(config.relayUrl, binding);
   const publish = (patch: Partial<ScreenSession['state']>): void => publishSessionState(context, sessionId, state, patch, listeners);
+  const platform = new ReceiverPlatformHandler((request) => context.platform.request(request), (record) => context.telemetry.ingest(record));
+  const authenticatedMessage = createAuthenticatedHandler({ state, connected, telemetry: context.telemetry, platform,
+    current: (entry) => !disposed && entries.has(entry) && !entry.retired && entry.trusted,
+    publish, advanceEpoch: () => ++authoritativeEpoch,
+    revokeLivePresenter: () => {
+      if (livePresenter) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); livePresenter = undefined; }
+    } });
   const report = (cause: unknown): void => {
     context.telemetry.disclose({ operation: 'cast.session', category: 'dependency_transport', cause, publicMessage: CAST_UNAVAILABLE_MESSAGE });
     publish({ status: 'error', error: CAST_UNAVAILABLE_MESSAGE });
@@ -50,7 +57,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         resumeGeneration += 1;
         const revokedEntries = [...entries].filter((entry) => entry !== pairing);
         const bindings = [...resumeAuthorities.values()];
-        revokedEntries.forEach((entry) => retireReceiver(entry, connected));
+        revokedEntries.forEach((entry) => { platform.retire(entry); retireReceiver(entry, connected); });
         resumeEntries.clear(); dormantBindings.clear(); resumeAuthorities.clear(); listeningBindings.clear(); livePresenter = undefined; sasOwner = undefined; clearTimeout(sasTimer);
         delete state.sas; delete state.sasTrusted;
         publish({ peerCount: 0, command: null, stream: null, status: 'disconnected', pairingVisible: false });
@@ -59,41 +66,15 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       }
       if (!sasOwner || record.action !== 'sas' || record.sas !== state.sas || record.decision !== 'dismiss') return;
       const entry = sasOwner; sasOwner = undefined; clearTimeout(sasTimer);
-      entry.receiver?.confirmSas(false); entry.trusted = false;
+      platform.retire(entry); entry.receiver?.confirmSas(false); entry.trusted = false;
       delete state.sas; delete state.sasTrusted; publish({});
     }).catch(report);
   }, 200) : undefined;
   const applyConnection = (entry: ReceiverEntry, expectedGeneration: string, event: { generation: string; trusted: boolean }): void => {
     if (disposed || entry.retired || event.generation !== expectedGeneration) return;
     entry.trusted = event.trusted;
+    if (!event.trusted) platform.retire(entry);
     if (event.trusted) { delete state.sas; publish({ sasTrusted: true }); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
-  };
-  const broadcastQueue = (conflictEntry?: ReceiverEntry): void => {
-    for (const entry of connected) if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: entry === conflictEntry, pairingVisible: state.pairingVisible });
-  };
-  const authenticatedMessage = (entry: ReceiverEntry) => (message: Extract<DataMessage, { type: 'queue-mutation' | 'pair-display-request' }>, send: (outgoing: DataMessage) => void): void => {
-    if (disposed || entry.retired || !entry.trusted) return;
-    if (message.type === 'pair-display-request') {
-      publish({ pairingVisible: message.visible, pairingReveal: message.visible ? state.pairingReveal + 1 : state.pairingReveal });
-      broadcastQueue();
-      return;
-    }
-    const next = applyReceivedQueueMutation(state.queue, message.mutation, context.telemetry);
-    if (!next) { send({ type: 'queue-snapshot', snapshot: state.queue, conflict: true, pairingVisible: state.pairingVisible }); return; }
-    state.queue = next;
-    const current = next.items.find((item) => item.id === next.currentItemId);
-    const sourceChanged = Boolean(current && (state.command?.sourceKind !== current.command.sourceKind || state.command.sourceUrl !== current.command.sourceUrl));
-    const command = current ? { ...current.command, outputMode: next.outputMode } : null;
-    if (current && sourceChanged) {
-      authoritativeEpoch += 1; entry.epochOffset = authoritativeEpoch - entry.state.presentationEpoch;
-      if (livePresenter) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); livePresenter = undefined; }
-      publish({ queue: next, command, stream: null, presentationEpoch: authoritativeEpoch, status: 'casting' });
-    } else if (!current && next.currentItemId === null && state.command && next.items.length === 0) {
-      authoritativeEpoch += 1;
-      if (livePresenter) { livePresenter.revokedEpoch = Math.max(livePresenter.revokedEpoch, livePresenter.state.presentationEpoch); livePresenter.receiver?.revokePresenter(livePresenter.state.presentationEpoch); livePresenter = undefined; }
-      publish({ queue: next, command: null, stream: null, presentationEpoch: authoritativeEpoch, status: connected.size ? 'paired' : 'disconnected' });
-    } else publish({ queue: next, ...(command ? { command } : {}) });
-    broadcastQueue();
   };
   const aggregate = (entry: ReceiverEntry): void => {
     const latest = { ...entry.state, relayMedia: !entry.state.stream && entry.state.relayMedia?.epoch === entry.state.presentationEpoch ? entry.state.relayMedia : null };
@@ -121,7 +102,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       sasOwner = entry; delete state.sasTrusted; clearTimeout(sasTimer);
       sasTimer = setTimeout(() => {
         if (sasOwner !== entry) return;
-        sasOwner = undefined; entry.receiver?.confirmSas(false); entry.trusted = false; delete state.sas; delete state.sasTrusted; publish({});
+        sasOwner = undefined; platform.retire(entry); entry.receiver?.confirmSas(false); entry.trusted = false; delete state.sas; delete state.sasTrusted; publish({});
       }, config.sasTimeoutSeconds * 1_000);
     }
     if (sasOwner === entry && latest.sasTrusted === true) {
@@ -140,7 +121,15 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
     entry.revokedEpoch = Math.max(entry.revokedEpoch, entry.state.presentationEpoch); livePresenter = undefined;
     publish({ stream: null, command: null });
   };
+  const revokeBinding = async (bindingId: string): Promise<void> => {
+    dormantBindings.delete(bindingId); resumeAuthorities.delete(bindingId);
+    for (const owner of entries) if (owner.resumeBinding?.bindingId === bindingId) platform.retire(owner);
+    const resumeEntry = resumeEntries.get(bindingId);
+    if (resumeEntry) { resumeEntry.retired = true; resumeEntries.delete(bindingId); listeningBindings.delete(bindingId); connected.delete(resumeEntry); clearDisconnectedMedia(resumeEntry); resumeEntry.receiver?.close(); }
+    await context.castResume.delete(bindingId);
+  };
   const disposeEntry = async (entry: ReceiverEntry): Promise<void> => {
+    platform.retire(entry);
     entry.retired = true; connected.delete(entry); if (pairing === entry) pairing = undefined; if (sasOwner === entry) sasOwner = undefined; clearDisconnectedMedia(entry); entry.receiver?.close();
     publish({ peerCount: connected.size, status: state.command || state.stream || state.relayMedia ? 'casting' : connected.size > 0 ? 'paired' : 'disconnected' });
     entries.delete(entry);
@@ -164,13 +153,13 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
           if (disposed || entry.retired) return; entry.state = next;
           if (next.peerCount > 0 && !entry.connected) { entry.connected = true; connected.add(entry); entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible }); }
           if (next.peerCount === 0 && entry.connected) {
-            entry.retired = true; entry.connected = false; connected.delete(entry); entries.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
+            platform.retire(entry); entry.retired = true; entry.connected = false; connected.delete(entry); entries.delete(entry); resumeEntries.delete(binding.bindingId); listeningBindings.delete(binding.bindingId);
             if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
             clearDisconnectedMedia(entry); entry.receiver?.close(); publish({ peerCount: connected.size, status: state.command || state.stream || state.relayMedia ? 'casting' : connected.size ? 'paired' : 'disconnected' });
             if (!disposed && generation === resumeGeneration) enqueue(listen); return;
           }
           aggregate(entry);
-        }, undefined, context.castResume ? (bindingId) => { resumeAuthorities.delete(bindingId); return context.castResume.delete(bindingId); } : undefined, authenticatedMessage(entry), (event) => { if (disposed || entry.retired || event.generation !== options.generation) return; entry.trusted = event.trusted; if (event.trusted) { delete state.sas; publish({ sasTrusted: true }); } }, (record) => context.telemetry.ingest(record));
+        }, undefined, context.castResume ? revokeBinding : undefined, authenticatedMessage(entry), (event) => { if (disposed || entry.retired || event.generation !== options.generation) return; entry.trusted = event.trusted; if (!event.trusted) platform.retire(entry); if (event.trusted) { delete state.sas; publish({ sasTrusted: true }); } }, (record) => context.telemetry.ingest(record));
         await entry.receiver.listening;
       } catch (cause) {
         listeningBindings.delete(binding.bindingId);
@@ -205,7 +194,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
         if (entry.trusted) entry.receiver?.send?.({ type: 'queue-snapshot', snapshot: state.queue, conflict: false, pairingVisible: state.pairingVisible });
         if (pairing === entry) { pairing = undefined; clearTimeout(renewal); enqueue(allocate); } }
       if (next.peerCount === 0 && entry.connected) {
-        entry.retired = true; entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
+        platform.retire(entry); entry.retired = true; entry.connected = false; connected.delete(entry); if (sasOwner === entry) { sasOwner = undefined; clearTimeout(sasTimer); }
         clearDisconnectedMedia(entry); entry.receiver?.close(); const generation = resumeGeneration; const settle = entry.bindingInstall ?? Promise.resolve(); void settle.then(() => { if (disposed || generation !== resumeGeneration) return; const binding = entry.resumeBinding; if (!binding) { void entry.room.close(); return; } dormantBindings.set(binding.bindingId, binding); if (connected.size === 0) { const pending = [...dormantBindings.values()]; dormantBindings.clear(); pending.forEach((candidate) => void startResumeBinding(candidate)); } }, () => { void entry.room.close(); });
         publish({ peerCount: connected.size, status: state.command || state.stream || state.relayMedia ? 'casting' : connected.size ? 'paired' : 'disconnected' }); return;
       }
@@ -225,13 +214,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
       const install = installBinding(binding); entry.bindingInstall = install; pendingBindingInstalls.set(binding.bindingId, install);
       void install.finally(() => { if (pendingBindingInstalls.get(binding.bindingId) === install) pendingBindingInstalls.delete(binding.bindingId); }).catch(() => undefined);
       return install;
-    }, async (bindingId) => {
-      dormantBindings.delete(bindingId);
-      resumeAuthorities.delete(bindingId);
-      await context.castResume.delete(bindingId);
-      const resumeEntry = resumeEntries.get(bindingId);
-      if (resumeEntry) { resumeEntry.retired = true; resumeEntries.delete(bindingId); listeningBindings.delete(bindingId); connected.delete(resumeEntry); clearDisconnectedMedia(resumeEntry); resumeEntry.receiver?.close(); }
-    }, authenticatedMessage(entry), (event) => {
+    }, revokeBinding, authenticatedMessage(entry), (event) => {
       if (!initialized) { const pending = pendingConnectionEvents.get(entry) ?? []; pending.push(event); pendingConnectionEvents.set(entry, pending); return; }
       applyConnection(entry, room.options.generation, event);
     }, (record) => context.telemetry.ingest(record));
@@ -244,7 +227,7 @@ export function createScreenSession(context: GuestWidgetContext): ScreenSession 
   };
   if (!config.relayUrl) report('Configure and approve a signaling origin.'); else { enqueue(resume); enqueue(allocate); }
   return { state, subscribe(listener) { listeners.add(listener); listener({ ...state }); return () => listeners.delete(listener); },
-    close() { disposed = true; abort.abort(); clearInterval(dismissalInterval); clearTimeout(renewal); clearTimeout(sasTimer);
+    close() { disposed = true; platform.close(); abort.abort(); clearInterval(dismissalInterval); clearTimeout(renewal); clearTimeout(sasTimer);
       for (const entry of entries) { entry.receiver?.close(); if (!entry.resumeBinding) void entry.room.close(); }
       state.stream = null; state.relayMedia = null; entries.clear(); resumeEntries.clear(); dormantBindings.clear(); resumeAuthorities.clear(); listeningBindings.clear(); connected.clear(); pairing = undefined; livePresenter = undefined; sasOwner = undefined; listeners.clear(); } };
 }

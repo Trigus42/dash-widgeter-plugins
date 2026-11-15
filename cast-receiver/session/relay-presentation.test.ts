@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 import type { createPluginReceiver, ReceiverState } from '../receiver';
-import type { DataMessage } from '@/core/cast/protocol/data-message';
+import type { AuthenticatedMessageHandler } from '@/core/cast/protocol/data-message';
 
 const mocks = vi.hoisted(() => ({ pairing: vi.fn(), receiver: vi.fn<typeof createPluginReceiver>() }));
 vi.mock('./pairing', () => ({ createPairingSession: mocks.pairing }));
@@ -12,7 +12,7 @@ async function setup() {
   const rooms = [0, 1].map((index) => ({ options: { generation: `g-${index}` }, roomJoinCode: '123456', authCode: '654321', expiresAt: Date.now() + 60_000, close: vi.fn(() => Promise.resolve()) }));
   mocks.pairing.mockResolvedValueOnce(rooms[0]).mockResolvedValueOnce(rooms[1]).mockImplementation(() => new Promise(() => undefined));
   const updates: Array<(state: ReceiverState) => void> = [];
-  const messages: Array<(message: Extract<DataMessage, { type: 'queue-mutation' | 'pair-display-request' }>, send: (message: DataMessage) => void) => void> = [];
+  const messages: AuthenticatedMessageHandler[] = [];
   const connections: Array<(event: { generation: string; trusted: boolean }) => void> = [];
   const receivers = rooms.map(() => ({ listening: Promise.resolve(), close: vi.fn(), confirmSas: vi.fn(), revokePresenter: vi.fn(), send: vi.fn() }));
   mocks.receiver.mockImplementation((_options, _asset, update, _binding, _revoke, message, connection) => {
