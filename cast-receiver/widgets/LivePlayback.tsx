@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from 'rea
 import { Video } from '@videojs/react/video';
 import { PlaybackPlayer, usePlaybackMedia, usePlaybackPlayer } from '@/media/PlaybackPlayer';
 import type { ReactWidgetProps } from '@/sandbox/react';
+import { FRAME_PLAYBACK_ACTIVATION_MESSAGE } from '@/sandbox/frame-interaction';
 
 import de from '../locales/de.json';
 const EN = { playbackBlocked: 'Playback needs a user gesture.', playbackFailed: 'The shared media could not be played.' };
@@ -32,7 +33,8 @@ function StreamMedia({ context, stream, relayUrl, relayHasAudio, paused, volume,
   latestRef.current = { paused, volume, muted: playbackMuted };
   const apply = useCallback((): void => {
     if (!attachedRef.current) return;
-    player.setVolume(latestRef.current.volume);
+    // Video.js setVolume also unmutes; applying remote volume must preserve autoplay mute.
+    if (videoRef.current && player.volumeAvailability !== 'unsupported') videoRef.current.volume = latestRef.current.volume;
     player.setMuted(latestRef.current.muted);
     if (latestRef.current.paused) {
       if (intentRef.current !== true) player.pause();
@@ -40,7 +42,9 @@ function StreamMedia({ context, stream, relayUrl, relayHasAudio, paused, volume,
     } else if (intentRef.current !== false) {
       intentRef.current = false;
       const epoch = sourceEpochRef.current;
-      void player.play().catch((cause: unknown) => {
+      void player.play().then(() => {
+        if (activeRef.current && epoch === sourceEpochRef.current) context.reportStatus('ok', '');
+      }).catch((cause: unknown) => {
         if (!activeRef.current || epoch !== sourceEpochRef.current) return;
         blockedRef.current = cause instanceof Error && cause.name === 'NotAllowedError';
         context.telemetry.disclose({ operation: 'cast.playback.play', category: blockedRef.current ? 'permission_denied' : 'dependency_response',
@@ -89,8 +93,12 @@ function StreamMedia({ context, stream, relayUrl, relayHasAudio, paused, volume,
         blockedRef.current = false; intentRef.current = null; apply();
       }
     };
+    const activateFromHost = (event: MessageEvent<{ type?: string } | null>): void => {
+      if (event.source === window.parent && event.data?.type === FRAME_PLAYBACK_ACTIVATION_MESSAGE) activate();
+    };
     window.addEventListener('pointerdown', activate); document.addEventListener('visibilitychange', activate);
-    return () => { window.removeEventListener('pointerdown', activate); document.removeEventListener('visibilitychange', activate); };
+    window.addEventListener('message', activateFromHost);
+    return () => { window.removeEventListener('pointerdown', activate); document.removeEventListener('visibilitychange', activate); window.removeEventListener('message', activateFromHost); };
   }, [apply]);
   return <Video ref={videoRef} className="cast-media" hidden={!visible} autoPlay={!paused} muted={playbackMuted}
     playsInline controls={false} onLoadedMetadata={apply} />;

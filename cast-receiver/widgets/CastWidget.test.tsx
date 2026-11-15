@@ -3,6 +3,7 @@ import { act, cleanup, render, waitFor } from '@testing-library/react';
 import type { GuestWidgetContext } from '@/sandbox/sdk';
 import { createCastQueueSnapshot } from '@/cast-protocol';
 import type { MediaAdapter } from '@/protocol/media';
+import { FRAME_PLAYBACK_ACTIVATION_MESSAGE } from '@/sandbox/frame-interaction';
 
 /**
  * Regression: a Cast receiver with no paired sender used to force sourceKind to
@@ -27,9 +28,10 @@ function baseReceiverState(): Record<string, unknown> {
     roomJoinCode: '', authCode: '', relayUrl: '', senderUrl: '', queue: createCastQueueSnapshot(true), pairingReveal: 0, pairingVisible: false };
 }
 
-type TestWidgetContext = Omit<GuestWidgetContext, 'setPresentation' | 'setPresentationMode'> & {
+type TestWidgetContext = Omit<GuestWidgetContext, 'setPresentation' | 'setPresentationMode' | 'telemetry'> & {
   setPresentation: Mock<(this: void, presentation: Parameters<GuestWidgetContext['setPresentation']>[0]) => Promise<void>>;
   setPresentationMode: Mock<(this: void, mode: 'normal' | 'active') => Promise<void>>;
+  telemetry: Omit<GuestWidgetContext['telemetry'], 'disclose'> & { disclose: Mock<(this: void, input: Parameters<GuestWidgetContext['telemetry']['disclose']>[0]) => void> };
 };
 
 function context(config: Record<string, unknown>): TestWidgetContext {
@@ -135,6 +137,39 @@ describe('CastWidget live media playback', () => {
     await waitFor(() => expect(play).toHaveBeenCalled());
     expect(received).toEqual([true]);
     expect(container.querySelector('video')?.muted).toBe(true);
+  });
+
+  it('never unmutes an audio-less share when volume or track state updates', async () => {
+    mocks.state = { ...baseReceiverState(), presentationEpoch: 1, relayMedia: { url: 'blob:relay', hasVideo: true, hasAudio: false, epoch: 1 } };
+    const { container } = render(<CastWidget context={context({ muted: false })} />);
+    const video = container.querySelector('video')!;
+    await waitFor(() => expect(play).toHaveBeenCalled());
+    const muteWrites: boolean[] = [];
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted')!;
+    vi.spyOn(video, 'muted', 'set').mockImplementation(function (this: HTMLMediaElement, value: boolean) {
+      muteWrites.push(value); descriptor.set?.call(this, value);
+    });
+    act(() => mocks.listener?.({ ...mocks.state, command: { sourceKind: 'idle', sourceUrl: '', muted: false, volume: 0.3 } }));
+    await waitFor(() => expect(video.volume).toBe(0.3));
+    expect(muteWrites).not.toContain(false); expect(video.muted).toBe(true);
+  });
+
+  it('retries blocked playback only for its host activation and clears the failure after playing', async () => {
+    const denial = new DOMException('Autoplay denied', 'NotAllowedError');
+    play.mockRejectedValueOnce(denial);
+    mocks.state = { ...baseReceiverState(), presentationEpoch: 1, relayMedia: { url: 'blob:relay', hasVideo: true, hasAudio: true, epoch: 1 } };
+    const ctx = context({ muted: false });
+    render(<CastWidget context={ctx} />);
+    await waitFor(() => expect(ctx.telemetry.disclose).toHaveBeenCalledWith(expect.objectContaining({ operation: 'cast.playback.play', category: 'permission_denied', cause: denial })));
+    expect(play).toHaveBeenCalledOnce();
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: { type: FRAME_PLAYBACK_ACTIVATION_MESSAGE }, source: null })); });
+    expect(play).toHaveBeenCalledOnce();
+    await act(async () => { window.dispatchEvent(new MessageEvent('message', { data: { type: FRAME_PLAYBACK_ACTIVATION_MESSAGE }, source: window.parent })); });
+    await waitFor(() => expect(ctx.reportStatus).toHaveBeenCalledWith('ok', ''));
+    expect(play).toHaveBeenCalledTimes(2); expect(ctx.telemetry.disclose).toHaveBeenCalledOnce();
+    act(() => mocks.listener?.({ ...baseReceiverState() }));
+    act(() => { window.dispatchEvent(new MessageEvent('message', { data: { type: FRAME_PLAYBACK_ACTIVATION_MESSAGE }, source: window.parent })); });
+    expect(play).toHaveBeenCalledTimes(2);
   });
 
   it.each([false, true])('retains hidden relay playback with hasVideo=%s in audio-only mode', async (hasVideo) => {
