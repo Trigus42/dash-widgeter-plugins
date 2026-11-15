@@ -15,12 +15,22 @@ export const WEATHER_SANDBOX_CSS = `
   }
   .weather-loading, .weather-error { display: grid; place-items: center; text-align: center; }
   .weather-error { color: #ff8080; }
-  .weather-current { display: flex; align-items: center; justify-content: center; gap: min(10cqh,5cqw); height: 100%; }
-  .weather-current svg { width: min(90cqh,30cqw); height: min(90cqh,30cqw); flex-shrink: 0; }
-  .weather-temp { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-  .weather-value { font-size: min(52cqh,22cqw); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-  .weather-desc { font-size: min(20cqh,8cqw); line-height: 1.15; color: rgba(255,255,255,0.82); margin-top: 0.15em; overflow-wrap: anywhere; }
-  .weather-loc { font-size: min(17cqh,7cqw); color: rgba(255,255,255,0.82); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-now { padding: 0; }
+  .weather-content {
+    display: flex; flex-direction: column; justify-content: center; gap: 2cqh; flex: 1; min-height: 0;
+    padding: 2cqh 5cqw; box-sizing: border-box;
+  }
+  .weather-loc {
+    font-size: min(10cqh,5cqw); line-height: 1.2; color: rgba(255,255,255,0.65);
+    overflow-wrap: anywhere;
+  }
+  .weather-current { display: flex; align-items: center; justify-content: center; gap: 4cqw; min-height: 0; }
+  .weather-current svg { width: min(58cqh,26cqw); height: min(58cqh,26cqw); flex-shrink: 0; color: rgba(255,255,255,0.85); }
+  .weather-temp { display: flex; flex-direction: column; min-width: 0; }
+  .weather-reading { display: flex; align-items: baseline; gap: 0.12em; white-space: nowrap; }
+  .weather-value { font-size: min(36cqh,22cqw); font-weight: 500; line-height: 1; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; }
+  .weather-unit { font-size: min(32cqh,15cqw); font-weight: 400; line-height: 1; color: rgba(255,255,255,0.85); }
+  .weather-desc { font-size: min(13cqh,6cqw); line-height: 1.2; color: rgba(255,255,255,0.85); overflow-wrap: anywhere; }
   .weather-forecast { display: flex; justify-content: space-between; gap: 3%; margin-top: 8px; }
   .weather-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6%; flex: 1; min-width: 0; }
   .weather-day svg { width: min(34cqh,60%); height: min(34cqh,60%); }
@@ -29,10 +39,10 @@ export const WEATHER_SANDBOX_CSS = `
   .weather-forecast-header { font-size: min(12cqh,6cqw); color: rgba(255,255,255,0.82); margin-bottom: 2%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .weather-forecast-full { margin-top: 0; flex: 1; align-items: stretch; }
   .weather-next {
-    position: absolute; left: 5%; right: 5%; bottom: 4%;
-    display: flex; align-items: center; justify-content: center; gap: 0.4em;
-    color: rgba(255,255,255,0.9);
+    display: flex; align-items: center; justify-content: center; gap: 1.5cqw; flex-shrink: 0;
+    font-size: min(12cqh,5cqw); line-height: 1.2; color: rgba(255,255,255,0.75);
   }
-  .weather-next svg { width: min(14cqh,7cqw); height: min(14cqh,7cqw); flex-shrink: 0; }
-  .weather-next-text { font-size: min(13cqh,5.5cqw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .weather-next svg { width: 1.3em; height: 1.3em; flex-shrink: 0; }
+  .weather-next-text { min-width: 0; overflow-wrap: anywhere; }
+  .weather-next-time { flex-shrink: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
 `;

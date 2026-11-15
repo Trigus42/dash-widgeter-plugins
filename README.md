@@ -37,6 +37,15 @@ This recreates `dist/index.json` and content-addressed
 bundle URL, and SHA-256 digest; the host verifies the digest before execution.
 Do not edit generated files by hand.
 
+## Weather presentation
+
+Current conditions keep a compact icon-left, text-right layout, with the location
+below the condition and an inline temperature unit. Upcoming precipitation stays
+in normal flow immediately underneath, without a separate header, divider, or
+space-consuming footer. Type and spacing scale with the widget container. Runtime
+labels use the plugin's locale catalogs, with English fallback for unsupported
+locales.
+
 ## License
 
 AGPL-3.0-only, same as the host application.

@@ -6,12 +6,10 @@ import { buildWeatherUrl, mapOpenMeteo, nextPrecipEvent, weatherCacheKey } from 
 import { readWeatherConfig, type WeatherData } from '../data/types';
 import { text } from './translate';
 
-/** "in 25 min" / "in 2 h" — compact, locale-neutral relative label. */
 function formatLeadTime(locale: string, minutes: number): string {
   if (minutes < 1) return text(locale, 'now');
   if (minutes < 60) return text(locale, 'inMinutes', { count: minutes });
-  const hours = Math.round(minutes / 60);
-  return text(locale, 'inHours', { count: hours });
+  return text(locale, 'inHours', { count: Math.round(minutes / 60) });
 }
 
 /**
@@ -52,26 +50,29 @@ export function WeatherWidget({ context }: ReactWidgetProps): React.JSX.Element 
   const nextDescription = nextEvent ? describeWeather(nextEvent.weatherCode) : null;
 
   return (
-    <div ref={containerRef} className="weather-widget">
-      <div className="weather-current">
-        <WeatherIcon icon={current.icon} size={64} />
-        <div className="weather-temp">
-          <span className="weather-value">
-            {Math.round(data.temperature)}
-            {data.unitLabel}
-          </span>
-          <span className="weather-desc">{text(context.locale, `codes.${data.weatherCode}`, {}, current.label)}</span>
-          {config.showTitle && <span className="weather-loc">{config.locationName}</span>}
+    <div ref={containerRef} className="weather-widget weather-now">
+      <div className="weather-content">
+        <div className="weather-current">
+          <WeatherIcon icon={current.icon} size={64} />
+          <div className="weather-temp">
+            <div className="weather-reading">
+              <span className="weather-value">{Math.round(data.temperature)}</span>
+              <span className="weather-unit">{data.unitLabel}</span>
+            </div>
+            <span className="weather-desc">{text(context.locale, `codes.${data.weatherCode}`, {}, current.label)}</span>
+            {config.showTitle && <div className="weather-loc">{config.locationName}</div>}
+          </div>
         </div>
+        {nextEvent && nextDescription && (
+          <div className="weather-next" aria-label={text(context.locale, 'nextPrecipitation')}>
+            <WeatherIcon icon={nextDescription.icon} size={18} />
+            <span className="weather-next-text">
+              {text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label)}
+            </span>
+            <span className="weather-next-time">{formatLeadTime(context.locale, nextEvent.minutesUntil)}</span>
+          </div>
+        )}
       </div>
-      {nextEvent && nextDescription && (
-        <div className="weather-next" title={text(context.locale, 'nextPrecipitation')}>
-          <WeatherIcon icon={nextDescription.icon} size={18} />
-          <span className="weather-next-text">
-            {text(context.locale, `codes.${nextEvent.weatherCode}`, {}, nextDescription.label)} {formatLeadTime(context.locale, nextEvent.minutesUntil)}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

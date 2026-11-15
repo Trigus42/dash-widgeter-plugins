@@ -1,0 +1,11 @@
+{
+  "runtime": {
+    "inHours": "in {{count}} h",
+    "inMinutes": "in {{count}} min",
+    "loading": "Loading weather…",
+    "loadingForecast": "Loading forecast…",
+    "nextPrecipitation": "Next precipitation",
+    "now": "now",
+    "today": "Today"
+  }
+}

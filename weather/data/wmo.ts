@@ -1,8 +1,4 @@
-/**
- * WMO weather interpretation codes → short label + icon key. Icons are drawn
- * locally as inline SVG (see WeatherIcon.tsx) so no external CDN is referenced,
- * per AGENTS.md local-asset self-containment.
- */
+/** WMO interpretation codes mapped to labels and locally bundled Lucide glyphs. */
 export type IconKey =
   | 'clear'
   | 'partly'
